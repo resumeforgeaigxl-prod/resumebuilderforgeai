@@ -3,24 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { PlusCircle, Loader2 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 
-const DEFAULT_RESUME_JSON = {
-    name: "",
-    email: "",
-    phone: "",
-    linkedin: "",
-    github: "",
-    summary: "",
-    skills: [],
-    experience: [],
-    projects: [],
-    education: []
-}
-
-export function CreateResumeButton({ userId, variant = 'primary' }: { userId: string, variant?: 'primary' | 'secondary' }) {
+export function CreateResumeButton({ variant = 'primary' }: { variant?: 'primary' | 'secondary' }) {
     const router = useRouter()
-    const supabase = createClient()
     const [isCreating, setIsCreating] = useState(false)
     const [error, setError] = useState<string | null>(null)
 

@@ -31,7 +31,7 @@ export default async function DashboardPage() {
                     <p className="text-slate-400 mt-2">Manage and optimize your professional profiles</p>
                 </div>
 
-                <CreateResumeButton userId={session.userId} />
+                <CreateResumeButton />
             </div>
 
             {/* Mock Test CTA */}
@@ -79,7 +79,7 @@ export default async function DashboardPage() {
                     <p className="text-slate-500 mb-6 max-w-md">
                         Get started by creating your first resume. You can upload an existing file or start from scratch.
                     </p>
-                    <CreateResumeButton userId={session.userId} variant="secondary" />
+                    <CreateResumeButton variant="secondary" />
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
