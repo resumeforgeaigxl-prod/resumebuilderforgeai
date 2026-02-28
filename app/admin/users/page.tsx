@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Shield, Ban, CheckCircle, Loader2, Phone, Mail, User, Unlock, Infinity } from 'lucide-react';
+import { Ban, Loader2, Phone, User, Unlock, Infinity } from 'lucide-react';
 
 interface UserRow {
     id: string; email: string; phone_number: string | null;
