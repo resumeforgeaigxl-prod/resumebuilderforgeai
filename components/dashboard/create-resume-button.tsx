@@ -28,27 +28,30 @@ export function CreateResumeButton({ userId, variant = 'primary' }: { userId: st
         setIsCreating(true)
         setError(null)
         try {
-            const { data, error } = await supabase
-                .from('resumes')
-                .insert({
-                    user_id: userId,
-                    title: 'Untitled Resume',
-                    resume_json: DEFAULT_RESUME_JSON,
-                    template_selected: 'modern'
-                })
-                .select('id')
-                .single()
+            const res = await fetch('/api/resume/create', {
+                method: 'POST',
+                headers: { 'Accept': 'application/json' }
+            })
 
-            if (error) throw error
+            if (res.redirected) {
+                window.location.href = res.url
+                return
+            }
 
-            if (data?.id) {
+            const data = await res.json()
+            if (!res.ok) {
+                throw new Error(data.error || data.details || 'Failed to create resume')
+            }
+
+            if (data.id) {
                 router.push(`/builder/${data.id}`)
             } else {
-                throw new Error("Failed to create resume: No ID returned")
+                window.location.reload() // Fallback to redirect logic
             }
         } catch (err: unknown) {
-            console.error('Error creating resume:', err)
-            setError(err instanceof Error ? err.message : 'Error creating resume')
+            console.error('[CreateButton] Error:', err)
+            const msg = err instanceof Error ? err.message : String(err)
+            setError(msg === '[object Object]' ? 'Database error (check RLS)' : msg)
             setIsCreating(false)
         }
     }

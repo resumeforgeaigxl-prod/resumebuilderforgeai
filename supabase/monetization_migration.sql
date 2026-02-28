@@ -25,9 +25,9 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
 CREATE TABLE IF NOT EXISTS public.coupons (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4 (),
     code TEXT UNIQUE NOT NULL,
-    discount_type TEXT NOT NULL DEFAULT 'full', -- 'percent' | 'fixed' | 'full'
-    discount_value INTEGER NOT NULL DEFAULT 100,
-    valid_until TIMESTAMPTZ, -- NULL = never expires
+    type TEXT NOT NULL DEFAULT 'full', -- 'percentage' | 'fixed' | 'free_months'
+    value INTEGER NOT NULL DEFAULT 100,
+    expires_at TIMESTAMPTZ, -- NULL = never expires
     max_uses INTEGER DEFAULT NULL, -- NULL = unlimited uses
     used_count INTEGER NOT NULL DEFAULT 0,
     is_active BOOLEAN NOT NULL DEFAULT true,

@@ -204,8 +204,14 @@ export default function BuilderPage() {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a'); a.href = url; a.download = `${title || 'resume'}.pdf`; a.click();
                 URL.revokeObjectURL(url);
-            } else alert('Download failed.');
-        } catch { alert('Download error.'); } finally { setDownloading(false); }
+            } else {
+                const data = await res.json().catch(() => ({ error: 'Download failed' }));
+                alert(`Download error: ${data.error || 'Unknown error'}${data.details ? ` (${data.details})` : ''}`);
+            }
+        } catch (err: unknown) {
+            console.error('[Download] Error:', err);
+            alert('Download error: Network failure or timeout.');
+        } finally { setDownloading(false); }
     }
 
     const hasChanges = initialData !== JSON.stringify(resumeData);
