@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 };
 
 import Header from "@/components/layout/Header";
+import HeaderWrapper from "@/components/layout/HeaderWrapper";
 
 export default function RootLayout({
   children,
@@ -30,7 +31,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#070710] text-slate-200`}
       >
-        <Header />
+        <HeaderWrapper>
+          <Header />
+        </HeaderWrapper>
         {children}
       </body>
     </html>
