@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Shield, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity } from 'lucide-react';
 
 export default function AdminLayoutClient({ children, profile }: { children: ReactNode, profile: { email: string } }) {
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const pathname = usePathname();
 
     const navItems = [
@@ -22,63 +22,93 @@ export default function AdminLayoutClient({ children, profile }: { children: Rea
     ];
 
     return (
-        <div className="min-h-screen bg-[#050508] text-slate-200 flex flex-col md:flex-row">
-            {/* Mobile Header */}
-            <div className="md:hidden flex items-center justify-between p-4 bg-slate-900 border-b border-white/5 sticky top-0 z-30">
-                <div className="flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-red-400" />
-                    <span className="font-bold text-white">Admin Panel</span>
-                </div>
-                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-slate-400 hover:text-white transition-colors">
-                    {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                </button>
-            </div>
-
-            {/* Sidebar Overlay (Mobile) */}
-            {isMobileMenuOpen && (
-                <div className="md:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
+        <div className="min-h-screen bg-[#050508] text-slate-200">
+            {/* Mobile Sidebar Overlay */}
+            {isSidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] md:hidden transition-opacity duration-300"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
             )}
 
-            {/* Sidebar */}
-            <aside className={`fixed md:sticky top-0 left-0 h-screen w-64 md:w-60 shrink-0 bg-slate-900 border-r border-white/5 flex flex-col z-50 transform transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-                <div className="p-5 border-b border-white/5 hidden md:block">
-                    <div className="flex items-center gap-2">
-                        <Shield className="w-5 h-5 text-red-400" />
-                        <span className="font-bold text-white">Admin Panel</span>
+            {/* Top Navigation - Mobile Only */}
+            <header className="md:hidden flex items-center justify-between p-4 bg-slate-900/50 backdrop-blur-md border-b border-white/5 sticky top-0 z-50">
+                <div className="flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-indigo-500" />
+                    <span className="font-bold text-white tracking-tight">Admin</span>
+                </div>
+                <button
+                    onClick={() => setIsSidebarOpen(true)}
+                    className="p-2 rounded-lg bg-white/5 text-slate-400 hover:text-white transition-all active:scale-95"
+                >
+                    <Menu className="w-6 h-6" />
+                </button>
+            </header>
+
+            <div className="flex h-screen overflow-hidden">
+                {/* Sidebar */}
+                <aside className={`
+                    fixed md:relative inset-y-0 left-0 z-[70] 
+                    w-64 md:w-64 bg-slate-900 border-r border-white/5 
+                    flex flex-col transform transition-transform duration-300 ease-in-out
+                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+                    ${isSidebarOpen ? 'flex' : 'hidden md:flex'}
+                `}>
+                    {/* Sidebar Header */}
+                    <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Shield className="w-6 h-6 text-indigo-500" />
+                            <span className="font-bold text-white tracking-tight">Admin Panel</span>
+                        </div>
+                        <button onClick={() => setIsSidebarOpen(false)} className="md:hidden p-1 text-slate-500 hover:text-white">
+                            <X className="w-5 h-5" />
+                        </button>
                     </div>
-                    <p className="text-xs text-slate-500 mt-1 truncate">{profile.email}</p>
-                </div>
-                {/* Mobile email show */}
-                <div className="p-5 border-b border-white/5 md:hidden bg-slate-800/50">
-                    <p className="text-xs text-slate-400 truncate">Logged in as:</p>
-                    <p className="text-sm text-slate-200 truncate font-medium">{profile.email}</p>
-                </div>
 
-                <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-                    {navItems.map(item => {
-                        const isActive = item.href === '/admin' ? pathname === item.href : pathname?.startsWith(item.href);
-                        return (
-                            <Link key={item.href} href={item.href} onClick={() => setIsMobileMenuOpen(false)}
-                                className={`flex items-center gap-3 px-3 py-2.5 md:py-2 rounded-xl text-sm transition-all ${isActive ? 'bg-white/10 text-white font-medium border-l-2 border-indigo-500' : 'font-medium md:font-normal text-slate-400 hover:text-white hover:bg-white/5 border-l-2 border-transparent'}`}>
-                                <item.icon className={`w-5 h-5 md:w-4 md:h-4 ${isActive ? 'text-indigo-400' : ''}`} />
-                                {item.label}
-                            </Link>
-                        );
-                    })}
-                </nav>
-                <div className="p-3 border-t border-white/5">
-                    <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 text-xs text-slate-500 hover:text-slate-300 transition-all">
-                        ← Back to App
-                    </Link>
-                </div>
-            </aside>
+                    <div className="p-4 border-b border-white/5 bg-white/[0.02]">
+                        <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">User Session</p>
+                        <p className="text-sm text-slate-300 truncate font-medium">{profile.email}</p>
+                    </div>
 
-            {/* Main Content */}
-            <main className="flex-1 min-w-0 min-h-screen">
-                <div className="p-6">
-                    {children}
-                </div>
-            </main>
+                    {/* Navigation */}
+                    <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
+                        {navItems.map(item => {
+                            const isActive = item.href === '/admin' ? pathname === item.href : pathname?.startsWith(item.href);
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    onClick={() => setIsSidebarOpen(false)}
+                                    className={`
+                                        flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all duration-200
+                                        ${isActive
+                                            ? 'bg-indigo-600/10 text-white font-semibold border border-indigo-500/20'
+                                            : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'}
+                                    `}
+                                >
+                                    <item.icon className={`w-5 h-5 ${isActive ? 'text-indigo-400' : 'text-slate-500'}`} />
+                                    {item.label}
+                                </Link>
+                            );
+                        })}
+                    </nav>
+
+                    {/* Sidebar Footer */}
+                    <div className="p-4 border-t border-white/5">
+                        <Link href="/dashboard" className="flex items-center gap-2 px-4 py-2 text-xs text-slate-500 hover:text-slate-300 transition-all group">
+                            <X className="w-4 h-4 group-hover:rotate-90 transition-transform" />
+                            Exit Admin Panel
+                        </Link>
+                    </div>
+                </aside>
+
+                {/* Main Content */}
+                <main className="flex-1 min-w-0 overflow-y-auto bg-[#050508] relative">
+                    <div className="max-w-7xl mx-auto min-h-full">
+                        {children}
+                    </div>
+                </main>
+            </div>
         </div>
     );
 }

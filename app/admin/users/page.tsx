@@ -74,15 +74,17 @@ export default function AdminUsersPage() {
     );
 
     return (
-        <div className="p-8">
-            <div className="flex items-center justify-between mb-6">
+        <div className="p-4 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold flex items-center gap-2"><User className="w-6 h-6 text-blue-400" />User Management</h1>
+                    <h1 className="text-2xl font-bold flex items-center gap-2 tracking-tight"><User className="w-6 h-6 text-blue-400" />User Management</h1>
                     <p className="text-slate-500 text-sm mt-1">{users.length} registered users</p>
                 </div>
-                <input value={search} onChange={e => setSearch(e.target.value)}
-                    placeholder="Search by email or phone…"
-                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-64" />
+                <div className="relative w-full sm:w-72">
+                    <input value={search} onChange={e => setSearch(e.target.value)}
+                        placeholder="Search by email or phone…"
+                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium" />
+                </div>
             </div>
 
             {loading ? (
