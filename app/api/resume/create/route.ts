@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     const session = await getSession()
 
     if (!session) {
-        return NextResponse.redirect(`${requestUrl.origin}/login`, { status: 303 })
+        return NextResponse.redirect(new URL('/login', request.url), { status: 303 });
     }
 
     try {
@@ -35,18 +35,21 @@ export async function POST(request: Request) {
                 template_selected: 'modern'
             })
             .select('id')
-            .single()
+            .single();
 
         if (error || !data) {
-            console.error("Error creating resume:", error)
-            return NextResponse.redirect(`${requestUrl.origin}/dashboard?error=Could not create resume`, { status: 303 })
+            console.error("Error creating resume:", error);
+            const errorUrl = new URL('/dashboard', request.url);
+            errorUrl.searchParams.set('error', 'Could not create resume');
+            return NextResponse.redirect(errorUrl, { status: 303 });
         }
 
-        console.log("Created new resume with ID:", data.id)
-        // Redirect to the builder
-        return NextResponse.redirect(`${requestUrl.origin}/builder/${data.id}`, { status: 303 })
-    } catch (err) {
-        console.error("Unexpected error creating resume:", err)
-        return NextResponse.redirect(`${requestUrl.origin}/dashboard?error=Server error`, { status: 303 })
+        const redirectUrl = new URL(`/builder/${data.id}`, request.url);
+        return NextResponse.redirect(redirectUrl, { status: 303 });
+    } catch (err: unknown) {
+        console.error("Unexpected error creating resume:", err);
+        const errorUrl = new URL('/dashboard', request.url);
+        errorUrl.searchParams.set('error', err instanceof Error ? err.message : 'Server error');
+        return NextResponse.redirect(errorUrl, { status: 303 });
     }
 }

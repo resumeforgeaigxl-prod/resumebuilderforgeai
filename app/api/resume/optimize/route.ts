@@ -44,19 +44,16 @@ export async function POST(request: Request) {
             optimizedJson = JSON.parse(cleaned);
 
             // Validation: Ensure core arrays exist to avoid client-side crashes
-            const defaults = {
-                experience: [],
-                projects: [],
-                education: [],
-                skills: [],
-                skillCategories: [],
-                certifications: []
-            };
+            optimizedJson = { ...resumeData, ...optimizedJson };
 
-            optimizedJson = { ...resumeData, ...optimizedJson, ...defaults };
-            // Re-apply values from optimized if they are valid arrays
-            if (Array.isArray(optimizedJson.experience)) optimizedJson.experience = optimizedJson.experience;
-            if (Array.isArray(optimizedJson.projects)) optimizedJson.projects = optimizedJson.projects;
+            // ENSURE core arrays exist and are valid. 
+            // We only overwrite with defaults if the key is missing or not an array.
+            if (!Array.isArray(optimizedJson.experience)) optimizedJson.experience = resumeData.experience || [];
+            if (!Array.isArray(optimizedJson.projects)) optimizedJson.projects = resumeData.projects || [];
+            if (!Array.isArray(optimizedJson.education)) optimizedJson.education = resumeData.education || [];
+            if (!Array.isArray(optimizedJson.skills)) optimizedJson.skills = resumeData.skills || [];
+            if (!Array.isArray(optimizedJson.skillCategories)) optimizedJson.skillCategories = resumeData.skillCategories || [];
+            if (!Array.isArray(optimizedJson.certifications)) optimizedJson.certifications = resumeData.certifications || [];
 
             console.log("[Optimize] Successfully validated AI output.");
         } catch {
