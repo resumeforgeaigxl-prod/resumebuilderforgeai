@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { ResumeData, ResumeExperience, ResumeProject, ResumeEducation, Certification, SkillCategory, TEMPLATE_LIST } from '@/types/resume';
 import {
@@ -46,6 +46,20 @@ export default function BuilderPage() {
     const [couponApplied, setCouponApplied] = useState(false);
     const [faangMode, setFaangMode] = useState(false);
     const [userAccess, setUserAccess] = useState<boolean | null>(null);
+    const [authLoading, setAuthLoading] = useState(true);
+    const [isNotFound, setIsNotFound] = useState(false);
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                router.push('/login');
+            } else {
+                setAuthLoading(false);
+            }
+        };
+        checkAuth();
+    }, [router, supabase.auth]);
 
     useEffect(() => {
         fetch('/api/user/access').then(res => res.json()).then(data => {
@@ -54,8 +68,9 @@ export default function BuilderPage() {
     }, []);
 
     const fetchResume = useCallback(async () => {
+        if (authLoading) return;
         const { data, error } = await supabase.from('resumes').select('*').eq('id', id).single();
-        if (error || !data) { router.push('/dashboard'); return; }
+        if (error || !data) { setIsNotFound(true); setLoading(false); return; }
         let rData = data.resume_json;
         if (typeof rData === 'string') { try { rData = JSON.parse(rData); } catch { /* ok */ } }
         setResumeData(rData as ResumeData);
@@ -63,7 +78,7 @@ export default function BuilderPage() {
         setTitle(data.title);
         setSelectedTemplate(data.template_selected || 'harvard');
         setLoading(false);
-    }, [id, router, supabase]);
+    }, [id, supabase, authLoading]);
 
     useEffect(() => { fetchResume(); }, [fetchResume]);
 
@@ -160,13 +175,14 @@ export default function BuilderPage() {
     const hasChanges = initialData !== JSON.stringify(resumeData);
     const isResumeEmpty = !resumeData?.name?.trim() && !resumeData?.experience?.length;
 
-    if (loading) return <div className="flex items-center justify-center min-h-screen"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /></div>;
+    if (authLoading || loading) return <div className="flex items-center justify-center min-h-screen"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /></div>;
+    if (isNotFound) return notFound();
     if (!resumeData) return null;
 
     const rd = resumeData;
 
     return (
-        <div className="min-h-screen bg-[#070710] text-slate-200">
+        <div className="min-h-screen bg-[#070710] text-slate-200 pt-20">
             {/* ── Header ── */}
             <header className="sticky top-0 z-20 bg-slate-900/80 backdrop-blur-md border-b border-white/5 px-4 sm:px-6 py-3">
                 <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">

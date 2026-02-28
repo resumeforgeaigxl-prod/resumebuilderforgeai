@@ -18,6 +18,8 @@ export const metadata: Metadata = {
   description: "AI-powered resume builder, ATS optimizer, and portfolio generator to help you land your dream job faster.",
 };
 
+import Header from "@/components/layout/Header";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -26,8 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#070710] text-slate-200`}
       >
+        <Header />
         {children}
       </body>
     </html>
