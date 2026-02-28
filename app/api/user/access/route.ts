@@ -10,7 +10,10 @@ export async function GET() {
         if (!session) return NextResponse.json({ hasAccess: false, reason: 'unauthorized' });
 
         const access = await checkUserAccess(session.userId);
-        return NextResponse.json(access);
+        return NextResponse.json({
+            ...access,
+            userId: session.userId
+        });
     } catch {
         return NextResponse.json({ hasAccess: false, reason: 'error' });
     }

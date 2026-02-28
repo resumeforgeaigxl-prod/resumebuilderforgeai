@@ -89,10 +89,13 @@ async function getOverflowRatio(page: import('puppeteer').Page): Promise<number>
 }
 
 export async function POST(request: Request) {
+    let browser: any = null;
     try {
         const body = await request.json();
         const resumeData: ResumeData = body.resumeData;
         const template: string = body.template || 'harvard';
+
+        console.log(`[Download] Starting PDF generation for template: ${template}`);
 
         if (!resumeData) {
             return NextResponse.json({ error: 'No resume data provided' }, { status: 400 });
@@ -114,7 +117,7 @@ export async function POST(request: Request) {
         const html = selectTemplate(resumeData, template);
 
         const puppeteer = await import('puppeteer');
-        const browser = await puppeteer.default.launch({
+        browser = await puppeteer.default.launch({
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
         });
@@ -142,19 +145,19 @@ export async function POST(request: Request) {
         // ────────────────────────────────────────────────────────────────────────
 
         // ── Inject watermark AFTER compression (preserves layout) ───────────────
+        console.log(`[Download] Injecting watermark: ${showWatermark}`);
         if (showWatermark) {
             await injectWatermark(page);
         }
-        // ────────────────────────────────────────────────────────────────────────
 
+        console.log('[Download] Generating PDF buffer...');
         const pdfBuffer = await page.pdf({
             format: 'A4',
-            printBackground: true, // needed to render the watermark overlay
+            printBackground: true,
             preferCSSPageSize: true,
             pageRanges: '1',
         });
-
-        await browser.close();
+        console.log(`[Download] Done. Buffer size=${pdfBuffer.length} bytes`);
 
         return new NextResponse(new Uint8Array(pdfBuffer), {
             status: 200,
@@ -163,14 +166,24 @@ export async function POST(request: Request) {
                 'Content-Disposition': `attachment; filename="resume.pdf"`,
                 'X-Compress-Ratio': ratio.toFixed(3),
                 'X-Watermark': showWatermark ? 'true' : 'false',
+                'Cache-Control': 'no-store, max-age=0',
             },
         });
 
-    } catch (e) {
-        console.error('[Download] PDF generation error:', e);
+    } catch (e: any) {
+        console.error('[Download] CRITICAL PDF Error:', e);
         return NextResponse.json(
-            { error: e instanceof Error ? e.message : 'PDF generation failed' },
+            {
+                error: 'PDF generation failed',
+                details: e instanceof Error ? e.message : String(e),
+                stack: process.env.NODE_ENV === 'development' ? e.stack : undefined
+            },
             { status: 500 }
         );
+    } finally {
+        if (browser) {
+            console.log('[Download] Closing browser instance');
+            await browser.close();
+        }
     }
 }

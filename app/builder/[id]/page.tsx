@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter, notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -48,6 +50,7 @@ export default function BuilderPage() {
     const [userAccess, setUserAccess] = useState<boolean | null>(null);
     const [authLoading, setAuthLoading] = useState(true);
     const [isNotFound, setIsNotFound] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
     useEffect(() => {
         fetch('/api/user/access').then(res => res.json()).then(data => {
@@ -55,25 +58,47 @@ export default function BuilderPage() {
                 router.push('/login');
             } else {
                 if (data.hasAccess !== undefined) setUserAccess(data.hasAccess);
+                if (data.userId) setCurrentUserId(data.userId);
                 setAuthLoading(false);
             }
-        }).catch(() => {
+        }).catch((err) => {
+            console.error('[Builder] Access check failed:', err);
             setAuthLoading(false);
         });
     }, [router]);
 
     const fetchResume = useCallback(async () => {
-        if (authLoading) return;
-        const { data, error } = await supabase.from('resumes').select('*').eq('id', id).single();
-        if (error || !data) { setIsNotFound(true); setLoading(false); return; }
-        let rData = data.resume_json;
-        if (typeof rData === 'string') { try { rData = JSON.parse(rData); } catch { /* ok */ } }
-        setResumeData(rData as ResumeData);
-        setInitialData(JSON.stringify(rData));
-        setTitle(data.title);
-        setSelectedTemplate(data.template_selected || 'harvard');
-        setLoading(false);
-    }, [id, supabase, authLoading]);
+        if (authLoading || !id) return;
+        try {
+            const { data, error } = await supabase.from('resumes').select('*').eq('id', id).single();
+
+            if (error || !data) {
+                console.error('[Builder] Resume fetch error:', error);
+                setIsNotFound(true);
+                setLoading(false);
+                return;
+            }
+
+            // Client-side owner check as backup to RLS
+            if (currentUserId && data.user_id !== currentUserId) {
+                console.warn('[Builder] Ownership mismatch! Redirecting...');
+                router.push('/dashboard');
+                return;
+            }
+
+            let rData = data.resume_json;
+            if (typeof rData === 'string') { try { rData = JSON.parse(rData); } catch { /* ok */ } }
+            setResumeData(rData as ResumeData);
+            setInitialData(JSON.stringify(rData));
+            setTitle(data.title);
+            setSelectedTemplate(data.template_selected || 'harvard');
+        } catch (err) {
+            console.error('[Builder] Unexpected error fetching resume:', err);
+            setIsNotFound(true);
+        } finally {
+            setLoading(false);
+        }
+    }, [id, supabase, authLoading, currentUserId, router]);
 
     useEffect(() => { fetchResume(); }, [fetchResume]);
 
