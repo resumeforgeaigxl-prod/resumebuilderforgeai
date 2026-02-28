@@ -57,7 +57,7 @@ export default function MockTestPage() {
     const [couponCode, setCouponCode] = useState('');
     const [couponMsg, setCouponMsg] = useState<{ text: string; ok: boolean } | null>(null);
     const [couponLoading, setCouponLoading] = useState(false);
-    const [couponApplied, setCouponApplied] = useState(false);
+
 
     const loadTest = useCallback(async () => {
         setLoading(true);
@@ -89,7 +89,7 @@ export default function MockTestPage() {
         const data = await res.json();
         if (res.ok && data.success) {
             setCouponMsg({ text: data.message, ok: true });
-            if (data.hasFullAccess) { setCouponApplied(true); loadTest(); }
+            if (data.hasFullAccess) { loadTest(); }
         } else {
             setCouponMsg({ text: data.error || 'Invalid coupon', ok: false });
         }

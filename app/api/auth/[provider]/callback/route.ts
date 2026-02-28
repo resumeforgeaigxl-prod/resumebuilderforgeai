@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server';
 import { PROVIDERS, getOAuthStateCookie, clearOAuthStateCookie, getRedirectUri } from '@/lib/auth/oauth';
 import { createSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
-import crypto from 'crypto';
-
 export async function GET(request: Request, { params }: { params: { provider: string } }) {
     const provider = params.provider.toLowerCase();
     const url = new URL(request.url);

@@ -10,7 +10,7 @@ interface Version {
 
 interface Props {
     resumeId: string;
-    onRestore: (data: any) => void;
+    onRestore: (data: Record<string, unknown>) => void;
 }
 
 export function VersionHistory({ resumeId, onRestore }: Props) {

@@ -260,7 +260,7 @@ export default function BuilderPage() {
                         <ResumeUpload onUploadSuccess={data => { setResumeData(data); alert('Resume parsed!'); }} onUploadError={err => alert(err)} />
 
                         {/* Versions */}
-                        {typeof id === 'string' && <VersionHistory resumeId={id} onRestore={(d) => setResumeData(d)} />}
+                        {typeof id === 'string' && <VersionHistory resumeId={id} onRestore={(d) => setResumeData(d as unknown as ResumeData)} />}
 
                         {/* Personal Info */}
                         <Section title="Personal Information" icon={<Building2 className="w-5 h-5" />}>

@@ -24,6 +24,7 @@ export async function GET() {
 
         if (error) throw error;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const formatted = subscriptions.map((s: any) => ({
             id: s.id,
             plan: s.plan,
@@ -31,11 +32,12 @@ export async function GET() {
             expires_at: s.expires_at,
             created_at: s.created_at,
             coupon_code: s.coupon_code,
-            user_email: s.users?.email || 'Unknown'
+            user_email: (Array.isArray(s.users) ? s.users[0]?.email : s.users?.email) || 'Unknown'
         }));
 
         return NextResponse.json({ success: true, subscriptions: formatted });
-    } catch (e: any) {
+    } catch (error: unknown) {
+        const e = error as Error;
         return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }

@@ -26,17 +26,19 @@ export async function GET() {
         if (error) throw error;
 
         // Flatten data structure easily for frontend table
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const formatted = resumes.map((r: any) => ({
             id: r.id,
             title: r.title,
             created_at: r.created_at,
             updated_at: r.updated_at,
-            user_email: r.users?.email || 'Unknown',
-            ats_score: r.resume_analysis?.[0]?.keyword_score ?? null
+            user_email: (Array.isArray(r.users) ? r.users[0]?.email : r.users?.email) || 'Unknown',
+            ats_score: Array.isArray(r.resume_analysis) ? r.resume_analysis[0]?.keyword_score ?? null : null
         }));
 
         return NextResponse.json({ success: true, resumes: formatted });
-    } catch (e: any) {
+    } catch (error: unknown) {
+        const e = error as Error;
         return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }

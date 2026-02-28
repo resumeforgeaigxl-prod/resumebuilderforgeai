@@ -24,17 +24,19 @@ export async function GET() {
 
         if (error) throw error;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const formatted = tests.map((t: any) => ({
             id: t.id,
             company_name: t.company_name,
             job_title: t.job_title,
             total_questions: t.total_questions,
             created_at: t.created_at,
-            user_email: t.users?.email || 'Unknown'
+            user_email: (Array.isArray(t.users) ? t.users[0]?.email : t.users?.email) || 'Unknown'
         }));
 
         return NextResponse.json({ success: true, tests: formatted });
-    } catch (e: any) {
+    } catch (error: unknown) {
+        const e = error as Error;
         return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }

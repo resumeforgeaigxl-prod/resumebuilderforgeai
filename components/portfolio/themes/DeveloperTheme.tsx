@@ -1,6 +1,6 @@
 'use client';
 import { PortfolioData } from '@/types/portfolio';
-import { Github, ExternalLink, Mail, Terminal, Cpu, Database, Globe, Linkedin, Download } from 'lucide-react';
+import { Github, ExternalLink, Mail, Cpu, Database, Globe, Linkedin, Download } from 'lucide-react';
 
 interface Props { data: PortfolioData; watermark?: boolean; }
 
@@ -9,8 +9,8 @@ export default function DeveloperTheme({ data, watermark = false }: Props) {
 
     return (
         <div className="min-h-screen bg-[#0d1117] text-[#e6edf3] font-['JetBrains_Mono',monospace]">
+            {/* eslint-disable-next-line @next/next/no-page-custom-font */}
             <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-
             {/* Terminal-style header */}
             <header className="border-b border-[#30363d] bg-[#161b22]">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
@@ -23,7 +23,7 @@ export default function DeveloperTheme({ data, watermark = false }: Props) {
                     <div className="space-y-1 font-[monospace]">
                         <p className="text-[#8b949e] text-sm"><span className="text-[#58a6ff]">$</span> whoami</p>
                         <h1 className="text-3xl font-bold text-[#e6edf3]">{data.name}</h1>
-                        <p className="text-sm"><span className="text-[#8b949e]">// </span><span className="text-[#3fb950]">{data.headline}</span></p>
+                        <p className="text-sm"><span className="text-[#8b949e]">{'// '}</span><span className="text-[#3fb950]">{data.headline}</span></p>
                     </div>
                     <p className="mt-4 text-[#8b949e] text-sm leading-relaxed max-w-2xl font-['Inter',sans-serif]">{data.about}</p>
                     <div className="flex flex-wrap gap-4 mt-6">
@@ -151,7 +151,7 @@ export default function DeveloperTheme({ data, watermark = false }: Props) {
 
             {watermark && (
                 <footer className="py-4 text-center text-xs text-[#8b949e] border-t border-[#30363d] font-mono">
-                    <span className="text-[#8b949e]">// Built with </span><a href="/" className="text-[#58a6ff] hover:underline">ResumeForge AI</a><span className="text-[#8b949e]"> — upgrade to remove watermark</span>
+                    <span className="text-[#8b949e]">{'// Built with '}</span><a href="/" className="text-[#58a6ff] hover:underline">ResumeForge AI</a><span className="text-[#8b949e]"> — upgrade to remove watermark</span>
                 </footer>
             )}
         </div>

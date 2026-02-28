@@ -1,12 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { Users, FileText, Activity, CreditCard, LayoutTemplate, CopyCheck, Coins } from 'lucide-react';
-import { startOfMonth, startOfDay, endOfDay } from 'date-fns';
+import { startOfDay, endOfDay } from 'date-fns';
 
 export default async function AdminDashboard() {
   const supabase = createClient();
   const todayStart = startOfDay(new Date()).toISOString();
   const todayEnd = endOfDay(new Date()).toISOString();
-  const monthStart = startOfMonth(new Date()).toISOString();
 
   const [
     profilesRes,

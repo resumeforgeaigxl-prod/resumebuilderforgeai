@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Sparkles, Globe, Eye, Edit2, Copy, Check, AlertCircle, Layout } from 'lucide-react';
+import { Loader2, Sparkles, Globe, Eye, Copy, Check, AlertCircle, Layout } from 'lucide-react';
 import { Portfolio, PORTFOLIO_THEMES } from '@/types/portfolio';
 
 export default function PortfolioPage() {

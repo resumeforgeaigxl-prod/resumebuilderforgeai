@@ -31,7 +31,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         if (error) throw error;
 
         return NextResponse.json({ success: true });
-    } catch (e: any) {
+    } catch (error: unknown) { const e = error as Error;
         return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }

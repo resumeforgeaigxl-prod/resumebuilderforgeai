@@ -98,7 +98,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
             .range(MAX_VERSIONS, 1000); // anything beyond top N
 
         if (oldVersions && oldVersions.length > 0) {
-            const idsToDelete = oldVersions.map((v: any) => v.id);
+            const idsToDelete = oldVersions.map((v: { id: string }) => v.id);
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await (supabase as any).from('resume_versions').delete().in('id', idsToDelete);
         }

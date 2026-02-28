@@ -57,7 +57,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
         return NextResponse.json({ success: true, message: 'User upgraded to Pro' });
 
-    } catch (e: any) {
+    } catch (error: unknown) { const e = error as Error;
         console.error('API Error:', e);
         return NextResponse.json({ error: e.message || 'Server error' }, { status: 500 });
     }

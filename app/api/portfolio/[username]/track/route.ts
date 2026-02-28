@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { headers } from 'next/headers';
 
 export const runtime = 'nodejs';
 
@@ -21,8 +20,6 @@ export async function POST(request: Request, { params }: { params: { username: s
             return NextResponse.json({ error: 'Portfolio not found' }, { status: 404 });
         }
 
-        const headersList = headers();
-        const ip = headersList.get('x-forwarded-for') || '127.0.0.1';
 
         // Simple heuristic: one hit per IP for "unique visitors" conceptually (in reality you'd use a Redis set, but we use a daily proxy table if we wanted exact). 
         // Here we just increment views +1, unique_visitors +1 logic if new IP (for simplicity, we track global view counts via upsert).

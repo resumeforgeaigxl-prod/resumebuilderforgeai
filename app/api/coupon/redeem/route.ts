@@ -15,7 +15,6 @@ export async function POST(request: Request) {
 
     const supabase = createClient();
     const normalizedCode = code.trim().toUpperCase();
-    const now = new Date().toISOString();
 
     // 1. Validate coupon
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

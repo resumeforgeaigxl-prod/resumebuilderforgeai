@@ -21,7 +21,7 @@ export async function GET() {
         if (error) throw error;
 
         return NextResponse.json({ success: true, coupons });
-    } catch (e: any) {
+    } catch (error: unknown) { const e = error as Error;
         return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }

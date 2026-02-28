@@ -33,7 +33,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         );
 
         // Delete user directly from auth.users (cascades down to profiles, resumes, etc. due to schema ON DELETE CASCADE)
-        const { data, error } = await supabaseAdmin.auth.admin.deleteUser(targetUserId);
+        const { error } = await supabaseAdmin.auth.admin.deleteUser(targetUserId);
 
         if (error) {
             console.error('Supabase Admin Delete Error:', error);
@@ -42,7 +42,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
         return NextResponse.json({ success: true, message: 'User deleted permanently' });
 
-    } catch (e: any) {
+    } catch (error: unknown) {
+        const e = error as Error;
         console.error('API Error:', e);
         return NextResponse.json({ error: e.message || 'Server error' }, { status: 500 });
     }

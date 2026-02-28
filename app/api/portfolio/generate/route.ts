@@ -53,6 +53,7 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json().catch(() => ({}));
+        // eslint-disable-next-line prefer-const
         let { resumeData, jobTitle } = body;
 
         // If no resumeData provided, try to fetch the user's latest resume

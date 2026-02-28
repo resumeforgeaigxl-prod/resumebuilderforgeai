@@ -9,7 +9,7 @@ interface Props {
 }
 
 export function HealthScorePanel({ resumeId, resumeData }: Props) {
-    const [metrics, setMetrics] = useState<any>(null);
+    const [metrics, setMetrics] = useState<{ action_score: number; impact_score: number; readability_score: number; recruiter_scan_time: number } | null>(null);
     const [loading, setLoading] = useState(false);
     const [scanned, setScanned] = useState(false);
 

@@ -25,17 +25,19 @@ export async function GET() {
 
         if (error) throw error;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const formatted = logs.map((l: any) => ({
             id: l.id,
             action: l.action,
             target_id: l.target_id,
             metadata: l.metadata,
             created_at: l.created_at,
-            admin_email: l.users?.email || 'Unknown Admin'
+            admin_email: (Array.isArray(l.users) ? l.users[0]?.email : l.users?.email) || 'Unknown Admin'
         }));
 
         return NextResponse.json({ success: true, logs: formatted });
-    } catch (e: any) {
+    } catch (error: unknown) {
+        const e = error as Error;
         return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }

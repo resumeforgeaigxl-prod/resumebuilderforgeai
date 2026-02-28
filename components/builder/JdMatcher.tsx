@@ -11,7 +11,7 @@ interface Props {
 export function JdMatcher({ resumeId, resumeData }: Props) {
     const [jdText, setJdText] = useState('');
     const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<{ match_percentage: number; missing_keywords: string[]; present_keywords: string[] } | null>(null);
     const [error, setError] = useState('');
 
     const matchJd = async () => {

@@ -9,8 +9,8 @@ export default function CorporateTheme({ data, watermark = false }: Props) {
 
     return (
         <div className="min-h-screen bg-[#0a0f1e] text-slate-200" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+            {/* eslint-disable-next-line @next/next/no-page-custom-font */}
             <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-
             {/* Hero */}
             <header className="relative overflow-hidden border-b border-white/5">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-purple-600/5 to-transparent pointer-events-none" />

@@ -4,7 +4,7 @@ import { ScrollText, Loader2, Search, Calendar, Shield } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 
 interface AdminLog {
-    id: string; action: string; target_id: string; metadata: any;
+    id: string; action: string; target_id: string; metadata: Record<string, unknown> | null;
     created_at: string; admin_email: string;
 }
 

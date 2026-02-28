@@ -76,8 +76,8 @@ export async function POST(request: Request) {
         // Compile text fields for heuristic analysis
         const allText = `
         ${resumeData.summary || ''}
-        ${resumeData.experience?.map((e: any) => e.points?.join('\n') || '').join('\n') || ''}
-        ${resumeData.projects?.map((p: any) => p.description?.join('\n') || '').join('\n') || ''}
+        ${resumeData.experience?.map((e: { points?: string[] }) => e.points?.join('\n') || '').join('\n') || ''}
+        ${resumeData.projects?.map((p: { description?: string[] }) => p.description?.join('\n') || '').join('\n') || ''}
         ${resumeData.skills?.join(' ') || ''}
         `;
         const words = allText.split(/\s+/).filter(w => w.length > 2);
