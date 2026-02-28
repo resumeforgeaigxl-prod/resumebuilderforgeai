@@ -50,22 +50,17 @@ export default function BuilderPage() {
     const [isNotFound, setIsNotFound] = useState(false);
 
     useEffect(() => {
-        const checkAuth = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
+        fetch('/api/user/access').then(res => res.json()).then(data => {
+            if (data.reason === 'unauthorized') {
                 router.push('/login');
             } else {
+                if (data.hasAccess !== undefined) setUserAccess(data.hasAccess);
                 setAuthLoading(false);
             }
-        };
-        checkAuth();
-    }, [router, supabase.auth]);
-
-    useEffect(() => {
-        fetch('/api/user/access').then(res => res.json()).then(data => {
-            if (data.hasAccess !== undefined) setUserAccess(data.hasAccess);
-        }).catch(() => { });
-    }, []);
+        }).catch(() => {
+            setAuthLoading(false);
+        });
+    }, [router]);
 
     const fetchResume = useCallback(async () => {
         if (authLoading) return;
