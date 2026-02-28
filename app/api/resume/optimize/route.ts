@@ -59,8 +59,8 @@ export async function POST(request: Request) {
             if (Array.isArray(optimizedJson.projects)) optimizedJson.projects = optimizedJson.projects;
 
             console.log("[Optimize] Successfully validated AI output.");
-        } catch (error) {
-            console.error("[Optimize] JSON Parse Error. Raw output:", aiOutput);
+        } catch {
+            console.log("[Optimize] JSON Parse Error. Raw output:", aiOutput);
             throw new Error("AI returned an invalid JSON format. Please try again.");
         }
 
