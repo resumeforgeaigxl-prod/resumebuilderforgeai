@@ -89,7 +89,7 @@ async function getOverflowRatio(page: import('puppeteer').Page): Promise<number>
 }
 
 export async function POST(request: Request) {
-    let browser: any = null;
+    let browser: import('puppeteer').Browser | null = null;
     try {
         const body = await request.json();
         const resumeData: ResumeData = body.resumeData;
@@ -170,13 +170,14 @@ export async function POST(request: Request) {
             },
         });
 
-    } catch (e: any) {
+    } catch (e: unknown) {
         console.error('[Download] CRITICAL PDF Error:', e);
+        const error = e as Error;
         return NextResponse.json(
             {
                 error: 'PDF generation failed',
-                details: e instanceof Error ? e.message : String(e),
-                stack: process.env.NODE_ENV === 'development' ? e.stack : undefined
+                details: error.message || String(e),
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
             },
             { status: 500 }
         );

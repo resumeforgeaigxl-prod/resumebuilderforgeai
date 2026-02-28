@@ -9,7 +9,7 @@ export async function POST(
     _request: Request,
     { params }: { params: { testId: string } }
 ) {
-    let browser: any = null;
+    let browser: import('puppeteer').Browser | null = null;
     try {
         const session = await getSession();
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -105,7 +105,7 @@ export async function POST(
             },
         });
 
-    } catch (e: any) {
+    } catch (e: unknown) {
         console.error('[MockTest Download] CRITICAL PDF Error:', e);
         return NextResponse.json(
             { error: 'PDF generation failed', details: e instanceof Error ? e.message : String(e) },
