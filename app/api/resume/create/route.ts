@@ -36,7 +36,7 @@ export async function POST(request: Request) {
             .select('id')
             .single();
 
-        if (error || !data) {
+        if (error || !data || !data.id) {
             console.error("Error creating resume:", error);
             const errorUrl = new URL('/dashboard', request.url);
             errorUrl.searchParams.set('error', 'Could not create resume');

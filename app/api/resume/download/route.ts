@@ -160,11 +160,11 @@ export async function POST(request: Request) {
         });
         console.log(`[Download] Done. Buffer size=${pdfBuffer.length} bytes`);
 
-        return new NextResponse(new Uint8Array(pdfBuffer), {
+        return new NextResponse(Buffer.from(pdfBuffer), {
             status: 200,
             headers: {
                 'Content-Type': 'application/pdf',
-                'Content-Disposition': `attachment; filename="resume.pdf"`,
+                'Content-Disposition': 'attachment; filename="resume.pdf"',
                 'X-Compress-Ratio': ratio.toFixed(3),
                 'X-Watermark': showWatermark ? 'true' : 'false',
                 'Cache-Control': 'no-store, max-age=0',

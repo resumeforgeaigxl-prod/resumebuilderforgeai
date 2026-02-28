@@ -1,6 +1,7 @@
 import { ResumeCard } from '@/components/dashboard/resume-card'
 import { PlusCircle, Brain, Globe } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { CreateResumeButton } from '@/components/dashboard/create-resume-button'
 import { getSession } from '@/lib/auth/jwt'
 import Link from 'next/link'
 
@@ -30,12 +31,7 @@ export default async function DashboardPage() {
                     <p className="text-slate-400 mt-2">Manage and optimize your professional profiles</p>
                 </div>
 
-                <form action="/api/resume/create" method="POST">
-                    <button type="submit" className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]">
-                        <PlusCircle className="w-5 h-5" />
-                        Create New Resume
-                    </button>
-                </form>
+                <CreateResumeButton userId={session.userId} />
             </div>
 
             {/* Mock Test CTA */}
@@ -83,12 +79,7 @@ export default async function DashboardPage() {
                     <p className="text-slate-500 mb-6 max-w-md">
                         Get started by creating your first resume. You can upload an existing file or start from scratch.
                     </p>
-                    <form action="/api/resume/create" method="POST">
-                        <button className="flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-medium rounded-xl transition-colors">
-                            <PlusCircle className="w-5 h-5" />
-                            Create Resume
-                        </button>
-                    </form>
+                    <CreateResumeButton userId={session.userId} variant="secondary" />
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

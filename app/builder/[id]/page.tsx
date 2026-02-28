@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter, notFound } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { ResumeData, ResumeExperience, ResumeProject, ResumeEducation, Certification, SkillCategory, TEMPLATE_LIST } from '@/types/resume';
 import {
@@ -212,7 +212,18 @@ export default function BuilderPage() {
     const isResumeEmpty = !resumeData?.name?.trim() && !resumeData?.experience?.length;
 
     if (authLoading || loading) return <div className="flex items-center justify-center min-h-screen"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /></div>;
-    if (isNotFound) return notFound();
+    if (isNotFound) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-[#070710] text-center p-4">
+                <AlertCircle className="w-16 h-16 text-red-500 mb-6" />
+                <h1 className="text-3xl font-bold text-white mb-2">Resume Not Found</h1>
+                <p className="text-slate-400 mb-8 max-w-md">The resume you are looking for does not exist or you do not have permission to view it.</p>
+                <Link href="/dashboard" className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-all font-medium">
+                    Return to Dashboard
+                </Link>
+            </div>
+        );
+    }
     if (!resumeData) return null;
 
     const rd = resumeData;
