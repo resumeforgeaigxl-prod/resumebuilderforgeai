@@ -12,6 +12,7 @@ import { generateAtsLightHtml } from '@/templates/ats-light';
 import { getSession } from '@/lib/auth/jwt';
 import { checkUserAccess } from '@/lib/access';
 
+// Trigger re-build with fixed ESLint types
 export const runtime = 'nodejs';
 
 function selectTemplate(resumeData: ResumeData, template: string): string {
