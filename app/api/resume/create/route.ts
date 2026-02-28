@@ -16,7 +16,6 @@ const DEFAULT_RESUME_JSON = {
 }
 
 export async function POST(request: Request) {
-    const requestUrl = new URL(request.url)
     const supabase = createClient()
     const session = await getSession()
 
