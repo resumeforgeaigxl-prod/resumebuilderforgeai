@@ -143,12 +143,28 @@ export default function BuilderPage() {
                 body: JSON.stringify({ resumeData, jobDescription, template: selectedTemplate }),
             });
             const result = await res.json();
-            if (result.success) {
-                setResumeData(result.optimizedData);
+            if (result.success && result.optimizedData) {
+                // Defensive normalization
+                const raw = result.optimizedData;
+                const normalized: ResumeData = {
+                    ...resumeData, // fallback
+                    ...raw,
+                    experience: Array.isArray(raw.experience) ? raw.experience : (resumeData.experience || []),
+                    projects: Array.isArray(raw.projects) ? raw.projects : (resumeData.projects || []),
+                    education: Array.isArray(raw.education) ? raw.education : (resumeData.education || []),
+                    skills: Array.isArray(raw.skills) ? raw.skills : (resumeData.skills || []),
+                    skillCategories: Array.isArray(raw.skillCategories) ? raw.skillCategories : (resumeData.skillCategories || []),
+                };
+                setResumeData(normalized);
                 setShowOptimizer(false);
                 setStep('download');
-            } else alert('Optimization failed: ' + result.error);
-        } catch { alert('Error during optimization'); } finally { setOptimizing(false); }
+            } else {
+                alert('Optimization failed: ' + (result.error || 'Unknown error'));
+            }
+        } catch (e) {
+            console.error('[Optimize] Catch:', e);
+            alert('Error during optimization. Please check your network.');
+        } finally { setOptimizing(false); }
     }
 
     async function redeemCoupon() {
@@ -317,8 +333,8 @@ export default function BuilderPage() {
 
                         {/* Experience */}
                         <Section title="Work Experience" icon={<Building2 className="w-5 h-5" />}
-                            onAdd={() => setResumeData({ ...rd, experience: [...rd.experience, { id: uid(), company: '', role: '', duration: '', points: [''] } as ResumeExperience] })}>
-                            {rd.experience.map((exp, idx) => (
+                            onAdd={() => setResumeData({ ...rd, experience: [...(rd.experience || []), { id: uid(), company: '', role: '', duration: '', points: [''] } as ResumeExperience] })}>
+                            {(rd.experience || []).map((exp, idx) => (
                                 <ListCard key={exp.id} onDelete={() => setResumeData({ ...rd, experience: rd.experience.filter((_, i) => i !== idx) })}>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                                         <FInput label="Company" value={exp.company} onChange={v => { const l = [...rd.experience]; l[idx].company = v; setResumeData({ ...rd, experience: l }); }} />
@@ -332,8 +348,8 @@ export default function BuilderPage() {
 
                         {/* Education */}
                         <Section title="Education" icon={<GraduationCap className="w-5 h-5" />}
-                            onAdd={() => setResumeData({ ...rd, education: [...rd.education, { id: uid(), school: '', degree: '', duration: '', cgpa: '' } as ResumeEducation] })}>
-                            {rd.education.map((edu, idx) => (
+                            onAdd={() => setResumeData({ ...rd, education: [...(rd.education || []), { id: uid(), school: '', degree: '', duration: '', cgpa: '' } as ResumeEducation] })}>
+                            {(rd.education || []).map((edu, idx) => (
                                 <ListCard key={edu.id} onDelete={() => setResumeData({ ...rd, education: rd.education.filter((_, i) => i !== idx) })}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <FInput label="School / University" value={edu.school} onChange={v => { const l = [...rd.education]; l[idx].school = v; setResumeData({ ...rd, education: l }); }} />
@@ -361,8 +377,8 @@ export default function BuilderPage() {
 
                         {/* Projects */}
                         <Section title="Projects" icon={<Lightbulb className="w-5 h-5" />}
-                            onAdd={() => setResumeData({ ...rd, projects: [...rd.projects, { id: uid(), title: '', tech: [], description: [''], liveLink: '', githubLink: '' } as ResumeProject] })}>
-                            {rd.projects.map((proj, idx) => (
+                            onAdd={() => setResumeData({ ...rd, projects: [...(rd.projects || []), { id: uid(), title: '', tech: [], description: [''], liveLink: '', githubLink: '' } as ResumeProject] })}>
+                            {(rd.projects || []).map((proj, idx) => (
                                 <ListCard key={proj.id} onDelete={() => setResumeData({ ...rd, projects: rd.projects.filter((_, i) => i !== idx) })}>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                                         <FInput label="Project Title" value={proj.title} onChange={v => { const l = [...rd.projects]; l[idx].title = v; setResumeData({ ...rd, projects: l }); }} />
@@ -509,7 +525,7 @@ export default function BuilderPage() {
                                         </div>
                                     ))}
                                 </div>
-                                {atsResult.feedback.map((f, i) => (
+                                {(atsResult.feedback || []).map((f, i) => (
                                     <div key={i} className="flex gap-2 text-xs text-slate-400 italic mb-1">
                                         <div className="mt-1 w-1 h-1 rounded-full bg-blue-400 shrink-0" />{f}
                                     </div>

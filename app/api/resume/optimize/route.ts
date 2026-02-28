@@ -13,23 +13,18 @@ export async function POST(request: Request) {
         }
 
         const prompt = `
-            You are an expert ATS (Applicant Tracking System) optimizer and resume writer.
-            I will provide you with a candidate's current resume (in JSON format) and a Job Description.
+            You are an expert ATS (Applicant Tracking System) optimizer.
+            Rewrite the following Resume JSON to align perfectly with the Job Description.
             
-            Your task is to:
-            1. Analyze the Job Description for key skills, keywords, and requirements.
-            2. Rewrite the bullet points in the "experience" and "projects" sections of the resume to better align with the Job Description.
-            3. Naturally integrate missing relevant keywords into the bullet points or the "skills" array.
-            4. Improve the "summary" to be highly targeted towards the Job Description.
+            STRICT OUTPUT RULES:
+            1. Return ONLY the updated JSON. No markdown, no backticks, no text before or after.
+            2. You MUST preserve the exact JSON structure provided.
+            3. Rewrite "summary", "experience" bullet points, and "projects" descriptions to use high-impact keywords from the JD.
+            4. If the candidate is missing skills mentioned in the JD that they reasonably possess based on their experience, add them to the "skills" array.
+            5. Ensure all arrays ("experience", "projects", "skills", "education") are present and valid arrays in the output.
             
-            CRITICAL RULES:
-            1. DO NOT fabricate or invent any experience, qualifications, or past employers.
-            2. Return ONLY valid JSON, exactly matching the schema of the provided resume.
-            3. Do not include markdown formatting (like \`\`\`json).
-            4. Do not include any explanations or conversational text.
-            
-            CURRENT RESUME JSON:
-            ${JSON.stringify(resumeData, null, 2)}
+            CURRENT RESUME:
+            ${JSON.stringify(resumeData)}
             
             JOB DESCRIPTION:
             ${jobDescription}
@@ -39,23 +34,43 @@ export async function POST(request: Request) {
         let optimizedJson;
 
         try {
-            // Attempt to parse. Often AI might still inject markdown backticks
-            const cleanedOutput = aiOutput.replace(/```json/g, '').replace(/```/g, '').trim();
-            optimizedJson = JSON.parse(cleanedOutput);
-            console.log("Successfully optimized resume JSON from Gemini.");
-        } catch (error) {
-            console.error("Failed to parse optimized AI output as JSON on first try:", error);
-            console.error("Raw AI Output:", aiOutput);
+            // Clean AI Output from markdown artifacts
+            const cleaned = aiOutput
+                .replace(/^```json/i, '')
+                .replace(/^```/i, '')
+                .replace(/```$/i, '')
+                .trim();
 
-            // The generated AI response utility already handles 1 retry natively,
-            // but if it still fails here after removing backticks, we throw.
-            throw new Error("Failed to parse strictly valid JSON from the AI provider.");
+            optimizedJson = JSON.parse(cleaned);
+
+            // Validation: Ensure core arrays exist to avoid client-side crashes
+            const defaults = {
+                experience: [],
+                projects: [],
+                education: [],
+                skills: [],
+                skillCategories: [],
+                certifications: []
+            };
+
+            optimizedJson = { ...resumeData, ...optimizedJson, ...defaults };
+            // Re-apply values from optimized if they are valid arrays
+            if (Array.isArray(optimizedJson.experience)) optimizedJson.experience = optimizedJson.experience;
+            if (Array.isArray(optimizedJson.projects)) optimizedJson.projects = optimizedJson.projects;
+
+            console.log("[Optimize] Successfully validated AI output.");
+        } catch (error) {
+            console.error("[Optimize] JSON Parse Error. Raw output:", aiOutput);
+            throw new Error("AI returned an invalid JSON format. Please try again.");
         }
 
         return NextResponse.json({ success: true, optimizedData: optimizedJson });
 
-    } catch (e) {
+    } catch (e: unknown) {
         console.error("Error optimizing resume:", e);
-        return NextResponse.json({ error: e instanceof Error ? e.message : 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({
+            success: false,
+            error: e instanceof Error ? e.message : 'Internal Server Error'
+        }, { status: 500 });
     }
 }
