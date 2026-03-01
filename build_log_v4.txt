@@ -43,10 +43,10 @@ chunks\8948.js:1:37220)
     at Object.f (C:\ResumeFor
 geAi\ai-resume-builder\.next\
 server\chunks\1615.js:1:1692)
-    at c (C:\ResumeForgeAi\ai
+    at d (C:\ResumeForgeAi\ai
 -resume-builder\.next\server\
-app\api\admin\coupons\route.j
-s:1:2342)
+app\api\admin\resumes\[id]\ro
+ute.js:1:2462)
     at d (C:\ResumeForgeAi\ai
 -resume-builder\.next\server\
 app\api\ai\conversation\route
@@ -158,9 +158,9 @@ Route (app)                                Size     First Load JS
 Γö£ ╞Æ /api/resume/parse                      0 B                0 B
 Γö£ ╞Æ /api/user/access                       0 B                0 B
 Γö£ ╞Æ /auth/callback                         0 B                0 B
-Γö£ ╞Æ /builder/[id]                          29.2 kB         181 kB
+Γö£ ╞Æ /builder/[id]                          29.3 kB         181 kB
 Γö£ ╞Æ /complete-profile                      1.36 kB        88.7 kB
-Γö£ ╞Æ /dashboard                             2.24 kB         103 kB
+Γö£ ╞Æ /dashboard                             2.26 kB         103 kB
 Γö£ Γùï /icon.svg                              0 B                0 B
 Γö£ ╞Æ /jobforgeai                            8.3 kB          143 kB
 Γö£ ╞Æ /jobforgeai/share/[conversationId]     2.24 kB         154 kB

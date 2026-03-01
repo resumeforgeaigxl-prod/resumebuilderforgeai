@@ -67,13 +67,22 @@ export default function BuilderPage() {
         });
     }, [router]);
 
-    const fetchResume = useCallback(async () => {
-        if (authLoading || !id) return;
+    const fetchResume = useCallback(async (isRetry = false) => {
+        // 7. Ensure session exists before fetching resume (via authLoading & currentUserId check)
+        if (authLoading || !id || !currentUserId) return;
+
         try {
             const { data, error } = await supabase.from('resumes').select('*').eq('id', id).single();
 
             if (error || !data) {
-                console.error('[Builder] Resume fetch error:', error);
+                // 8. If resume not found, retry fetch once after 300ms before showing 404
+                if (!isRetry) {
+                    console.log('[Builder] Resume not found, retrying in 300ms...');
+                    setTimeout(() => fetchResume(true), 300);
+                    return;
+                }
+
+                console.error('[Builder] Resume fetch error after retry:', error);
                 setIsNotFound(true);
                 setLoading(false);
                 return;
@@ -92,11 +101,18 @@ export default function BuilderPage() {
             setInitialData(JSON.stringify(rData));
             setTitle(data.title);
             setSelectedTemplate(data.template_selected || 'harvard');
+            setIsNotFound(false); // Reset if it was a retry success
         } catch (err) {
             console.error('[Builder] Unexpected error fetching resume:', err);
-            setIsNotFound(true);
+            if (!isRetry) {
+                setTimeout(() => fetchResume(true), 300);
+            } else {
+                setIsNotFound(true);
+            }
         } finally {
-            setLoading(false);
+            if (!isRetry) setLoading(false);
+            // If it's a retry, we'll set loading false in the next call or after error
+            if (isRetry) setLoading(false);
         }
     }, [id, supabase, authLoading, currentUserId, router]);
 

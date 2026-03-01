@@ -29,6 +29,8 @@ export function CreateResumeButton({ variant = 'primary' }: { variant?: 'primary
             }
 
             if (data.id) {
+                // 5. Add 200ms delay before router.push to prevent race condition
+                await new Promise(resolve => setTimeout(resolve, 200));
                 router.push(`/builder/${data.id}`)
             } else {
                 window.location.reload() // Fallback to redirect logic
