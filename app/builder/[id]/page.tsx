@@ -25,7 +25,8 @@ const SKILL_CATEGORIES: string[] = ['Languages', 'Frontend', 'Backend', 'Databas
 type Step = 'edit' | 'template' | 'optimize' | 'download';
 
 export default function BuilderPage() {
-    const { id } = useParams();
+    const params = useParams();
+    const id = params?.id as string;
     const router = useRouter();
     const supabase = createClient();
 
@@ -33,6 +34,8 @@ export default function BuilderPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [optimizing, setOptimizing] = useState(false);
+    const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+    const [pendingOptimizedData, setPendingOptimizedData] = useState<ResumeData | null>(null);
     const [downloading, setDownloading] = useState(false);
     const [resumeData, setResumeData] = useState<ResumeData | null>(null);
     const [initialData, setInitialData] = useState('');
@@ -68,51 +71,34 @@ export default function BuilderPage() {
     }, [router]);
 
     const fetchResume = useCallback(async (isRetry = false) => {
-        // 7. Ensure session exists before fetching resume (via authLoading & currentUserId check)
         if (authLoading || !id || !currentUserId) return;
-
         try {
             const { data, error } = await supabase.from('resumes').select('*').eq('id', id).single();
-
             if (error || !data) {
-                // 8. If resume not found, retry fetch once after 300ms before showing 404
                 if (!isRetry) {
-                    console.log('[Builder] Resume not found, retrying in 300ms...');
                     setTimeout(() => fetchResume(true), 300);
                     return;
                 }
-
-                console.error('[Builder] Resume fetch error after retry:', error);
                 setIsNotFound(true);
                 setLoading(false);
                 return;
             }
-
-            // Client-side owner check as backup to RLS
             if (currentUserId && data.user_id !== currentUserId) {
-                console.warn('[Builder] Ownership mismatch! Redirecting...');
                 router.push('/dashboard');
                 return;
             }
-
             let rData = data.resume_json;
             if (typeof rData === 'string') { try { rData = JSON.parse(rData); } catch { /* ok */ } }
             setResumeData(rData as ResumeData);
             setInitialData(JSON.stringify(rData));
             setTitle(data.title);
             setSelectedTemplate(data.template_selected || 'harvard');
-            setIsNotFound(false); // Reset if it was a retry success
-        } catch (err) {
-            console.error('[Builder] Unexpected error fetching resume:', err);
-            if (!isRetry) {
-                setTimeout(() => fetchResume(true), 300);
-            } else {
-                setIsNotFound(true);
-            }
+            setIsNotFound(false);
+        } catch {
+            if (!isRetry) setTimeout(() => fetchResume(true), 300);
+            else setIsNotFound(true);
         } finally {
-            if (!isRetry) setLoading(false);
-            // If it's a retry, we'll set loading false in the next call or after error
-            if (isRetry) setLoading(false);
+            setLoading(false);
         }
     }, [id, supabase, authLoading, currentUserId, router]);
 
@@ -126,7 +112,7 @@ export default function BuilderPage() {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ resumeData, jobDescription }),
             });
-            const result = await res.json();
+            const result = (await res.json()) as { success: boolean; scoreResult: ATSScoreResult };
             if (result.success) setAtsResult(result.scoreResult);
         } finally { setIsAtsLoading(false); }
     }, [resumeData, jobDescription]);
@@ -150,6 +136,30 @@ export default function BuilderPage() {
         setStep('optimize');
     }
 
+    async function handleGenerateSummary() {
+        if (!resumeData) return;
+        setIsGeneratingSummary(true);
+        try {
+            const res = await fetch('/api/resume/generate-summary', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    role: resumeData.experience?.[0]?.role || '',
+                    skills: resumeData.skills?.join(', ') || '',
+                    experienceText: resumeData.experience?.map(e => `${e.role} at ${e.company} (${e.duration})`).join('\n') || '',
+                    educationText: resumeData.education?.map(e => `${e.degree} from ${e.school}`).join(', ') || '',
+                    projectsText: resumeData.projects?.map(p => p.title).join(', ') || ''
+                }),
+            });
+            const result = (await res.json()) as { success: boolean; summary: string };
+            if (result.success) {
+                setResumeData({ ...resumeData, summary: result.summary });
+            }
+        } finally {
+            setIsGeneratingSummary(false);
+        }
+    }
+
     async function handleOptimize() {
         if (!resumeData || !jobDescription) return;
         setOptimizing(true);
@@ -158,12 +168,11 @@ export default function BuilderPage() {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ resumeData, jobDescription, template: selectedTemplate }),
             });
-            const result = await res.json();
+            const result = (await res.json()) as { success: boolean; optimizedData: Partial<ResumeData>; error?: string };
             if (result.success && result.optimizedData) {
-                // Defensive normalization
                 const raw = result.optimizedData;
                 const normalized: ResumeData = {
-                    ...resumeData, // fallback
+                    ...resumeData,
                     ...raw,
                     experience: Array.isArray(raw.experience) ? raw.experience : (resumeData.experience || []),
                     projects: Array.isArray(raw.projects) ? raw.projects : (resumeData.projects || []),
@@ -171,16 +180,23 @@ export default function BuilderPage() {
                     skills: Array.isArray(raw.skills) ? raw.skills : (resumeData.skills || []),
                     skillCategories: Array.isArray(raw.skillCategories) ? raw.skillCategories : (resumeData.skillCategories || []),
                 };
-                setResumeData(normalized);
-                setShowOptimizer(false);
-                setStep('download');
+                setPendingOptimizedData(normalized);
             } else {
                 alert('Optimization failed: ' + (result.error || 'Unknown error'));
             }
         } catch (e) {
             console.error('[Optimize] Catch:', e);
-            alert('Error during optimization. Please check your network.');
+            alert('Error during optimization.');
         } finally { setOptimizing(false); }
+    }
+
+    function applyOptimization() {
+        if (pendingOptimizedData) {
+            setResumeData(pendingOptimizedData);
+            setPendingOptimizedData(null);
+            setShowOptimizer(false);
+            setStep('download');
+        }
     }
 
     async function redeemCoupon() {
@@ -193,7 +209,7 @@ export default function BuilderPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code: couponCode }),
             });
-            const data = await res.json();
+            const data = (await res.json()) as { success: boolean; message: string; hasFullAccess?: boolean; error?: string };
             if (res.ok && data.success) {
                 setCouponMsg({ text: data.message, ok: true });
                 if (data.hasFullAccess) setCouponApplied(true);
@@ -358,8 +374,18 @@ export default function BuilderPage() {
                             </div>
                         </Section>
 
-                        {/* Summary */}
-                        <Section title="Professional Summary" icon={<Lightbulb className="w-5 h-5" />}>
+                        <Section title="Professional Summary" icon={<Lightbulb className="w-5 h-5" />}
+                            onAction={
+                                <button
+                                    onClick={handleGenerateSummary}
+                                    disabled={isGeneratingSummary || !rd.experience?.length}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
+                                >
+                                    {isGeneratingSummary ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                                    AI Generate
+                                </button>
+                            }
+                        >
                             <textarea value={rd.summary} onChange={e => setResumeData({ ...rd, summary: e.target.value })}
                                 className="w-full h-28 bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-2 focus:ring-blue-500/50 outline-none resize-none text-sm" placeholder="Brief professional summary..." />
                         </Section>
@@ -571,18 +597,68 @@ export default function BuilderPage() {
 
             {/* ── Optimizer Modal ── */}
             {showOptimizer && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/70 backdrop-blur-sm">
-                    <div className="bg-slate-900 border border-white/10 w-full max-w-2xl rounded-3xl p-8 shadow-2xl relative">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md">
+                    <div className="bg-slate-900 border border-white/10 w-full max-w-2xl rounded-3xl p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
                         <button onClick={() => setShowOptimizer(false)} className="absolute top-5 right-5 p-2 hover:bg-white/5 rounded-full"><X className="w-5 h-5" /></button>
-                        <h2 className="text-xl font-bold mb-2 flex items-center gap-2"><Sparkles className="w-5 h-5 text-blue-400" />AI Job Description Optimizer</h2>
-                        <p className="text-slate-400 mb-1 text-xs">Template: <span className="text-blue-300">{TEMPLATE_LIST.find(t => t.id === selectedTemplate)?.name}</span></p>
-                        <p className="text-slate-400 mb-5 text-sm">AI will rewrite bullets for this template to maximise ATS compatibility.</p>
-                        <textarea value={jobDescription} onChange={e => setJobDescription(e.target.value)}
-                            className="w-full h-56 bg-black/40 border border-white/10 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/50 outline-none resize-none mb-5 text-sm" placeholder="Paste Job Description here..." />
-                        <button onClick={handleOptimize} disabled={optimizing || !jobDescription}
-                            className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-2xl transition-all disabled:opacity-50 flex items-center justify-center gap-2">
-                            {optimizing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />} Optimize Resume
-                        </button>
+
+                        {!pendingOptimizedData ? (
+                            <>
+                                <h2 className="text-xl font-bold mb-2 flex items-center gap-2"><Sparkles className="w-5 h-5 text-blue-400" />AI Job Optimizer</h2>
+                                <p className="text-slate-400 mb-5 text-sm">Paste the Job Description to align your resume experience and projects.</p>
+                                <textarea
+                                    value={jobDescription}
+                                    onChange={e => setJobDescription(e.target.value)}
+                                    className="w-full h-64 bg-black/40 border border-white/10 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/50 outline-none resize-none mb-5 text-sm"
+                                    placeholder="Paste Job Description here..."
+                                />
+                                <button
+                                    onClick={handleOptimize}
+                                    disabled={optimizing || !jobDescription}
+                                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-2xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                >
+                                    {optimizing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                                    {optimizing ? 'Optimizing...' : 'Optimize My Resume'}
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <div className="text-center mb-6">
+                                    <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <CheckCircle className="w-8 h-8 text-emerald-400" />
+                                    </div>
+                                    <h2 className="text-2xl font-bold mb-1 text-white">Optimization Ready!</h2>
+                                    <p className="text-slate-400 text-sm">AI has improved your experience and projects based on the JD.</p>
+                                </div>
+
+                                <div className="bg-black/40 border border-white/5 rounded-2xl p-5 mb-6">
+                                    <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Preview Snapshot</h3>
+                                    <div className="space-y-4">
+                                        {pendingOptimizedData.summary && (
+                                            <div>
+                                                <p className="text-[10px] font-bold text-blue-400 mb-1">REWRITTEN SUMMARY</p>
+                                                <p className="text-xs text-slate-300 line-clamp-3 italic">&quot;{pendingOptimizedData.summary}&quot;</p>
+                                            </div>
+                                        )}
+                                        <p className="text-[10px] text-slate-500">All experience bullets and project descriptions have been optimized for ATS.</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <button
+                                        onClick={() => setPendingOptimizedData(null)}
+                                        className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-medium rounded-2xl transition-all border border-white/10 text-sm"
+                                    >
+                                        Back / Discard
+                                    </button>
+                                    <button
+                                        onClick={applyOptimization}
+                                        className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-emerald-600/20 text-sm"
+                                    >
+                                        Apply to Resume
+                                    </button>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             )}
@@ -593,12 +669,15 @@ export default function BuilderPage() {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const uid = () => Math.random().toString(36).substr(2, 9);
 
-function Section({ title, icon, onAdd, children }: { title: string; icon: React.ReactNode; onAdd?: () => void; children: React.ReactNode }) {
+function Section({ title, icon, onAdd, onAction, children }: { title: string; icon: React.ReactNode; onAdd?: () => void; onAction?: React.ReactNode; children: React.ReactNode }) {
     return (
         <section className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden backdrop-blur-sm">
             <div className="px-7 py-5 border-b border-white/5 flex items-center justify-between">
                 <div className="flex items-center gap-3"><div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">{icon}</div><h2 className="text-lg font-bold">{title}</h2></div>
-                {onAdd && <button onClick={onAdd} className="p-2 hover:bg-white/10 rounded-lg transition-all text-slate-400 hover:text-white"><Plus className="w-4 h-4" /></button>}
+                <div className="flex items-center gap-2">
+                    {onAction}
+                    {onAdd && <button onClick={onAdd} className="p-2 hover:bg-white/10 rounded-lg transition-all text-slate-400 hover:text-white"><Plus className="w-4 h-4" /></button>}
+                </div>
             </div>
             <div className="p-7">{children}</div>
         </section>
@@ -651,3 +730,4 @@ function Bullets({ points, onChange, faangMode = false }: { points: string[]; on
         </div>
     );
 }
+

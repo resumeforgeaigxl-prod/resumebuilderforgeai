@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { ResumeData } from '@/types/resume';
-import { COMPRESS_STAGE_1, COMPRESS_STAGE_2, COMPRESS_STAGE_3 } from '@/templates/utils';
 import { generateHarvardHtml } from '@/templates/harvard';
 import { generateStanfordHtml } from '@/templates/stanford';
 import { generateModernHtml } from '@/templates/modern';
@@ -31,15 +30,7 @@ function selectTemplate(resumeData: ResumeData, template: string): string {
     }
 }
 
-async function injectCss(page: Page, css: string): Promise<void> {
-    await page.evaluate((cssText: string) => {
-        document.querySelectorAll('style[data-compress]').forEach(el => el.remove());
-        const s = document.createElement('style');
-        s.setAttribute('data-compress', 'true');
-        s.textContent = cssText;
-        document.head.appendChild(s);
-    }, css);
-}
+
 
 async function injectWatermark(page: Page): Promise<void> {
     await page.evaluate(() => {
@@ -119,48 +110,31 @@ export async function POST(request: Request) {
 
         const html = selectTemplate(resumeData, template);
 
+        // ── 1. PDF Generation logic for Production/Local ──
         const isLocal = process.env.NODE_ENV === 'development' || !process.env.VERCEL;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const c = chromium as any;
         const launchOptions = isLocal ? {
             args: [],
             executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
             headless: true,
         } : {
-            args: chromium.args,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            defaultViewport: (chromium as any).defaultViewport,
-            executablePath: await chromium.executablePath(),
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            headless: (chromium as any).headless,
+            args: c.args,
+            executablePath: await c.executablePath(),
+            headless: c.headless,
+            defaultViewport: c.defaultViewport,
         };
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         browser = await puppeteer.launch(launchOptions as any);
 
         const page = await browser.newPage();
-        await page.setViewport({ width: 794, height: 1122, deviceScaleFactor: 1 });
         await page.setContent(html, { waitUntil: 'networkidle0' });
 
-        // ── Iterative 3-stage compression ───────────────────────────────────────
-        let ratio = await getOverflowRatio(page);
-        console.log(`[Download] template="${template}" initial ratio=${ratio.toFixed(3)}`);
+        const ratio = await getOverflowRatio(page);
 
-        if (ratio > 1) {
-            await injectCss(page, COMPRESS_STAGE_1);
-            ratio = await getOverflowRatio(page);
-        }
-        if (ratio > 1) {
-            await injectCss(page, COMPRESS_STAGE_2);
-            ratio = await getOverflowRatio(page);
-        }
-        if (ratio > 1) {
-            await injectCss(page, COMPRESS_STAGE_3);
-            ratio = await getOverflowRatio(page);
-        }
-        // ────────────────────────────────────────────────────────────────────────
-
-        // ── Inject watermark AFTER compression (preserves layout) ───────────────
-        console.log(`[Download] Injecting watermark: ${showWatermark}`);
+        // ── 2. Inject watermark if needed ──
         if (showWatermark) {
             await injectWatermark(page);
         }
@@ -169,8 +143,6 @@ export async function POST(request: Request) {
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
-            preferCSSPageSize: true,
-            pageRanges: '1',
         });
         console.log(`[Download] Done. Buffer size=${pdfBuffer.length} bytes`);
 

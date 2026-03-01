@@ -1,0 +1,23 @@
+
+[36m./app/(auth)/forgot-password/page.tsx[39m
+[33m21[39m:[33m75[39m  [31m[1mError[22m[39m: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  [90m[1mreact/no-unescaped-entities[22m[39m
+
+[36m./app/api/resume/download/route.ts[39m
+[33m3[39m:[33m10[39m  [31m[1mError[22m[39m: 'COMPRESS_STAGE_1' is defined but never used.  [90m[1m@typescript-eslint/no-unused-vars[22m[39m
+[33m3[39m:[33m28[39m  [31m[1mError[22m[39m: 'COMPRESS_STAGE_2' is defined but never used.  [90m[1m@typescript-eslint/no-unused-vars[22m[39m
+[33m3[39m:[33m46[39m  [31m[1mError[22m[39m: 'COMPRESS_STAGE_3' is defined but never used.  [90m[1m@typescript-eslint/no-unused-vars[22m[39m
+[33m34[39m:[33m16[39m  [31m[1mError[22m[39m: 'injectCss' is defined but never used.  [90m[1m@typescript-eslint/no-unused-vars[22m[39m
+[33m132[39m:[33m36[39m  [31m[1mError[22m[39m: Unexpected any. Specify a different type.  [90m[1m@typescript-eslint/no-explicit-any[22m[39m
+[33m133[39m:[33m43[39m  [31m[1mError[22m[39m: Unexpected any. Specify a different type.  [90m[1m@typescript-eslint/no-explicit-any[22m[39m
+
+[36m./app/api/resume/optimize/route.ts[39m
+[33m69[39m:[33m36[39m  [31m[1mError[22m[39m: Unexpected any. Specify a different type.  [90m[1m@typescript-eslint/no-explicit-any[22m[39m
+[33m69[39m:[33m42[39m  [31m[1mError[22m[39m: Unexpected any. Specify a different type.  [90m[1m@typescript-eslint/no-explicit-any[22m[39m
+[33m73[39m:[33m35[39m  [31m[1mError[22m[39m: Unexpected any. Specify a different type.  [90m[1m@typescript-eslint/no-explicit-any[22m[39m
+
+[36m./app/builder/[id]/page.tsx[39m
+[33m638[39m:[33m107[39m  [31m[1mError[22m[39m: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  [90m[1mreact/no-unescaped-entities[22m[39m
+[33m638[39m:[33m138[39m  [31m[1mError[22m[39m: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  [90m[1mreact/no-unescaped-entities[22m[39m
+
+[36m./lib/ats-score.ts[39m
+[33m40[39m:[33m13[39m  [31m[1mError[22m[39m: 'stacksDetected' is assigned a value but never used.  [90m[1m@typescript-eslint/no-unused-vars[22m[39m

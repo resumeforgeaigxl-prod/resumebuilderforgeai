@@ -25,7 +25,23 @@ interface AIResponseMetadata {
     };
 }
 
-async function fetchFromOpenRouter(prompt: string, model: string, customSystemPrompt?: string): Promise<AIResponseMetadata> {
+export function stripMarkdown(text: string): string {
+    return text
+        .replace(/^```[a-z]*\n/i, '') // beginning of code blocks
+        .replace(/\n```$/i, '')        // end of code blocks
+        .replace(/[*#>`~]/g, '')      // standard markdown symbols
+        .replace(/!\[.*?\]\(.*?\)/g, '') // images
+        .replace(/\[.*?\]\(.*?\)/g, '$1') // links (keep text)
+        .trim();
+}
+
+async function fetchFromOpenRouter(
+    prompt: string,
+    model: string,
+    customSystemPrompt?: string,
+    temp?: number,
+    maxTokens?: number
+): Promise<AIResponseMetadata> {
     const apiKey = (process.env.OPENROUTER_API_KEY || "").trim();
 
     if (!apiKey) {
@@ -54,8 +70,8 @@ async function fetchFromOpenRouter(prompt: string, model: string, customSystemPr
                     content: prompt,
                 },
             ],
-            temperature: 0.2,
-            max_tokens: 1800,
+            temperature: temp ?? 0.2,
+            max_tokens: maxTokens ?? 2000,
         }),
     });
 
@@ -83,13 +99,15 @@ async function fetchFromOpenRouter(prompt: string, model: string, customSystemPr
 export async function generateAIResponse(
     prompt: string,
     selectedModel?: string,
-    systemPrompt?: string
+    systemPrompt?: string,
+    temp?: number,
+    maxTokens?: number
 ): Promise<AIResponseMetadata> {
     const model = selectedModel || DEFAULT_MODEL;
 
     try {
         console.log(`[AI] Using model: ${model}`);
-        const result = await fetchFromOpenRouter(prompt, model, systemPrompt);
+        const result = await fetchFromOpenRouter(prompt, model, systemPrompt, temp, maxTokens);
         console.log(`[AI] Success. Response length: ${result.text.length}`);
         return result;
     } catch (err: unknown) {
@@ -98,7 +116,7 @@ export async function generateAIResponse(
         if (model !== FALLBACK_MODEL) {
             console.warn(`[AI] Model ${model} failed. Falling back to ${FALLBACK_MODEL}. Error: ${errMessage}`);
             try {
-                const result = await fetchFromOpenRouter(prompt, FALLBACK_MODEL, systemPrompt);
+                const result = await fetchFromOpenRouter(prompt, FALLBACK_MODEL, systemPrompt, temp, maxTokens);
                 console.log(`[AI] Fallback success. Response length: ${result.text.length}`);
                 return result;
             } catch (fallbackErr: unknown) {

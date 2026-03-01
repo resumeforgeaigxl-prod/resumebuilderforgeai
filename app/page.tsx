@@ -380,9 +380,9 @@ export default function Home() {
       <footer className="border-t border-white/5 py-8 text-center bg-[#05050a] relative z-10">
         <p className="text-slate-600 text-sm">© {new Date().getFullYear()} ResumeForge AI. All rights reserved.</p>
         <div className="flex justify-center gap-4 mt-4 text-xs text-slate-500 font-medium">
-          <span>Privacy Policy</span>
-          <span>Terms of Service</span>
-          <span>Contact</span>
+          <Link href="/privacy" className="hover:text-slate-300 transition-colors cursor-pointer">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-slate-300 transition-colors cursor-pointer">Terms of Service</Link>
+          <span className="hover:text-slate-300 transition-colors cursor-pointer">Contact</span>
         </div>
       </footer>
     </div>
