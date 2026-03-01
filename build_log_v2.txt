@@ -1,0 +1,186 @@
+﻿
+> ai-resume-builder@0.1.0 build
+> next build
+
+  Γû▓ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/55) ...
+   Generating static pages (13/55) 
+   Generating static pages (27/55) 
+node.exe : [AI Conversation 
+GET Error] n [Error]: 
+Dynamic server usage: Route 
+/api/ai/conversation 
+couldn't be rendered 
+statically because it used 
+`cookies`. See more info 
+here: https://nextjs.org/docs
+/messages/dynamic-server-erro
+r
+At C:\Program 
+Files\nodejs\npm.ps1:29 
+char:3
++   & $NODE_EXE $NPM_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: ([AI Con  
+  versatio...ic-server-err   
+ or:String) [], RemoteExc    
+eption
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+    at l (C:\ResumeForgeAi\ai
+-resume-builder\.next\server\
+chunks\8948.js:1:37220)
+    at Object.f (C:\ResumeFor
+geAi\ai-resume-builder\.next\
+server\chunks\1615.js:1:1692)
+    at c (C:\ResumeForgeAi\ai
+-resume-builder\.next\server\
+app\api\admin\coupons\route.j
+s:1:2342)
+    at d (C:\ResumeForgeAi\ai
+-resume-builder\.next\server\
+app\api\ai\conversation\route
+.js:1:1030)
+    at C:\ResumeForgeAi\ai-re
+sume-builder\node_modules\nex
+t\dist\compiled\next-server\a
+pp-route.runtime.prod.js:6:38
+417
+    at C:\ResumeForgeAi\ai-re
+sume-builder\node_modules\nex
+t\dist\server\lib\trace\trace
+r.js:140:36
+    at 
+NoopContextManager.with (C:\R
+esumeForgeAi\ai-resume-builde
+r\node_modules\next\dist\comp
+iled\@opentelemetry\api\index
+.js:1:7062)
+    at ContextAPI.with (C:\Re
+sumeForgeAi\ai-resume-builder
+\node_modules\next\dist\compi
+led\@opentelemetry\api\index.
+js:1:518)
+    at 
+NoopTracer.startActiveSpan (C
+:\ResumeForgeAi\ai-resume-bui
+lder\node_modules\next\dist\c
+ompiled\@opentelemetry\api\in
+dex.js:1:18093)
+    at 
+ProxyTracer.startActiveSpan (
+C:\ResumeForgeAi\ai-resume-bu
+ilder\node_modules\next\dist\
+compiled\@opentelemetry\api\i
+ndex.js:1:18854) {
+  description: "Route 
+/api/ai/conversation 
+couldn't be rendered 
+statically because it used 
+`cookies`. See more info 
+here: https://nextjs.org/docs
+/messages/dynamic-server-erro
+r",
+  digest: 
+'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages (41/55) 
+ Γ£ô Generating static pages (55/55)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                Size     First Load JS
+Γöî ╞Æ /                                      9.32 kB         144 kB
+Γö£ ╞Æ /_not-found                            873 B          88.2 kB
+Γö£ ╞Æ /admin                                 155 B          87.5 kB
+Γö£ ╞Æ /admin/ai-monitoring                   6.93 kB         189 kB
+Γö£ ╞Æ /admin/coupons                         4.14 kB         108 kB
+Γö£ ╞Æ /admin/downloads                       155 B          87.5 kB
+Γö£ ╞Æ /admin/logs                            1.91 kB        97.3 kB
+Γö£ ╞Æ /admin/mock-tests                      2.08 kB         102 kB
+Γö£ ╞Æ /admin/portfolios                      2.43 kB         103 kB
+Γö£ ╞Æ /admin/resume-scores                   155 B          87.5 kB
+Γö£ ╞Æ /admin/resumes                         2.7 kB         94.3 kB
+Γö£ ╞Æ /admin/subscriptions                   2.3 kB         97.7 kB
+Γö£ ╞Æ /admin/users                           3.99 kB        91.3 kB
+Γö£ ╞Æ /api/admin/ai-monitoring               0 B                0 B
+Γö£ ╞Æ /api/admin/coupons                     0 B                0 B
+Γö£ ╞Æ /api/admin/coupons/[id]/toggle         0 B                0 B
+Γö£ ╞Æ /api/admin/coupons/create              0 B                0 B
+Γö£ ╞Æ /api/admin/logs                        0 B                0 B
+Γö£ ╞Æ /api/admin/mock-tests                  0 B                0 B
+Γö£ ╞Æ /api/admin/portfolios                  0 B                0 B
+Γö£ ╞Æ /api/admin/portfolios/[id]/toggle      0 B                0 B
+Γö£ ╞Æ /api/admin/resumes                     0 B                0 B
+Γö£ ╞Æ /api/admin/resumes/[id]                0 B                0 B
+Γö£ ╞Æ /api/admin/subscriptions               0 B                0 B
+Γö£ ╞Æ /api/admin/subscriptions/[id]/extend   0 B                0 B
+Γö£ ╞Æ /api/admin/users                       0 B                0 B
+Γö£ ╞Æ /api/admin/users/[id]/block            0 B                0 B
+Γö£ ╞Æ /api/admin/users/[id]/delete           0 B                0 B
+Γö£ ╞Æ /api/admin/users/[id]/override         0 B                0 B
+Γö£ ╞Æ /api/admin/users/[id]/upgrade          0 B                0 B
+Γö£ ╞Æ /api/ai/chat                           0 B                0 B
+Γö£ ╞Æ /api/ai/conversation                   0 B                0 B
+Γö£ ╞Æ /api/ai/settings                       0 B                0 B
+Γö£ ╞Æ /api/auth/[provider]                   0 B                0 B
+Γö£ ╞Æ /api/auth/[provider]/callback          0 B                0 B
+Γö£ ╞Æ /api/auth/complete-profile             0 B                0 B
+Γö£ ╞Æ /api/auth/login                        0 B                0 B
+Γö£ ╞Æ /api/auth/signout                      0 B                0 B
+Γö£ ╞Æ /api/auth/signup                       0 B                0 B
+Γö£ ╞Æ /api/coupon/redeem                     0 B                0 B
+Γö£ ╞Æ /api/mock-test/[testId]                0 B                0 B
+Γö£ ╞Æ /api/mock-test/[testId]/download       0 B                0 B
+Γö£ ╞Æ /api/mock-test/generate                0 B                0 B
+Γö£ ╞Æ /api/portfolio                         0 B                0 B
+Γö£ ╞Æ /api/portfolio/[username]/track        0 B                0 B
+Γö£ ╞Æ /api/portfolio/generate                0 B                0 B
+Γö£ ╞Æ /api/resume/[id]/versions              0 B                0 B
+Γö£ ╞Æ /api/resume/[id]/versions/[versionId]  0 B                0 B
+Γö£ ╞Æ /api/resume/analyze                    0 B                0 B
+Γö£ ╞Æ /api/resume/ats-score                  0 B                0 B
+Γö£ ╞Æ /api/resume/create                     0 B                0 B
+Γö£ ╞Æ /api/resume/download                   0 B                0 B
+Γö£ ╞Æ /api/resume/enhance-bullet             0 B                0 B
+Γö£ ╞Æ /api/resume/match-jd                   0 B                0 B
+Γö£ ╞Æ /api/resume/optimize                   0 B                0 B
+Γö£ ╞Æ /api/resume/parse                      0 B                0 B
+Γö£ ╞Æ /api/user/access                       0 B                0 B
+Γö£ ╞Æ /auth/callback                         0 B                0 B
+Γö£ ╞Æ /builder/[id]                          29.2 kB         181 kB
+Γö£ ╞Æ /complete-profile                      1.36 kB        88.7 kB
+Γö£ ╞Æ /dashboard                             2.24 kB         103 kB
+Γö£ Γùï /icon.svg                              0 B                0 B
+Γö£ ╞Æ /jobforgeai                            8.3 kB          143 kB
+Γö£ ╞Æ /jobforgeai/share/[conversationId]     2.24 kB         154 kB
+Γö£ ╞Æ /login                                 181 B          96.2 kB
+Γö£ ╞Æ /mock-test                             3.73 kB        91.1 kB
+Γö£ ╞Æ /mock-test/[id]                        5.49 kB         102 kB
+Γö£ ╞Æ /portfolio                             3.78 kB        91.1 kB
+Γö£ ╞Æ /portfolio/[username]                  134 B          93.6 kB
+Γö£ ╞Æ /preview/[token]                       134 B          93.6 kB
+Γö£ ╞Æ /privacy                               181 B          96.2 kB
+Γö£ ╞Æ /signup                                3.42 kB        99.4 kB
+Γöö ╞Æ /terms                                 181 B          96.2 kB
++ First Load JS shared by all              87.3 kB
+  Γö£ chunks/117-648129468f8bcd07.js         31.7 kB
+  Γö£ chunks/fd9d1056-ea949d58b73d551c.js    53.6 kB
+  Γöö other shared chunks (total)            1.95 kB
+
+
+╞Æ Middleware                               32.5 kB
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+

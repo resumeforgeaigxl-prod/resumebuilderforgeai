@@ -15,12 +15,24 @@ export const AVAILABLE_MODELS = [
     { id: "deepseek/deepseek-chat", label: "DeepSeek Chat" },
 ];
 
-async function fetchFromOpenRouter(prompt: string, model: string): Promise<string> {
+interface AIResponseMetadata {
+    text: string;
+    model: string;
+    usage: {
+        prompt_tokens: number;
+        completion_tokens: number;
+        total_tokens: number;
+    };
+}
+
+async function fetchFromOpenRouter(prompt: string, model: string, customSystemPrompt?: string): Promise<AIResponseMetadata> {
     const apiKey = (process.env.OPENROUTER_API_KEY || "").trim();
 
     if (!apiKey) {
         throw new Error("OPENROUTER_API_KEY is not set in environment variables.");
     }
+
+    const systemPrompt = customSystemPrompt || "You are an ATS resume optimization AI. When asked to return JSON, return ONLY valid JSON with no markdown formatting, no code blocks, and no extra text.";
 
     const response = await fetch(OPENROUTER_API_URL, {
         method: "POST",
@@ -35,7 +47,7 @@ async function fetchFromOpenRouter(prompt: string, model: string): Promise<strin
             messages: [
                 {
                     role: "system",
-                    content: "You are an ATS resume optimization AI. When asked to return JSON, return ONLY valid JSON with no markdown formatting, no code blocks, and no extra text.",
+                    content: systemPrompt,
                 },
                 {
                     role: "user",
@@ -55,34 +67,40 @@ async function fetchFromOpenRouter(prompt: string, model: string): Promise<strin
 
     const data = await response.json();
     const content = data?.choices?.[0]?.message?.content;
+    const usage = data?.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
 
     if (!content) {
         throw new Error("OpenRouter returned an empty response.");
     }
 
-    return content;
+    return {
+        text: content,
+        model: data?.model || model,
+        usage: usage
+    };
 }
 
 export async function generateAIResponse(
     prompt: string,
-    selectedModel?: string
-): Promise<string> {
+    selectedModel?: string,
+    systemPrompt?: string
+): Promise<AIResponseMetadata> {
     const model = selectedModel || DEFAULT_MODEL;
 
     try {
         console.log(`[AI] Using model: ${model}`);
-        const text = await fetchFromOpenRouter(prompt, model);
-        console.log(`[AI] Success. Response length: ${text.length}`);
-        return text;
+        const result = await fetchFromOpenRouter(prompt, model, systemPrompt);
+        console.log(`[AI] Success. Response length: ${result.text.length}`);
+        return result;
     } catch (err: unknown) {
         // If user selected a non-default model and it fails, retry with default
         const errMessage = err instanceof Error ? err.message : String(err);
         if (model !== FALLBACK_MODEL) {
             console.warn(`[AI] Model ${model} failed. Falling back to ${FALLBACK_MODEL}. Error: ${errMessage}`);
             try {
-                const text = await fetchFromOpenRouter(prompt, FALLBACK_MODEL);
-                console.log(`[AI] Fallback success. Response length: ${text.length}`);
-                return text;
+                const result = await fetchFromOpenRouter(prompt, FALLBACK_MODEL, systemPrompt);
+                console.log(`[AI] Fallback success. Response length: ${result.text.length}`);
+                return result;
             } catch (fallbackErr: unknown) {
                 const fallbackMessage = fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr);
                 console.error("[AI] Fallback also failed:", fallbackMessage);
@@ -90,5 +108,26 @@ export async function generateAIResponse(
             }
         }
         throw new Error(`AI generation failed: ${errMessage}`);
+    }
+}
+
+export async function logAIUsage(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    supabase: any,
+    userId: string,
+    conversationId: string | null,
+    result: AIResponseMetadata,
+    responseTimeMs: number
+) {
+    try {
+        await supabase.from('ai_usage_logs').insert({
+            user_id: userId,
+            conversation_id: conversationId,
+            model_used: result.model,
+            tokens_used: result.usage.total_tokens,
+            response_time_ms: responseTimeMs
+        });
+    } catch (err) {
+        console.error('[AI Usage Log Error]', err);
     }
 }

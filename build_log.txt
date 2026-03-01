@@ -1,0 +1,98 @@
+﻿
+> ai-resume-builder@0.1.0 build
+> next build
+
+  Γû▓ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully
+   Linting and checking validity of types ...
+node.exe : 
+At C:\Program 
+Files\nodejs\npm.ps1:29 
+char:3
++   & $NODE_EXE $NPM_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: (:String  
+  ) [], RemoteException
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+Failed to compile.
+
+./app/admin/ai-monitoring/pag
+e.tsx
+4:79  Error: 'UserIcon' is 
+defined but never used.  @typ
+escript-eslint/no-unused-vars
+4:120  Error: 'Share2' is 
+defined but never used.  @typ
+escript-eslint/no-unused-vars
+63:69  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
+
+./app/api/admin/ai-monitoring
+/route.ts
+53:15  Error: 'todayStr' is 
+assigned a value but never 
+used.  @typescript-eslint/no-
+unused-vars
+
+./app/api/ai/conversation/rou
+te.ts
+16:44  Error: 'fetchError' 
+is assigned a value but 
+never used.  @typescript-esli
+nt/no-unused-vars
+
+./app/api/mock-test/[testId]/
+download/route.ts
+107:59  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
+
+./app/api/resume/download/rou
+te.ts
+137:59  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
+
+./app/jobforgeai/page.tsx
+5:49  Error: 
+'MessageSquareWarning' is 
+defined but never used.  @typ
+escript-eslint/no-unused-vars
+5:105  Error: 'Sparkles' is 
+defined but never used.  @typ
+escript-eslint/no-unused-vars
+5:115  Error: 'LogOut' is 
+defined but never used.  @typ
+escript-eslint/no-unused-vars
+
+./app/jobforgeai/share/[conve
+rsationId]/page.tsx
+72:118  Error: `'` can be 
+escaped with `&apos;`, 
+`&lsquo;`, `&#39;`, 
+`&rsquo;`.  
+react/no-unescaped-entities
+
+./lib/ai-provider.ts
+115:15  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
+
+info  - Need to disable some 
+ESLint rules? Learn more 
+here: https://nextjs.org/docs
+/basic-features/eslint#disabl
+ing-rules

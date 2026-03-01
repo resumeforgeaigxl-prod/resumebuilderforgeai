@@ -11,6 +11,8 @@ import { generateAcademicHtml } from '@/templates/academic';
 import { generateAtsLightHtml } from '@/templates/ats-light';
 import { getSession } from '@/lib/auth/jwt';
 import { checkUserAccess } from '@/lib/access';
+import puppeteer, { Browser, Page } from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
 
 // Trigger re-build with fixed ESLint types
 export const runtime = 'nodejs';
@@ -29,7 +31,7 @@ function selectTemplate(resumeData: ResumeData, template: string): string {
     }
 }
 
-async function injectCss(page: import('puppeteer').Page, css: string): Promise<void> {
+async function injectCss(page: Page, css: string): Promise<void> {
     await page.evaluate((cssText: string) => {
         document.querySelectorAll('style[data-compress]').forEach(el => el.remove());
         const s = document.createElement('style');
@@ -39,7 +41,7 @@ async function injectCss(page: import('puppeteer').Page, css: string): Promise<v
     }, css);
 }
 
-async function injectWatermark(page: import('puppeteer').Page): Promise<void> {
+async function injectWatermark(page: Page): Promise<void> {
     await page.evaluate(() => {
         // Remove existing watermark if any
         document.querySelectorAll('#resumeforge-watermark').forEach(el => el.remove());
@@ -82,7 +84,7 @@ async function injectWatermark(page: import('puppeteer').Page): Promise<void> {
     });
 }
 
-async function getOverflowRatio(page: import('puppeteer').Page): Promise<number> {
+async function getOverflowRatio(page: Page): Promise<number> {
     return page.evaluate(() => {
         const A4_CONTENT_H = 1050;
         return document.body.scrollHeight / A4_CONTENT_H;
@@ -90,7 +92,7 @@ async function getOverflowRatio(page: import('puppeteer').Page): Promise<number>
 }
 
 export async function POST(request: Request) {
-    let browser: import('puppeteer').Browser | null = null;
+    let browser: Browser | null = null;
     try {
         const body = await request.json();
         const resumeData: ResumeData = body.resumeData;
@@ -117,15 +119,27 @@ export async function POST(request: Request) {
 
         const html = selectTemplate(resumeData, template);
 
-        const puppeteer = await import('puppeteer');
-        browser = await puppeteer.default.launch({
+        const isLocal = process.env.NODE_ENV === 'development' || !process.env.VERCEL;
+
+        const launchOptions = isLocal ? {
+            args: [],
+            executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
             headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-        });
+        } : {
+            args: chromium.args,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            defaultViewport: (chromium as any).defaultViewport,
+            executablePath: await chromium.executablePath(),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            headless: (chromium as any).headless,
+        };
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        browser = await puppeteer.launch(launchOptions as any);
 
         const page = await browser.newPage();
         await page.setViewport({ width: 794, height: 1122, deviceScaleFactor: 1 });
-        await page.setContent(html, { waitUntil: 'domcontentloaded' });
+        await page.setContent(html, { waitUntil: 'networkidle0' });
 
         // ── Iterative 3-stage compression ───────────────────────────────────────
         let ratio = await getOverflowRatio(page);

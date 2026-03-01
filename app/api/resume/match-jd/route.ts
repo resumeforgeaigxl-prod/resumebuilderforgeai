@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
-import { generateAIResponse } from '@/lib/ai-provider';
+import { generateAIResponse, logAIUsage } from '@/lib/ai-provider';
 
 export const runtime = 'nodejs';
 
@@ -31,6 +31,7 @@ export async function POST(request: Request) {
         if (!ownership) return NextResponse.json({ error: 'Resume not found' }, { status: 404 });
 
         // AI Matcher
+        const startTime = Date.now();
         const prompt = `You are an expert ATS (Applicant Tracking System).
 Analyze this Job Description and this candidate's Resume.
 Identify the hard skills, soft skills, and keywords required in the JD.
@@ -50,7 +51,11 @@ ${jdText.slice(0, 3000)}
 Resume Data:
 ${JSON.stringify(resumeData).slice(0, 3000)}`;
 
-        const aiResponse = await generateAIResponse(prompt);
+        const aiResult = await generateAIResponse(prompt);
+        const aiResponse = aiResult.text;
+        const endTime = Date.now();
+        await logAIUsage(supabase, session.userId, null, aiResult, endTime - startTime);
+
         let parsedResult;
         try {
             parsedResult = JSON.parse(aiResponse.replace(/```json/g, '').replace(/```/g, '').trim());

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
-import { generateAIResponse } from '@/lib/ai-provider';
+import { generateAIResponse, logAIUsage } from '@/lib/ai-provider';
 import mammoth from 'mammoth';
 import { runOCR } from '@/lib/parser/ocrParser';
 
@@ -128,7 +128,17 @@ RAW RESUME TEXT:
 ${rawText}
 `;
 
-    const aiOut = await generateAIResponse(prompt);
+    const supabase = createClient();
+    const session = await getSession();
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const startTime = Date.now();
+    const aiResult = await generateAIResponse(prompt);
+    const endTime = Date.now();
+    const aiOut = aiResult.text;
+
+    await logAIUsage(supabase, session.userId, null, aiResult, endTime - startTime);
+
     let parsed;
     try {
       parsed = JSON.parse(aiOut.replace(/```json/g, '').replace(/```/g, '').trim());
@@ -140,9 +150,6 @@ ${rawText}
     if (formData.get('returnJson') === 'true') {
       return NextResponse.json({ success: true, data: parsed });
     }
-
-    const supabase = createClient();
-    const session = await getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

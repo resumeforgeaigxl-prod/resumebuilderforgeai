@@ -1,5 +1,5 @@
 import { ResumeCard } from '@/components/dashboard/resume-card'
-import { PlusCircle, Brain, Globe } from 'lucide-react'
+import { PlusCircle, Brain, Globe, MessageSquareWarning } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { CreateResumeButton } from '@/components/dashboard/create-resume-button'
 import { getSession } from '@/lib/auth/jwt'
@@ -62,6 +62,22 @@ export default async function DashboardPage() {
                             <p className="text-sm text-slate-400 mt-0.5">Generate a professional, hosted portfolio website instantly from your resume. Share with recruiters.</p>
                         </div>
                         <span className="text-emerald-400 text-sm font-medium group-hover:translate-x-1 transition-transform">Start →</span>
+                    </div>
+                </div>
+            </Link>
+
+            {/* JobForgeAI CTA */}
+            <Link href="/jobforgeai" className="block">
+                <div className="p-5 rounded-2xl bg-gradient-to-r from-orange-600/15 to-red-600/15 border border-orange-500/20 hover:border-orange-400/40 transition-all cursor-pointer group">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                        <div className="p-3 bg-orange-500/15 rounded-xl shrink-0">
+                            <MessageSquareWarning className="w-6 h-6 text-orange-400" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="font-bold text-white group-hover:text-orange-300 transition-colors">JobForgeAI Assistant</h3>
+                            <p className="text-sm text-slate-400 mt-0.5">Your strict AI coach for resume optimization, technical problem solving, and interview prep.</p>
+                        </div>
+                        <span className="text-orange-400 text-sm font-medium group-hover:translate-x-1 transition-transform">Start →</span>
                     </div>
                 </div>
             </Link>

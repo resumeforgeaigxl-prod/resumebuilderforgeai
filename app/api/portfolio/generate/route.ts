@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
-import { generateAIResponse } from '@/lib/ai-provider';
+import { generateAIResponse, logAIUsage } from '@/lib/ai-provider';
 import { isValidUsername, PortfolioData } from '@/types/portfolio';
 
 export const runtime = 'nodejs';
@@ -120,7 +120,13 @@ SCHEMA:
   ]
 }`;
 
-        const aiOut = await generateAIResponse(prompt);
+        const startTime = Date.now();
+        const aiResult = await generateAIResponse(prompt);
+        const aiOut = aiResult.text;
+        const endTime = Date.now();
+
+        await logAIUsage(supabase, session.userId, null, aiResult, endTime - startTime);
+
         let portfolioData: PortfolioData;
 
         try {

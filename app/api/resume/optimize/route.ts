@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
-import { generateAIResponse } from '@/lib/ai-provider';
+import { generateAIResponse, logAIUsage } from '@/lib/ai-provider';
 import { ResumeData } from '@/types/resume';
+import { getSession } from '@/lib/auth/jwt';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
     try {
+        const session = await getSession();
+        if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
         const body = await request.json();
         const resumeData: ResumeData = body.resumeData;
         const jobDescription: string = body.jobDescription;
@@ -30,9 +35,15 @@ export async function POST(request: Request) {
             ${jobDescription}
         `;
 
-        const aiOutput = await generateAIResponse(prompt);
-        let optimizedJson;
+        const startTime = Date.now();
+        const aiResult = await generateAIResponse(prompt);
+        const endTime = Date.now();
+        const aiOutput = aiResult.text;
 
+        const supabase = createClient();
+        await logAIUsage(supabase, session.userId, null, aiResult, endTime - startTime);
+
+        let optimizedJson;
         try {
             // Clean AI Output from markdown artifacts
             const cleaned = aiOutput
@@ -47,7 +58,6 @@ export async function POST(request: Request) {
             optimizedJson = { ...resumeData, ...optimizedJson };
 
             // ENSURE core arrays exist and are valid. 
-            // We only overwrite with defaults if the key is missing or not an array.
             if (!Array.isArray(optimizedJson.experience)) optimizedJson.experience = resumeData.experience || [];
             if (!Array.isArray(optimizedJson.projects)) optimizedJson.projects = resumeData.projects || [];
             if (!Array.isArray(optimizedJson.education)) optimizedJson.education = resumeData.education || [];

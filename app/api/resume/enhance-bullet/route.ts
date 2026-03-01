@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
-import { generateAIResponse } from '@/lib/ai-provider';
+import { generateAIResponse, logAIUsage } from '@/lib/ai-provider';
 import { checkDailyLimit, logUsage } from '@/lib/usage';
+import { createClient } from '@/lib/supabase/server';
 
 export const runtime = 'nodejs';
 
@@ -30,6 +31,7 @@ export async function POST(request: Request) {
         }
 
         // Generate AI enhancement
+        const startTime = Date.now();
         const faangRules = faangMode
             ? `\nFAANG MODE ACTIVATED:\n- Enforce the XYZ formula: "Accomplished [X] as measured by [Y], by doing [Z]".\n- Maximize leadership signals (e.g. Spearheaded, Architected).\n- Emphasize scale, system design complexity, and cross-functional impact.`
             : '';
@@ -44,11 +46,18 @@ Original Bullet: "${bulletText}"
 
 Provide ONLY the single improved bullet point text. Do not add quotes, introductory text, or markdown.`;
 
-        let optimizedBullet = await generateAIResponse(prompt);
+        const aiResult = await generateAIResponse(prompt);
+        let optimizedBullet = aiResult.text;
+        const endTime = Date.now();
+
         optimizedBullet = optimizedBullet.replace(/^[-*•]\s*/, '').replace(/^"|"$/g, '').trim();
 
         // Log successful usage
-        await logUsage(session.userId, 'ai_enhance');
+        const supabase = createClient();
+        await Promise.all([
+            logUsage(session.userId, 'ai_enhance'),
+            logAIUsage(supabase, session.userId, null, aiResult, endTime - startTime)
+        ]);
 
         return NextResponse.json({
             success: true,

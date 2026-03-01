@@ -1,5 +1,15 @@
 {
     "regions": [
         "bom1"
-    ]
+    ],
+    "functions": {
+        "app/api/resume/download/route.ts": {
+            "memory": 1024,
+            "maxDuration": 30
+        },
+        "app/api/mock-test/[testId]/download/route.ts": {
+            "memory": 1024,
+            "maxDuration": 30
+        }
+    }
 }

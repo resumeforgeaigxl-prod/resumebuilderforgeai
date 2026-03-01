@@ -3,7 +3,7 @@
 import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard } from 'lucide-react';
+import { Shield, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning } from 'lucide-react';
 
 export default function AdminLayoutClient({ children, profile }: { children: ReactNode, profile: { email: string } }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -36,6 +36,7 @@ export default function AdminLayoutClient({ children, profile }: { children: Rea
         { href: '/admin/downloads', label: 'PDF Downloads', icon: FileText },
         { href: '/admin/subscriptions', label: 'Subscriptions', icon: CreditCard },
         { href: '/admin/coupons', label: 'Coupons', icon: Ticket },
+        { href: '/admin/ai-monitoring', label: 'AI Monitoring', icon: MessageSquareWarning },
         { href: '/admin/logs', label: 'Audit Logs', icon: ScrollText },
     ];
 
