@@ -148,7 +148,8 @@ export default function BuilderPage() {
                     skills: resumeData.skills?.join(', ') || '',
                     experienceText: resumeData.experience?.map(e => `${e.role} at ${e.company} (${e.duration})`).join('\n') || '',
                     educationText: resumeData.education?.map(e => `${e.degree} from ${e.school}`).join(', ') || '',
-                    projectsText: resumeData.projects?.map(p => p.title).join(', ') || ''
+                    projectsText: resumeData.projects?.map(p => p.title).join(', ') || '',
+                    jobDescription: jobDescription
                 }),
             });
             const result = (await res.json()) as { success: boolean; summary: string };
@@ -400,7 +401,7 @@ export default function BuilderPage() {
                                         <FInput label="Role / Title" value={exp.role} onChange={v => { const l = [...rd.experience]; l[idx].role = v; setResumeData({ ...rd, experience: l }); }} />
                                         <FInput label="Duration" value={exp.duration} onChange={v => { const l = [...rd.experience]; l[idx].duration = v; setResumeData({ ...rd, experience: l }); }} />
                                     </div>
-                                    <Bullets points={exp.points} faangMode={faangMode} onChange={p => { const l = [...rd.experience]; l[idx].points = p; setResumeData({ ...rd, experience: l }); }} />
+                                    <Bullets points={exp.points} faangMode={faangMode} jobDescription={jobDescription} onChange={p => { const l = [...rd.experience]; l[idx].points = p; setResumeData({ ...rd, experience: l }); }} />
                                 </ListCard>
                             ))}
                         </Section>
@@ -445,7 +446,7 @@ export default function BuilderPage() {
                                         <div className="flex items-center gap-2"><ExternalLink className="w-4 h-4 text-slate-500 shrink-0" /><FInput label="Live URL" value={proj.liveLink ?? ''} onChange={v => { const l = [...rd.projects]; l[idx].liveLink = v; setResumeData({ ...rd, projects: l }); }} /></div>
                                         <div className="flex items-center gap-2"><Github className="w-4 h-4 text-slate-500 shrink-0" /><FInput label="GitHub URL" value={proj.githubLink ?? ''} onChange={v => { const l = [...rd.projects]; l[idx].githubLink = v; setResumeData({ ...rd, projects: l }); }} /></div>
                                     </div>
-                                    <Bullets points={proj.description} faangMode={faangMode} onChange={p => { const l = [...rd.projects]; l[idx].description = p; setResumeData({ ...rd, projects: l }); }} />
+                                    <Bullets points={proj.description} faangMode={faangMode} jobDescription={jobDescription} onChange={p => { const l = [...rd.projects]; l[idx].description = p; setResumeData({ ...rd, projects: l }); }} />
                                 </ListCard>
                             ))}
                         </Section>
@@ -567,13 +568,11 @@ export default function BuilderPage() {
                                 </div>
                                 <div className="space-y-1.5 mb-3">
                                     {([
-                                        { label: 'Completeness', val: atsResult.details.completeness, max: 20 },
-                                        { label: 'Metrics', val: atsResult.details.metrics, max: 20 },
-                                        { label: 'Skills', val: atsResult.details.skills, max: 15 },
-                                        { label: 'Keywords', val: atsResult.details.keywords, max: 27 },
-                                        { label: 'Proj Links', val: atsResult.details.projectLinks, max: 10 },
-                                        { label: 'CGPA', val: atsResult.details.cgpaBonus, max: 3 },
-                                        { label: 'Certs', val: atsResult.details.certBonus, max: 5 },
+                                        { label: 'JD Match', val: atsResult.details.keywords, max: 35 },
+                                        { label: 'Skill Depth', val: atsResult.details.completeness, max: 25 },
+                                        { label: 'Action Verbs', val: atsResult.details.skills, max: 20 },
+                                        { label: 'Metrics', val: atsResult.details.metrics, max: 10 },
+                                        { label: 'Structure', val: atsResult.details.projectLinks, max: 10 },
                                     ] as const).map(item => (
                                         <div key={item.label} className="flex items-center gap-2">
                                             <span className="text-xs text-slate-500 w-20 shrink-0">{item.label}</span>
@@ -703,7 +702,7 @@ function ListCard({ onDelete, children }: { onDelete: () => void; children: Reac
     );
 }
 
-function Bullets({ points, onChange, faangMode = false }: { points: string[]; onChange: (p: string[]) => void; faangMode?: boolean }) {
+function Bullets({ points, onChange, faangMode = false, jobDescription = '' }: { points: string[]; onChange: (p: string[]) => void; faangMode?: boolean; jobDescription?: string }) {
     return (
         <div className="space-y-2">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Bullet Points</label>
@@ -716,6 +715,7 @@ function Bullets({ points, onChange, faangMode = false }: { points: string[]; on
                         <BulletEnhancer
                             bullet={p}
                             faangMode={faangMode}
+                            jobDescription={jobDescription}
                             onEnhanced={(newText) => { const l = [...points]; l[idx] = newText; onChange(l); }}
                         />
                         <button onClick={() => onChange(points.filter((_, i) => i !== idx))} className="p-1.5 text-slate-600 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-all">

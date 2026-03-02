@@ -12,7 +12,7 @@ export async function POST(request: Request) {
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const body = await request.json();
-        const { bulletText, faangMode = false } = body;
+        const { bulletText, faangMode = false, jobDescription } = body;
 
         if (!bulletText || typeof bulletText !== 'string' || bulletText.trim().length === 0) {
             return NextResponse.json({ error: 'Bullet text is required' }, { status: 400 });
@@ -32,21 +32,29 @@ export async function POST(request: Request) {
 
         // Generate AI enhancement
         const startTime = Date.now();
+
+        const systemPrompt = `You are a technical resume optimizer. 
+Your goal is to improve resume bullet points for clarity, technical depth, and JD alignment.
+
+RULES:
+1. Preserve original meaning.
+2. Improve clarity and technical specificity.
+3. Add relevant technical keywords and tools.
+4. Expand slightly if the bullet is too short (e.g. < 5 words).
+5. DO NOT add fake percentages (e.g., "Increased performance by 30%").
+6. DO NOT fabricate performance metrics or achievements.
+7. Keep it detailed but realistic for the candidate's level.
+8. If a Job Description is provided, inject relevant keywords naturally.
+9. ONLY return the improved bullet point text. No quotes, no preamble.`;
+
+        const jdContext = jobDescription ? `\nTarget Job Description:\n${jobDescription}` : '';
         const faangRules = faangMode
-            ? `\nFAANG MODE ACTIVATED:\n- Enforce the XYZ formula: "Accomplished [X] as measured by [Y], by doing [Z]".\n- Maximize leadership signals (e.g. Spearheaded, Architected).\n- Emphasize scale, system design complexity, and cross-functional impact.`
+            ? `\nFAANG MODE ACTIVATED:\n- Enforce the XYZ formula: "Accomplished [X] as measured by [Y], by doing [Z]".\n- Maximize leadership signals (e.g. Spearheaded, Architected).\n- Emphasize scale and system design complexity. (STILL: DO NOT FABRICATE NUMBERS)`
             : '';
 
-        const prompt = `You are a top-tier tech recruiter and resume writer.
-Rewrite the following resume bullet point to make it highly impactful.
-Start with a strong action verb, quantify the result with realistic metrics if missing, and clarify the core technical contribution.
+        const prompt = `${faangRules}${jdContext}\n\nOriginal Bullet: "${bulletText}"\n\nImproved Bullet:`;
 
-${faangRules}
-
-Original Bullet: "${bulletText}"
-
-Provide ONLY the single improved bullet point text. Do not add quotes, introductory text, or markdown.`;
-
-        const aiResult = await generateAIResponse(prompt);
+        const aiResult = await generateAIResponse(prompt, undefined, systemPrompt, 0.2, 300);
         let optimizedBullet = aiResult.text;
         const endTime = Date.now();
 

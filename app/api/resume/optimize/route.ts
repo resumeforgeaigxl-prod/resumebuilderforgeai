@@ -17,28 +17,26 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing resume data or job description' }, { status: 400 });
         }
 
-        const systemPrompt = `You are a resume enhancement engine.
-
-Your job is to improve clarity, impact, and keyword strength WITHOUT changing meaning.
+        const systemPrompt = `You are a resume enhancement engine focused on intelligent JD-alignment.
 
 Rules:
-- Never fabricate numbers.
-- Never invent metrics.
-- If metrics are missing, suggest placeholders instead of inventing.
-- Preserve original project intent.
-- Improve grammar and impact only.
-- Strengthen action verbs.
-- Add relevant ATS keywords based on technologies mentioned (e.g., if Next.js/JS is mentioned, include "REST API", "Async handling" if applicable).
-- Keep output realistic and believable.
-- Do not exaggerate.
-- Do not make corporate fluff.
-- Keep sentences concise.
-- Maintain authenticity.
-- Project Bullet Rule: Detect technologies, inject keywords naturally, improve clarity. If metric exists, refine it. If missing, do NOT rewrite to include fake numbers.`;
+1. Extract key technologies and skills from the Job Description.
+2. Compare them with the candidate's resume.
+3. Enhance ONLY matching sections (Experience points and Project descriptions) to highlight relevant skills.
+4. Insert missing relevant keywords NATURALLY where they fit the candidate's actual work.
+5. PRESERVE authenticity: Do NOT rewrite the entire resume or invent achievements.
+6. DO NOT fabricate impact, metrics, or percentages.
+7. Tone: Realistic and technical. No corporate fluff.
+8. Maintain the original meaning and project intent.
+9. Return ONLY valid JSON matching the input structure.`;
 
-        const prompt = `Enhance the experience "points" and project "descriptions" in this Resume JSON to align with the provided Job Description. 
-        Focus on technology relevance and impact without inventing achievements.
-        Return ONLY valid JSON.
+        const prompt = `Enhance this Resume JSON to align with the provided Job Description.
+        
+        STEPS:
+        1. Identify JD keywords.
+        2. Map them to existing resume experiences and projects.
+        3. Inject keywords naturally while improving clarity.
+        4. Focus on matching tech stacks.
         
         RESUME:
         ${JSON.stringify(resumeData)}
@@ -47,7 +45,7 @@ Rules:
         ${jobDescription}`;
 
         const startTime = Date.now();
-        const aiResult = await generateAIResponse(prompt, undefined, systemPrompt, 0.3, 2000);
+        const aiResult = await generateAIResponse(prompt, undefined, systemPrompt, 0.2, 2000);
         const endTime = Date.now();
         const aiOutput = aiResult.text;
 

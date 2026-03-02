@@ -6,9 +6,10 @@ interface Props {
     bullet: string;
     onEnhanced: (newBullet: string) => void;
     faangMode?: boolean;
+    jobDescription?: string;
 }
 
-export function BulletEnhancer({ bullet, onEnhanced, faangMode = false }: Props) {
+export function BulletEnhancer({ bullet, onEnhanced, faangMode = false, jobDescription }: Props) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -20,7 +21,7 @@ export function BulletEnhancer({ bullet, onEnhanced, faangMode = false }: Props)
             const res = await fetch('/api/resume/enhance-bullet', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ bulletText: bullet, faangMode })
+                body: JSON.stringify({ bulletText: bullet, faangMode, jobDescription })
             });
             const data = await res.json();
             if (data.success && data.optimizedBullet) {

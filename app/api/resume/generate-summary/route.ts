@@ -11,27 +11,31 @@ export async function POST(request: Request) {
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const body = await request.json();
-        const { role, skills, experienceText, educationText, projectsText } = body;
+        const { role, skills, experienceText, educationText, projectsText, jobDescription } = body;
 
-        const systemPrompt = `Generate an authentic professional resume summary.
+        const systemPrompt = `You are a professional resume writer for tech candidates. 
+Generate an authentic, JD-aligned professional summary.
 
-Constraints:
-- 3 to 4 lines only.
-- Reflect real career stage (Student, Intern, Junior, Entry-Level vs Professional).
-- Use Education context (Degree, University) and Projects to determine if user is a student. 
-- Do NOT use senior corporate double-speak for juniors/students.
-- Mention role, key skills, and real impact context.
-- No markdown, no fluff, purely professional but authentic.`;
+RULES:
+- Keep it 2–3 concise lines (no more).
+- If a Job Description is provided, align the summary to that role by including matching keywords naturally.
+- Reflect the candidate's REAL career stage (e.g., student, junior, or professional) based on Education and Projects.
+- Tone: Realistic and hands-on. 
+- AVOID: Corporate fluff, "seasoned professional" for students, and faking experience.
+- DO NOT fabricate achievements or roles.
+- No markdown, no introductory text, purely the summary.`;
 
-        const prompt = `Generate an authentic summary for:
-Role: ${role || 'Professional'}
+        const jdContext = jobDescription ? `\nTarget Job Description:\n${jobDescription}` : '';
+        const prompt = `Generate a realistic resume summary for:
+Role: ${role || 'Software Developer'}
 Skills: ${skills}
-Experience Context: ${experienceText}
+Experience: ${experienceText}
 Education: ${educationText}
-Projects: ${projectsText}`;
+Projects: ${projectsText}
+${jdContext}`;
 
         const startTime = Date.now();
-        const aiResult = await generateAIResponse(prompt, undefined, systemPrompt, 0.4, 500);
+        const aiResult = await generateAIResponse(prompt, undefined, systemPrompt, 0.3, 500);
         const endTime = Date.now();
 
         const summary = stripMarkdown(aiResult.text);
