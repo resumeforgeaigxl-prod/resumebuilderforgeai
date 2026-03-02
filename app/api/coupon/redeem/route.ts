@@ -66,7 +66,46 @@ export async function POST(request: Request) {
         .update({ used_count: coupon.used_count + 1 })
         .eq('id', coupon.id);
 
-    // 4. If full access (100% or type=full): create active subscription
+    // 4. Special Case: LAUNCH100 - Free 6-Month Pro Access
+    if (normalizedCode === 'LAUNCH100') {
+        const expiresAt = new Date();
+        expiresAt.setMonth(expiresAt.getMonth() + 6);
+
+        // Update User directly (Source of Truth for access check)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase as any)
+            .from('users')
+            .update({
+                plan: 'pro',
+                access_expires_at: expiresAt.toISOString(),
+                is_free_override: true // persistent fallback
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any)
+            .eq('id', session.userId);
+
+        // Record in subscriptions table
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase as any)
+            .from('subscriptions')
+            .insert({
+                user_id: session.userId,
+                plan: 'pro',
+                status: 'active',
+                expires_at: expiresAt.toISOString(),
+                coupon_code: 'LAUNCH100',
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any);
+
+        return NextResponse.json({
+            valid: true,
+            access_granted: true,
+            unlock_all: true,
+            expires_in: "6 months",
+            message: "🎉 Free 6-Month Pro Access Activated",
+        });
+    }
+
+    // 5. If full access (100% or type=full): create active subscription
     const isFullAccess = coupon.type === 'full' || coupon.value >= 100;
 
     if (isFullAccess) {
@@ -79,7 +118,8 @@ export async function POST(request: Request) {
                 status: 'active',
                 expires_at: null, // permanent via coupon
                 coupon_code: normalizedCode,
-            });
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any);
 
         // Also mark user as having override for persistence
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

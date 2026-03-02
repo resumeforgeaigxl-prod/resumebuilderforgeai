@@ -67,7 +67,12 @@ export async function GET(
             questions: processedQuestions,
             gated,
             freeLimit: FREE_LIMIT,
-            accessReason: access.reason,
+            access: {
+                hasAccess: access.hasAccess,
+                plan: access.plan,
+                expiresAt: access.expiresAt,
+                reason: access.reason
+            }
         });
 
     } catch (e) {

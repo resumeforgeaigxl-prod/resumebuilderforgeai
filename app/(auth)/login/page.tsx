@@ -1,8 +1,54 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
-import { LogIn } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { LogIn, Loader2, AlertCircle } from 'lucide-react'
 import { OAuthButtons } from '@/components/auth/oauth-buttons'
 
 export default function LoginPage() {
+    const router = useRouter()
+    const searchParams = useSearchParams()
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState(searchParams.get('error') || null)
+
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault()
+        setIsLoading(true)
+        setError(null)
+
+        const formData = new FormData(e.currentTarget)
+        const email = formData.get('email')
+        const password = formData.get('password')
+
+        try {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            })
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                throw new Error(data.error || 'Login failed')
+            }
+
+            // Redirect based on profile completion
+            if (!data.profileCompleted) {
+                router.push('/complete-profile')
+            } else {
+                router.push('/dashboard')
+            }
+            router.refresh()
+        } catch (err: unknown) {
+            setError((err as Error).message || 'Login failed')
+            setIsLoading(false)
+        }
+    }
+
     return (
         <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-2xl">
             <div className="text-center mb-8">
@@ -27,7 +73,14 @@ export default function LoginPage() {
                     </div>
                 </div>
 
-                <form className="space-y-4" method="POST">
+                {error && (
+                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3 text-red-500 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                        <p className="text-sm font-medium">{error}</p>
+                    </div>
+                )}
+
+                <form className="space-y-4" onSubmit={handleSubmit}>
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-300">Email Address</label>
                         <input
@@ -35,7 +88,8 @@ export default function LoginPage() {
                             name="email"
                             placeholder="you@example.com"
                             required
-                            className="w-full px-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-white placeholder-slate-600"
+                            disabled={isLoading}
+                            className="w-full px-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                     </div>
                     <div className="space-y-2">
@@ -50,15 +104,24 @@ export default function LoginPage() {
                             name="password"
                             placeholder="••••••••"
                             required
-                            className="w-full px-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-white placeholder-slate-600"
+                            disabled={isLoading}
+                            className="w-full px-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                     </div>
 
                     <button
-                        formAction="/api/auth/login"
-                        className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]"
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100 flex items-center justify-center gap-2"
                     >
-                        Sign In
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                Signing In...
+                            </>
+                        ) : (
+                            'Sign In'
+                        )}
                     </button>
                 </form>
 
@@ -72,3 +135,4 @@ export default function LoginPage() {
         </div >
     )
 }
+

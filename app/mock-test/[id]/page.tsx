@@ -59,6 +59,8 @@ export default function MockTestPage() {
     const [couponLoading, setCouponLoading] = useState(false);
 
 
+    const [userAccess, setUserAccess] = useState<{ plan: string; expiresAt: string | null } | null>(null);
+
     const loadTest = useCallback(async () => {
         setLoading(true);
         try {
@@ -67,6 +69,13 @@ export default function MockTestPage() {
             const data = await res.json();
             setTest(data.test as MockTest);
             setQuestions(data.questions as Question[]);
+
+            // Set user access from server response
+            if (data.access) {
+                setUserAccess(data.access);
+            }
+
+            // Initial server-side gated state
             setGated(data.gated);
             setFreeLimit(data.freeLimit ?? 5);
         } catch {
@@ -77,6 +86,14 @@ export default function MockTestPage() {
     }, [id, router]);
 
     useEffect(() => { loadTest(); }, [loadTest]);
+
+    // Derived Lock Condition as requested
+    // "Lock condition must depend on: user.plan !== 'pro' AND user.access_expires_at < now"
+    const effectivelyGated = gated && (
+        !userAccess ||
+        userAccess.plan !== 'pro' ||
+        (userAccess.expiresAt && new Date(userAccess.expiresAt) < new Date())
+    );
 
     async function redeemCoupon() {
         if (!couponCode.trim()) return;
@@ -90,9 +107,9 @@ export default function MockTestPage() {
             const data = await res.json();
             if (res.ok && data.valid) {
                 setCouponMsg({ text: data.message, ok: true });
-                if (data.unlock_all) {
-                    setGated(false); // Immediate unlock UI
-                    loadTest();      // Refresh full data
+                if (data.unlock_all || data.access_granted) {
+                    setGated(false); // Immediate unlock UI flag
+                    setTimeout(() => loadTest(), 1000); // Fully refresh access data
                 }
             } else {
                 setCouponMsg({ text: data.error || 'Invalid coupon', ok: false });
@@ -160,13 +177,13 @@ export default function MockTestPage() {
                         </div>
                     </div>
                     <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 w-full sm:w-auto">
-                        {submitted && !gated && (
+                        {submitted && !effectivelyGated && (
                             <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-sm">
                                 <Trophy className="w-4 h-4" />
                                 Score: {correctCount}/{totalMcq}
                             </div>
                         )}
-                        {!gated && (
+                        {!effectivelyGated && (
                             <>
                                 <button onClick={() => { setUserAnswers({}); setSubmitted(false); }}
                                     title="Retake"
@@ -186,7 +203,7 @@ export default function MockTestPage() {
 
             <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
                 {/* Free user banner */}
-                {gated && (
+                {effectivelyGated && (
                     <div className="mb-6 p-4 bg-gradient-to-r from-purple-600/15 to-blue-600/15 border border-purple-500/20 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         <Lock className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
                         <div className="flex-1">
@@ -292,7 +309,7 @@ export default function MockTestPage() {
                     })}
 
                     {/* Blurred gated questions */}
-                    {gatedCount > 0 && (
+                    {effectivelyGated && gatedCount > 0 && (
                         <div className="relative rounded-2xl overflow-hidden">
                             {/* Blurred preview */}
                             <div className="space-y-4 filter blur-[5px] pointer-events-none select-none opacity-60">

@@ -1,14 +1,57 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
-import { Lock, ArrowLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Lock, ArrowLeft, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
 
 export default function ResetPasswordPage({
     searchParams,
 }: {
     searchParams: { token?: string, error?: string, message?: string }
 }) {
+    const router = useRouter()
     const token = searchParams.token
-    const error = searchParams.error
-    const message = searchParams.message
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState(searchParams.error || null)
+    const [message, setMessage] = useState(searchParams.message || null)
+
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault()
+        setIsLoading(true)
+        setError(null)
+        setMessage(null)
+
+        const formData = new FormData(e.currentTarget)
+        const password = formData.get('password')
+        const confirm_password = formData.get('confirm_password')
+
+        try {
+            const res = await fetch('/api/reset-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ token, password, confirm_password }),
+            })
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                throw new Error(data.error || 'Failed to update password')
+            }
+
+            setMessage(data.message)
+
+            // Redirect to login after a short delay
+            setTimeout(() => {
+                router.push(`/login?message=${encodeURIComponent(data.message)}`)
+            }, 3000)
+        } catch (err: unknown) {
+            setError((err as Error).message || 'Failed to update password')
+            setIsLoading(false)
+        }
+    }
 
     if (!token) {
         return (
@@ -41,20 +84,20 @@ export default function ResetPasswordPage({
             </div>
 
             {error && (
-                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-xl">
-                    {error}
+                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+                    <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                    <p className="font-medium text-red-500">{error}</p>
                 </div>
             )}
 
             {message && (
-                <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm rounded-xl">
-                    {message}
+                <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+                    <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
+                    <p className="font-medium text-emerald-500">{message}</p>
                 </div>
             )}
 
-            <form className="space-y-6" method="POST" action="/api/auth/reset-password">
-                <input type="hidden" name="token" value={token} />
-
+            <form className="space-y-6" onSubmit={handleSubmit}>
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-300">New Password</label>
                     <input
@@ -62,7 +105,8 @@ export default function ResetPasswordPage({
                         name="password"
                         placeholder="••••••••"
                         required
-                        className="w-full px-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-white placeholder-slate-600"
+                        disabled={isLoading}
+                        className="w-full px-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                 </div>
 
@@ -73,15 +117,24 @@ export default function ResetPasswordPage({
                         name="confirm_password"
                         placeholder="••••••••"
                         required
-                        className="w-full px-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-white placeholder-slate-600"
+                        disabled={isLoading}
+                        className="w-full px-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                 </div>
 
                 <button
                     type="submit"
-                    className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]"
+                    disabled={isLoading}
+                    className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                    Update Password
+                    {isLoading ? (
+                        <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            Updating Password...
+                        </>
+                    ) : (
+                        'Update Password'
+                    )}
                 </button>
             </form>
 
@@ -94,3 +147,4 @@ export default function ResetPasswordPage({
         </div>
     )
 }
+
