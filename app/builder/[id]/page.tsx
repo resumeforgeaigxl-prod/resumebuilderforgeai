@@ -22,6 +22,8 @@ import { ATSScoreResult } from '@/lib/ats-score';
 
 const SKILL_CATEGORIES: string[] = ['Languages', 'Frontend', 'Backend', 'Databases', 'Cloud & DevOps', 'System Design', 'AI & Automation'];
 
+import posthog from '@/lib/posthog';
+
 type Step = 'edit' | 'template' | 'optimize' | 'download';
 
 export default function BuilderPage() {
@@ -165,6 +167,10 @@ export default function BuilderPage() {
         if (!resumeData || !jobDescription) return;
         setOptimizing(true);
         try {
+            posthog.capture('ai_optimize_clicked', { resume_id: id });
+        } catch (e) { console.error('[PostHog] Event error:', e); }
+
+        try {
             const res = await fetch('/api/resume/optimize', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ resumeData, jobDescription, template: selectedTemplate }),
@@ -212,6 +218,9 @@ export default function BuilderPage() {
             });
             const data = (await res.json()) as { success: boolean; message: string; hasFullAccess?: boolean; error?: string };
             if (res.ok && data.success) {
+                try {
+                    posthog.capture('coupon_applied', { coupon_code: couponCode });
+                } catch (e) { console.error('[PostHog] Event error:', e); }
                 setCouponMsg({ text: data.message, ok: true });
                 if (data.hasFullAccess) setCouponApplied(true);
             } else {
@@ -227,6 +236,10 @@ export default function BuilderPage() {
     async function handleDownload() {
         if (!resumeData) return;
         setDownloading(true);
+        try {
+            posthog.capture('pdf_downloaded', { resume_id: id, template: selectedTemplate });
+        } catch (e) { console.error('[PostHog] Event error:', e); }
+
         try {
             const res = await fetch('/api/resume/download', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },

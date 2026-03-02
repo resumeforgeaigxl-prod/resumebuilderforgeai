@@ -29,6 +29,15 @@ export function CreateResumeButton({ variant = 'primary' }: { variant?: 'primary
             }
 
             if (data.id) {
+                try {
+                    const posthog = (await import('@/lib/posthog')).default;
+                    posthog.capture('resume_created', {
+                        resume_id: data.id
+                    });
+                } catch (err) {
+                    console.error('[PostHog] Event error:', err);
+                }
+
                 // 5. Add 200ms delay before router.push to prevent race condition
                 await new Promise(resolve => setTimeout(resolve, 200));
                 router.push(`/builder/${data.id}`)

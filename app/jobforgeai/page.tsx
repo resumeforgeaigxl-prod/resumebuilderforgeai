@@ -126,6 +126,11 @@ export default function JobForgeAIPage() {
         setChatLoading(true);
 
         try {
+            const posthog = (await import('@/lib/posthog')).default;
+            posthog.capture('jobforgeai_used');
+        } catch (err) { console.error('[PostHog] Event error:', err); }
+
+        try {
             const res = await fetch('/api/ai/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

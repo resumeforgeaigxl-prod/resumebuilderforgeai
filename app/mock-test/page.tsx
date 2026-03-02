@@ -34,6 +34,12 @@ export default function MockTestSetupPage() {
             });
             const data = await res.json();
             if (res.ok && data.success) {
+                try {
+                    const posthog = (await import('@/lib/posthog')).default;
+                    posthog.capture('mock_test_started', {
+                        job_title: jobTitle
+                    });
+                } catch (err) { console.error('[PostHog] Event error:', err); }
                 router.push(`/mock-test/${data.testId}`);
             } else {
                 setError(data.error || 'Failed to generate test. Please try again.');

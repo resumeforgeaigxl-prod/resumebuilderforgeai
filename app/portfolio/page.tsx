@@ -28,6 +28,10 @@ export default function PortfolioPage() {
             const res = await fetch('/api/portfolio/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
             const data = await res.json();
             if (res.ok && data.success) {
+                try {
+                    const posthog = (await import('@/lib/posthog')).default;
+                    posthog.capture('portfolio_generated');
+                } catch (err) { console.error('[PostHog] Event error:', err); }
                 router.push(`/preview/${data.previewToken}`);
             } else { setError(data.error || 'Generation failed'); setGenerating(false); }
         } catch { setError('Network error. Please try again.'); setGenerating(false); }
