@@ -82,18 +82,26 @@ export default function MockTestPage() {
         if (!couponCode.trim()) return;
         setCouponLoading(true);
         setCouponMsg(null);
-        const res = await fetch('/api/coupon/redeem', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code: couponCode }),
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
-            setCouponMsg({ text: data.message, ok: true });
-            if (data.hasFullAccess) { loadTest(); }
-        } else {
-            setCouponMsg({ text: data.error || 'Invalid coupon', ok: false });
+        try {
+            const res = await fetch('/api/coupon/redeem', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: couponCode }),
+            });
+            const data = await res.json();
+            if (res.ok && data.valid) {
+                setCouponMsg({ text: data.message, ok: true });
+                if (data.unlock_all) {
+                    setGated(false); // Immediate unlock UI
+                    loadTest();      // Refresh full data
+                }
+            } else {
+                setCouponMsg({ text: data.error || 'Invalid coupon', ok: false });
+            }
+        } catch {
+            setCouponMsg({ text: 'Error applying coupon', ok: false });
+        } finally {
+            setCouponLoading(false);
         }
-        setCouponLoading(false);
     }
 
     async function handleDownload() {

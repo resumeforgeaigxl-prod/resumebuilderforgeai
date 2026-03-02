@@ -25,8 +25,8 @@ export async function POST(request: Request) {
         .eq('is_active', true)
         .single() as {
             data: {
-                id: string; code: string; discount_type: string;
-                discount_value: number; valid_until: string | null;
+                id: string; code: string; type: string;
+                value: number; expires_at: string | null;
                 max_uses: number | null; used_count: number; is_active: boolean;
             } | null
         };
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     }
 
     // Check expiry
-    if (coupon.valid_until && new Date(coupon.valid_until) < new Date()) {
+    if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
         return NextResponse.json({ error: 'This coupon has expired' }, { status: 410 });
     }
 
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
         .eq('id', coupon.id);
 
     // 4. If full access (100% or type=full): create active subscription
-    const isFullAccess = coupon.discount_type === 'full' || coupon.discount_value >= 100;
+    const isFullAccess = coupon.type === 'full' || coupon.value >= 100;
 
     if (isFullAccess) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -81,19 +81,26 @@ export async function POST(request: Request) {
                 coupon_code: normalizedCode,
             });
 
+        // Also mark user as having override for persistence
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase as any)
+            .from('users')
+            .update({ is_free_override: true })
+            .eq('id', session.userId);
+
         return NextResponse.json({
-            success: true,
-            hasFullAccess: true,
-            message: `🎉 Coupon applied! You now have full access — no watermark on your PDFs.`,
+            valid: true,
+            discount: 100,
+            unlock_all: true,
+            message: "100% discount applied — Full access unlocked.",
         });
     }
 
-    // Partial discount — just confirm valid (user can use it at checkout later)
+    // Partial discount — just confirm valid
     return NextResponse.json({
-        success: true,
-        hasFullAccess: false,
-        discountType: coupon.discount_type,
-        discountValue: coupon.discount_value,
-        message: `Coupon valid! ${coupon.discount_value}${coupon.discount_type === 'percent' ? '%' : '₹'} discount applied.`,
+        valid: true,
+        discount: coupon.value || 0,
+        unlock_all: false,
+        message: `Coupon valid! ${coupon.value}% discount applied.`,
     });
 }

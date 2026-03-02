@@ -216,13 +216,16 @@ export default function BuilderPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code: couponCode }),
             });
-            const data = (await res.json()) as { success: boolean; message: string; hasFullAccess?: boolean; error?: string };
-            if (res.ok && data.success) {
+            const data = (await res.json()) as { valid: boolean; message: string; unlock_all?: boolean; error?: string };
+            if (res.ok && data.valid) {
                 try {
                     posthog.capture('coupon_applied', { coupon_code: couponCode });
                 } catch (e) { console.error('[PostHog] Event error:', e); }
                 setCouponMsg({ text: data.message, ok: true });
-                if (data.hasFullAccess) setCouponApplied(true);
+                if (data.unlock_all) {
+                    setCouponApplied(true);
+                    setUserAccess(true); // Immediate unlock
+                }
             } else {
                 setCouponMsg({ text: data.error || 'Invalid coupon', ok: false });
             }
