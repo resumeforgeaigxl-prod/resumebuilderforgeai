@@ -1,0 +1,85 @@
+﻿
+> ai-resume-builder@0.1.0 build
+> next build
+
+  Γû▓ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully
+   Linting and checking validity of types ...
+node.exe : 
+At C:\Program 
+Files\nodejs\npm.ps1:29 
+char:3
++   & $NODE_EXE $NPM_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: (:String  
+  ) [], RemoteException
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+Failed to compile.
+
+./app/(auth)/forgot-password/
+page.tsx
+41:23  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
+
+./app/(auth)/login/page.tsx
+46:23  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
+
+./app/(auth)/reset-password/p
+age.tsx
+50:23  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
+
+./app/(auth)/signup/page.tsx
+53:23  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
+
+./app/api/coupon/redeem/route
+.ts
+82:18  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
+95:18  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
+
+./app/complete-profile/page.t
+sx
+5:32  Error: 'CheckCircle2' 
+is defined but never used.  @
+typescript-eslint/no-unused-v
+ars
+49:23  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
+
+./lib/access.ts
+60:32  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
+
+info  - Need to disable some 
+ESLint rules? Learn more 
+here: https://nextjs.org/docs
+/basic-features/eslint#disabl
+ing-rules
