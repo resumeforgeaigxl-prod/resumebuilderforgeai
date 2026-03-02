@@ -115,19 +115,27 @@ export async function POST(request: Request) {
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const c = chromium as any;
-        const launchOptions = isLocal ? {
-            args: [],
-            executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-            headless: true,
-        } : {
-            args: c.args,
-            executablePath: await c.executablePath(),
-            headless: c.headless,
-            defaultViewport: c.defaultViewport,
-        };
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        browser = await puppeteer.launch(launchOptions as any);
+        let launchOptions: any;
+
+        if (isLocal) {
+            launchOptions = {
+                args: [],
+                executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+                headless: true,
+            };
+        } else {
+            // Updated Vercel configuration for @sparticuz/chromium 123+
+            launchOptions = {
+                args: c.args,
+                defaultViewport: c.defaultViewport,
+                executablePath: await c.executablePath(),
+                headless: c.headless,
+            };
+        }
+
+        browser = await puppeteer.launch(launchOptions);
 
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });

@@ -91,21 +91,27 @@ export async function POST(
 
         const isLocal = process.env.NODE_ENV === 'development' || !process.env.VERCEL;
 
-        const launchOptions = isLocal ? {
-            args: [],
-            executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-            headless: true,
-        } : {
-            args: chromium.args,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            defaultViewport: (chromium as any).defaultViewport,
-            executablePath: await chromium.executablePath(),
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            headless: (chromium as any).headless,
-        };
-
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        browser = await puppeteer.launch(launchOptions as any);
+        const c = chromium as any;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let launchOptions: any;
+
+        if (isLocal) {
+            launchOptions = {
+                args: [],
+                executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+                headless: true,
+            };
+        } else {
+            launchOptions = {
+                args: c.args,
+                defaultViewport: c.defaultViewport,
+                executablePath: await c.executablePath(),
+                headless: c.headless,
+            };
+        }
+
+        browser = await puppeteer.launch(launchOptions);
 
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
