@@ -37,11 +37,19 @@ export default function SignupPage({ searchParams }: { searchParams: { error?: s
                 }),
             });
 
-            const data = await res.json();
-
+            // Handle errors before parsing JSON to avoid "Unexpected end of JSON input"
             if (!res.ok) {
-                throw new Error(data.error || 'Signup failed');
+                let errorMessage = 'Signup failed';
+                try {
+                    const errorData = await res.json();
+                    errorMessage = errorData.message || errorMessage;
+                } catch (e) {
+                    console.error('Error parsing error response:', e);
+                }
+                throw new Error(errorMessage);
             }
+
+            const data = await res.json();
 
             // Successfully created account
             setMessage(data.message || 'Account created! Please log in.');
@@ -51,7 +59,7 @@ export default function SignupPage({ searchParams }: { searchParams: { error?: s
                 router.push(`/login?message=${encodeURIComponent(data.message || 'Account created! Please log in.')}`);
             }, 2000);
         } catch (err: unknown) {
-            setError((err as Error).message || 'Something went wrong');
+            setError((err as Error).message || 'Signup failed');
             setIsLoading(false);
         }
     }

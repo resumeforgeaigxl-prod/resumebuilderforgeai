@@ -82,25 +82,58 @@ export async function POST(request: Request) {
     if (!rawText?.trim()) return NextResponse.json({ error: 'No text extracted from file.' }, { status: 400 });
 
     const prompt = `
-You are an expert resume parser. Extract all information from the raw text and return structured JSON.
+You are an expert resume parser. Extract information from the raw text provided and return ONLY a structured JSON object.
 
-RULES:
-1. Return ONLY valid JSON. No markdown. No extra text.
-2. DO NOT fabricate any data.
+STRICT RULES:
+1. Return ONLY valid JSON. No markdown blocks, no prefix text, no suffix text.
+2. DO NOT fabricate or guess any information. If a field is not found, return "" (string) or [] (array).
 3. Classify skills into these 7 categories ONLY:
    Languages, Frontend, Backend, Databases, Cloud & DevOps, System Design, AI & Automation
-4. Max 3 bullets per project (max 20 words per bullet).
-5. Max 4 experience bullets per role (max 20 words each).
+4. PROFESSIONAL SUMMARY RULE:
+   - Extract ONLY the explicit "Summary" or "Objective" section.
+   - DO NOT include the full resume text.
+   - DO NOT include skills or lists of technologies.
+   - DO NOT include project details or experience descriptions.
+   - If no summary exists, return "".
+5. PROJECTS RULE:
+   - Map each project to the "projects" array.
+   - "description" MUST be an array of bullet points (max 3 per project).
+   - DO NOT include the project title or technologies inside the description bullets.
+6. EXPERIENCE RULE:
+   - "points" MUST be an array of bullet points (max 4 per role).
 
-SCHEMA:
+JSON SCHEMA:
 {
   "name": "",
   "email": "",
   "phone": "",
   "linkedin": "",
   "github": "",
-  "summary": "",
-  "skills": ["string"],
+  "professional_summary": "",
+  "skills": [],
+  "projects": [
+    {
+      "title": "",
+      "technologies": [],
+      "bullets": []
+    }
+  ],
+  "experience": [
+    {
+      "company": "",
+      "role": "",
+      "duration": "",
+      "points": []
+    }
+  ],
+  "education": [
+    {
+      "school": "",
+      "degree": "",
+      "duration": "",
+      "cgpa": ""
+    }
+  ],
   "skillCategories": [
     { "category": "Languages", "skills": [] },
     { "category": "Frontend", "skills": [] },
@@ -109,18 +142,6 @@ SCHEMA:
     { "category": "Cloud & DevOps", "skills": [] },
     { "category": "System Design", "skills": [] },
     { "category": "AI & Automation", "skills": [] }
-  ],
-  "experience": [
-    { "id": "uid", "company": "", "role": "", "duration": "", "points": [] }
-  ],
-  "projects": [
-    { "id": "uid", "title": "", "tech": [], "description": [], "liveLink": "", "githubLink": "" }
-  ],
-  "education": [
-    { "id": "uid", "school": "", "degree": "", "duration": "", "cgpa": "" }
-  ],
-  "certifications": [
-    { "id": "uid", "title": "", "issuer": "", "year": "" }
   ]
 }
 
@@ -141,24 +162,60 @@ ${rawText}
 
     let parsed;
     try {
-      parsed = JSON.parse(aiOut.replace(/```json/g, '').replace(/```/g, '').trim());
+      const rawParsed = JSON.parse(aiOut.replace(/```json/g, '').replace(/```/g, '').trim());
+
+      // Transform into strict internal ResumeData structure
+      parsed = {
+        name: String(rawParsed.name || ''),
+        email: String(rawParsed.email || ''),
+        phone: String(rawParsed.phone || ''),
+        linkedin: String(rawParsed.linkedin || ''),
+        github: String(rawParsed.github || ''),
+        summary: String(rawParsed.professional_summary || ''), // Map summary properly
+        skills: Array.isArray(rawParsed.skills) ? rawParsed.skills : [],
+        skillCategories: Array.isArray(rawParsed.skillCategories) ? rawParsed.skillCategories : [],
+        experience: (Array.isArray(rawParsed.experience) ? rawParsed.experience : []).map((exp: { company?: string; role?: string; duration?: string; points?: string[] }) => ({
+          company: String(exp.company || ''),
+          role: String(exp.role || ''),
+          duration: String(exp.duration || ''),
+          points: Array.isArray(exp.points) ? exp.points : []
+        })),
+        projects: (Array.isArray(rawParsed.projects) ? rawParsed.projects : []).map((proj: { title?: string; technologies?: string[]; bullets?: string[] }) => ({
+          title: String(proj.title || ''),
+          tech: Array.isArray(proj.technologies) ? proj.technologies : [], // Map tech properly
+          description: Array.isArray(proj.bullets) ? proj.bullets : [] // Map bullets to description
+        })),
+        education: (Array.isArray(rawParsed.education) ? rawParsed.education : []).map((edu: { school?: string; degree?: string; duration?: string; cgpa?: string }) => ({
+          school: String(edu.school || ''),
+          degree: String(edu.degree || ''),
+          duration: String(edu.duration || ''),
+          cgpa: String(edu.cgpa || '')
+        }))
+      };
     } catch {
-      console.error('[Parse] JSON parse fail, raw:', aiOut.substring(0, 300));
-      throw new Error('AI returned invalid JSON.');
+      console.error('[Parse] JSON parse/transform fail, raw:', aiOut.substring(0, 300));
+      throw new Error('AI returned invalid data structure.');
     }
 
     if (formData.get('returnJson') === 'true') {
       return NextResponse.json({ success: true, data: parsed });
     }
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: row, error: dbErr } = await (supabase as any)
       .from('resumes')
-      .insert({ user_id: session.userId, title: parsed.name ? `${parsed.name}'s Resume` : 'Imported Resume', resume_json: parsed, template_selected: 'harvard' })
+      .insert({
+        user_id: session.userId,
+        title: parsed.name ? `${parsed.name}'s Resume` : 'Imported Resume',
+        resume_json: parsed,
+        template_selected: 'harvard'
+      })
       .select().single();
 
-    if (dbErr || !row) return NextResponse.json({ error: 'DB error' }, { status: 500 });
+    if (dbErr || !row) {
+      console.error('[Parse] DB Insert Error:', dbErr);
+      return NextResponse.json({ error: 'Failed to save parsed resume' }, { status: 500 });
+    }
     return NextResponse.json({ success: true, resumeId: row.id });
 
   } catch (e) {

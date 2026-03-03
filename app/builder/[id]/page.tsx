@@ -23,6 +23,7 @@ import { ATSScoreResult } from '@/lib/ats-score';
 const SKILL_CATEGORIES: string[] = ['Languages', 'Frontend', 'Backend', 'Databases', 'Cloud & DevOps', 'System Design', 'AI & Automation'];
 
 import posthog from '@/lib/posthog';
+import { CoverLetterModal } from '@/components/builder/cover-letter-modal';
 
 type Step = 'edit' | 'template' | 'optimize' | 'download';
 
@@ -56,6 +57,7 @@ export default function BuilderPage() {
     const [authLoading, setAuthLoading] = useState(true);
     const [isNotFound, setIsNotFound] = useState(false);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [showCoverLetter, setShowCoverLetter] = useState(false);
 
     useEffect(() => {
         fetch('/api/user/access').then(res => res.json()).then(data => {
@@ -77,6 +79,7 @@ export default function BuilderPage() {
         try {
             const { data, error } = await supabase.from('resumes').select('*').eq('id', id).single();
             if (error || !data) {
+                console.error('[Builder] Resume fetch error:', error);
                 if (!isRetry) {
                     setTimeout(() => fetchResume(true), 300);
                     return;
@@ -85,7 +88,16 @@ export default function BuilderPage() {
                 setLoading(false);
                 return;
             }
+            console.log('[Builder] Resume fetched:', {
+                id: data.id,
+                owner: data.user_id,
+                currentUser: currentUserId
+            });
             if (currentUserId && data.user_id !== currentUserId) {
+                console.warn('[Builder] Access denied - Redirecting to dashboard', {
+                    resumeOwner: data.user_id,
+                    currentUser: currentUserId
+                });
                 router.push('/dashboard');
                 return;
             }
@@ -375,7 +387,23 @@ export default function BuilderPage() {
                     <div className="lg:col-span-8 space-y-6 pb-24 w-full overflow-hidden">
 
                         {/* Upload */}
-                        <ResumeUpload onUploadSuccess={data => { setResumeData(data); alert('Resume parsed!'); }} onUploadError={err => alert(err)} />
+                        <ResumeUpload
+                            onUploadSuccess={parsed => {
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                const mappedData: ResumeData = {
+                                    ...parsed,
+                                    // Inject IDs for local state management (Builder needs these for keys/deletion)
+                                    experience: (parsed.experience || []).map((exp: ResumeExperience) => ({ ...exp, id: uid() })),
+                                    projects: (parsed.projects || []).map((proj: ResumeProject) => ({ ...proj, id: uid() })),
+                                    education: (parsed.education || []).map((edu: ResumeEducation) => ({ ...edu, id: uid() })),
+                                    certifications: (parsed.certifications || []).map((cert: Certification) => ({ ...cert, id: uid() }))
+                                };
+
+                                setResumeData(mappedData);
+                                alert('Resume parsed and mapped successfully!');
+                            }}
+                            onUploadError={err => alert(err)}
+                        />
 
                         {/* Versions */}
                         {typeof id === 'string' && <VersionHistory resumeId={id} onRestore={(d) => setResumeData(d as unknown as ResumeData)} />}
@@ -559,7 +587,10 @@ export default function BuilderPage() {
                             </div>
 
                             <p className="text-xs text-slate-400 mb-3">Or use the legacy full resume optimizer.</p>
-                            <button onClick={() => setShowOptimizer(true)} className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all text-sm mb-4">Open Optimizer</button>
+                            <button onClick={() => setShowOptimizer(true)} className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all text-sm mb-3">Open Optimizer</button>
+                            <button onClick={() => setShowCoverLetter(true)} className="w-full py-2 bg-purple-600 hover:bg-purple-500 rounded-xl transition-all text-sm font-bold shadow-lg shadow-purple-900/20 flex items-center justify-center gap-2">
+                                <Sparkles className="w-3.5 h-3.5" /> Generate Cover Letter
+                            </button>
                         </div>
 
                         {/* Health & JD */}
@@ -570,7 +601,13 @@ export default function BuilderPage() {
                         <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-white/10 relative overflow-hidden">
                             {isAtsLoading && <div className="absolute inset-0 bg-black/40 z-10 flex items-center justify-center"><Loader2 className="w-5 h-5 animate-spin text-blue-400" /></div>}
                             {!atsResult ? (
-                                <div className="text-center py-3"><AlertCircle className="w-8 h-8 text-slate-600 mx-auto mb-2" /><p className="text-xs text-slate-500">Complete your resume to see ATS score.</p></div>
+                                <div className="text-center py-3"><AlertCircle className="w-8 h-8 text-slate-600 mx-auto mb-2" /><p className="text-xs text-slate-500">Provide a Job Description to see JD Match score.</p></div>
+                            ) : !atsResult.isValid ? (
+                                <div className="text-center py-3">
+                                    <AlertCircle className="w-8 h-8 text-red-500/50 mx-auto mb-2" />
+                                    <p className="text-xs text-red-400 font-medium">Resume content appears invalid or incomplete.</p>
+                                    <p className="text-[10px] text-slate-500 mt-1 px-4">Ensure you are using real words and technical terms.</p>
+                                </div>
                             ) : (<>
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
@@ -582,6 +619,7 @@ export default function BuilderPage() {
                                 <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-4">
                                     <div className="h-full bg-gradient-to-r from-blue-400 to-purple-400 transition-all duration-700" style={{ width: `${atsResult.score}%` }} />
                                 </div>
+                                <div className="text-[10px] text-slate-500 mb-3 italic">Improve your resume to increase ATS score.</div>
                                 <div className="space-y-1.5 mb-3">
                                     {([
                                         { label: 'JD Match', val: atsResult.details.keywords, max: 35 },
@@ -676,6 +714,14 @@ export default function BuilderPage() {
                         )}
                     </div>
                 </div>
+            )}
+
+            {showCoverLetter && id && resumeData && (
+                <CoverLetterModal
+                    resumeId={id}
+                    resumeData={resumeData}
+                    onClose={() => setShowCoverLetter(false)}
+                />
             )}
         </div>
     );

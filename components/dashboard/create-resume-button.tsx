@@ -15,39 +15,40 @@ export function CreateResumeButton({ variant = 'primary' }: { variant?: 'primary
         try {
             const res = await fetch('/api/resume/create', {
                 method: 'POST',
-                headers: { 'Accept': 'application/json' }
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
             })
 
-            if (res.redirected) {
-                window.location.href = res.url
-                return
-            }
-
             const data = await res.json()
+
             if (!res.ok) {
                 throw new Error(data.error || data.details || 'Failed to create resume')
             }
 
-            if (data.id) {
-                try {
-                    const posthog = (await import('@/lib/posthog')).default;
-                    posthog.capture('resume_created', {
-                        resume_id: data.id
-                    });
-                } catch (err) {
-                    console.error('[PostHog] Event error:', err);
-                }
-
-                // 5. Add 200ms delay before router.push to prevent race condition
-                await new Promise(resolve => setTimeout(resolve, 200));
-                router.push(`/builder/${data.id}`)
-            } else {
-                window.location.reload() // Fallback to redirect logic
+            if (!data.id) {
+                throw new Error('Server did not return a valid Resume ID')
             }
+
+            // Tracking
+            try {
+                const posthog = (await import('@/lib/posthog')).default;
+                posthog.capture('resume_created', {
+                    resume_id: data.id
+                });
+            } catch (err) {
+                console.error('[PostHog] Event error:', err);
+            }
+
+            // Small delay to ensure DB consistency before redirect
+            await new Promise(resolve => setTimeout(resolve, 300));
+            router.push(`/builder/${data.id}`)
+
         } catch (err: unknown) {
             console.error('[CreateButton] Error:', err)
             const msg = err instanceof Error ? err.message : String(err)
-            setError(msg === '[object Object]' ? 'Database error (check RLS)' : msg)
+            setError(msg)
             setIsCreating(false)
         }
     }

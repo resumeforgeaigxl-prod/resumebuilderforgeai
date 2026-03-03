@@ -14,11 +14,11 @@ export async function POST(request: Request) {
         const tcAccepted = body.tc_accepted === true;
 
         if (!email || !password) {
-            return NextResponse.json({ error: 'Email and password required.' }, { status: 400 });
+            return NextResponse.json({ success: false, message: 'Email and password required.' }, { status: 400 });
         }
 
         if (!tcAccepted) {
-            return NextResponse.json({ error: 'You must accept the Terms & Conditions.' }, { status: 400 });
+            return NextResponse.json({ success: false, message: 'You must accept the Terms & Conditions.' }, { status: 400 });
         }
 
         const supabase = createClient();
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
             .single();
 
         if (existingUser) {
-            return NextResponse.json({ error: 'Account with this email already exists.' }, { status: 400 });
+            return NextResponse.json({ success: false, message: 'Account with this email already exists.' }, { status: 400 });
         }
 
         // 2. Hash password
@@ -56,15 +56,21 @@ export async function POST(request: Request) {
 
         if (insertError) {
             console.error('[Signup] Database insert error:', insertError);
-            return NextResponse.json({ error: 'Failed to create account. Please try again.' }, { status: 500 });
+            return NextResponse.json(
+                { success: false, message: "Signup failed" },
+                { status: 500 }
+            );
         }
 
         return NextResponse.json({
             success: true,
             message: 'Account created! Please log in.'
         });
-    } catch (err) {
+    } catch (err: unknown) {
         console.error('Signup error:', err);
-        return NextResponse.json({ error: 'Something went wrong. Please try again later.' }, { status: 500 });
+        return NextResponse.json(
+            { success: false, message: "Signup failed" },
+            { status: 500 }
+        );
     }
 }

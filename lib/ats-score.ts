@@ -2,6 +2,7 @@ import { ResumeData } from '@/types/resume';
 
 export interface ATSScoreResult {
     score: number;
+    isValid: boolean;
     details: {
         keywords: number;
         completeness: number;
@@ -15,20 +16,65 @@ export interface ATSScoreResult {
     isMatch: boolean;
 }
 
-export function calculateATSScore(resume: ResumeData, jobDescription?: string): ATSScoreResult | null {
-    const hasName = !!resume.name?.trim();
-    const hasSkills = (resume.skills?.length ?? 0) >= 3 || (resume.skillCategories?.some(c => c.skills.length > 0) ?? false);
-    const hasContent = (resume.experience?.length ?? 0) > 0 || (resume.projects?.length ?? 0) > 0;
-    if (!hasName || !hasSkills || !hasContent) return null;
+// Semantic Validation Dictionaries
+const VALID_SKILLS = new Set([
+    'react', 'next.js', 'node.js', 'typescript', 'javascript', 'python', 'java', 'go', 'rust', 'c++', 'c#',
+    'postgresql', 'mongodb', 'mysql', 'redis', 'elasticsearch', 'docker', 'kubernetes', 'aws', 'azure', 'gcp',
+    'html', 'css', 'tailwind', 'sass', 'redux', 'graphql', 'rest api', 'ci/cd', 'git', 'terraform', 'ansible',
+    'pytorch', 'tensorflow', 'scikit-learn', 'pandas', 'numpy', 'opencv', 'llm', 'nlp', 'system design',
+    'distributed systems', 'microservices', 'agile', 'scrum', 'backend', 'frontend', 'devops', 'testing', 'security'
+]);
 
+const ACTION_VERBS = new Set([
+    'achieved', 'managed', 'developed', 'led', 'designed', 'created', 'improved', 'increased', 'decreased',
+    'resolved', 'spearheaded', 'built', 'implemented', 'optimized', 'automated', 'orchestrated', 'streamlined',
+    'pioneered', 'transformed', 'delivered', 'integrated', 'architected', 'maintained', 'mentored'
+]);
+
+export function calculateATSScore(resume: ResumeData, jobDescription?: string): ATSScoreResult | null {
     const feedback: string[] = [];
     const allText = JSON.stringify(resume).toLowerCase();
+    const words = allText.split(/\W+/).filter(w => w.length > 2);
 
-    // 1. Keyword & Tech Stack Relevance (JD Alignment) - 35%
+    // --- SEMANTIC VALIDATION LAYER ---
+    const checkSemanticValidity = () => {
+        if (words.length < 15) return false; // Too short to be valid
+
+        // 1. Check for long random strings (gibberish)
+        const longStrings = words.filter(w => w.length > 25);
+        if (longStrings.length > 2) return false;
+
+        // 2. Dictionary/Keyword Match Ratio
+        const knownTokens = words.filter(w =>
+            VALID_SKILLS.has(w) ||
+            ACTION_VERBS.has(w) ||
+            ['summary', 'experience', 'projects', 'education', 'skills', 'university', 'college', 'engineer', 'developer', 'manager', 'lead', 'achieved', 'managed'].includes(w)
+        );
+
+        const semanticRatio = knownTokens.length / Math.max(words.length, 1);
+
+        // If less than 5% of content is recognizable career context, it's likely gibberish
+        if (semanticRatio < 0.05 && words.length > 40) return false;
+
+        return true;
+    };
+
+    const isValid = checkSemanticValidity();
+
+    if (!isValid && words.length > 8) {
+        return {
+            score: 0,
+            isValid: false,
+            details: { keywords: 0, completeness: 0, metrics: 0, skills: 0, projectLinks: 0, cgpaBonus: 0, certBonus: 0 },
+            feedback: ['Resume content appears invalid or contains mostly gibberish.'],
+            isMatch: !!jobDescription
+        };
+    }
+
+    // 1. Keyword & Tech Stack Relevance (JD Alignment) - 40%
     const getKeywordScore = () => {
         let score = 0;
 
-        // Match vs JD if present
         if (jobDescription) {
             const jdTerms = jobDescription.toLowerCase().split(/\W+/).filter(w => w.length > 3);
             const jdWords = new Set(jdTerms);
@@ -37,84 +83,73 @@ export function calculateATSScore(resume: ResumeData, jobDescription?: string): 
                 let matches = 0;
                 jdWords.forEach(w => { if (allText.includes(w)) matches++; });
 
-                // matchRatio is matches relative to unique JD keywords (capped at 15 for fairness)
                 const matchRatio = matches / Math.min(jdWords.size, 15);
-                score = Math.min(35, matchRatio * 35);
+                score = Math.min(40, matchRatio * 40);
             }
         } else {
-            // General relevance if no JD - Lower weight
             const baseKeywords = ['rest api', 'scalable', 'optimization', 'frontend', 'backend', 'database', 'testing', 'security', 'agile', 'git', 'ci/cd'];
             const matches = baseKeywords.filter(w => allText.includes(w)).length;
-            score = Math.min(20, matches * 2);
+            score = Math.min(25, matches * 2.5);
         }
 
         return score;
     };
 
     const keywordWeight = getKeywordScore();
-    if (jobDescription && keywordWeight < 15) feedback.push('Low JD alignment. Add missing technologies mentioned in the job description.');
 
-    // 2. Skill Match & Tech Depth - 25%
+    // 2. Skill Match & Tech Depth - 25% (Now strictly uses VALID_SKILLS)
     const getSkillScore = () => {
+        const foundSkills = Array.from(VALID_SKILLS).filter(s => allText.includes(s));
         let score = 0;
-        const techStacks = [
-            { id: 'Frontend', words: ['react', 'next.js', 'typescript', 'javascript', 'tailwind', 'css', 'html', 'vue', 'angular', 'redux'] },
-            { id: 'Backend', words: ['node.js', 'python', 'django', 'go', 'java', 'spring', 'postgresql', 'mongodb', 'docker', 'kubernetes', 'aws', 'graphql'] },
-            { id: 'Mobile', words: ['react native', 'flutter', 'swift', 'kotlin'] },
-            { id: 'AI/ML', words: ['pytorch', 'tensorflow', 'scikit-learn', 'llm', 'opencv', 'pandas'] }
-        ];
 
-        techStacks.forEach(stack => {
-            const count = stack.words.filter(w => allText.includes(w)).length;
-            if (count >= 3) score += 8;
-            else if (count >= 1) score += 3;
-        });
+        if (foundSkills.length >= 8) score = 25;
+        else if (foundSkills.length >= 5) score = 15;
+        else if (foundSkills.length >= 2) score = 8;
 
-        return Math.min(25, score);
+        return score;
     };
 
     const skillsWeight = getSkillScore();
 
-    // 3. Action Verbs & Professionalism (20%)
-    const actionVerbs = ['achieved', 'managed', 'developed', 'led', 'designed', 'created', 'improved', 'increased', 'decreased', 'resolved', 'spearheaded', 'built', 'implemented', 'optimized', 'automated', 'orchestrated', 'streamlined'];
-    let verbCount = 0;
-    actionVerbs.forEach(v => { if (allText.includes(v)) verbCount++; });
-    const verbsWeight = Math.min(20, (verbCount / 8) * 20);
-    if (verbCount < 5) feedback.push('Use stronger action verbs to describe your contributions.');
+    // 3. Experience Match & Action Verbs - 20%
+    const getExperienceScore = () => {
+        const foundVerbs = Array.from(ACTION_VERBS).filter(v => allText.includes(v));
+        return Math.min(20, (foundVerbs.length / 6) * 20);
+    };
 
-    // 4. Measurable Impact / Metrics (10%) - HARD TO GET
-    let metricCount = 0;
-    const metricRegex = /\d+%|\d+x|\d+ (users|ms|sec|hrs|k|m|clients|projects|million|percent)/g;
-    const matches = allText.match(metricRegex);
-    if (matches) metricCount = matches.length;
-    const metricsWeight = Math.min(10, (metricCount / 4) * 10);
-    if (metricCount < 1) feedback.push('Quantify your impact with numbers or percentages where possible.');
+    const expWeight = getExperienceScore();
 
-    // 5. Structure & Section Completeness (10%)
-    let structPoints = 0;
-    if (resume.summary?.trim() && resume.summary.length > 50) structPoints += 2;
-    if ((resume.experience?.length || 0) > 0) structPoints += 3;
-    if ((resume.education?.length || 0) > 0) structPoints += 2;
-    if ((resume.skills?.length || 0) >= 5 || (resume.skillCategories?.length || 0) >= 2) structPoints += 2;
-    if ((resume.projects?.length || 0) > 0) structPoints += 1;
-    const structWeight = Math.min(10, structPoints);
+    // 4. Resume Completeness - 15%
+    const getCompletenessScore = () => {
+        let points = 0;
+        if (resume.summary?.trim() && resume.summary.length > 25) points += 3;
+        if ((resume.experience?.length || 0) > 0) points += 4;
+        if ((resume.projects?.length || 0) > 0) points += 3;
+        if ((resume.education?.length || 0) > 0) points += 2;
+        if ((resume.skills?.length || 0) > 0 || (resume.skillCategories?.some(c => c.skills.length > 0))) points += 3;
 
-    // Final Total (Out of 100)
-    let total = keywordWeight + skillsWeight + verbsWeight + metricsWeight + structWeight;
+        return points;
+    };
 
-    // Strictness: Cap score for sparse content
-    if (allText.length < 1000) total = Math.min(total, 65);
-    if (metricCount === 0 && total > 85) total = 85; // Cannot be "Perfect" without metrics
+    const completenessWeight = getCompletenessScore();
+
+    // Final Total
+    let total = keywordWeight + skillsWeight + expWeight + completenessWeight;
+
+    // Strictness caps
+    if (allText.length < 300) total = Math.min(total, 30);
+    else if (allText.length < 800) total = Math.min(total, 70);
 
     total = Math.round(Math.min(100, Math.max(0, total)));
 
     return {
         score: total,
+        isValid: true,
         details: {
             keywords: Math.round(keywordWeight),
-            completeness: Math.round(structWeight),
-            metrics: Math.round(metricsWeight),
-            skills: Math.round(verbsWeight),
+            completeness: Math.round(completenessWeight),
+            metrics: Math.round(expWeight),
+            skills: Math.round(skillsWeight),
             projectLinks: 0,
             cgpaBonus: 0,
             certBonus: 0
