@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { calculateATSScore } from '@/lib/ats-score';
 import { rateLimit } from '@/lib/rate-limit';
+import { getSession } from '@/lib/auth/jwt';
+import { logATSScore } from '@/lib/admin-logger';
 
 export async function POST(request: Request) {
     try {
@@ -22,6 +24,22 @@ export async function POST(request: Request) {
         if (!resumeData) return NextResponse.json({ error: 'Resume data required' }, { status: 400 });
 
         const result = calculateATSScore(resumeData, jobDescription);
+
+        // Fire-and-forget admin logging
+        getSession().then(session => {
+            if (session?.userId && result) {
+                logATSScore({
+                    userId: session.userId,
+                    resumeId: (resumeData?.id as string) || null,
+                    score: result.score ?? 0,
+                    keywordMatch: result.details?.keywords ?? 0,
+                    skillMatch: result.details?.skills ?? 0,
+                    experienceMatch: result.details?.metrics ?? 0,
+                    completeness: result.details?.completeness ?? 0,
+                    jobDescription: jobDescription
+                });
+            }
+        }).catch(() => { });
 
         return NextResponse.json({ success: true, scoreResult: result }, {
             headers: { 'X-RateLimit-Remaining': String(remaining) },

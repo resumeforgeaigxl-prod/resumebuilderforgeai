@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { FileText, Loader2, Search, Trash2, Calendar, Target, User } from 'lucide-react';
+import { FileText, Loader2, Search, Trash2, Calendar, Target, User, Download, ExternalLink } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface ResumeRow {
@@ -110,7 +110,16 @@ export default function AdminResumesPage() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <a
+                                                        href={`/builder/${r.id}`}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 transition-all active:scale-95"
+                                                        title="Open in Builder & Download PDF"
+                                                    >
+                                                        <Download className="w-4 h-4" />
+                                                    </a>
                                                     <button
                                                         onClick={() => deleteResume(r.id)}
                                                         disabled={deleting === r.id}
@@ -155,13 +164,24 @@ export default function AdminResumesPage() {
                                         <Calendar className="w-3 h-3" />
                                         {formatDistanceToNow(new Date(r.updated_at), { addSuffix: true })}
                                     </div>
-                                    <button
-                                        onClick={() => deleteResume(r.id)}
-                                        disabled={deleting === r.id}
-                                        className="p-2.5 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 active:scale-95 transition-all"
-                                    >
-                                        {deleting === r.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <a
+                                            href={`/builder/${r.id}`}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 active:scale-95 transition-all"
+                                            title="Open & Download"
+                                        >
+                                            <ExternalLink className="w-4 h-4" />
+                                        </a>
+                                        <button
+                                            onClick={() => deleteResume(r.id)}
+                                            disabled={deleting === r.id}
+                                            className="p-2.5 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 active:scale-95 transition-all"
+                                        >
+                                            {deleting === r.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}

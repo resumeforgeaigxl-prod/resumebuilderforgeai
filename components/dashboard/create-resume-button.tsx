@@ -57,6 +57,7 @@ export function CreateResumeButton({ variant = 'primary' }: { variant?: 'primary
         return (
             <div className="flex flex-col items-center">
                 <button
+                    type="button"
                     onClick={handleCreate}
                     disabled={isCreating}
                     className="flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-white font-medium rounded-xl transition-colors"
@@ -72,6 +73,7 @@ export function CreateResumeButton({ variant = 'primary' }: { variant?: 'primary
     return (
         <div className="flex flex-col items-end">
             <button
+                type="button"
                 onClick={handleCreate}
                 disabled={isCreating}
                 className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium rounded-xl transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]"

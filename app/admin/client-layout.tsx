@@ -3,7 +3,7 @@
 import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning } from 'lucide-react';
+import { Shield, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning, Briefcase, FileHeart } from 'lucide-react';
 
 export default function AdminLayoutClient({ children, profile }: { children: ReactNode, profile: { email: string } }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -31,9 +31,11 @@ export default function AdminLayoutClient({ children, profile }: { children: Rea
         { href: '/admin/users', label: 'Users', icon: Users },
         { href: '/admin/resumes', label: 'Resumes', icon: FileText },
         { href: '/admin/mock-tests', label: 'Mock Tests', icon: BrainCircuit },
+        { href: '/admin/jobs', label: 'Jobs Monitor', icon: Briefcase },
         { href: '/admin/portfolios', label: 'Portfolios', icon: Globe },
         { href: '/admin/resume-scores', label: 'Resume Scores', icon: Activity },
         { href: '/admin/downloads', label: 'PDF Downloads', icon: FileText },
+        { href: '/admin/cover-letters', label: 'Cover Letters', icon: FileHeart },
         { href: '/admin/subscriptions', label: 'Subscriptions', icon: CreditCard },
         { href: '/admin/coupons', label: 'Coupons', icon: Ticket },
         { href: '/admin/ai-monitoring', label: 'AI Monitoring', icon: MessageSquareWarning },

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
+import { logMockTestGenerated } from '@/lib/admin-logger';
 
 export const runtime = 'nodejs';
 
@@ -205,6 +206,15 @@ export async function POST(request: Request) {
         }
 
         console.log(`[MockTest] Generated ${allQuestions.length} questions for test ${testId}`);
+
+        // Fire-and-forget admin log
+        logMockTestGenerated({
+            userId: session.userId,
+            testId,
+            jobTitle: jobTitle || 'Unknown Role',
+            totalQuestions: allQuestions.length
+        });
+
         return NextResponse.json({ success: true, testId, totalQuestions: allQuestions.length });
 
     } catch (e) {

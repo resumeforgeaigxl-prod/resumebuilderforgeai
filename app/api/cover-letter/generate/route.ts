@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { generateAIResponse, logAIUsage } from '@/lib/ai-provider';
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
+import { logCoverLetter } from '@/lib/admin-logger';
 
 export async function POST(req: Request) {
     try {
@@ -84,6 +85,14 @@ export async function POST(req: Request) {
 
         const supabase = createClient();
         await logAIUsage(supabase, session.userId, null, aiResult, endTime - startTime);
+
+        // Fire-and-forget admin log
+        logCoverLetter({
+            userId: session.userId,
+            roleTitle: roleTitle,
+            companyName: companyName || '',
+            content: aiResult.text
+        });
 
         return NextResponse.json({
             success: true,

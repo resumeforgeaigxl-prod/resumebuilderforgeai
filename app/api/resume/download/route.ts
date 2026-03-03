@@ -10,6 +10,7 @@ import { generateAcademicHtml } from '@/templates/academic';
 import { generateAtsLightHtml } from '@/templates/ats-light';
 import { getSession } from '@/lib/auth/jwt';
 import { checkUserAccess } from '@/lib/access';
+import { logPDFDownload } from '@/lib/admin-logger';
 import puppeteer, { Browser, Page } from 'puppeteer-core';
 import chromium from '@sparticuz/chromium';
 
@@ -153,6 +154,16 @@ export async function POST(request: Request) {
             printBackground: true,
         });
         console.log(`[Download] Done. Buffer size=${pdfBuffer.length} bytes`);
+
+        // Fire-and-forget admin log
+        if (session?.userId) {
+            logPDFDownload({
+                userId: session.userId,
+                resumeName: (resumeData as unknown as Record<string, unknown>)?.name as string || 'Untitled',
+                template,
+                watermarked: showWatermark
+            });
+        }
 
         return new NextResponse(Buffer.from(pdfBuffer), {
             status: 200,

@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { CreateResumeButton } from '@/components/dashboard/create-resume-button'
 import { getSession } from '@/lib/auth/jwt'
 import Link from 'next/link'
+import { JobBoard } from '@/components/jobs/job-board'
 
 export default async function DashboardPage() {
     const supabase = createClient()
@@ -110,6 +111,10 @@ export default async function DashboardPage() {
                     ))}
                 </div>
             )}
+
+            <div className="pt-10 border-t border-white/5">
+                <JobBoard />
+            </div>
         </div>
     )
 }
