@@ -1,21 +1,25 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Briefcase, Star, Users, MousePointerClick, Eye, RefreshCw, Loader2, ExternalLink } from 'lucide-react';
+import { Briefcase, Star, Users, MousePointerClick, Eye, RefreshCw, Loader2, ExternalLink, Mail } from 'lucide-react';
+
+interface Application {
+    id: string;
+    user_id: string;
+    user_email: string | null;
+    user_name: string | null;
+    job_title: string;
+    company: string;
+    apply_url: string;
+    applied_at: string;
+}
 
 interface JobStats {
     total: number;
     mnc: number;
     applications: number;
     views: number;
-    recentApplications: {
-        id: string;
-        user_id: string;
-        job_title: string;
-        company: string;
-        apply_url: string;
-        applied_at: string;
-    }[];
+    recentApplications: Application[];
 }
 
 export default function AdminJobsPage() {
@@ -40,7 +44,6 @@ export default function AdminJobsPage() {
 
     useEffect(() => {
         fetchStats();
-        // Refresh every 10 seconds
         const interval = setInterval(fetchStats, 10000);
         return () => clearInterval(interval);
     }, [fetchStats]);
@@ -117,7 +120,7 @@ export default function AdminJobsPage() {
                                 <table className="w-full text-sm">
                                     <thead>
                                         <tr className="border-b border-white/5 text-xs text-slate-500 uppercase tracking-wider">
-                                            <th className="px-6 py-3 text-left font-bold">User ID</th>
+                                            <th className="px-6 py-3 text-left font-bold">User</th>
                                             <th className="px-6 py-3 text-left font-bold">Job Title</th>
                                             <th className="px-6 py-3 text-left font-bold">Company</th>
                                             <th className="px-6 py-3 text-left font-bold">Date</th>
@@ -127,8 +130,33 @@ export default function AdminJobsPage() {
                                     <tbody className="divide-y divide-white/5">
                                         {stats?.recentApplications?.map(app => (
                                             <tr key={app.id} className="hover:bg-white/[0.02] transition-colors">
-                                                <td className="px-6 py-3 font-mono text-xs text-slate-500 truncate max-w-[120px]">
-                                                    {app.user_id?.slice(0, 8)}...
+                                                {/* User cell — shows avatar, name & email */}
+                                                <td className="px-6 py-3">
+                                                    <div className="flex items-center gap-2.5">
+                                                        {/* Avatar initials */}
+                                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500/40 to-purple-500/40 border border-indigo-500/20 flex items-center justify-center shrink-0">
+                                                            <span className="text-[11px] font-bold text-indigo-300 uppercase">
+                                                                {(app.user_name || app.user_email || '?').charAt(0)}
+                                                            </span>
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            {app.user_name && (
+                                                                <p className="text-slate-200 font-semibold text-xs truncate max-w-[150px]">
+                                                                    {app.user_name}
+                                                                </p>
+                                                            )}
+                                                            {app.user_email ? (
+                                                                <p className="text-slate-500 text-[11px] flex items-center gap-1 truncate max-w-[160px]">
+                                                                    <Mail className="w-2.5 h-2.5 shrink-0" />
+                                                                    {app.user_email}
+                                                                </p>
+                                                            ) : (
+                                                                <p className="font-mono text-[10px] text-slate-600">
+                                                                    {app.user_id?.slice(0, 12)}…
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </div>
                                                 </td>
                                                 <td className="px-6 py-3 text-slate-200 font-medium">{app.job_title}</td>
                                                 <td className="px-6 py-3 text-slate-400">{app.company}</td>
