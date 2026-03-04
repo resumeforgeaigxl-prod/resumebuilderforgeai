@@ -112,11 +112,9 @@ export default function AdminResumesPage() {
                                             <td className="px-6 py-4">
                                                 <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <a
-                                                        href={`/builder/${r.id}`}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 transition-all active:scale-95"
-                                                        title="Open in Builder & Download PDF"
+                                                        href={`/api/admin/resumes/${r.id}/download`}
+                                                        className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all active:scale-95"
+                                                        title="Download PDF"
                                                     >
                                                         <Download className="w-4 h-4" />
                                                     </a>
@@ -166,13 +164,11 @@ export default function AdminResumesPage() {
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <a
-                                            href={`/builder/${r.id}`}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 active:scale-95 transition-all"
-                                            title="Open & Download"
+                                            href={`/api/admin/resumes/${r.id}/download`}
+                                            className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 active:scale-95 transition-all"
+                                            title="Download PDF"
                                         >
-                                            <ExternalLink className="w-4 h-4" />
+                                            <Download className="w-4 h-4" />
                                         </a>
                                         <button
                                             onClick={() => deleteResume(r.id)}
