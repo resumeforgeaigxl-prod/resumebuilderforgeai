@@ -11,7 +11,7 @@ const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 
 const FROM = {
   name: process.env.BREVO_FROM_NAME ?? 'ResumeForgeAI',
-  email: process.env.BREVO_FROM_EMAIL ?? 'support@resumeforgeai.in',
+  email: process.env.EMAIL_FROM ?? process.env.BREVO_FROM_EMAIL ?? 'support@resumeforgeai.in',
 };
 
 // ── Low-level sender ─────────────────────────────────────────────────────────
@@ -28,10 +28,14 @@ interface SendEmailOptions {
 
 export async function sendEmail(opts: SendEmailOptions): Promise<boolean> {
   const apiKey = process.env.BREVO_API_KEY;
+
   if (!apiKey) {
-    console.warn('[Brevo] BREVO_API_KEY not set — email skipped');
+    console.error('[Brevo ERROR] BREVO_API_KEY is missing. Email skipped.');
     return false;
   }
+
+  // NOTE: We have removed the NODE_ENV check to allow emails in all environments.
+  console.log(`[Brevo] Attempting to send email: "${opts.subject}" to ${opts.to.map(r => r.email).join(', ')}`);
 
   try {
     const res = await fetch(BREVO_API_URL, {
@@ -51,13 +55,15 @@ export async function sendEmail(opts: SendEmailOptions): Promise<boolean> {
     });
 
     if (!res.ok) {
-      const err = await res.text();
-      console.error('[Brevo] Send failed:', res.status, err);
+      const errBody = await res.text();
+      console.error(`[Brevo ERROR] Failed to send email. Status: ${res.status}. Error: ${errBody}`);
       return false;
     }
+
+    console.log('[Brevo SUCCESS] Email sent successfully.');
     return true;
   } catch (err) {
-    console.error('[Brevo] Network error:', err);
+    console.error('[Brevo CRITICAL ERROR] Network or unexpected error:', err);
     return false;
   }
 }

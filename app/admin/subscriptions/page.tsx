@@ -70,8 +70,8 @@ export default function AdminSubscriptionsPage() {
     async function loadSubs() {
         setLoading(true);
         const [subsRes, invRes] = await Promise.all([
-            fetch('/api/admin/subscriptions'),
-            fetch('/api/admin/invoices'),
+            fetch('/api/admin/subscriptions', { cache: 'no-store' }),
+            fetch('/api/admin/invoices', { cache: 'no-store' }),
         ]);
         const subsData = await subsRes.json();
         const invData = await invRes.json();

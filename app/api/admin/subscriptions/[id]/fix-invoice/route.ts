@@ -4,6 +4,8 @@ import { getSession } from '@/lib/auth/jwt';
 import { createInvoice } from '@/lib/invoice';
 import { sendPaymentSuccessEmail } from '@/lib/brevo';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(
     req: Request,
     { params }: { params: { id: string } }

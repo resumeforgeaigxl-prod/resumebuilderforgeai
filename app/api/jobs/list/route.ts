@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Fetch job listings with optional section filtering.
  * ?section=mnc | remote | latest | fresher (default: latest)

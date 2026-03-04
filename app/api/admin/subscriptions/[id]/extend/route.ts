@@ -21,7 +21,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         const daysToAdd = body.days || 30;
 
         // Fetch current subscription
-        const { data: sub } = await supabase.from('subscriptions').select('expires_at').eq('id', params.id).single();
+        const { data: sub } = await supabase.from('subscriptions').select('expires_at, user_id').eq('id', params.id).single();
         if (!sub) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
         const baseDate = sub.expires_at ? new Date(sub.expires_at) : new Date();
@@ -31,15 +31,25 @@ export async function POST(req: Request, { params }: { params: { id: string } })
             admin_id: session.userId,
             action: 'extend_subscription',
             target_id: params.id,
-            metadata: { daysAdded: daysToAdd, newExpiry }
+            metadata: { daysAdded: daysToAdd, newExpiry, userId: sub.user_id }
         });
 
+        // Update subscriptions table
         const { error } = await supabase
             .from('subscriptions')
             .update({ expires_at: newExpiry, status: 'active' })
             .eq('id', params.id);
 
         if (error) throw error;
+
+        // Sync to users table for redundant access checks
+        if (sub.user_id) {
+            await supabase.from('users').update({
+                access_expires_at: newExpiry,
+                plan_end: newExpiry,
+                plan: 'pro' // ensure they have pro flag
+            }).eq('id', sub.user_id);
+        }
 
         return NextResponse.json({ success: true, message: `Extended by ${daysToAdd} days` });
     } catch (error: unknown) {
