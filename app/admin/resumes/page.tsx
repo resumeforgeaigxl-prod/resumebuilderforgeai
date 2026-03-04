@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { FileText, Loader2, Search, Trash2, Calendar, Target, User, Download, ExternalLink } from 'lucide-react';
+import { FileText, Loader2, Search, Trash2, Calendar, Target, User, Download } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface ResumeRow {
