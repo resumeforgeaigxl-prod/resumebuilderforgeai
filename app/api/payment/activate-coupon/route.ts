@@ -1,0 +1,131 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+import { getSession } from '@/lib/auth/jwt';
+import { activateUserPlan, PlanName } from '@/lib/plan-activation';
+import { createInvoice } from '@/lib/invoice';
+import { sendPaymentSuccessEmail } from '@/lib/brevo';
+import { format } from 'date-fns';
+
+/**
+ * POST /api/payment/activate-coupon
+ * Called when coupon makes price = 0.
+ */
+export async function POST(req: NextRequest) {
+    try {
+        const session = await getSession();
+        if (!session?.userId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const body = await req.json();
+        const couponCode: string = (body.coupon_code ?? '').trim().toUpperCase();
+        const planName: PlanName = (body.plan_name ?? '').toUpperCase() as PlanName;
+
+        if (!couponCode || !planName) {
+            return NextResponse.json({ error: 'Missing coupon_code or plan_name' }, { status: 400 });
+        }
+
+        const supabase = createClient();
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: coupon } = await (supabase as any)
+            .from('coupons')
+            .select('id, code, type, value, expires_at, max_uses, used_count, is_active')
+            .eq('code', couponCode)
+            .eq('is_active', true)
+            .single() as {
+                data: {
+                    id: string; type: string; value: number;
+                    expires_at: string | null; max_uses: number | null;
+                    used_count: number; is_active: boolean;
+                } | null
+            };
+
+        if (!coupon) return NextResponse.json({ error: 'Invalid or inactive coupon code' }, { status: 400 });
+        if (coupon.expires_at && new Date(coupon.expires_at) < new Date())
+            return NextResponse.json({ error: 'This coupon has expired' }, { status: 400 });
+        if (coupon.max_uses !== null && coupon.used_count >= coupon.max_uses)
+            return NextResponse.json({ error: 'Coupon usage limit reached' }, { status: 400 });
+        const isFullAccess = coupon.type === 'full' || coupon.value >= 100;
+        if (!isFullAccess)
+            return NextResponse.json({ error: 'Coupon does not provide full access' }, { status: 400 });
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: alreadyUsed } = await (supabase as any)
+            .from('subscriptions').select('id')
+            .eq('user_id', session.userId).eq('coupon_code', couponCode)
+            .limit(1).single() as { data: { id: string } | null };
+
+        if (alreadyUsed)
+            return NextResponse.json({ error: 'You have already used this coupon' }, { status: 409 });
+
+        // Increment used_count
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase as any)
+            .from('coupons').update({ used_count: coupon.used_count + 1 }).eq('id', coupon.id);
+
+        // Fetch billing details
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: billing } = await (supabase as any)
+            .from('billing_details')
+            .select('full_name, email, phone, address, city, state, country, zip_code')
+            .eq('user_id', session.userId)
+            .order('created_at', { ascending: false })
+            .limit(1).single();
+
+        const billingAddress = billing
+            ? [billing.address, billing.city, billing.state, billing.zip_code, billing.country]
+                .filter(Boolean).join(', ')
+            : body.billing_address ?? null;
+
+        // Record ₹0 payment
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase as any).from('payments').insert({
+            user_id: session.userId, plan_name: planName,
+            amount: 0, razorpay_payment_id: null, razorpay_order_id: null,
+            status: 'success', billing_address: billingAddress,
+        });
+
+        // Record subscription
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase as any).from('subscriptions').insert({
+            user_id: session.userId, plan: planName.toLowerCase(),
+            status: 'active', expires_at: null, coupon_code: couponCode,
+        });
+
+        // Activate plan
+        await activateUserPlan(session.userId, planName);
+
+        // Generate ₹0 invoice
+        const invoice = await createInvoice({
+            userId: session.userId, plan: planName, amount: 0,
+            paymentMethod: 'coupon', couponCode,
+            billing: billing ? {
+                name: billing.full_name, email: billing.email, phone: billing.phone,
+                address: billing.address, city: billing.city, state: billing.state,
+                country: billing.country, zip: billing.zip_code,
+            } : null,
+        });
+
+        // Send payment/activation email (non-blocking)
+        const userEmail = billing?.email ?? null;
+        if (userEmail && invoice) {
+            sendPaymentSuccessEmail({
+                userEmail,
+                userName: billing?.full_name,
+                plan: planName,
+                amountINR: 'Free',
+                paymentMethod: 'coupon',
+                couponCode,
+                invoiceNumber: invoice.invoice_number,
+                invoiceId: invoice.id,
+                date: format(new Date(), 'dd MMM yyyy'),
+            }).catch(e => console.error('[activate-coupon] Email error:', e));
+        }
+
+        return NextResponse.json({ success: true });
+    } catch (err) {
+        console.error('[activate-coupon] Error:', err);
+        return NextResponse.json({ error: 'Failed to activate coupon plan' }, { status: 500 });
+    }
+}

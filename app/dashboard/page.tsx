@@ -5,6 +5,7 @@ import { CreateResumeButton } from '@/components/dashboard/create-resume-button'
 import { getSession } from '@/lib/auth/jwt'
 import Link from 'next/link'
 import { JobBoard } from '@/components/jobs/job-board'
+import { PaymentSuccessBanner } from '@/components/dashboard/payment-success-banner'
 
 export default async function DashboardPage() {
     const supabase = createClient()
@@ -24,6 +25,7 @@ export default async function DashboardPage() {
 
     return (
         <div className="space-y-8">
+            <PaymentSuccessBanner />
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
