@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
+import { activateUserPlan } from '@/lib/plan-activation';
+import { createInvoice } from '@/lib/invoice';
+import { sendPaymentSuccessEmail } from '@/lib/brevo';
+import { format } from 'date-fns';
 
 export const runtime = 'nodejs';
 
@@ -20,19 +24,24 @@ export async function POST(request: Request) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: coupon } = await (supabase as any)
         .from('coupons')
-        .select('*')
+        .select('id, code, type, value, plan_type, expires_at, max_uses, used_count, is_active')
         .eq('code', normalizedCode)
         .eq('is_active', true)
         .single() as {
             data: {
                 id: string; code: string; type: string;
-                value: number; expires_at: string | null;
+                value: number; plan_type: string; expires_at: string | null;
                 max_uses: number | null; used_count: number; is_active: boolean;
             } | null
         };
 
     if (!coupon) {
         return NextResponse.json({ error: 'Invalid or inactive coupon code' }, { status: 404 });
+    }
+
+    // Plan validation (legacy API defaults to Pro access)
+    if (coupon.plan_type !== 'all' && coupon.plan_type !== 'pro') {
+        return NextResponse.json({ error: 'This coupon is not valid for the Pro plan.' }, { status: 400 });
     }
 
     // Check expiry
@@ -58,6 +67,16 @@ export async function POST(request: Request) {
     if (existing) {
         return NextResponse.json({ error: 'You have already used this coupon' }, { status: 409 });
     }
+
+    // Fetch billing details for invoice/email (if available)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: billing } = await (supabase as any)
+        .from('billing_details')
+        .select('full_name, email, phone, address, city, state, country, zip_code')
+        .eq('user_id', session.userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
 
     // 3. Increment used_count atomically
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -96,6 +115,33 @@ export async function POST(request: Request) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any);
 
+        // Generate ₹0 invoice
+        const invoice = await createInvoice({
+            userId: session.userId, plan: 'PRO', amount: 0,
+            paymentMethod: 'coupon', couponCode: 'LAUNCH100',
+            billing: billing ? {
+                name: billing.full_name, email: billing.email, phone: billing.phone,
+                address: billing.address, city: billing.city, state: billing.state,
+                country: billing.country, zip: billing.zip_code,
+            } : null,
+        });
+
+        // Send activation email
+        const userEmail = billing?.email ?? null;
+        if (userEmail && invoice) {
+            sendPaymentSuccessEmail({
+                userEmail,
+                userName: billing?.full_name,
+                plan: 'PRO',
+                amountINR: 'Free',
+                paymentMethod: 'coupon',
+                couponCode: 'LAUNCH100',
+                invoiceNumber: invoice.invoice_number,
+                invoiceId: invoice.id,
+                date: format(new Date(), 'dd MMM yyyy'),
+            }).catch(e => console.error('[redeem LAUNCH100] Email error:', e));
+        }
+
         return NextResponse.json({
             valid: true,
             access_granted: true,
@@ -109,6 +155,10 @@ export async function POST(request: Request) {
     const isFullAccess = coupon.type === 'full' || coupon.value >= 100;
 
     if (isFullAccess) {
+        // Use unified activation
+        await activateUserPlan(session.userId, 'PRO');
+
+        // Record in subscriptions table (redundant if activateUserPlan does it, but keeping for legacy compatibility if needed)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (supabase as any)
             .from('subscriptions')
@@ -127,6 +177,33 @@ export async function POST(request: Request) {
             .from('users')
             .update({ is_free_override: true })
             .eq('id', session.userId);
+
+        // Generate ₹0 invoice
+        const invoice = await createInvoice({
+            userId: session.userId, plan: 'PRO', amount: 0,
+            paymentMethod: 'coupon', couponCode: normalizedCode,
+            billing: billing ? {
+                name: billing.full_name, email: billing.email, phone: billing.phone,
+                address: billing.address, city: billing.city, state: billing.state,
+                country: billing.country, zip: billing.zip_code,
+            } : null,
+        });
+
+        // Send activation email
+        const userEmail = billing?.email ?? null;
+        if (userEmail && invoice) {
+            sendPaymentSuccessEmail({
+                userEmail,
+                userName: billing?.full_name,
+                plan: 'PRO',
+                amountINR: 'Free',
+                paymentMethod: 'coupon',
+                couponCode: normalizedCode,
+                invoiceNumber: invoice.invoice_number,
+                invoiceId: invoice.id,
+                date: format(new Date(), 'dd MMM yyyy'),
+            }).catch(e => console.error('[redeem FullAccess] Email error:', e));
+        }
 
         return NextResponse.json({
             valid: true,

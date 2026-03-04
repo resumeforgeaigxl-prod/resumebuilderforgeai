@@ -36,18 +36,24 @@ export async function POST(req: NextRequest) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: coupon } = await (supabase as any)
             .from('coupons')
-            .select('id, code, type, value, expires_at, max_uses, used_count, is_active')
+            .select('id, code, type, value, plan_type, expires_at, max_uses, used_count, is_active')
             .eq('code', couponCode)
             .eq('is_active', true)
             .single() as {
                 data: {
-                    id: string; type: string; value: number;
+                    id: string; type: string; value: number; plan_type: string;
                     expires_at: string | null; max_uses: number | null;
                     used_count: number; is_active: boolean;
                 } | null
             };
 
         if (!coupon) return NextResponse.json({ error: 'Invalid or inactive coupon code' }, { status: 400 });
+
+        // Plan validation
+        if (coupon.plan_type !== 'all' && coupon.plan_type !== planName.toLowerCase()) {
+            return NextResponse.json({ error: 'This coupon is not valid for this plan' }, { status: 400 });
+        }
+
         if (coupon.expires_at && new Date(coupon.expires_at) < new Date())
             return NextResponse.json({ error: 'This coupon has expired' }, { status: 400 });
         if (coupon.max_uses !== null && coupon.used_count >= coupon.max_uses)

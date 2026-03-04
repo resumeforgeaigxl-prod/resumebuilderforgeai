@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 interface CouponRow {
     id: string; code: string; type: string; value: number;
+    plan_type: string;
     max_uses: number | null; used_count: number; is_active: boolean;
     expires_at: string | null; created_at: string;
 }
@@ -19,7 +20,7 @@ export default function AdminCouponsPage() {
     // Create Modal state
     const [creating, setCreating] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const [form, setForm] = useState({ code: '', type: 'percentage', value: '', max_uses: '', expires_at: '' });
+    const [form, setForm] = useState({ code: '', type: 'percentage', value: '', plan_type: 'all', max_uses: '', expires_at: '' });
 
     async function loadCoupons() {
         setLoading(true);
@@ -52,6 +53,7 @@ export default function AdminCouponsPage() {
                 code: form.code,
                 type: form.type,
                 value: Number(form.value),
+                plan_type: form.plan_type,
                 max_uses: form.max_uses ? Number(form.max_uses) : null,
                 expires_at: form.expires_at ? new Date(form.expires_at).toISOString() : null
             })
@@ -59,7 +61,7 @@ export default function AdminCouponsPage() {
 
         if (res.ok) {
             setCreating(false);
-            setForm({ code: '', type: 'percentage', value: '', max_uses: '', expires_at: '' });
+            setForm({ code: '', type: 'percentage', value: '', plan_type: 'all', max_uses: '', expires_at: '' });
             await loadCoupons();
         } else {
             const data = await res.json();
@@ -161,6 +163,7 @@ export default function AdminCouponsPage() {
                                 <tr className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
                                     <th className="px-6 py-4">Code</th>
                                     <th className="px-6 py-4">Value</th>
+                                    <th className="px-6 py-4">Plan</th>
                                     <th className="px-6 py-4">Redemptions</th>
                                     <th className="px-6 py-4">Status</th>
                                     <th className="px-6 py-4 text-right">Actions</th>
@@ -183,6 +186,15 @@ export default function AdminCouponsPage() {
                                             <td className="px-6 py-4">
                                                 <span className="font-medium text-slate-300">
                                                     {c.type === 'percentage' ? `${c.value}% OFF` : (c.type === 'fixed' ? `$${c.value} OFF` : `${c.value} Months Free`)}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${c.plan_type === 'all' ? 'bg-slate-500/10 text-slate-400 border border-slate-500/20' :
+                                                        c.plan_type === 'pro' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' :
+                                                            c.plan_type === 'premium' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                                                                'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                                                    }`}>
+                                                    {c.plan_type}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
@@ -278,6 +290,17 @@ export default function AdminCouponsPage() {
                                         className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                                         style={{ colorScheme: 'dark' }} />
                                 </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Applicable Plan</label>
+                                <select value={form.plan_type} onChange={e => setForm({ ...form, plan_type: e.target.value })}
+                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-colors">
+                                    <option value="all">All Plans</option>
+                                    <option value="pro">Pro</option>
+                                    <option value="premium">Premium</option>
+                                    <option value="career">Career</option>
+                                </select>
                             </div>
                         </div>
 

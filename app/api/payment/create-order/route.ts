@@ -51,12 +51,12 @@ export async function POST(req: NextRequest) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const { data: coupon } = await (supabase as any)
                 .from('coupons')
-                .select('id, type, value, expires_at, max_uses, used_count, is_active')
+                .select('id, type, value, plan_type, expires_at, max_uses, used_count, is_active')
                 .eq('code', couponCode)
                 .eq('is_active', true)
                 .single() as {
                     data: {
-                        id: string; type: string; value: number;
+                        id: string; type: string; value: number; plan_type: string;
                         expires_at: string | null; max_uses: number | null;
                         used_count: number; is_active: boolean;
                     } | null
@@ -66,8 +66,9 @@ export async function POST(req: NextRequest) {
                 const now = new Date();
                 const expired = coupon.expires_at && new Date(coupon.expires_at) < now;
                 const limitReached = coupon.max_uses !== null && coupon.used_count >= coupon.max_uses;
+                const planMatch = coupon.plan_type === 'all' || coupon.plan_type === planName.toLowerCase();
 
-                if (!expired && !limitReached) {
+                if (!expired && !limitReached && planMatch) {
                     if (coupon.type === 'full') {
                         discountAmount = basePrice;
                     } else if (coupon.type === 'fixed') {

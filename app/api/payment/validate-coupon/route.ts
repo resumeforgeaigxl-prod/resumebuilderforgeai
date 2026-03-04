@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const code: string = (body.code ?? '').trim().toUpperCase();
         const planPrice: number = Number(body.plan_price ?? 0);
+        const selectedPlan: string = (body.plan_name ?? '').toLowerCase();
 
         if (!code) {
             return NextResponse.json({ error: 'Coupon code is required' }, { status: 400 });
@@ -33,19 +34,24 @@ export async function POST(req: NextRequest) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: coupon } = await (supabase as any)
             .from('coupons')
-            .select('id, code, type, value, expires_at, max_uses, used_count, is_active')
+            .select('id, code, type, value, plan_type, expires_at, max_uses, used_count, is_active')
             .eq('code', code)
             .eq('is_active', true)
             .single() as {
                 data: {
                     id: string; code: string; type: string;
-                    value: number; expires_at: string | null;
+                    value: number; plan_type: string; expires_at: string | null;
                     max_uses: number | null; used_count: number; is_active: boolean;
                 } | null
             };
 
         if (!coupon) {
             return NextResponse.json({ valid: false, error: 'Invalid or inactive coupon code' }, { status: 200 });
+        }
+
+        // Plan-specific validation
+        if (coupon.plan_type !== 'all' && coupon.plan_type !== selectedPlan) {
+            return NextResponse.json({ valid: false, error: 'This coupon is not valid for this plan.' }, { status: 200 });
         }
 
         if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {

@@ -18,13 +18,14 @@ export async function POST(req: Request) {
         await supabase.from('admin_logs').insert({
             admin_id: session.userId,
             action: 'create_coupon',
-            metadata: { code: body.code, type: body.type, val: body.value, max_uses: body.max_uses, expires: body.expires_at }
+            metadata: { code: body.code, type: body.type, val: body.value, plan_type: body.plan_type || 'all', max_uses: body.max_uses, expires: body.expires_at }
         });
 
         const { error } = await supabase.from('coupons').insert({
             code: body.code.toUpperCase(),
             type: body.type, // 'percentage', 'fixed', 'free_months'
             value: body.value,
+            plan_type: body.plan_type || 'all',
             max_uses: body.max_uses || null,
             expires_at: body.expires_at || null,
             is_active: true
@@ -33,7 +34,8 @@ export async function POST(req: Request) {
         if (error) throw error;
 
         return NextResponse.json({ success: true, message: 'Coupon created' });
-    } catch (error: unknown) { const e = error as Error;
+    } catch (error: unknown) {
+        const e = error as Error;
         return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }

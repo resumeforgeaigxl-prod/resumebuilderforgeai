@@ -165,7 +165,7 @@ export default function BillingPage() {
             const res = await fetch('/api/payment/validate-coupon', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code, plan_price: basePrice }),
+                body: JSON.stringify({ code, plan_price: basePrice, plan_name: plan.toLowerCase() }),
             });
             const data: CouponResult = await res.json();
             setCouponResult(data);
