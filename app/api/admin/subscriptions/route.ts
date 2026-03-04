@@ -41,36 +41,48 @@ export async function GET() {
 
         // ── Fetch payments (latest per user) — includes coupon/discount fields ─
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: payments } = await (supabase as any)
-            .from('payments')
-            .select(`
-                user_id, plan_name, amount, original_price, coupon_code,
-                discount_amount, razorpay_payment_id, status, billing_address, created_at
-            `)
-            .in('user_id', userIds)
-            .eq('status', 'success')
-            .order('created_at', { ascending: false });
+        let payments: any[] = [];
+        if (userIds.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { data: paymentsData, error: paymentsErr } = await (supabase as any)
+                .from('payments')
+                .select(`
+                    user_id, plan_name, amount, original_price, coupon_code,
+                    discount_amount, razorpay_payment_id, status, billing_address, created_at
+                `)
+                .in('user_id', userIds)
+                .eq('status', 'success')
+                .order('created_at', { ascending: false });
+            if (paymentsErr) console.error('[admin/subscriptions] Payments query error:', JSON.stringify(paymentsErr));
+            payments = paymentsData ?? [];
+        }
 
         // ── Build payment lookup: user_id → latest payment ────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const paymentMap: Record<string, any> = {};
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (payments as any[] ?? []).forEach((p: any) => {
+        payments.forEach((p: any) => {
             if (!paymentMap[p.user_id]) paymentMap[p.user_id] = p;
         });
 
         // ── Fetch billing details (latest per user) ───────────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: billings } = await (supabase as any)
-            .from('billing_details')
-            .select('user_id, full_name, phone, country, state, city, zip_code, address, company_name, created_at')
-            .in('user_id', userIds)
-            .order('created_at', { ascending: false });
+        let billings: any[] = [];
+        if (userIds.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { data: billingsData, error: billingsErr } = await (supabase as any)
+                .from('billing_details')
+                .select('user_id, full_name, phone, country, state, city, zip_code, address, company_name, created_at')
+                .in('user_id', userIds)
+                .order('created_at', { ascending: false });
+            if (billingsErr) console.error('[admin/subscriptions] Billings query error:', JSON.stringify(billingsErr));
+            billings = billingsData ?? [];
+        }
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const billingMap: Record<string, any> = {};
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (billings as any[] ?? []).forEach((b: any) => {
+        billings.forEach((b: any) => {
             if (!billingMap[b.user_id]) billingMap[b.user_id] = b;
         });
 

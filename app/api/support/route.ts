@@ -28,10 +28,15 @@ export async function POST(req: NextRequest) {
 
         const supabase = createClient();
 
-        // Generate ticket ID
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: ticketIdData } = await (supabase as any).rpc('generate_ticket_id') as { data: string | null };
-        const ticketId = ticketIdData ?? `TKT-${Date.now()}`;
+        // Generate ticket ID — fall back gracefully if RPC not yet deployed
+        let ticketId = `TKT-${Date.now()}`;
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { data: ticketIdData, error: rpcErr } = await (supabase as any).rpc('generate_ticket_id') as { data: string | null; error: unknown };
+            if (!rpcErr && ticketIdData) ticketId = ticketIdData;
+        } catch (rpcEx) {
+            console.warn('[support] generate_ticket_id RPC failed, using fallback:', rpcEx);
+        }
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: ticket, error } = await (supabase as any)
@@ -49,7 +54,10 @@ export async function POST(req: NextRequest) {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error('[support POST] Insert error:', JSON.stringify(error));
+            throw error;
+        }
 
         const categoryLabel = category.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
