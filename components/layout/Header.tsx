@@ -24,6 +24,12 @@ export default async function Header() {
                 <div className="flex items-center gap-4">
                     {session ? (
                         <>
+                            {session.role === 'admin' && (
+                                <Link href="/admin" className="text-sm font-medium text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1">
+                                    <Sparkles className="w-3 h-3" />
+                                    Admin
+                                </Link>
+                            )}
                             <Link href="/dashboard" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
                                 Dashboard
                             </Link>

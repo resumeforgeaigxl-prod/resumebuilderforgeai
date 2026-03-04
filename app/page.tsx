@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { ArrowRight, FileText, Sparkles, Zap, Shield, Target, Layout, Upload, CheckCircle2, Lock, TrendingUp, XCircle, BrainCircuit, Briefcase } from 'lucide-react';
+import { ArrowRight, FileText, Sparkles, Zap, Shield, Target, Layout, Upload, CheckCircle2, Lock, TrendingUp, XCircle, BrainCircuit, Briefcase, MessageSquareWarning } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -88,7 +88,7 @@ export default function Home() {
           </div>
 
           <div className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 p-8 md:p-12 rounded-3xl text-center max-w-4xl mx-auto relative overflow-hidden">
-            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay" />
+
             <Shield className="w-12 h-12 text-purple-400 mx-auto mb-6" />
             <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">ResumeForgeAI Fixes Everything</h3>
             <p className="text-slate-300 text-lg">Our system ensures strict ATS compliance, injects powerful action verbs, and automatically cross-references the exact keywords required by your target job description.</p>
@@ -192,8 +192,8 @@ export default function Home() {
             <FeatureCard icon={<Target className="w-6 h-6 text-emerald-400" />} title="JD Matching" desc="Cross-reference missing keywords against any job description." />
             <FeatureCard icon={<Layout className="w-6 h-6 text-pink-400" />} title="Portfolio Generator" desc="Turn your resume into a stunning dark-mode web portfolio instantly." />
             <FeatureCard icon={<TestIcon />} title="AI Mock Tests" desc="Generate technical interview questions specific to your exact resume." />
-            <FeatureCard icon={<FileText className="w-6 h-6 text-slate-400" />} title="Clean Templates" desc="Single-column, print-ready templates designed strictly for parsing bots." />
-            <FeatureCard icon={<Upload className="w-6 h-6 text-cyan-400" />} title="PDF / DOC Parser" desc="Extract your data instantly. No need to re-type your entire history." />
+            <FeatureCard icon={<MessageSquareWarning className="w-6 h-6 text-orange-400" />} title="JobForgeAI Chat" desc="A strict AI career coach for optimization and interview prep." />
+            <FeatureCard icon={<Briefcase className="w-6 h-6 text-cyan-400" />} title="Live Job Board" desc="Curated MNC and entry-level jobs with direct ATS match scores." />
             <FeatureCard icon={<Shield className="w-6 h-6 text-yellow-400" />} title="Secure Auth" desc="OAuth logins via Google, GitHub, or Discord. Secure cloud storage." />
           </div>
         </section>

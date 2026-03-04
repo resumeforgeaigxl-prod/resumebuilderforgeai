@@ -1,5 +1,5 @@
 import { ResumeCard } from '@/components/dashboard/resume-card'
-import { PlusCircle, Brain, Globe, MessageSquareWarning } from 'lucide-react'
+import { PlusCircle, Brain, Globe, MessageSquareWarning, Crown, User as UserIcon, Sparkles, CheckCircle2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { CreateResumeButton } from '@/components/dashboard/create-resume-button'
 import { getSession } from '@/lib/auth/jwt'
@@ -15,6 +15,14 @@ export default async function DashboardPage() {
         return null
     }
 
+    // Fetch user details for name and plan
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: user } = await (supabase as any)
+        .from('users')
+        .select('full_name, email, plan_type, plan_end')
+        .eq('id', session.userId)
+        .single();
+
     // Fetch resumes
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: resumes, error } = await (supabase as any)
@@ -23,15 +31,86 @@ export default async function DashboardPage() {
         .eq('user_id', session.userId)
         .order('updated_at', { ascending: false })
 
+    const displayName = user?.full_name || user?.email?.split('@')[0] || 'User';
+    const planType = user?.plan_type?.toUpperCase() || 'FREE';
+
+    // Check if plan is active
+    const isPlanActive = user?.plan_end ? new Date(user.plan_end) > new Date() : false;
+    const activePlan = (planType !== 'FREE' && isPlanActive) ? planType : 'FREE';
+
+    const planBadgeStyles: Record<string, string> = {
+        FREE: 'bg-slate-800/50 text-slate-400 border-slate-700',
+        PRO: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+        PREMIUM: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+        CAREER: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    };
+
     return (
         <div className="space-y-8">
             <PaymentSuccessBanner />
+
+            {/* User Welcome & Plan Info */}
+            <div className="relative overflow-hidden p-8 rounded-[2rem] bg-slate-900/40 border border-slate-800/60 backdrop-blur-md group">
+                {/* Background Glow */}
+                <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-600/10 blur-[80px] rounded-full pointer-events-none group-hover:bg-indigo-600/20 transition-all duration-700" />
+
+                <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8">
+                    <div className="flex items-center gap-6">
+                        <div className="relative">
+                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-white/5 shadow-inner">
+                                {activePlan === 'FREE' ? (
+                                    <UserIcon className="w-8 h-8 text-slate-400" />
+                                ) : (
+                                    <Crown className="w-8 h-8 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.4)]" />
+                                )}
+                            </div>
+                            {activePlan !== 'FREE' && (
+                                <div className="absolute -top-2 -right-2">
+                                    <Sparkles className="w-5 h-5 text-amber-400 animate-pulse" />
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="space-y-1">
+                            <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                                Active Dashboard
+                            </p>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                <h1 className="text-3xl font-black text-white tracking-tight">
+                                    {displayName}
+                                </h1>
+                                <div className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black border uppercase tracking-widest ${planBadgeStyles[activePlan] || planBadgeStyles.FREE}`}>
+                                    {activePlan} Membership
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        {activePlan === 'FREE' ? (
+                            <Link href="/#pricing" className="px-6 py-3 rounded-2xl bg-white text-black text-sm font-bold transition-all hover:scale-105 active:scale-95 shadow-xl shadow-white/5">
+                                Upgrade to Pro
+                            </Link>
+                        ) : (
+                            <div className="text-right hidden sm:block">
+                                <p className="text-xs text-slate-500 font-medium">Subscription Status</p>
+                                <p className="text-sm text-emerald-400 font-bold flex items-center gap-1 justify-end">
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    Active Account
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+                    <h2 className="text-2xl font-bold text-white">
                         My Resumes
-                    </h1>
-                    <p className="text-slate-400 mt-2">Manage and optimize your professional profiles</p>
+                    </h2>
+                    <p className="text-slate-400 mt-1 text-sm">Manage and optimize your professional profiles</p>
                 </div>
 
                 <CreateResumeButton />
