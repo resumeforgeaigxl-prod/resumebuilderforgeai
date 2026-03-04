@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { getSession } from '@/lib/auth/jwt'
+import { sendResumeCreatedEmail } from '@/lib/brevo'
 
 const DEFAULT_RESUME_JSON = {
     name: "",
@@ -63,6 +65,30 @@ export async function POST() {
                 success: false,
                 error: 'Failed to generate resume ID'
             }, { status: 500 });
+        }
+
+        // 5. Send resume-created email (non-blocking, fire-and-forget)
+        try {
+            const supabaseAdmin = createAdminClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.SUPABASE_SERVICE_ROLE_KEY!
+            );
+            const { data: userRow } = await supabaseAdmin
+                .from('users')
+                .select('email, full_name')
+                .eq('id', userId)
+                .single();
+
+            if (userRow?.email) {
+                sendResumeCreatedEmail(
+                    userRow.email,
+                    userRow.full_name || undefined,
+                    'Untitled Resume',
+                    data.id
+                ).catch(e => console.error('[Resume Create] Email error:', e));
+            }
+        } catch (emailErr) {
+            console.error('[Resume Create] Failed to trigger email:', emailErr);
         }
 
         return NextResponse.json({ success: true, id: data.id });

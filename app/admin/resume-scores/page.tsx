@@ -1,87 +1,140 @@
-import { createClient } from '@/lib/supabase/server';
-
-import { Activity, Star, Calendar } from 'lucide-react';
+import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { Activity, Star, Calendar, Target } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 export default async function AdminResumeScoresPage() {
-    const supabase = createClient();
+    const supabase = createAdminClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
 
-    // Fetch resume scores with associated resume and user data
+    // Fetch latest ATS score checks from resume_scores table (logged by admin-logger)
     const { data: scores } = await supabase
-        .from('resume_analysis')
+        .from('resume_scores')
         .select(`
             *,
-            resumes(title, user_id),
-            users!resume_analysis_user_id_fkey(email)
+            users ( email, full_name )
         `)
-        .order('created_at', { ascending: false })
+        .order('checked_at', { ascending: false })
         .limit(100);
+
+    const totalChecks = scores?.length ?? 0;
+    const avgScore = totalChecks > 0
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ? Math.round((scores as any[]).reduce((sum: number, s: any) => sum + (s.score ?? 0), 0) / totalChecks)
+        : 0;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const highScores = (scores as any[] ?? []).filter((s: any) => (s.score ?? 0) >= 80).length;
 
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 flex items-center gap-3">
-                <Activity className="w-8 h-8 text-blue-400" />
-                Resume Scores
-            </h1>
-            <p className="text-slate-400">Track and monitor ATS score checks performed by users.</p>
+            <div>
+                <h1 className="text-2xl font-bold flex items-center gap-2">
+                    <Activity className="w-6 h-6 text-blue-400" />
+                    ATS Score Checks
+                </h1>
+                <p className="text-slate-500 text-sm mt-1">
+                    Track all ATS score checks performed by users
+                </p>
+            </div>
 
-            <div className="bg-slate-900/50 border border-white/5 rounded-2xl text-white">
-                <div className="p-6 border-b border-white/5">
-                    <h2 className="text-xl font-bold">Recent Score Checks</h2>
-                </div>
-                <div className="p-6">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left text-slate-400">
-                            <thead className="text-xs uppercase bg-slate-800/50 text-slate-300">
-                                <tr>
-                                    <th className="px-6 py-3">Resume Title</th>
-                                    <th className="px-6 py-3">User</th>
-                                    <th className="px-6 py-3 text-center">Score</th>
-                                    <th className="px-6 py-3">Keywords</th>
-                                    <th className="px-6 py-3">Checked At</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                {scores?.map((s: any) => {
-                                    const averageScore = Math.round(((s.keyword_score || 0) + (s.impact_score || 0) + (s.action_score || 0) + (s.readability_score || 0)) / 4);
-
-                                    return (
-                                        <tr key={s.id} className="border-b border-white/5 hover:bg-white/5">
-                                            <td className="px-6 py-4 font-medium text-white">
-                                                {s.resumes?.title || 'Unknown Resume'}
-                                            </td>
-                                            <td className="px-6 py-4 text-blue-400">
-                                                {/* Fallback to user_id if joining users table failed due to schema changes */}
-                                                {s.users?.email || s.resumes?.user_id || 'Unknown'}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex justify-center items-center gap-2">
-                                                    <Star className={`w-4 h-4 ${averageScore >= 80 ? 'text-emerald-400' : averageScore >= 60 ? 'text-yellow-400' : 'text-red-400'}`} />
-                                                    <span className={`font-bold ${averageScore >= 80 ? 'text-emerald-400' : averageScore >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>{averageScore}%</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="bg-slate-800 text-slate-300 px-2 py-1 rounded text-xs">
-                                                    {s.keyword_score || 0}% match
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-2">
-                                                    <Calendar className="w-3 h-3 text-slate-500" />
-                                                    {s.created_at ? formatDistanceToNow(new Date(s.created_at), { addSuffix: true }) : 'Unknown'}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                }) || (
-                                        <tr>
-                                            <td colSpan={5} className="px-6 py-4 text-center">No scores tracked yet.</td>
-                                        </tr>
-                                    )}
-                            </tbody>
-                        </table>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
+                    <div className="inline-flex p-3 rounded-xl bg-blue-500/10 mb-4">
+                        <Target className="w-5 h-5 text-blue-400" />
                     </div>
+                    <div className="text-3xl font-bold text-white mb-1">{totalChecks}</div>
+                    <div className="text-sm text-slate-400">Total ATS Checks</div>
+                </div>
+                <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
+                    <div className="inline-flex p-3 rounded-xl bg-amber-500/10 mb-4">
+                        <Star className="w-5 h-5 text-amber-400" />
+                    </div>
+                    <div className="text-3xl font-bold text-white mb-1">{avgScore}%</div>
+                    <div className="text-sm text-slate-400">Average Score</div>
+                </div>
+                <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
+                    <div className="inline-flex p-3 rounded-xl bg-emerald-500/10 mb-4">
+                        <Activity className="w-5 h-5 text-emerald-400" />
+                    </div>
+                    <div className="text-3xl font-bold text-white mb-1">{highScores}</div>
+                    <div className="text-sm text-slate-400">High Scores (≥80%)</div>
+                </div>
+            </div>
+
+            {/* Table */}
+            <div className="bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden">
+                <div className="px-6 py-4 border-b border-white/5">
+                    <h2 className="font-semibold text-sm">Recent ATS Score Checks</h2>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                        <thead className="border-b border-white/5 text-xs text-slate-500 uppercase tracking-wider">
+                            <tr>
+                                <th className="px-6 py-3 text-left font-bold">User</th>
+                                <th className="px-6 py-3 text-center font-bold">ATS Score</th>
+                                <th className="px-6 py-3 text-center font-bold">Keywords</th>
+                                <th className="px-6 py-3 text-center font-bold">Skills</th>
+                                <th className="px-6 py-3 text-left font-bold">Checked At</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                            {(scores as any[] ?? []).length === 0 && (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-12 text-center text-slate-600">
+                                        No ATS checks recorded yet. Events will appear here once users check their resume score.
+                                    </td>
+                                </tr>
+                            )}
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                            {(scores as any[] ?? []).map((s: any) => {
+                                const userObj = Array.isArray(s.users) ? s.users[0] : s.users;
+                                const score = s.score ?? 0;
+                                const scoreColor = score >= 80 ? 'text-emerald-400' : score >= 60 ? 'text-yellow-400' : 'text-red-400';
+                                const scoreBg = score >= 80 ? 'bg-emerald-500/10 border-emerald-500/20' : score >= 60 ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-red-500/10 border-red-500/20';
+
+                                return (
+                                    <tr key={s.id} className="hover:bg-white/[0.02] transition-colors">
+                                        <td className="px-6 py-3">
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500/30 to-indigo-500/30 flex items-center justify-center text-[10px] font-bold text-blue-300 shrink-0">
+                                                    {(userObj?.email || '?').charAt(0).toUpperCase()}
+                                                </div>
+                                                <div>
+                                                    {userObj?.full_name && (
+                                                        <p className="text-slate-200 font-semibold text-xs">{userObj.full_name}</p>
+                                                    )}
+                                                    <p className="text-slate-500 text-[11px]">{userObj?.email || 'Unknown'}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-3 text-center">
+                                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-xs font-bold ${scoreBg} ${scoreColor}`}>
+                                                <Star className="w-3 h-3" /> {score}%
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-3 text-center text-slate-400 text-xs">
+                                            {s.keyword_match ?? 0}%
+                                        </td>
+                                        <td className="px-6 py-3 text-center text-slate-400 text-xs">
+                                            {s.skill_match ?? 0}%
+                                        </td>
+                                        <td className="px-6 py-3">
+                                            <div className="flex items-center gap-2 text-slate-500 text-xs">
+                                                <Calendar className="w-3 h-3" />
+                                                {s.checked_at
+                                                    ? formatDistanceToNow(new Date(s.checked_at), { addSuffix: true })
+                                                    : 'Unknown'
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

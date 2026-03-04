@@ -10,8 +10,8 @@
 const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 
 const FROM = {
-    name: process.env.BREVO_FROM_NAME ?? 'ResumeForgeAI',
-    email: process.env.BREVO_FROM_EMAIL ?? 'support@resumeforgeai.in',
+  name: process.env.BREVO_FROM_NAME ?? 'ResumeForgeAI',
+  email: process.env.BREVO_FROM_EMAIL ?? 'support@resumeforgeai.in',
 };
 
 // ── Low-level sender ─────────────────────────────────────────────────────────
@@ -20,52 +20,52 @@ interface BrevoRecipient { email: string; name?: string }
 interface BrevoAttachment { name: string; content: string } // base64
 
 interface SendEmailOptions {
-    to: BrevoRecipient[];
-    subject: string;
-    html: string;
-    attachments?: BrevoAttachment[];
+  to: BrevoRecipient[];
+  subject: string;
+  html: string;
+  attachments?: BrevoAttachment[];
 }
 
 export async function sendEmail(opts: SendEmailOptions): Promise<boolean> {
-    const apiKey = process.env.BREVO_API_KEY;
-    if (!apiKey) {
-        console.warn('[Brevo] BREVO_API_KEY not set — email skipped');
-        return false;
-    }
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) {
+    console.warn('[Brevo] BREVO_API_KEY not set — email skipped');
+    return false;
+  }
 
-    try {
-        const res = await fetch(BREVO_API_URL, {
-            method: 'POST',
-            headers: {
-                'api-key': apiKey,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify({
-                sender: FROM,
-                to: opts.to,
-                subject: opts.subject,
-                htmlContent: opts.html,
-                ...(opts.attachments?.length ? { attachment: opts.attachments } : {}),
-            }),
-        });
+  try {
+    const res = await fetch(BREVO_API_URL, {
+      method: 'POST',
+      headers: {
+        'api-key': apiKey,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: FROM,
+        to: opts.to,
+        subject: opts.subject,
+        htmlContent: opts.html,
+        ...(opts.attachments?.length ? { attachment: opts.attachments } : {}),
+      }),
+    });
 
-        if (!res.ok) {
-            const err = await res.text();
-            console.error('[Brevo] Send failed:', res.status, err);
-            return false;
-        }
-        return true;
-    } catch (err) {
-        console.error('[Brevo] Network error:', err);
-        return false;
+    if (!res.ok) {
+      const err = await res.text();
+      console.error('[Brevo] Send failed:', res.status, err);
+      return false;
     }
+    return true;
+  } catch (err) {
+    console.error('[Brevo] Network error:', err);
+    return false;
+  }
 }
 
 // ── Shared HTML wrapper ──────────────────────────────────────────────────────
 
 function emailWrapper(bodyHtml: string): string {
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -114,7 +114,7 @@ function emailWrapper(bodyHtml: string): string {
 }
 
 function ctaButton(text: string, href: string, color = '#6366f1'): string {
-    return `<div style="text-align:center;margin:28px 0;">
+  return `<div style="text-align:center;margin:28px 0;">
       <a href="${href}" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,${color},#a855f7);color:#fff;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;letter-spacing:0.3px;">
         ${text} →
       </a>
@@ -122,14 +122,14 @@ function ctaButton(text: string, href: string, color = '#6366f1'): string {
 }
 
 function headingAndSub(heading: string, sub: string): string {
-    return `
+  return `
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:800;color:#f1f5f9;">${heading}</h1>
       <p style="margin:0 0 28px;font-size:15px;color:#94a3b8;">${sub}</p>
     `;
 }
 
 function infoRow(label: string, value: string): string {
-    return `<tr>
+  return `<tr>
       <td style="padding:10px 14px;font-size:13px;color:#94a3b8;width:40%;border-bottom:1px solid #1e1b4b;">${label}</td>
       <td style="padding:10px 14px;font-size:13px;color:#e2e8f0;font-weight:600;border-bottom:1px solid #1e1b4b;">${value}</td>
     </tr>`;
@@ -138,8 +138,8 @@ function infoRow(label: string, value: string): string {
 // ── 1. Welcome Email ─────────────────────────────────────────────────────────
 
 export async function sendWelcomeEmail(to: string, name?: string): Promise<void> {
-    const displayName = name || to.split('@')[0];
-    const html = emailWrapper(`
+  const displayName = name || to.split('@')[0];
+  const html = emailWrapper(`
       ${headingAndSub(`Welcome, ${displayName}! 🎉`, 'Your AI-powered career journey starts now.')}
       <p style="color:#cbd5e1;font-size:14px;line-height:1.7;margin:0 0 20px;">
         You've joined <strong style="color:#a78bfa;">ResumeForgeAI</strong> — the smartest way to build ATS-optimized resumes, 
@@ -157,41 +157,41 @@ export async function sendWelcomeEmail(to: string, name?: string): Promise<void>
       <p style="text-align:center;color:#64748b;font-size:12px;margin:0;">Your free account includes 1 resume download without watermark.</p>
     `);
 
-    await sendEmail({
-        to: [{ email: to, name: displayName }],
-        subject: `Welcome to ResumeForgeAI, ${displayName}! 🚀`,
-        html,
-    });
+  await sendEmail({
+    to: [{ email: to, name: displayName }],
+    subject: `Welcome to ResumeForgeAI, ${displayName}! 🚀`,
+    html,
+  });
 }
 
 // ── 2. Payment Success + Invoice Email ───────────────────────────────────────
 
 interface InvoiceEmailData {
-    userEmail: string;
-    userName?: string;
-    plan: string;
-    amountINR: string;
-    paymentMethod: string;
-    invoiceNumber: string;
-    invoiceId: string;
-    couponCode?: string | null;
-    date: string;
+  userEmail: string;
+  userName?: string;
+  plan: string;
+  amountINR: string;
+  paymentMethod: string;
+  invoiceNumber: string;
+  invoiceId: string;
+  couponCode?: string | null;
+  date: string;
 }
 
 export async function sendPaymentSuccessEmail(data: InvoiceEmailData): Promise<void> {
-    const planLabel = data.plan.charAt(0) + data.plan.slice(1).toLowerCase();
-    const isFree = data.amountINR === '₹0' || data.amountINR === 'Free';
-    const methodLabel = data.paymentMethod === 'coupon'
-        ? `Coupon${data.couponCode ? ` (${data.couponCode})` : ''}`
-        : 'Razorpay';
+  const planLabel = data.plan.charAt(0) + data.plan.slice(1).toLowerCase();
+  const isFree = data.amountINR === '₹0' || data.amountINR === 'Free';
+  const methodLabel = data.paymentMethod === 'coupon'
+    ? `Coupon${data.couponCode ? ` (${data.couponCode})` : ''}`
+    : 'Razorpay';
 
-    const html = emailWrapper(`
+  const html = emailWrapper(`
       ${headingAndSub(
-        isFree ? '🎟 Plan Activated!' : '🎉 Payment Successful!',
-        isFree
-            ? `Your coupon was applied and ${planLabel} plan is now active.`
-            : `Your ${planLabel} plan is now active. Thank you for your purchase!`
-    )}
+    isFree ? '🎟 Plan Activated!' : '🎉 Payment Successful!',
+    isFree
+      ? `Your coupon was applied and ${planLabel} plan is now active.`
+      : `Your ${planLabel} plan is now active. Thank you for your purchase!`
+  )}
 
       <table width="100%" cellpadding="0" cellspacing="0" style="background:#0d0d1c;border-radius:10px;border:1px solid #1e1b4b;margin-bottom:24px;">
         <tbody>
@@ -210,22 +210,22 @@ export async function sendPaymentSuccessEmail(data: InvoiceEmailData): Promise<v
       </p>
     `);
 
-    await sendEmail({
-        to: [{ email: data.userEmail, name: data.userName }],
-        subject: `${isFree ? '🎟 Plan Activated' : '✅ Payment Confirmed'} — ${planLabel} Plan | ResumeForgeAI`,
-        html,
-    });
+  await sendEmail({
+    to: [{ email: data.userEmail, name: data.userName }],
+    subject: `${isFree ? '🎟 Plan Activated' : '✅ Payment Confirmed'} — ${planLabel} Plan | ResumeForgeAI`,
+    html,
+  });
 }
 
 // ── 3. Support Ticket Created (User confirmation) ────────────────────────────
 
 export async function sendTicketConfirmationEmail(
-    to: string,
-    ticketId: string,
-    category: string,
-    message: string,
+  to: string,
+  ticketId: string,
+  category: string,
+  message: string,
 ): Promise<void> {
-    const html = emailWrapper(`
+  const html = emailWrapper(`
       ${headingAndSub('Support Ticket Received 🎫', `We've received your request and will respond shortly.`)}
       <table width="100%" cellpadding="0" cellspacing="0" style="background:#0d0d1c;border-radius:10px;border:1px solid #1e1b4b;margin-bottom:24px;">
         <tbody>
@@ -243,22 +243,22 @@ export async function sendTicketConfirmationEmail(
       </p>
     `);
 
-    await sendEmail({
-        to: [{ email: to }],
-        subject: `🎫 Ticket ${ticketId} — We received your request | ResumeForgeAI`,
-        html,
-    });
+  await sendEmail({
+    to: [{ email: to }],
+    subject: `🎫 Ticket ${ticketId} — We received your request | ResumeForgeAI`,
+    html,
+  });
 }
 
 // ── 4. Admin reply notification ──────────────────────────────────────────────
 
 export async function sendAdminReplyEmail(
-    to: string,
-    ticketId: string,
-    adminReply: string,
-    status: string,
+  to: string,
+  ticketId: string,
+  adminReply: string,
+  status: string,
 ): Promise<void> {
-    const html = emailWrapper(`
+  const html = emailWrapper(`
       ${headingAndSub('Support Update 💬', `Your ticket ${ticketId} has received a reply.`)}
       <table width="100%" cellpadding="0" cellspacing="0" style="background:#0d0d1c;border-radius:10px;border:1px solid #1e1b4b;margin-bottom:20px;">
         <tbody>
@@ -273,25 +273,25 @@ export async function sendAdminReplyEmail(
       ${ctaButton('Open Dashboard', 'https://resumeforgeai.in/dashboard')}
     `);
 
-    await sendEmail({
-        to: [{ email: to }],
-        subject: `💬 Reply on Ticket ${ticketId} | ResumeForgeAI Support`,
-        html,
-    });
+  await sendEmail({
+    to: [{ email: to }],
+    subject: `💬 Reply on Ticket ${ticketId} | ResumeForgeAI Support`,
+    html,
+  });
 }
 
 // ── 5. Admin notification (new ticket alert) ─────────────────────────────────
 
 export async function notifyAdminNewTicket(
-    ticketId: string,
-    userEmail: string,
-    category: string,
-    message: string,
+  ticketId: string,
+  userEmail: string,
+  category: string,
+  message: string,
 ): Promise<void> {
-    const adminEmail = process.env.BREVO_ADMIN_EMAIL;
-    if (!adminEmail) return;
+  const adminEmail = process.env.BREVO_ADMIN_EMAIL;
+  if (!adminEmail) return;
 
-    const html = emailWrapper(`
+  const html = emailWrapper(`
       ${headingAndSub('New Support Ticket 🚨', `A user has submitted a support request.`)}
       <table width="100%" cellpadding="0" cellspacing="0" style="background:#0d0d1c;border-radius:10px;border:1px solid #1e1b4b;margin-bottom:20px;">
         <tbody>
@@ -306,9 +306,71 @@ export async function notifyAdminNewTicket(
       ${ctaButton('View in Admin Panel', 'https://resumeforgeai.in/admin/support', '#d97706')}
     `);
 
-    await sendEmail({
-        to: [{ email: adminEmail, name: 'ResumeForgeAI Admin' }],
-        subject: `🚨 New Ticket ${ticketId} — ${category}`,
-        html,
-    });
+  await sendEmail({
+    to: [{ email: adminEmail, name: 'ResumeForgeAI Admin' }],
+    subject: `🚨 New Ticket ${ticketId} — ${category}`,
+    html,
+  });
 }
+
+// ── 6. Login / Welcome-back Email ─────────────────────────────────────────────
+
+export async function sendLoginEmail(to: string, name?: string): Promise<void> {
+  const displayName = name || to.split('@')[0];
+  const html = emailWrapper(`
+      ${headingAndSub(`Welcome back, ${displayName}! 👋`, 'You have successfully signed in to ResumeForgeAI.')}
+      <p style="color:#cbd5e1;font-size:14px;line-height:1.7;margin:0 0 20px;">
+        Your session is now active. Continue building your AI-powered resume and land your dream job.
+      </p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#0d0d1c;border-radius:10px;border:1px solid #1e1b4b;margin-bottom:24px;">
+        <tbody>
+          ${infoRow('✦ Quick Actions', 'Build or update your resume')}
+          ${infoRow('✦ ATS Checker', 'Optimize your resume score')}
+          ${infoRow('✦ Job Board', 'Explore matched opportunities')}
+        </tbody>
+      </table>
+      ${ctaButton('Go to Dashboard', 'https://resumeforgeai.in/dashboard')}
+      <p style="text-align:center;color:#64748b;font-size:12px;margin:0;">If this wasn't you, please <a href="mailto:support@resumeforgeai.in" style="color:#818cf8;">contact support</a> immediately.</p>
+    `);
+
+  await sendEmail({
+    to: [{ email: to, name: displayName }],
+    subject: `Welcome back to ResumeForgeAI, ${displayName}! 👋`,
+    html,
+  });
+}
+
+// ── 7. Resume Created Email ────────────────────────────────────────────────────
+
+export async function sendResumeCreatedEmail(
+  to: string,
+  name: string | undefined,
+  resumeTitle: string,
+  resumeId: string,
+): Promise<void> {
+  const displayName = name || to.split('@')[0];
+  const resumeUrl = `https://resumeforgeai.in/builder/${resumeId}`;
+
+  const html = emailWrapper(`
+      ${headingAndSub('Your Resume is Ready! 📄', `"${resumeTitle}" has been created successfully.`)}
+      <p style="color:#cbd5e1;font-size:14px;line-height:1.7;margin:0 0 20px;">
+        Hi ${displayName}, your resume <strong style="color:#a78bfa;">"${resumeTitle}"</strong> is ready to edit and download. Use our AI tools to optimize it for ATS systems.
+      </p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#0d0d1c;border-radius:10px;border:1px solid #1e1b4b;margin-bottom:24px;">
+        <tbody>
+          ${infoRow('Resume Title', `<span style="color:#e2e8f0;">${resumeTitle}</span>`)}
+          ${infoRow('Next Step', 'Use AI Optimize to match job descriptions')}
+          ${infoRow('Pro Tip', 'Check your ATS score before applying')}
+        </tbody>
+      </table>
+      ${ctaButton('Open Resume Builder', resumeUrl, '#7c3aed')}
+      <p style="text-align:center;color:#64748b;font-size:12px;margin:0;">Download as PDF anytime from your dashboard.</p>
+    `);
+
+  await sendEmail({
+    to: [{ email: to, name: displayName }],
+    subject: `Your Resume is Ready — "${resumeTitle}" | ResumeForgeAI`,
+    html,
+  });
+}
+

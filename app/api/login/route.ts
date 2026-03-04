@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createSession } from '@/lib/auth/jwt';
 import bcrypt from 'bcrypt';
+import { sendLoginEmail } from '@/lib/brevo';
 
 export const runtime = 'nodejs';
 
@@ -55,7 +56,11 @@ export async function POST(request: Request) {
             provider: 'credentials'
         });
 
-        // 5. Return JSON success
+        // 5. Send login notification email (non-blocking)
+        sendLoginEmail(user.email, user.full_name || undefined)
+            .catch(e => console.error('[Login] Email error:', e));
+
+        // 6. Return JSON success
         return NextResponse.json({
             success: true,
             profileCompleted: user.profile_completed

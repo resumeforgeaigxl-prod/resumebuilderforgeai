@@ -3,21 +3,35 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
     Briefcase, MapPin, ExternalLink, Sparkles,
-    Loader2, Info, AlertCircle, Star, RefreshCw, Globe, GraduationCap
+    Loader2, Info, AlertCircle, Star, RefreshCw, Globe, GraduationCap,
+    Lock, Crown, Zap
 } from 'lucide-react';
+import Link from 'next/link';
 
 interface Job {
     id: string;
     title: string;
     company: string;
     location: string;
-    description: string;
-    apply_url: string;
+    description: string | null;
+    apply_url: string | null;
     employment_type: string;
     posted_at: string;
     source: string;
     is_mnc: boolean;
     level: string;
+    locked?: boolean;
+}
+
+interface JobsResponse {
+    success: boolean;
+    jobs: Job[];
+    lockedJobs: Job[];
+    totalJobs: number;
+    visibleCount: number;
+    lockedCount: number;
+    userPlan: string;
+    planLimit: number | null;
 }
 
 const SOURCE_COLOR: Record<string, string> = {
@@ -25,6 +39,44 @@ const SOURCE_COLOR: Record<string, string> = {
     Adzuna: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
     Remotive: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
 };
+
+// ─── Locked Job Card ─────────────────────────────────────────────────────────
+function LockedJobCard({ job }: { job: Job }) {
+    return (
+        <div className="relative p-6 bg-white/[0.015] border border-white/8 rounded-[2rem] overflow-hidden group cursor-not-allowed select-none">
+            {/* Blurred content layer */}
+            <div className="blur-[3px] pointer-events-none opacity-40">
+                <div className="flex gap-3 items-start mb-3 pr-20">
+                    <div className="w-11 h-11 shrink-0 rounded-2xl bg-gradient-to-br from-slate-700/30 to-slate-600/20 border border-white/5 flex items-center justify-center">
+                        <span className="text-slate-500 font-black text-base uppercase">
+                            {job.company?.charAt(0) || '?'}
+                        </span>
+                    </div>
+                    <div className="min-w-0">
+                        <h3 className="font-bold text-[15px] text-slate-300 truncate leading-snug">{job.title}</h3>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                            {job.company} · {job.location}
+                        </p>
+                    </div>
+                </div>
+                <div className="h-3 bg-slate-700/40 rounded-full mb-2 w-full" />
+                <div className="h-3 bg-slate-700/40 rounded-full mb-2 w-4/5" />
+                <div className="h-3 bg-slate-700/40 rounded-full w-3/5" />
+            </div>
+
+            {/* Lock overlay */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-black/60 via-black/70 to-black/80 rounded-[2rem]">
+                <div className="w-12 h-12 bg-amber-500/15 border border-amber-500/30 rounded-2xl flex items-center justify-center mb-3 shadow-lg shadow-amber-500/10">
+                    <Lock className="w-5 h-5 text-amber-400" />
+                </div>
+                <p className="text-xs font-black text-amber-300 uppercase tracking-widest mb-1">Premium Job</p>
+                <p className="text-[11px] text-slate-400 text-center max-w-[150px] leading-relaxed">
+                    Upgrade to Premium to unlock this job
+                </p>
+            </div>
+        </div>
+    );
+}
 
 // ─── Job Card ───────────────────────────────────────────────────────────────
 function JobCard({ job }: { job: Job }) {
@@ -36,7 +88,7 @@ function JobCard({ job }: { job: Job }) {
         } catch { return '—'; }
     })();
 
-    const shortDesc = (job.description || '').trim().slice(0, 200) + (job.description?.length > 200 ? '…' : '');
+    const shortDesc = (job.description || '').trim().slice(0, 200) + (job.description && job.description.length > 200 ? '…' : '');
 
     const handleATSMatch = () => {
         alert(
@@ -109,7 +161,7 @@ function JobCard({ job }: { job: Job }) {
                                 apply_url: job.apply_url
                             })
                         }).catch(() => { });
-                        window.open(job.apply_url, '_blank', 'noreferrer');
+                        window.open(job.apply_url || '#', '_blank', 'noreferrer');
                     }}
                     className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-lg shadow-blue-900/20"
                 >
@@ -169,17 +221,183 @@ function EmptyState({ label }: { label: string }) {
             <Info className="w-10 h-10 text-slate-700" />
             <h4 className="font-bold text-slate-400">No {label} found yet</h4>
             <p className="text-xs text-slate-600 max-w-xs">
-                Click <span className="text-blue-400 font-semibold">Refresh Feed</span> to pull live listings from JSearch & Adzuna.
+                Click <span className="text-blue-400 font-semibold">Refresh Feed</span> to pull live listings from JSearch &amp; Adzuna.
             </p>
         </div>
     );
 }
 
+// ─── Plan Banner ─────────────────────────────────────────────────────────────
+function PlanBanner({
+    visible, total, plan, lockedCount
+}: {
+    visible: number; total: number; plan: string; lockedCount: number;
+}) {
+    const isPaid = plan !== 'free';
+    const bgClass = isPaid
+        ? 'bg-emerald-500/5 border-emerald-500/15'
+        : 'bg-amber-500/8 border-amber-500/20';
+
+    return (
+        <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl border ${bgClass} mb-5`}>
+            <div className="flex items-center gap-3">
+                {isPaid
+                    ? <Crown className="w-4 h-4 text-emerald-400 shrink-0" />
+                    : <Zap className="w-4 h-4 text-amber-400 shrink-0" />
+                }
+                <div>
+                    <p className="text-sm font-bold text-white">
+                        Showing <span className={isPaid ? 'text-emerald-400' : 'text-amber-400'}>{visible}</span> of <span className="text-white">{total}</span> jobs
+                    </p>
+                    {!isPaid && lockedCount > 0 && (
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                            🔒 {lockedCount} jobs locked — Upgrade to Premium to unlock more jobs
+                        </p>
+                    )}
+                </div>
+            </div>
+            {!isPaid && lockedCount > 0 && (
+                <Link
+                    href="/billing"
+                    className="shrink-0 flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-amber-500/20"
+                >
+                    <Crown className="w-3.5 h-3.5" /> Upgrade to Premium
+                </Link>
+            )}
+        </div>
+    );
+}
+
+// ─── Upgrade Gate (shown after locked jobs) ───────────────────────────────────
+function UpgradeGate({ count, plan }: { count: number; plan: string }) {
+    if (plan !== 'free' || count === 0) return null;
+    return (
+        <div className="mt-6 p-6 rounded-[2rem] bg-gradient-to-br from-amber-500/10 via-orange-500/8 to-rose-500/5 border border-amber-500/20 text-center relative overflow-hidden">
+            {/* Glow */}
+            <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="w-14 h-14 bg-amber-500/15 border border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 relative">
+                <Crown className="w-7 h-7 text-amber-400" />
+            </div>
+            <h4 className="text-lg font-black text-white mb-2">
+                🔒 {count} More Jobs Available
+            </h4>
+            <p className="text-sm text-slate-400 mb-5 max-w-md mx-auto">
+                You&apos;re on the <span className="text-amber-400 font-bold">Free Plan</span>. Upgrade to Premium to unlock all {count} remaining jobs and apply instantly.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link
+                    href="/billing"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-sm uppercase tracking-wider rounded-2xl transition-all shadow-xl shadow-amber-500/20"
+                >
+                    <Crown className="w-4 h-4" /> Upgrade to Premium
+                </Link>
+                <Link
+                    href="/billing"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-sm rounded-2xl transition-all"
+                >
+                    View Plans
+                </Link>
+            </div>
+        </div>
+    );
+}
+
+// ─── Section ─────────────────────────────────────────────────────────────────
+interface SectionData {
+    jobs: Job[];
+    lockedJobs: Job[];
+    totalJobs: number;
+    visibleCount: number;
+    lockedCount: number;
+    userPlan: string;
+    planLimit: number | null;
+}
+
+function JobSection({
+    icon,
+    title,
+    accentClass,
+    bgAccent,
+    loaderColor,
+    moreColor,
+    loading,
+    data,
+    visible,
+    onLoadMore,
+}: {
+    icon: React.ReactNode;
+    title: string;
+    accentClass: string;
+    bgAccent: string;
+    loaderColor: string;
+    moreColor: string;
+    loading: boolean;
+    data: SectionData | null;
+    visible: number;
+    onLoadMore: () => void;
+}) {
+    const allDisplayJobs = [...(data?.jobs || []), ...(data?.lockedJobs || [])];
+    const visibleDisplayJobs = allDisplayJobs.slice(0, visible);
+    const remainingVisible = allDisplayJobs.length - visibleDisplayJobs.length;
+
+    return (
+        <section>
+            <div className="flex items-center gap-2 mb-3">
+                <div className={`p-1.5 ${bgAccent} rounded-lg`}>{icon}</div>
+                <h3 className={`text-lg font-bold ${accentClass}`}>{title}</h3>
+                <span className={`px-2 py-0.5 ${bgAccent} border border-white/10 rounded-md text-[11px] font-bold ${accentClass}`}>
+                    {data ? data.totalJobs : '—'}
+                </span>
+            </div>
+
+            {/* Plan banner */}
+            {data && data.lockedCount > 0 && (
+                <PlanBanner
+                    visible={data.visibleCount}
+                    total={data.totalJobs}
+                    plan={data.userPlan}
+                    lockedCount={data.lockedCount}
+                />
+            )}
+
+            {loading ? (
+                <div className={`flex items-center justify-center py-12 opacity-50`}>
+                    <Loader2 className={`w-8 h-8 animate-spin ${loaderColor}`} />
+                </div>
+            ) : (
+                <>
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                        {allDisplayJobs.length === 0
+                            ? <EmptyState label={title} />
+                            : visibleDisplayJobs.map(job =>
+                                job.locked
+                                    ? <LockedJobCard key={job.id} job={job} />
+                                    : <JobCard key={job.id} job={job} />
+                            )
+                        }
+                    </div>
+                    {/* Load more for visible (non-locked) portion */}
+                    {remainingVisible > 0 && (
+                        <LoadMoreButton
+                            remaining={remainingVisible}
+                            color={moreColor}
+                            onClick={onLoadMore}
+                        />
+                    )}
+                    {/* Upgrade gate after locked jobs */}
+                    {data && <UpgradeGate count={data.lockedCount} plan={data.userPlan} />}
+                </>
+            )}
+        </section>
+    );
+}
+
+
 // ─── Main Board ──────────────────────────────────────────────────────────────
 export function JobBoard() {
-    const [mncJobs, setMncJobs] = useState<Job[]>([]);
-    const [fresherJobs, setFresherJobs] = useState<Job[]>([]);
-    const [latestJobs, setLatestJobs] = useState<Job[]>([]);
+    const [mncData, setMncData] = useState<SectionData | null>(null);
+    const [fresherData, setFresherData] = useState<SectionData | null>(null);
+    const [latestData, setLatestData] = useState<SectionData | null>(null);
     const [loadingMnc, setLoadingMnc] = useState(true);
     const [loadingFresher, setLoadingFresher] = useState(true);
     const [loadingLatest, setLoadingLatest] = useState(true);
@@ -190,29 +408,38 @@ export function JobBoard() {
     const [visibleFresher, setVisibleFresher] = useState(10);
     const [visibleLatest, setVisibleLatest] = useState(10);
 
-    const fetchSection = useCallback(async (section: string) => {
+    const fetchSection = useCallback(async (section: string): Promise<SectionData | null> => {
         const res = await fetch(`/api/jobs/list?section=${section}`);
-        const data = await res.json();
-        return data.success ? (data.jobs || []) : [];
+        const data: JobsResponse = await res.json();
+        if (!data.success) return null;
+        return {
+            jobs: data.jobs || [],
+            lockedJobs: data.lockedJobs || [],
+            totalJobs: data.totalJobs ?? 0,
+            visibleCount: data.visibleCount ?? 0,
+            lockedCount: data.lockedCount ?? 0,
+            userPlan: data.userPlan ?? 'free',
+            planLimit: data.planLimit ?? null,
+        };
     }, []);
 
     const loadMnc = useCallback(async () => {
         setLoadingMnc(true);
-        try { setMncJobs(await fetchSection('mnc')); }
+        try { setMncData(await fetchSection('mnc')); }
         catch (e) { console.error('MNC load error:', e); }
         finally { setLoadingMnc(false); }
     }, [fetchSection]);
 
     const loadFresher = useCallback(async () => {
         setLoadingFresher(true);
-        try { setFresherJobs(await fetchSection('fresher')); }
+        try { setFresherData(await fetchSection('fresher')); }
         catch (e) { console.error('Fresher load error:', e); }
         finally { setLoadingFresher(false); }
     }, [fetchSection]);
 
     const loadLatest = useCallback(async () => {
         setLoadingLatest(true);
-        try { setLatestJobs(await fetchSection('latest')); }
+        try { setLatestData(await fetchSection('latest')); }
         catch (e) { console.error('Latest load error:', e); }
         finally { setLoadingLatest(false); }
     }, [fetchSection]);
@@ -266,109 +493,46 @@ export function JobBoard() {
             </div>
 
             {/* ── Section 1: Featured MNC Jobs ──────────────────────────────── */}
-            <section>
-                <div className="flex items-center gap-2 mb-5">
-                    <div className="p-1.5 bg-amber-500/15 rounded-lg">
-                        <Star className="w-4 h-4 text-amber-400" />
-                    </div>
-                    <h3 className="text-lg font-bold text-amber-200">Featured MNC Jobs</h3>
-                    <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded-md text-[11px] font-bold text-amber-400">
-                        {mncJobs.length}
-                    </span>
-                </div>
-
-                {loadingMnc ? (
-                    <div className="flex items-center justify-center py-12 opacity-50">
-                        <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
-                    </div>
-                ) : (
-                    <>
-                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                            {mncJobs.length === 0
-                                ? <EmptyState label="MNC Jobs" />
-                                : mncJobs.slice(0, visibleMnc).map(job => <JobCard key={job.id} job={job} />)
-                            }
-                        </div>
-                        {mncJobs.length > visibleMnc && (
-                            <LoadMoreButton
-                                remaining={mncJobs.length - visibleMnc}
-                                color="bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 text-amber-400"
-                                onClick={() => setVisibleMnc(v => v + 10)}
-                            />
-                        )}
-                    </>
-                )}
-            </section>
+            <JobSection
+                icon={<Star className="w-4 h-4 text-amber-400" />}
+                title="Featured MNC Jobs"
+                accentClass="text-amber-200"
+                bgAccent="bg-amber-500/15"
+                loaderColor="text-amber-400"
+                moreColor="bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 text-amber-400"
+                loading={loadingMnc}
+                data={mncData}
+                visible={visibleMnc}
+                onLoadMore={() => setVisibleMnc(v => v + 10)}
+            />
 
             {/* ── Section 2: Fresher & Intern Jobs ────────────────────────────── */}
-            <section>
-                <div className="flex items-center gap-2 mb-5">
-                    <div className="p-1.5 bg-green-500/15 rounded-lg">
-                        <GraduationCap className="w-4 h-4 text-green-400" />
-                    </div>
-                    <h3 className="text-lg font-bold text-green-200">Fresher & Intern Jobs</h3>
-                    <span className="px-2 py-0.5 bg-green-500/10 border border-green-500/20 rounded-md text-[11px] font-bold text-green-400">
-                        {fresherJobs.length}
-                    </span>
-                </div>
-
-                {loadingFresher ? (
-                    <div className="flex items-center justify-center py-12 opacity-50">
-                        <Loader2 className="w-8 h-8 animate-spin text-green-400" />
-                    </div>
-                ) : (
-                    <>
-                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                            {fresherJobs.length === 0
-                                ? <EmptyState label="Fresher Jobs" />
-                                : fresherJobs.slice(0, visibleFresher).map(job => <JobCard key={job.id} job={job} />)
-                            }
-                        </div>
-                        {fresherJobs.length > visibleFresher && (
-                            <LoadMoreButton
-                                remaining={fresherJobs.length - visibleFresher}
-                                color="bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 text-green-400"
-                                onClick={() => setVisibleFresher(v => v + 10)}
-                            />
-                        )}
-                    </>
-                )}
-            </section>
+            <JobSection
+                icon={<GraduationCap className="w-4 h-4 text-green-400" />}
+                title="Fresher & Intern Jobs"
+                accentClass="text-green-200"
+                bgAccent="bg-green-500/15"
+                loaderColor="text-green-400"
+                moreColor="bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 text-green-400"
+                loading={loadingFresher}
+                data={fresherData}
+                visible={visibleFresher}
+                onLoadMore={() => setVisibleFresher(v => v + 10)}
+            />
 
             {/* ── Section 3: Latest Tech Jobs ──────────────────────────────── */}
-            <section>
-                <div className="flex items-center gap-2 mb-5">
-                    <div className="p-1.5 bg-blue-500/15 rounded-lg">
-                        <Briefcase className="w-4 h-4 text-blue-400" />
-                    </div>
-                    <h3 className="text-lg font-bold">Latest Tech Jobs</h3>
-                    <span className="px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 rounded-md text-[11px] font-bold text-blue-400">
-                        {latestJobs.length}
-                    </span>
-                </div>
-
-                {loadingLatest ? (
-                    <div className="flex items-center justify-center py-12 opacity-50">
-                        <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
-                    </div>
-                ) : (
-                    <>
-                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                            {latestJobs.length === 0
-                                ? <EmptyState label="Tech Jobs" />
-                                : latestJobs.slice(0, visibleLatest).map(job => <JobCard key={job.id} job={job} />)
-                            }
-                        </div>
-                        {latestJobs.length > visibleLatest && (
-                            <LoadMoreButton
-                                remaining={latestJobs.length - visibleLatest}
-                                color="bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400"
-                                onClick={() => setVisibleLatest(v => v + 10)}
-                            />
-                        )}
-                    </>
-                )}
-            </section>
+            <JobSection
+                icon={<Briefcase className="w-4 h-4 text-blue-400" />}
+                title="Latest Tech Jobs"
+                accentClass=""
+                bgAccent="bg-blue-500/15"
+                loaderColor="text-blue-400"
+                moreColor="bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400"
+                loading={loadingLatest}
+                data={latestData}
+                visible={visibleLatest}
+                onLoadMore={() => setVisibleLatest(v => v + 10)}
+            />
 
             {/* Disclaimer */}
             <div className="p-4 bg-yellow-500/5 border border-yellow-500/10 rounded-2xl flex items-start gap-3">
