@@ -79,6 +79,14 @@ export async function POST(req: NextRequest) {
         await (supabase as any)
             .from('coupons').update({ used_count: coupon.used_count + 1 }).eq('id', coupon.id);
 
+        // Fetch user for email fallback
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: userData } = await (supabase as any)
+            .from('users')
+            .select('email, full_name')
+            .eq('id', session.userId)
+            .single();
+
         // Fetch billing details
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: billing } = await (supabase as any)
@@ -110,13 +118,13 @@ export async function POST(req: NextRequest) {
 
         // Record subscription
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (supabase as any).from('subscriptions').insert({
+        await (supabase as any).from('subscriptions').upsert({
             user_id: session.userId,
             plan: planName.toLowerCase(),
             status: 'active',
             expires_at: null,
             coupon_code: couponCode,
-        });
+        }, { onConflict: 'user_id' });
 
         // Activate plan
         await activateUserPlan(session.userId, planName);
@@ -133,11 +141,11 @@ export async function POST(req: NextRequest) {
         });
 
         // Send payment/activation email (non-blocking)
-        const userEmail = billing?.email ?? null;
+        const userEmail = billing?.email ?? userData?.email ?? null;
         if (userEmail && invoice) {
             sendPaymentSuccessEmail({
                 userEmail,
-                userName: billing?.full_name,
+                userName: billing?.full_name ?? userData?.full_name,
                 plan: planName,
                 amountINR: 'Free',
                 paymentMethod: 'coupon',

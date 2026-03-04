@@ -237,7 +237,7 @@ export default function Home() {
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Your Personal Web Portfolio</h2>
             <p className="text-slate-400 max-w-2xl mx-auto text-lg mb-8">One click turns your resume into a stunning, responsive website. Share it securely with recruiters.</p>
             <div className="inline-flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 rounded-xl font-mono text-sm text-blue-400 shadow-inner">
-              <GlobeIcon /> https://resumeforge.ai/p/<span className="text-white">your-name</span>
+              <GlobeIcon /> https://resumeforgeai.in/p/<span className="text-white">your-name</span>
             </div>
           </div>
 
@@ -248,7 +248,7 @@ export default function Home() {
                 <div className="w-3 h-3 rounded-full bg-red-500" />
                 <div className="w-3 h-3 rounded-full bg-yellow-500" />
                 <div className="w-3 h-3 rounded-full bg-green-500" />
-                <span className="ml-4 text-xs font-mono text-slate-500">resumeforge.ai / portfolio</span>
+                <span className="ml-4 text-xs font-mono text-slate-500">resumeforgeai.in / portfolio</span>
               </div>
               <div className="p-8 md:p-12">
                 <h1 className="text-3xl font-bold text-white mb-2">Alex Developer</h1>
@@ -424,7 +424,7 @@ export default function Home() {
         <div className="flex justify-center gap-4 mt-4 text-xs text-slate-500 font-medium">
           <Link href="/privacy" className="hover:text-slate-300 transition-colors cursor-pointer">Privacy Policy</Link>
           <Link href="/terms" className="hover:text-slate-300 transition-colors cursor-pointer">Terms of Service</Link>
-          <span className="hover:text-slate-300 transition-colors cursor-pointer">Contact</span>
+          <Link href="/dashboard/support" className="hover:text-slate-300 transition-colors cursor-pointer underline decoration-purple-500/30">Support</Link>
         </div>
       </footer>
     </div>

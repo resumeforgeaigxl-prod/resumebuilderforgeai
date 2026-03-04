@@ -111,6 +111,16 @@ export default async function DashboardPage() {
                             updatedAt={resume.updated_at}
                         />
                     ))}
+                    {/* Support Card */}
+                    <Link href="/dashboard/support" className="group">
+                        <div className="h-full bg-indigo-500/5 border border-indigo-500/10 hover:border-indigo-500/30 rounded-2xl p-6 transition-all flex flex-col items-center justify-center text-center">
+                            <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <PlusCircle className="w-6 h-6 text-indigo-400 rotate-45" />
+                            </div>
+                            <h3 className="font-bold text-white mb-1">Need Help?</h3>
+                            <p className="text-xs text-slate-500">Submit a support ticket and we&apos;ll get back to you.</p>
+                        </div>
+                    </Link>
                 </div>
             )}
 

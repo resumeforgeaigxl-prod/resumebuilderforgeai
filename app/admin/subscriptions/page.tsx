@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import {
     CreditCard, Loader2, Search, Calendar, User, Ticket,
     Clock, CheckCircle, ChevronDown, ChevronUp, MapPin,
-    IndianRupee, Smartphone, Building2, FileText, Tag, Percent
+    IndianRupee, Smartphone, Building2, FileText, Tag, Percent, Zap
 } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 
@@ -64,6 +64,7 @@ export default function AdminSubscriptionsPage() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [extending, setExtending] = useState<string | null>(null);
+    const [fixing, setFixing] = useState<string | null>(null);
     const [expandedId, setExpandedId] = useState<string | null>(null);
 
     async function loadSubs() {
@@ -94,6 +95,21 @@ export default function AdminSubscriptionsPage() {
     }
 
     useEffect(() => { loadSubs(); }, []);
+
+    async function fixSubInvoice(id: string) {
+        setFixing(id);
+        const res = await fetch(`/api/admin/subscriptions/${id}/fix-invoice`, {
+            method: 'POST'
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert(`Success! Invoice ${data.invoice_number} generated and sent.`);
+            await loadSubs();
+        } else {
+            alert(`Error: ${data.error || 'Failed to fix invoice'}`);
+        }
+        setFixing(null);
+    }
 
     async function extendSub(id: string) {
         setExtending(id);
@@ -287,6 +303,16 @@ export default function AdminSubscriptionsPage() {
                                                     >
                                                         <FileText className="w-3 h-3" />
                                                         {s.invoice_number ?? 'View'}
+                                                    </button>
+                                                ) : s.coupon_code ? (
+                                                    <button
+                                                        onClick={() => fixSubInvoice(s.id)}
+                                                        disabled={fixing === s.id}
+                                                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 border border-amber-500/20 transition-all"
+                                                        title="Generate & Send missing Invoice"
+                                                    >
+                                                        {fixing === s.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+                                                        Fix & Send
                                                     </button>
                                                 ) : <span className="text-slate-600 text-xs">—</span>}
                                             </td>

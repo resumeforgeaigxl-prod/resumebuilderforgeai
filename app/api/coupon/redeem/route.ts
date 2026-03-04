@@ -68,6 +68,14 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'You have already used this coupon' }, { status: 409 });
     }
 
+    // Fetch user for email fallback
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: userData } = await (supabase as any)
+        .from('users')
+        .select('email, full_name')
+        .eq('id', session.userId)
+        .single();
+
     // Fetch billing details for invoice/email (if available)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: billing } = await (supabase as any)
@@ -106,14 +114,25 @@ export async function POST(request: Request) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (supabase as any)
             .from('subscriptions')
-            .insert({
+            .upsert({
                 user_id: session.userId,
                 plan: 'pro',
                 status: 'active',
                 expires_at: expiresAt.toISOString(),
                 coupon_code: 'LAUNCH100',
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } as any);
+            }, { onConflict: 'user_id' });
+
+        // Record in payments table for admin visibility
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase as any).from('payments').insert({
+            user_id: session.userId,
+            plan_name: 'PRO',
+            original_price: 0,
+            coupon_code: 'LAUNCH100',
+            discount_amount: 0,
+            amount: 0,
+            status: 'success',
+        });
 
         // Generate ₹0 invoice
         const invoice = await createInvoice({
@@ -127,11 +146,11 @@ export async function POST(request: Request) {
         });
 
         // Send activation email
-        const userEmail = billing?.email ?? null;
+        const userEmail = billing?.email ?? userData?.email ?? null;
         if (userEmail && invoice) {
             sendPaymentSuccessEmail({
                 userEmail,
-                userName: billing?.full_name,
+                userName: billing?.full_name ?? userData?.full_name,
                 plan: 'PRO',
                 amountINR: 'Free',
                 paymentMethod: 'coupon',
@@ -158,18 +177,29 @@ export async function POST(request: Request) {
         // Use unified activation
         await activateUserPlan(session.userId, 'PRO');
 
-        // Record in subscriptions table (redundant if activateUserPlan does it, but keeping for legacy compatibility if needed)
+        // Record in subscriptions table
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (supabase as any)
             .from('subscriptions')
-            .insert({
+            .upsert({
                 user_id: session.userId,
                 plan: 'pro',
                 status: 'active',
                 expires_at: null, // permanent via coupon
                 coupon_code: normalizedCode,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } as any);
+            }, { onConflict: 'user_id' });
+
+        // Record in payments table for admin visibility
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase as any).from('payments').insert({
+            user_id: session.userId,
+            plan_name: 'PRO',
+            original_price: 0,
+            coupon_code: normalizedCode,
+            discount_amount: 0,
+            amount: 0,
+            status: 'success',
+        });
 
         // Also mark user as having override for persistence
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -190,11 +220,11 @@ export async function POST(request: Request) {
         });
 
         // Send activation email
-        const userEmail = billing?.email ?? null;
+        const userEmail = billing?.email ?? userData?.email ?? null;
         if (userEmail && invoice) {
             sendPaymentSuccessEmail({
                 userEmail,
-                userName: billing?.full_name,
+                userName: billing?.full_name ?? userData?.full_name,
                 plan: 'PRO',
                 amountINR: 'Free',
                 paymentMethod: 'coupon',

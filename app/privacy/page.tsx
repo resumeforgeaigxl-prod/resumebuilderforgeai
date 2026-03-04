@@ -66,7 +66,7 @@ export default function PrivacyPage() {
                             <li>Request deletion of your account and associated data.</li>
                             <li>Object to processing of your data in certain circumstances.</li>
                         </ul>
-                        <p className="mt-3">To exercise these rights, contact us at <span className="text-purple-400">support@resumeforge.ai</span>.</p>
+                        <p className="mt-3">To exercise these rights, contact us at <span className="text-purple-400">support@resumeforgeai.in</span>.</p>
                     </section>
 
                     <section>
@@ -81,7 +81,7 @@ export default function PrivacyPage() {
 
                     <section>
                         <h2 className="text-xl font-semibold text-white mb-3">9. Contact</h2>
-                        <p>For privacy-related questions: <span className="text-purple-400">support@resumeforge.ai</span></p>
+                        <p>For privacy-related questions: <span className="text-purple-400">support@resumeforgeai.in</span></p>
                     </section>
                 </div>
             </div>

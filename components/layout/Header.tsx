@@ -24,8 +24,11 @@ export default async function Header() {
                 <div className="flex items-center gap-4">
                     {session ? (
                         <>
-                            <Link href="/dashboard" className="text-sm font-medium text-slate-300 hover:text-white transition-colors hidden sm:block">
+                            <Link href="/dashboard" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
                                 Dashboard
+                            </Link>
+                            <Link href="/dashboard/support" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
+                                Support
                             </Link>
                             <form action="/api/auth/signout" method="post">
                                 <button className="text-sm font-bold bg-white/10 text-white px-5 py-2.5 rounded-full hover:bg-white/20 transition-all active:scale-95 flex items-center gap-2">
