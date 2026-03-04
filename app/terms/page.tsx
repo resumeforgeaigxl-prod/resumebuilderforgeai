@@ -1,6 +1,12 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 
-export const metadata = { title: 'Terms & Conditions — ResumeForge' };
+export const metadata: Metadata = {
+    title: 'Terms & Conditions | ResumeForgeAI',
+    description: 'Read the ResumeForgeAI terms and conditions. Understand your rights and responsibilities when using our platform.',
+    alternates: { canonical: 'https://resumeforgeai.in/terms' },
+};
+
 
 export default function TermsPage() {
     return (

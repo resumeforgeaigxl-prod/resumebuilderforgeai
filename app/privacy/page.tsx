@@ -1,6 +1,12 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 
-export const metadata = { title: 'Privacy Policy — ResumeForge' };
+export const metadata: Metadata = {
+    title: 'Privacy Policy | ResumeForgeAI',
+    description: 'Read the ResumeForgeAI privacy policy. Understand how we collect, use, and protect your personal data.',
+    alternates: { canonical: 'https://resumeforgeai.in/privacy' },
+};
+
 
 export default function PrivacyPage() {
     return (
