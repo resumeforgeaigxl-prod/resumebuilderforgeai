@@ -1,19 +1,25 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 import { getSession } from '@/lib/auth/jwt';
 
 export async function GET() {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const supabase = createClient();
+    // Use service-role to bypass RLS
+    const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    // Admin guard
     const { data: adminUser } = await supabase.from('users').select('role').eq('id', session.userId).single();
     if (!adminUser || adminUser.role !== 'admin') {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     try {
-        // Fetch subscriptions with user email
+        // ── Fetch subscriptions with user email ───────────────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: subscriptions, error } = await (supabase as any)
             .from('subscriptions')
@@ -25,21 +31,25 @@ export async function GET() {
 
         if (error) throw error;
 
-        // Fetch payment records for all user_ids to enrich with amount / method / billing
+        // ── Collect unique user IDs ───────────────────────────────────────────
         const userIds: string[] = Array.from(new Set(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (subscriptions as any[]).map((s: any) => s.user_id).filter(Boolean)
         ));
 
+        // ── Fetch payments (latest per user) — includes coupon/discount fields ─
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: payments } = await (supabase as any)
             .from('payments')
-            .select('user_id, plan_name, amount, razorpay_payment_id, status, billing_address, created_at')
+            .select(`
+                user_id, plan_name, amount, original_price, coupon_code,
+                discount_amount, razorpay_payment_id, status, billing_address, created_at
+            `)
             .in('user_id', userIds)
             .eq('status', 'success')
             .order('created_at', { ascending: false });
 
-        // Build a quick lookup: user_id → latest payment
+        // ── Build payment lookup: user_id → latest payment ────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const paymentMap: Record<string, any> = {};
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,7 +57,7 @@ export async function GET() {
             if (!paymentMap[p.user_id]) paymentMap[p.user_id] = p;
         });
 
-        // Fetch billing details for address info (latest per user)
+        // ── Fetch billing details (latest per user) ───────────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: billings } = await (supabase as any)
             .from('billing_details')
@@ -62,13 +72,14 @@ export async function GET() {
             if (!billingMap[b.user_id]) billingMap[b.user_id] = b;
         });
 
+        // ── Format output ─────────────────────────────────────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const formatted = (subscriptions as any[]).map((s: any) => {
             const payment = paymentMap[s.user_id] ?? null;
             const billing = billingMap[s.user_id] ?? null;
 
             const paymentMethod = s.coupon_code
-                ? 'coupon'
+                ? (payment?.amount === 0 ? 'coupon_free' : 'coupon_partial')
                 : payment?.razorpay_payment_id
                     ? 'razorpay'
                     : '—';
@@ -78,20 +89,27 @@ export async function GET() {
                     .filter(Boolean).join(', ')
                 : payment?.billing_address ?? null;
 
+            // Resolve coupon code from subscription OR payment row
+            const resolvedCoupon = s.coupon_code || payment?.coupon_code || null;
+
             return {
                 id: s.id,
                 plan: s.plan,
                 status: s.status,
                 expires_at: s.expires_at,
                 created_at: s.created_at,
-                coupon_code: s.coupon_code,
+                coupon_code: resolvedCoupon,
                 user_id: s.user_id,
-                user_email: (Array.isArray(s.users) ? s.users[0]?.email : s.users?.email) || 'Unknown',
-                // payment fields
-                amount: payment?.amount ?? 0,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                user_email: (Array.isArray(s.users) ? (s.users as any)[0]?.email : (s.users as any)?.email) || 'Unknown',
+                // Pricing breakdown
+                original_price: payment?.original_price ?? payment?.amount ?? 0,  // paise
+                discount_amount: payment?.discount_amount ?? 0,                    // paise
+                amount: payment?.amount ?? 0,                                      // final paid, paise
+                // Payment fields
                 payment_method: paymentMethod,
                 razorpay_payment_id: payment?.razorpay_payment_id ?? null,
-                // billing
+                // Billing
                 billing_name: billing?.full_name ?? null,
                 billing_phone: billing?.phone ?? null,
                 billing_company: billing?.company_name ?? null,

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import {
     CreditCard, Loader2, Search, Calendar, User, Ticket,
     Clock, CheckCircle, ChevronDown, ChevronUp, MapPin,
-    IndianRupee, Smartphone, Building2, FileText
+    IndianRupee, Smartphone, Building2, FileText, Tag, Percent
 } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 
@@ -16,8 +16,10 @@ interface SubscriptionRow {
     coupon_code: string | null;
     user_id: string;
     user_email: string;
-    // payment
-    amount: number;
+    // pricing breakdown
+    original_price: number;  // paise (before coupon)
+    discount_amount: number; // paise saved
+    amount: number;          // final paid, paise
     payment_method: string;
     razorpay_payment_id: string | null;
     // billing
@@ -40,9 +42,21 @@ function planColor(plan: string) {
 }
 
 function methodBadge(method: string) {
-    if (method === 'coupon') return 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20';
+    if (method === 'coupon_free') return 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20';
+    if (method === 'coupon_partial') return 'bg-purple-500/15 text-purple-400 border border-purple-500/20';
     if (method === 'razorpay') return 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20';
     return 'bg-slate-500/15 text-slate-400 border border-slate-700';
+}
+
+function methodLabel(method: string) {
+    if (method === 'coupon_free') return 'Coupon (Free)';
+    if (method === 'coupon_partial') return 'Coupon + Pay';
+    if (method === 'razorpay') return 'Razorpay';
+    return '—';
+}
+
+function fmt(paise: number) {
+    return `₹${(paise / 100).toFixed(0)}`;
 }
 
 export default function AdminSubscriptionsPage() {
@@ -105,7 +119,9 @@ export default function AdminSubscriptionsPage() {
     );
 
     const totalRevenue = subscriptions.reduce((sum, s) => sum + (s.amount || 0), 0);
+    const totalDiscount = subscriptions.reduce((sum, s) => sum + (s.discount_amount || 0), 0);
     const activeCount = subscriptions.filter(s => s.status === 'active' && (!s.expires_at || new Date(s.expires_at) > new Date())).length;
+    const couponCount = subscriptions.filter(s => s.coupon_code).length;
 
     return (
         <div className="p-4 sm:p-8">
@@ -134,9 +150,10 @@ export default function AdminSubscriptionsPage() {
                 {[
                     { label: 'Total Records', value: subscriptions.length, icon: <CreditCard className="w-4 h-4 text-slate-400" /> },
                     { label: 'Active Now', value: activeCount, icon: <CheckCircle className="w-4 h-4 text-emerald-400" /> },
-                    { label: 'Revenue (INR)', value: `₹${(totalRevenue / 100).toFixed(0)}`, icon: <IndianRupee className="w-4 h-4 text-amber-400" /> },
-                    { label: 'Coupon Plans', value: subscriptions.filter(s => s.payment_method === 'coupon').length, icon: <Ticket className="w-4 h-4 text-indigo-400" /> },
-                ].map(stat => (
+                    { label: 'Revenue Collected', value: fmt(totalRevenue), icon: <IndianRupee className="w-4 h-4 text-amber-400" /> },
+                    { label: 'Total Discounts', value: fmt(totalDiscount), icon: <Percent className="w-4 h-4 text-indigo-400" /> },
+                    { label: 'Coupon Plans', value: couponCount, icon: <Ticket className="w-4 h-4 text-indigo-400" /> },
+                ].slice(0, 4).map(stat => (
                     <div key={stat.label} className="p-4 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3">
                         {stat.icon}
                         <div>
@@ -153,16 +170,17 @@ export default function AdminSubscriptionsPage() {
                 </div>
             ) : (
                 <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden overflow-x-auto">
-                    <table className="w-full text-sm min-w-[1000px]">
+                    <table className="w-full text-sm min-w-[1100px]">
                         <thead className="border-b border-white/10 bg-white/5">
                             <tr className="text-left text-xs text-slate-500 uppercase tracking-wider">
                                 <th className="px-5 py-3">User</th>
                                 <th className="px-5 py-3">Plan</th>
-                                <th className="px-5 py-3">Amount</th>
+                                <th className="px-5 py-3">Original Price</th>
+                                <th className="px-5 py-3">Coupon Used</th>
+                                <th className="px-5 py-3">Discount</th>
+                                <th className="px-5 py-3">Final Paid</th>
                                 <th className="px-5 py-3">Payment Method</th>
-                                <th className="px-5 py-3">Coupon</th>
-                                <th className="px-5 py-3">Start Date</th>
-                                <th className="px-5 py-3">End Date</th>
+                                <th className="px-5 py-3">Start / Expires</th>
                                 <th className="px-5 py-3">Invoice</th>
                                 <th className="px-5 py-3">Actions</th>
                             </tr>
@@ -176,6 +194,7 @@ export default function AdminSubscriptionsPage() {
                                         ? 'bg-emerald-500/20 text-emerald-400'
                                         : 'bg-slate-500/20 text-slate-400';
                                 const isExpanded = expandedId === s.id;
+                                const hasDiscount = s.discount_amount > 0;
 
                                 return (
                                     <>
@@ -197,21 +216,46 @@ export default function AdminSubscriptionsPage() {
                                                 </span>
                                             </td>
 
-                                            {/* Amount */}
+                                            {/* Original Price */}
+                                            <td className="px-5 py-4">
+                                                <span className={`text-xs font-semibold ${hasDiscount ? 'line-through text-slate-500' : 'text-white'}`}>
+                                                    {s.original_price > 0 ? fmt(s.original_price) : '—'}
+                                                </span>
+                                            </td>
+
+                                            {/* Coupon Used */}
+                                            <td className="px-5 py-4">
+                                                {s.coupon_code ? (
+                                                    <div className="flex items-center gap-1 text-xs font-mono px-2 py-1 rounded bg-indigo-500/10 text-indigo-400 w-fit border border-indigo-500/20">
+                                                        <Tag className="w-3 h-3" />{s.coupon_code}
+                                                    </div>
+                                                ) : <span className="text-slate-600">—</span>}
+                                            </td>
+
+                                            {/* Discount */}
+                                            <td className="px-5 py-4">
+                                                {hasDiscount ? (
+                                                    <span className="text-xs font-bold text-emerald-400">
+                                                        −{fmt(s.discount_amount)}
+                                                    </span>
+                                                ) : <span className="text-slate-600">—</span>}
+                                            </td>
+
+                                            {/* Final Paid */}
                                             <td className="px-5 py-4">
                                                 {s.amount === 0
                                                     ? <span className="text-emerald-400 font-bold text-xs">Free</span>
-                                                    : <span className="text-white font-semibold">₹{(s.amount / 100).toFixed(0)}</span>
+                                                    : <span className="text-white font-bold">{fmt(s.amount)}</span>
                                                 }
                                             </td>
 
                                             {/* Payment Method */}
                                             <td className="px-5 py-4">
-                                                <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-bold capitalize ${methodBadge(s.payment_method)}`}>
+                                                <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-bold ${methodBadge(s.payment_method)}`}>
                                                     {s.payment_method === 'razorpay' ? (
                                                         <><CreditCard className="w-3 h-3" /> Razorpay</>
-                                                    ) : s.payment_method === 'coupon' ? (
-                                                        <><Ticket className="w-3 h-3" /> Coupon</>
+                                                    ) : s.payment_method?.startsWith('coupon') ? (
+                                                        <><Ticket className="w-3 h-3" /> {methodLabel(s.payment_method)}</>
                                                     ) : '—'}
                                                 </span>
                                                 {s.razorpay_payment_id && (
@@ -219,39 +263,18 @@ export default function AdminSubscriptionsPage() {
                                                 )}
                                             </td>
 
-                                            {/* Coupon */}
-                                            <td className="px-5 py-4">
-                                                {s.coupon_code ? (
-                                                    <div className="flex items-center gap-1 text-xs font-mono px-2 py-1 rounded bg-indigo-500/10 text-indigo-400 w-fit">
-                                                        <Ticket className="w-3 h-3" />{s.coupon_code}
-                                                    </div>
-                                                ) : <span className="text-slate-600">—</span>}
-                                            </td>
-
-                                            {/* Start date */}
+                                            {/* Dates */}
                                             <td className="px-5 py-4 text-slate-300 text-xs">
-                                                <div className="flex items-center gap-1.5">
+                                                <div className="flex items-center gap-1.5 mb-1">
                                                     <Calendar className="w-3 h-3 text-slate-500" />
                                                     {format(new Date(s.created_at), 'MMM dd, yyyy')}
                                                 </div>
-                                                <div className="text-slate-600 text-[10px] mt-0.5">
-                                                    {formatDistanceToNow(new Date(s.created_at), { addSuffix: true })}
-                                                </div>
-                                            </td>
-
-                                            {/* End date */}
-                                            <td className="px-5 py-4 text-slate-300 text-xs">
                                                 {s.expires_at ? (
-                                                    <>
-                                                        <div className="flex items-center gap-1.5">
-                                                            <Clock className="w-3 h-3 text-slate-500" />
-                                                            {format(new Date(s.expires_at), 'MMM dd, yyyy')}
-                                                        </div>
-                                                        <div className={`text-[10px] mt-0.5 ${isExpired ? 'text-rose-400' : 'text-slate-600'}`}>
-                                                            {formatDistanceToNow(new Date(s.expires_at), { addSuffix: true })}
-                                                        </div>
-                                                    </>
-                                                ) : <span className="text-slate-500 italic">Lifetime</span>}
+                                                    <div className={`flex items-center gap-1 text-[10px] ${isExpired ? 'text-rose-400' : 'text-slate-500'}`}>
+                                                        <Clock className="w-3 h-3" />
+                                                        {formatDistanceToNow(new Date(s.expires_at), { addSuffix: true })}
+                                                    </div>
+                                                ) : <span className="text-[10px] text-slate-600">Lifetime</span>}
                                             </td>
 
                                             {/* Invoice */}
@@ -294,10 +317,10 @@ export default function AdminSubscriptionsPage() {
                                             </td>
                                         </tr>
 
-                                        {/* Expanded billing details row */}
+                                        {/* Expanded billing details */}
                                         {isExpanded && (
                                             <tr key={`${s.id}-billing`} className="bg-slate-900/60">
-                                                <td colSpan={8} className="px-5 py-4">
+                                                <td colSpan={10} className="px-5 py-4">
                                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                                         <div className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
                                                             <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Contact</p>

@@ -6,6 +6,12 @@ import { createInvoice } from '@/lib/invoice';
 import { sendPaymentSuccessEmail } from '@/lib/brevo';
 import { format } from 'date-fns';
 
+const PLAN_PRICES: Record<PlanName, number> = {
+    PRO: 29,
+    PREMIUM: 199,
+    CAREER: 499,
+};
+
 /**
  * POST /api/payment/activate-coupon
  * Called when coupon makes price = 0.
@@ -46,7 +52,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'This coupon has expired' }, { status: 400 });
         if (coupon.max_uses !== null && coupon.used_count >= coupon.max_uses)
             return NextResponse.json({ error: 'Coupon usage limit reached' }, { status: 400 });
+
+        const basePrice = PLAN_PRICES[planName] || 0;
         const isFullAccess = coupon.type === 'full' || coupon.value >= 100;
+
         if (!isFullAccess)
             return NextResponse.json({ error: 'Coupon does not provide full access' }, { status: 400 });
 
@@ -78,19 +87,29 @@ export async function POST(req: NextRequest) {
                 .filter(Boolean).join(', ')
             : body.billing_address ?? null;
 
-        // Record ₹0 payment
+        // Record ₹0 payment with pricing breakdown
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (supabase as any).from('payments').insert({
-            user_id: session.userId, plan_name: planName,
-            amount: 0, razorpay_payment_id: null, razorpay_order_id: null,
-            status: 'success', billing_address: billingAddress,
+            user_id: session.userId,
+            plan_name: planName,
+            original_price: basePrice * 100,
+            coupon_code: couponCode,
+            discount_amount: basePrice * 100, // 100% off for activate-coupon path
+            amount: 0,
+            razorpay_payment_id: null,
+            razorpay_order_id: null,
+            status: 'success',
+            billing_address: billingAddress,
         });
 
         // Record subscription
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (supabase as any).from('subscriptions').insert({
-            user_id: session.userId, plan: planName.toLowerCase(),
-            status: 'active', expires_at: null, coupon_code: couponCode,
+            user_id: session.userId,
+            plan: planName.toLowerCase(),
+            status: 'active',
+            expires_at: null,
+            coupon_code: couponCode,
         });
 
         // Activate plan

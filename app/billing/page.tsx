@@ -224,13 +224,35 @@ export default function BillingPage() {
             const orderRes = await fetch('/api/payment/create-order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ plan }),
+                body: JSON.stringify({
+                    plan,
+                    // Pass coupon code so backend re-validates and applies discount to Razorpay amount
+                    coupon_code: couponResult?.valid && couponResult.code ? couponResult.code : undefined,
+                }),
             });
             if (!orderRes.ok) {
                 const d = await orderRes.json();
                 throw new Error(d.error ?? 'Failed to create payment order');
             }
             const orderData = await orderRes.json();
+
+            // Safety net: if backend says it's free, redirect to activate-coupon
+            if (orderData.isFree && couponResult?.code) {
+                const activateRes = await fetch('/api/payment/activate-coupon', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        coupon_code: couponResult.code,
+                        plan_name: plan,
+                    }),
+                });
+                if (!activateRes.ok) {
+                    const d = await activateRes.json();
+                    throw new Error(d.error ?? 'Failed to activate plan via coupon');
+                }
+                router.push('/dashboard?payment=success');
+                return;
+            }
 
             if (!window.Razorpay) {
                 throw new Error('Razorpay SDK not loaded. Please refresh and try again.');

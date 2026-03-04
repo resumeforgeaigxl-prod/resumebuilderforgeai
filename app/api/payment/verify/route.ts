@@ -21,14 +21,15 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Missing payment fields' }, { status: 400 });
         }
 
-        // Verify HMAC-SHA256 signature
+        // ── Verify HMAC-SHA256 signature ──────────────────────────────────────
         const secret = process.env.RAZORPAY_KEY_SECRET!;
         const expected = createHmac('sha256', secret)
             .update(`${razorpay_order_id}|${razorpay_payment_id}`)
             .digest('hex');
 
+        const supabase = createClient();
+
         if (expected !== razorpay_signature) {
-            const supabase = createClient();
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await (supabase as any)
                 .from('orders')
@@ -37,16 +38,28 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Invalid payment signature' }, { status: 400 });
         }
 
-        const supabase = createClient();
+        // ── Fetch the order row (contains coupon & pricing breakdown) ─────────
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: orderRow } = await (supabase as any)
+            .from('orders')
+            .select('amount, original_price, coupon_code, discount_amount')
+            .eq('razorpay_order_id', razorpay_order_id)
+            .single();
 
-        // Mark order success
+        const amountPaise = orderRow?.amount ?? 0;                          // final paid
+        const originalPrice = orderRow?.original_price ?? amountPaise;     // before coupon
+        const couponCode = orderRow?.coupon_code ?? null;
+        const discountAmount = orderRow?.discount_amount ?? 0;             // paise
+        const amountINR = `₹${(amountPaise / 100).toFixed(0)}`;
+
+        // ── Mark order success ────────────────────────────────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (supabase as any)
             .from('orders')
             .update({ status: 'success' })
             .eq('razorpay_order_id', razorpay_order_id);
 
-        // Fetch billing details
+        // ── Fetch billing details ─────────────────────────────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: billing } = await (supabase as any)
             .from('billing_details')
@@ -61,33 +74,33 @@ export async function POST(req: NextRequest) {
                 .filter(Boolean).join(', ')
             : null;
 
-        // Fetch amount from order
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: order } = await (supabase as any)
-            .from('orders')
-            .select('amount')
-            .eq('razorpay_order_id', razorpay_order_id)
-            .single();
-
-        const amountPaise = order?.amount ?? 0;
-        const amountINR = `₹${(amountPaise / 100).toFixed(0)}`;
-
-        // Insert payment record
+        // ── Insert payment record (full pricing breakdown) ────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (supabase as any).from('payments').insert({
             user_id: session.userId,
             plan_name: plan_name.toUpperCase(),
-            amount: amountPaise,
+            // Pricing fields
+            original_price: originalPrice,     // paise, before coupon
+            coupon_code: couponCode,           // coupon used (or null)
+            discount_amount: discountAmount,   // paise saved
+            amount: amountPaise,               // final amount paid
+            // Razorpay
             razorpay_payment_id,
             razorpay_order_id,
             status: 'success',
             billing_address: billingAddress,
         });
 
-        // Activate user plan
+        // ── If a coupon was used, increment its used_count ────────────────────
+        if (couponCode) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await (supabase as any).rpc('increment_coupon_used', { p_code: couponCode });
+        }
+
+        // ── Activate user plan ────────────────────────────────────────────────
         await activateUserPlan(session.userId, plan_name.toUpperCase() as PlanName);
 
-        // Generate invoice
+        // ── Generate invoice ──────────────────────────────────────────────────
         const invoice = await createInvoice({
             userId: session.userId,
             plan: plan_name.toUpperCase(),
@@ -95,6 +108,7 @@ export async function POST(req: NextRequest) {
             paymentMethod: 'razorpay',
             razorpayPaymentId: razorpay_payment_id,
             razorpayOrderId: razorpay_order_id,
+            couponCode: couponCode ?? undefined,
             billing: billing ? {
                 name: billing.full_name,
                 email: billing.email,
@@ -107,7 +121,7 @@ export async function POST(req: NextRequest) {
             } : null,
         });
 
-        // Send payment success email (non-blocking)
+        // ── Send payment success email (non-blocking) ─────────────────────────
         const userEmail = billing?.email ?? null;
         if (userEmail && invoice) {
             sendPaymentSuccessEmail({
@@ -116,6 +130,7 @@ export async function POST(req: NextRequest) {
                 plan: plan_name.toUpperCase(),
                 amountINR,
                 paymentMethod: 'razorpay',
+                couponCode: couponCode ?? undefined,
                 invoiceNumber: invoice.invoice_number,
                 invoiceId: invoice.id,
                 date: format(new Date(), 'dd MMM yyyy'),
