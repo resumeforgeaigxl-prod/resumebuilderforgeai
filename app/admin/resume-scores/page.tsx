@@ -15,7 +15,7 @@ export default async function AdminResumeScoresPage() {
             *,
             users ( email, full_name )
         `)
-        .order('checked_at', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(100);
 
     const totalChecks = scores?.length ?? 0;
@@ -124,8 +124,8 @@ export default async function AdminResumeScoresPage() {
                                         <td className="px-6 py-3">
                                             <div className="flex items-center gap-2 text-slate-500 text-xs">
                                                 <Calendar className="w-3 h-3" />
-                                                {s.checked_at
-                                                    ? formatDistanceToNow(new Date(s.checked_at), { addSuffix: true })
+                                                {s.created_at
+                                                    ? formatDistanceToNow(new Date(s.created_at), { addSuffix: true })
                                                     : 'Unknown'
                                                 }
                                             </div>
