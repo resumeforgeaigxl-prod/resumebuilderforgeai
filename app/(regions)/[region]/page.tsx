@@ -31,29 +31,29 @@ export default function RegionalPage({ params }: Props) {
     return (
         <div className="min-h-screen bg-[#070710] text-slate-200 selection:bg-purple-500/30 overflow-hidden relative font-sans">
 
-            {/* ── Region Banner ─────────────────────────────────────────────── */}
-            <div className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between gap-3 px-4 py-2.5 bg-indigo-900/95 backdrop-blur-md border-b border-white/10 text-sm">
-                <div className="flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-indigo-400" />
-                    <span className="text-slate-200">You are viewing the <strong className="text-white">{flag} {name}</strong> version</span>
-                </div>
-                <div className="flex gap-2">
-                    {(Object.keys(REGION_DATA) as string[]).filter(k => k !== r).map(k => (
-                        <Link key={k} href={`/${k}`} className="px-2 py-0.5 rounded-full bg-white/10 hover:bg-white/20 text-xs text-slate-300 transition-colors">
-                            {REGION_DATA[k].flag} {REGION_DATA[k].name}
-                        </Link>
-                    ))}
-                    <Link href="/" className="px-2 py-0.5 rounded-full bg-white/10 hover:bg-white/20 text-xs text-slate-300 transition-colors">
-                        🌍 Global
-                    </Link>
-                </div>
-            </div>
-
             {/* Background Effects */}
             <div className="absolute top-0 left-1/2 w-full -translate-x-1/2 h-[500px] bg-purple-600/20 blur-[120px] rounded-full pointer-events-none opacity-50" />
             <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-blue-600/20 blur-[120px] rounded-full pointer-events-none opacity-40" />
 
-            <main className="relative z-10 pt-40 pb-32">
+            <main className="relative z-10 pt-32 pb-32">
+
+                {/* ── Region Banner ──────────────────────────────────────────── */}
+                <div className="max-w-7xl mx-auto px-6 mb-8">
+                    <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-xl bg-indigo-900/60 border border-indigo-500/30 backdrop-blur-sm text-sm">
+                        <div className="flex items-center gap-2">
+                            <Globe className="w-4 h-4 text-indigo-400" />
+                            <span className="text-slate-200">Viewing the <strong className="text-white">{flag} {name}</strong> version</span>
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                            {(Object.keys(REGION_DATA) as string[]).filter(k => k !== r).map(k => (
+                                <Link key={k} href={`/${k}`} className="px-2 py-0.5 rounded-full bg-white/10 hover:bg-white/20 text-xs text-slate-300 transition-colors">
+                                    {REGION_DATA[k].flag} {REGION_DATA[k].name}
+                                </Link>
+                            ))}
+                            <Link href="/" className="px-2 py-0.5 rounded-full bg-white/10 hover:bg-white/20 text-xs text-slate-300 transition-colors">🌍 Global</Link>
+                        </div>
+                    </div>
+                </div>
 
                 {/* 1. Hero Section */}
                 <section className="flex flex-col items-center text-center max-w-4xl mx-auto mt-10 mb-32 px-6">
