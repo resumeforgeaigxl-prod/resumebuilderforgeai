@@ -48,7 +48,7 @@ export default async function Header({ lang = 'en', region = 'in' }: { lang?: st
                     {session ? (
                         <>
                             {session.role === 'admin' && (
-                                <Link href={`/${region}/${lang}/admin`} className="text-sm font-medium text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1">
+                                <Link href="/admin" className="text-sm font-medium text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1">
                                     <Sparkles className="w-3 h-3" />
                                     Admin
                                 </Link>

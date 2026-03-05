@@ -126,6 +126,12 @@ export async function middleware(request: NextRequest) {
         !pathname.startsWith('/api/') &&
         !pathname.startsWith('/admin') &&
         !pathname.startsWith('/sitemap') &&
+        !pathname.startsWith('/ai-resume-builder') &&
+        !pathname.startsWith('/ats-resume-builder') &&
+        !pathname.startsWith('/ai-mock-interview') &&
+        !pathname.startsWith('/job-interview-ai-coach') &&
+        !pathname.startsWith('/privacy') &&
+        !pathname.startsWith('/terms') &&
         !isSubdomain) {
         // Only force-redirect if NOT a bot OR if it's the root path
         if (!isSearchBot || pathname === '/') {
@@ -305,6 +311,7 @@ export async function middleware(request: NextRequest) {
         normalizedPath.startsWith('/ats-resume-builder') ||
         normalizedPath.startsWith('/ai-mock-interview') ||
         normalizedPath.startsWith('/job-interview-ai-coach') ||
+        normalizedPath.startsWith('/jobforgeai') ||
         normalizedPath.startsWith('/sitemap') ||
         normalizedPath.startsWith('/jobs') ||
         normalizedPath.startsWith('/job/') ||

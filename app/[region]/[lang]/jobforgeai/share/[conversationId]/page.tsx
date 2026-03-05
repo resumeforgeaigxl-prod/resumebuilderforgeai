@@ -1,8 +1,5 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { ShieldAlert, User as UserIcon, Loader2, MessageSquare, ExternalLink } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { ShieldAlert, User as UserIcon, MessageSquare, ExternalLink } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
 
 interface AIChat {
@@ -12,50 +9,39 @@ interface AIChat {
     created_at: string;
 }
 
-export default function SharedConversationPage({ params }: { params: { conversationId: string } }) {
-    const [loading, setLoading] = useState(true);
-    const [messages, setMessages] = useState<AIChat[]>([]);
-    const [userName, setUserName] = useState<string>('Candidate');
+// Bypass RLS for shared viewing
+const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const supabase = createClient();
+export default async function SharedConversationPage({ params }: { params: { conversationId: string } }) {
+    let messages: AIChat[] = [];
+    let userName = 'Candidate';
 
-            // 1. Fetch Conversation
-            const { data: convo } = await supabase
-                .from('conversations')
-                .select('user_id, users(display_name)')
-                .eq('id', params.conversationId)
-                .single();
+    // 1. Fetch Conversation with admin client
+    const { data: convo } = await supabaseAdmin
+        .from('conversations')
+        .select('user_id, users(display_name)')
+        .eq('id', params.conversationId)
+        .single();
 
-            if (convo?.users) {
-                const userObj = (Array.isArray(convo.users) ? convo.users[0] : convo.users) as { display_name: string } | null;
-                setUserName(userObj?.display_name || 'Candidate');
-            }
+    if (convo?.users) {
+        const userObj = (Array.isArray(convo.users) ? convo.users[0] : convo.users) as { display_name?: string } | null;
+        if (userObj?.display_name) {
+            userName = userObj.display_name;
+        }
+    }
 
-            // 2. Fetch Messages
-            const { data: msgs } = await supabase
-                .from('ai_messages')
-                .select('*')
-                .eq('conversation_id', params.conversationId)
-                .order('created_at', { ascending: true });
+    // 2. Fetch Messages
+    const { data: msgs } = await supabaseAdmin
+        .from('ai_messages')
+        .select('*')
+        .eq('conversation_id', params.conversationId)
+        .order('created_at', { ascending: true });
 
-            if (msgs) {
-                setMessages(msgs);
-            }
-            setLoading(false);
-        };
-
-        fetchData();
-    }, [params.conversationId]);
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-[#020205] flex flex-col items-center justify-center p-6">
-                <Loader2 className="w-10 h-10 animate-spin text-indigo-500 mb-4" />
-                <p className="text-slate-400 font-medium tracking-tight">Loading JobForgeAI Shared Conversation...</p>
-            </div>
-        );
+    if (msgs) {
+        messages = msgs as AIChat[];
     }
 
     return (
@@ -86,7 +72,7 @@ export default function SharedConversationPage({ params }: { params: { conversat
                 {messages.length === 0 ? (
                     <div className="text-center py-20 opacity-40">
                         <ShieldAlert className="w-12 h-12 mx-auto mb-4" />
-                        <p className="text-lg">This conversation has no data.</p>
+                        <p className="text-lg">This conversation has no data or does not exist.</p>
                     </div>
                 ) : (
                     messages.map((msg, i) => (
