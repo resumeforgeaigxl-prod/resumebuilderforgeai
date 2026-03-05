@@ -16,6 +16,36 @@ const EU_COUNTRIES = new Set([
 ]);
 
 const VALID_REGIONS = new Set(['in', 'us', 'eu']);
+const SUPPORTED_LOCALES = ['en', 'hi', 'te', 'ta', 'ml', 'es', 'fr', 'de'];
+const DEFAULT_LOCALE = 'en';
+const DEFAULT_REGION = 'in';
+
+const BOT_USER_AGENTS = [
+    'googlebot',
+    'bingbot',
+    'yandexbot',
+    'duckduckbot',
+    'slurp',
+    'baiduspider',
+    'ia_archiver',
+    'facebookexternalhit',
+    'twitterbot',
+    'rogerbot',
+    'linkedinbot',
+    'embedly',
+    'quora link preview',
+    'showyoubot',
+    'outbrain',
+    'pinterest/0.',
+    'developers.google.com/+/web/snippet',
+    'slackbot',
+    'vkShare',
+    'W3C_Validator',
+    'redditbot',
+    'Applebot',
+    'Twitterbot',
+    'Discordbot'
+];
 
 /** Map Vercel/CF country code to a region slug */
 function countryToRegion(country: string | null): string | null {
@@ -25,6 +55,37 @@ function countryToRegion(country: string | null): string | null {
     if (c === 'US') return 'us';
     if (EU_COUNTRIES.has(c)) return 'eu';
     return null;
+}
+
+function isBot(userAgent: string | null): boolean {
+    if (!userAgent) return false;
+    const lowerUA = userAgent.toLowerCase();
+    return BOT_USER_AGENTS.some(bot => lowerUA.includes(bot));
+}
+
+function getLocale(request: NextRequest): string {
+    // 1. Check for cookie
+    const cookieLocale = request.cookies.get('preferred_lang')?.value;
+    if (cookieLocale && SUPPORTED_LOCALES.includes(cookieLocale)) return cookieLocale;
+
+    // 2. Check Accept-Language header
+    const acceptLanguage = request.headers.get('accept-language');
+    if (acceptLanguage) {
+        const languages = acceptLanguage.split(',').map(lang => lang.split(';')[0].trim().split('-')[0]);
+        for (const lang of languages) {
+            if (SUPPORTED_LOCALES.includes(lang)) return lang;
+        }
+    }
+
+    return DEFAULT_LOCALE;
+}
+
+function getRegion(request: NextRequest): string {
+    const cookieRegion = request.cookies.get('preferred_region')?.value;
+    if (cookieRegion && VALID_REGIONS.has(cookieRegion)) return cookieRegion;
+
+    const countryCode = request.headers.get('x-vercel-ip-country') || request.headers.get('cf-ipcountry');
+    return countryToRegion(countryCode) || DEFAULT_REGION;
 }
 
 export async function middleware(request: NextRequest) {
@@ -37,10 +98,11 @@ export async function middleware(request: NextRequest) {
     const isAdminSubdomain = host.startsWith('admin.');
     const isSubdomain = isAppSubdomain || isApiSubdomain || isAdminSubdomain;
 
-    // ─── Always pass through: static files
+    // ─── Always pass through: static files, locales, etc.
     if (
         pathname.startsWith('/_next') ||
         pathname.startsWith('/favicon') ||
+        pathname.startsWith('/locales') ||
         pathname.endsWith('.svg') ||
         pathname.endsWith('.png') ||
         pathname.endsWith('.ico')
@@ -48,9 +110,59 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
+    // ─── Check for locale and region in path ───
+    const pathParts = pathname.split('/').filter(Boolean);
+    const firstSegment = pathParts[0] ?? '';
+    const secondSegment = pathParts[1] ?? '';
+
+    const hasRegion = VALID_REGIONS.has(firstSegment);
+    const hasLocale = SUPPORTED_LOCALES.includes(secondSegment);
+
+    const userAgent = request.headers.get('user-agent');
+    const isSearchBot = isBot(userAgent);
+
+    // If no valid region or locale in path, and NOT a bot being force-redirected
+    if ((!hasRegion || !hasLocale) && !pathname.startsWith('/api/') && !isApiSubdomain) {
+        // Only force-redirect if NOT a bot OR if it's the root path
+        if (!isSearchBot || pathname === '/') {
+            const url = new URL(request.url);
+            const lang = getLocale(request);
+            const region = getRegion(request);
+
+            // Construct new path
+            let newPath = pathname;
+            if (hasRegion && !hasLocale) {
+                // Case: /in/dashboard -> /in/en/dashboard
+                newPath = `/${firstSegment}/${lang}${pathname.replace(`/${firstSegment}`, '') || '/'}`;
+            } else if (!hasRegion && hasLocale) {
+                // Case: /en/dashboard -> /in/en/dashboard (preserve lang)
+                newPath = `/${region}/${firstSegment}${pathname.replace(`/${firstSegment}`, '') || '/'}`;
+            } else {
+                // Case: /dashboard -> /in/en/dashboard
+                newPath = `/${region}/${lang}${pathname}`;
+            }
+
+            // Clean up double slashes
+            newPath = newPath.replace(/\/+/g, '/');
+
+            url.pathname = newPath;
+            return NextResponse.redirect(url);
+        }
+    }
+
+    // ─── Strip region and locale for normalized path matching ───
+    let normalizedPath = pathname;
+    let currentLocale = DEFAULT_LOCALE;
+    let currentRegion = 'in';
+
+    if (hasRegion && hasLocale) {
+        currentRegion = firstSegment;
+        currentLocale = secondSegment;
+        normalizedPath = '/' + pathParts.slice(2).join('/');
+    }
+
     // ─── API subdomain: rewrite to /api/* and add CORS headers ───────────────
     if (isApiSubdomain) {
-        // Passthrough API calls with CORS headers
         const response = NextResponse.next();
         const origin = request.headers.get('origin') ?? '';
         const allowedOrigins = [
@@ -65,7 +177,6 @@ export async function middleware(request: NextRequest) {
         response.headers.set('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,PATCH,OPTIONS');
         response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-        // Handle CORS preflight
         if (request.method === 'OPTIONS') {
             return new NextResponse(null, { status: 204, headers: response.headers });
         }
@@ -89,26 +200,30 @@ export async function middleware(request: NextRequest) {
     // ─── Admin subdomain ──────────────────────────────────────────────────────
     if (isAdminSubdomain) {
         if (!session) {
-            const loginUrl = new URL(`https://${MAIN_DOMAIN}/login`);
+            const loginUrl = new URL(`https://${MAIN_DOMAIN}/${currentRegion}/${currentLocale}/login`);
             return NextResponse.redirect(loginUrl);
         }
         if (session.isBlocked) {
-            const res = NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/login?error=AccountBlocked`));
+            const res = NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${currentRegion}/${currentLocale}/login?error=AccountBlocked`));
             res.cookies.delete('resume_forge_auth');
             return res;
         }
         if (session.role !== 'admin') {
-            return NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/dashboard`));
+            return NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${currentRegion}/${currentLocale}/dashboard`));
         }
         return NextResponse.next();
     }
 
     // ─── App subdomain ────────────────────────────────────────────────────────
     if (isAppSubdomain) {
-        const origin = `https://app.${MAIN_DOMAIN}`;
-        const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/signup');
-        const isPublicRoute = pathname === '/' || pathname.startsWith('/privacy') || pathname.startsWith('/terms');
-        const isCompleteProfile = pathname === '/complete-profile';
+        const origin = `https://app.${MAIN_DOMAIN}/${currentRegion}/${currentLocale}`;
+        const isAuthRoute = normalizedPath.startsWith('/login') || normalizedPath.startsWith('/signup');
+        const isPublicRoute = normalizedPath === '/' ||
+            normalizedPath.startsWith('/privacy') ||
+            normalizedPath.startsWith('/terms') ||
+            normalizedPath.startsWith('/cookie-policy') ||
+            normalizedPath.startsWith('/data-deletion');
+        const isCompleteProfile = normalizedPath === '/complete-profile';
 
         if (!session && !isAuthRoute && !isPublicRoute && !isCompleteProfile) {
             return NextResponse.redirect(`${origin}/login`);
@@ -135,23 +250,19 @@ export async function middleware(request: NextRequest) {
     }
 
     // ─── Main domain: handle regional subfolders + geo detection ─────────────
-    const isApiRoute = pathname.startsWith('/api');
+    const isApiRoute = normalizedPath.startsWith('/api');
     if (isApiRoute) {
         return NextResponse.next();
     }
 
-    // Detect regional segment from URL path: /in /us /eu
-    const pathParts = pathname.split('/').filter(Boolean);
-    const firstSegment = pathParts[0] ?? '';
-    const isRegionalPath = VALID_REGIONS.has(firstSegment);
+    // Standard auth logic for main domain
+    const isRegionalPath = hasRegion;
 
     // ─── Geo suggestion cookie logic (main domain homepage only) ─────────────
-    if (!isRegionalPath && pathname === '/') {
+    if (!isRegionalPath && normalizedPath === '/') {
         const regionCookie = request.cookies.get('region')?.value;
 
-        // Only set geo_country cookie if user hasn't chosen a region yet
         if (!regionCookie) {
-            // Vercel sets x-vercel-ip-country; CloudFlare sets cf-ipcountry
             const countryCode =
                 request.headers.get('x-vercel-ip-country') ||
                 request.headers.get('cf-ipcountry');
@@ -159,11 +270,10 @@ export async function middleware(request: NextRequest) {
 
             if (suggestedRegion) {
                 const response = NextResponse.next();
-                // Set a short-lived cookie so the client-side banner knows what to suggest
                 response.cookies.set('geo_country', countryCode ?? '', {
                     path: '/',
-                    maxAge: 3600, // 1 hour
-                    httpOnly: false, // readable by client JS for the banner
+                    maxAge: 3600,
+                    httpOnly: false,
                     sameSite: 'lax',
                 });
                 response.cookies.set('geo_suggested_region', suggestedRegion, {
@@ -178,62 +288,84 @@ export async function middleware(request: NextRequest) {
     }
 
     // ─── Standard auth logic for main domain ─────────────────────────────────
-    const origin = `https://${MAIN_DOMAIN}`;
-    const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/signup');
+    const origin = `https://${MAIN_DOMAIN}/${currentRegion}/${currentLocale}`;
+    const isAuthRoute = normalizedPath.startsWith('/login') || normalizedPath.startsWith('/signup');
     const isPublicRoute =
-        pathname === '/' ||
+        normalizedPath === '/' ||
         isRegionalPath ||
-        pathname.startsWith('/privacy') ||
-        pathname.startsWith('/terms') ||
-        pathname.startsWith('/ai-resume-builder') ||
-        pathname.startsWith('/ats-resume-builder') ||
-        pathname.startsWith('/ai-mock-interview') ||
-        pathname.startsWith('/job-interview-ai-coach') ||
-        pathname.startsWith('/sitemap') ||
-        pathname.startsWith('/p/'); // public portfolios
-    const isCompleteProfile = pathname === '/complete-profile';
+        normalizedPath.startsWith('/privacy') ||
+        normalizedPath.startsWith('/terms') ||
+        normalizedPath.startsWith('/cookie-policy') ||
+        normalizedPath.startsWith('/data-deletion') ||
+        normalizedPath.startsWith('/ai-resume-builder') ||
+        normalizedPath.startsWith('/ats-resume-builder') ||
+        normalizedPath.startsWith('/ai-mock-interview') ||
+        normalizedPath.startsWith('/job-interview-ai-coach') ||
+        normalizedPath.startsWith('/sitemap') ||
+        normalizedPath.startsWith('/jobs') ||
+        normalizedPath.startsWith('/job/') ||
+        normalizedPath.startsWith('/companies/') ||
+        normalizedPath.startsWith('/p/');
+    const isCompleteProfile = normalizedPath === '/complete-profile';
 
-    // 1. Unauthenticated accessing protected route
     if (!session && !isAuthRoute && !isPublicRoute && !isCompleteProfile) {
         return NextResponse.redirect(`${origin}/login`);
     }
 
     if (session) {
-        // 2. Blocked users — force logout
         if (session.isBlocked) {
             const res = NextResponse.redirect(`${origin}/login?error=AccountBlocked`);
             res.cookies.delete('resume_forge_auth');
             return res;
         }
 
-        // 3. Profile not completed
         const profileIncomplete = !session.profileCompleted;
         if (profileIncomplete && !isCompleteProfile && !isAuthRoute && !isPublicRoute) {
             return NextResponse.redirect(`${origin}/complete-profile`);
         }
 
-        // 4. Completed user hitting complete-profile
         if (!profileIncomplete && isCompleteProfile) {
             return NextResponse.redirect(`${origin}/dashboard`);
         }
 
-        // 5. Admin route protection (main domain /admin/* still protected)
-        if (pathname.startsWith('/admin') && session.role !== 'admin') {
+        if (normalizedPath.startsWith('/admin') && session.role !== 'admin') {
             return NextResponse.redirect(`${origin}/dashboard`);
         }
 
-        // 6. Authenticated user hitting login/signup
         if (isAuthRoute) {
             if (profileIncomplete) return NextResponse.redirect(`${origin}/complete-profile`);
             return NextResponse.redirect(`${origin}/dashboard`);
         }
     }
 
-    return NextResponse.next();
+    const response = NextResponse.next();
+
+    // ─── Update preference cookies if user is on a regional path ──────────
+    if (hasRegion && hasLocale && !isApiRoute) {
+        const cookieRegion = request.cookies.get('preferred_region')?.value;
+        const cookieLang = request.cookies.get('preferred_lang')?.value;
+
+        if (cookieRegion !== currentRegion) {
+            response.cookies.set('preferred_region', currentRegion, {
+                path: '/',
+                maxAge: 31536000,
+                sameSite: 'lax',
+            });
+        }
+        if (cookieLang !== currentLocale) {
+            response.cookies.set('preferred_lang', currentLocale, {
+                path: '/',
+                maxAge: 31536000,
+                sameSite: 'lax',
+            });
+        }
+    }
+
+    return response;
 }
 
 export const config = {
     matcher: [
-        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        '/((?!api|_next/static|_next/image|favicon.ico|locales|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 };

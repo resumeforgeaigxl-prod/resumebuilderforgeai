@@ -13,11 +13,12 @@ import {
     LogOut
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 
 const MENU_ITEMS = [
     { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
     { label: 'My Resumes', href: '/resumes', icon: FileText },
-    { label: 'Job Board', href: '/jobs', icon: Briefcase },
+    { label: 'Job Board', href: '/dashboard-jobs', icon: Briefcase },
     { label: 'AI Tools', href: '/tools', icon: Wrench },
     { label: 'Account', href: '/account', icon: User },
 ];
@@ -26,6 +27,9 @@ export function Sidebar() {
     const pathname = usePathname();
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [mounted, setMounted] = useState(false);
+
+    const params = useParams() as { region: string; lang: string };
+    const { region, lang } = params;
 
     useEffect(() => {
         setMounted(true);
@@ -41,11 +45,12 @@ export function Sidebar() {
         >
             <div className="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
                 {MENU_ITEMS.map((item) => {
-                    const isActive = pathname === item.href;
+                    const fullHref = `/${region}/${lang}${item.href}`;
+                    const isActive = pathname === fullHref;
                     return (
                         <Link
                             key={item.href}
-                            href={item.href}
+                            href={fullHref}
                             className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all group
                                 ${isActive
                                     ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.1)]'
@@ -85,15 +90,18 @@ export function Sidebar() {
 // Mobile Bottom Nav
 export function MobileNav() {
     const pathname = usePathname();
+    const params = useParams() as { region: string; lang: string };
+    const { region, lang } = params;
 
     return (
         <nav className="fixed bottom-0 left-0 right-0 h-16 bg-[#070710]/90 backdrop-blur-xl border-t border-white/5 flex md:hidden items-center justify-around px-2 z-50">
             {MENU_ITEMS.map((item) => {
-                const isActive = pathname === item.href;
+                const fullHref = `/${region}/${lang}${item.href}`;
+                const isActive = pathname === fullHref;
                 return (
                     <Link
                         key={item.href}
-                        href={item.href}
+                        href={fullHref}
                         className={`flex flex-col items-center gap-1 transition-all ${isActive ? 'text-indigo-400' : 'text-slate-500'}`}
                     >
                         <item.icon className={`w-5 h-5 ${isActive ? 'scale-110 shadow-indigo-500/50' : ''}`} />

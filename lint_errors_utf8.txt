@@ -1,0 +1,194 @@
+﻿node.exe : 
+At C:\Program Files\nod
+ejs\npx.ps1:29 char:3
++   & $NODE_EXE 
+$NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (:String) [],    
+ RemoteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+./app/[region]/[lang]/d
+ata-deletion/page.tsx
+45:35  Error: `"` can 
+be escaped with 
+`&quot;`, `&ldquo;`, 
+`&#34;`, `&rdquo;`.  re
+act/no-unescaped-entiti
+es
+45:57  Error: `"` can 
+be escaped with 
+`&quot;`, `&ldquo;`, 
+`&#34;`, `&rdquo;`.  re
+act/no-unescaped-entiti
+es
+
+./app/[region]/[lang]/j
+ob/[slug]/page.tsx
+6:11  Error: 'Job' is 
+defined but never 
+used.  @typescript-esli
+nt/no-unused-vars
+
+./app/[region]/[lang]/j
+obforgeai/page.tsx
+302:110  Error: 
+Unexpected any. 
+Specify a different 
+type.  @typescript-esli
+nt/no-explicit-any
+412:28  Error: 
+Unexpected any. 
+Specify a different 
+type.  @typescript-esli
+nt/no-explicit-any
+413:23  Error: 
+Unexpected any. 
+Specify a different 
+type.  @typescript-esli
+nt/no-explicit-any
+414:26  Error: 
+Unexpected any. 
+Specify a different 
+type.  @typescript-esli
+nt/no-explicit-any
+415:25  Error: 
+Unexpected any. 
+Specify a different 
+type.  @typescript-esli
+nt/no-explicit-any
+
+./app/[region]/[lang]/l
+ayout.tsx
+34:11  Error: 
+'languages' is 
+assigned a value but 
+never used.  @typescrip
+t-eslint/no-unused-vars
+
+./app/[region]/[lang]/m
+ock-test/[id]/page.tsx
+5:14  Error: 
+'Download' is defined 
+but never used.  @types
+cript-eslint/no-unused-
+vars
+5:35  Error: 'Lock' is 
+defined but never 
+used.  @typescript-esli
+nt/no-unused-vars
+5:41  Error: 'Unlock' 
+is defined but never 
+used.  @typescript-esli
+nt/no-unused-vars
+5:49  Error: 
+'CheckCircle' is 
+defined but never 
+used.  @typescript-esli
+nt/no-unused-vars
+5:62  Error: 'XCircle' 
+is defined but never 
+used.  @typescript-esli
+nt/no-unused-vars
+6:23  Error: 
+'BookOpen' is defined 
+but never used.  @types
+cript-eslint/no-unused-
+vars
+6:43  Error: 
+'ArrowLeft' is defined 
+but never used.  @types
+cript-eslint/no-unused-
+vars
+6:62  Error: 'Ticket' 
+is defined but never 
+used.  @typescript-esli
+nt/no-unused-vars
+7:5  Error: 
+'ChevronRight' is 
+defined but never 
+used.  @typescript-esli
+nt/no-unused-vars
+7:31  Error: 
+'AlertCircle' is 
+defined but never 
+used.  @typescript-esli
+nt/no-unused-vars
+57:12  Error: 
+'userAccess' is 
+assigned a value but 
+never used.  @typescrip
+t-eslint/no-unused-vars
+140:27  Error: `'` can 
+be escaped with 
+`&apos;`, `&lsquo;`, 
+`&#39;`, `&rsquo;`.  re
+act/no-unescaped-entiti
+es
+209:33  Error: `"` can 
+be escaped with 
+`&quot;`, `&ldquo;`, 
+`&#34;`, `&rdquo;`.  re
+act/no-unescaped-entiti
+es
+209:66  Error: `"` can 
+be escaped with 
+`&quot;`, `&ldquo;`, 
+`&#34;`, `&rdquo;`.  re
+act/no-unescaped-entiti
+es
+353:28  Error: 
+Unexpected any. 
+Specify a different 
+type.  @typescript-esli
+nt/no-explicit-any
+
+./app/[region]/[lang]/p
+age.tsx
+29:9  Error: 
+'regionData' is 
+assigned a value but 
+never used.  @typescrip
+t-eslint/no-unused-vars
+
+./components/jobs/Publi
+cJobBoard.tsx
+5:21  Error: 
+'Briefcase' is defined 
+but never used.  @types
+cript-eslint/no-unused-
+vars
+5:32  Error: 'Filter' 
+is defined but never 
+used.  @typescript-esli
+nt/no-unused-vars
+7:5  Error: 
+'RefreshCw' is defined 
+but never used.  @types
+cript-eslint/no-unused-
+vars
+7:29  Error: 'Globe' 
+is defined but never 
+used.  @typescript-esli
+nt/no-unused-vars
+7:36  Error: 'Lock' is 
+defined but never 
+used.  @typescript-esli
+nt/no-unused-vars
+40:12  Error: 
+'totalJobs' is 
+assigned a value but 
+never used.  @typescrip
+t-eslint/no-unused-vars
+
+info  - Need to 
+disable some ESLint 
+rules? Learn more 
+here: https://nextjs.or
+g/docs/basic-features/e
+slint#disabling-rules

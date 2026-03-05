@@ -1,0 +1,33 @@
+
+> ai-resume-builder@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+Failed to compile.
+
+app\[region]\[lang]\layout.tsx
+Module not found: Can't resolve '../fonts/GeistMonoVF.woff'
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./app/[region]/[lang]/layout.tsx
+
+app\[region]\[lang]\layout.tsx
+Module not found: Can't resolve '../fonts/GeistVF.woff'
+
+https://nextjs.org/docs/messages/module-not-found
+
+Import trace for requested module:
+./app/[region]/[lang]/layout.tsx
+
+./app/[region]/[lang]/layout.tsx
+Module not found: Can't resolve '../globals.css'
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+> Build failed because of webpack errors

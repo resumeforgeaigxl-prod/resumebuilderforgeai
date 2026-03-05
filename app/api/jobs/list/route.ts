@@ -153,7 +153,7 @@ export async function GET(req: Request) {
             return job;
         });
 
-        return NextResponse.json({
+        const response = NextResponse.json({
             success: true,
             jobs,
             totalJobs: totalMatching,
@@ -162,6 +162,12 @@ export async function GET(req: Request) {
             userCountry: userCountryHeader || 'Other',
             userPlan
         });
+
+        // Add caching headers: 5 minutes for users, 1 hour for public/bots
+        const cacheSeconds = session ? 300 : 3600;
+        response.headers.set('Cache-Control', `public, s-maxage=${cacheSeconds}, stale-while-revalidate=${cacheSeconds / 2}`);
+
+        return response;
 
     } catch (error: unknown) {
         console.error('[API] Jobs List Error:', error);
