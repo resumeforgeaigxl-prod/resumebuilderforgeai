@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 
 export const dynamic = 'force-dynamic';
@@ -21,8 +22,9 @@ export async function GET() {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
+        const admin = createAdminClient();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: invoices, error } = await (supabase as any)
+        const { data: invoices, error } = await (admin as any)
             .from('invoices')
             .select(`
                 id, invoice_number, plan, amount, payment_method, coupon_code,

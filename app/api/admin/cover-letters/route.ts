@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 
 export async function GET() {
@@ -14,9 +15,10 @@ export async function GET() {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
+        const admin = createAdminClient();
         const [totalRes, recentRes] = await Promise.all([
-            supabase.from('cover_letters').select('id', { count: 'exact', head: true }),
-            supabase
+            admin.from('cover_letters').select('id', { count: 'exact', head: true }),
+            admin
                 .from('cover_letters')
                 .select('id, user_id, role_title, company_name, word_count, created_at')
                 .order('created_at', { ascending: false })

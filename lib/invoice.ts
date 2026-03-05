@@ -4,6 +4,7 @@ export interface InvoiceInput {
     userId: string;
     plan: string;
     amount: number;               // paise (2900 = ₹29). 0 for coupon.
+    currency?: string;            // 'INR' or 'USD'
     paymentMethod: 'razorpay' | 'coupon';
     couponCode?: string | null;
     razorpayPaymentId?: string | null;
@@ -26,6 +27,7 @@ export interface InvoiceRecord {
     user_id: string;
     plan: string;
     amount: number;
+    currency: string;
     payment_method: string;
     coupon_code: string | null;
     razorpay_payment_id: string | null;
@@ -64,6 +66,7 @@ export async function createInvoice(input: InvoiceInput): Promise<InvoiceRecord 
                 user_id: input.userId,
                 plan: input.plan,
                 amount: input.amount,
+                currency: input.currency || 'INR',
                 payment_method: input.paymentMethod,
                 coupon_code: input.couponCode ?? null,
                 razorpay_payment_id: input.razorpayPaymentId ?? null,

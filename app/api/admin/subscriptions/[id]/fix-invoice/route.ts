@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 import { createInvoice } from '@/lib/invoice';
 import { sendPaymentSuccessEmail } from '@/lib/brevo';
@@ -13,31 +14,38 @@ export async function POST(
     const session = await getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
-    // Admin check
+    const supabase = createClient();
     const { data: adminUser } = await supabase.from('users').select('role').eq('id', session.userId).single();
     if (!adminUser || adminUser.role !== 'admin') {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    const admin = createAdminClient();
+
     const { id: subId } = params;
 
     try {
         // 1. Fetch Subscription details
-        const { data: sub, error: subError } = await supabase
+        let { data: sub } = await admin
             .from('subscriptions')
             .select('*')
             .eq('id', subId)
             .single();
 
-        if (subError || !sub) return NextResponse.json({ error: 'Subscription not found' }, { status: 404 });
+        // Fallback: search by user_id if ID lookup fails
+        if (!sub) {
+            const { data: fallback } = await admin
+                .from('subscriptions')
+                .select('*')
+                .eq('user_id', subId)
+                .single();
+            sub = fallback;
+        }
+
+        if (!sub) return NextResponse.json({ error: 'Subscription not found' }, { status: 404 });
 
         // 2. Fetch User details
-        const { data: user, error: userError } = await supabase
+        const { data: user, error: userError } = await admin
             .from('users')
             .select('email, full_name')
             .eq('id', sub.user_id)
@@ -46,7 +54,7 @@ export async function POST(
         if (userError || !user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
         // 3. Check if payment record exists
-        const { data: existingPayment } = await supabase
+        const { data: existingPayment } = await admin
             .from('payments')
             .select('id')
             .eq('user_id', sub.user_id)
@@ -86,7 +94,7 @@ export async function POST(
         }
 
         // 4. Resolve billing info
-        const { data: billing } = await supabase
+        const { data: billing } = await admin
             .from('billing_details')
             .select('*')
             .eq('user_id', sub.user_id)
@@ -95,7 +103,7 @@ export async function POST(
             .single();
 
         // 5. Check if invoice exists
-        const { data: existingInvoice } = await supabase
+        const { data: existingInvoice } = await admin
             .from('invoices')
             .select('id, invoice_number')
             .eq('user_id', sub.user_id)

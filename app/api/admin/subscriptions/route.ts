@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 
 export const dynamic = 'force-dynamic';
@@ -8,132 +9,148 @@ export async function GET() {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // Use service-role to bypass RLS
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
-    // Admin guard
+    const supabase = createClient();
     const { data: adminUser } = await supabase.from('users').select('role').eq('id', session.userId).single();
     if (!adminUser || adminUser.role !== 'admin') {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    const admin = createAdminClient();
+
     try {
-        // ── Fetch subscriptions with user email ───────────────────────────────
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: subscriptions, error } = await (supabase as any)
-            .from('subscriptions')
-            .select(`
-                id, plan, status, expires_at, created_at, coupon_code, user_id,
-                users ( email )
-            `)
-            .order('created_at', { ascending: false });
+        // ── 1. Fetch all data sources in parallel ───────────────────────────
+        const [payRes, subsRes, overrideUsersRes] = await Promise.all([
+            admin.from('payments').select('*').eq('status', 'success').order('created_at', { ascending: false }),
+            admin.from('subscriptions').select('*').order('created_at', { ascending: false }),
+            admin.from('users')
+                .select('id, email, is_free_override, free_unlimited, created_at')
+                .or('is_free_override.eq.true,free_unlimited.eq.true')
+        ]);
 
-        if (error) throw error;
+        if (payRes.error) throw payRes.error;
 
-        // ── Collect unique user IDs ───────────────────────────────────────────
-        const userIds: string[] = Array.from(new Set(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (subscriptions as any[]).map((s: any) => s.user_id).filter(Boolean)
-        ));
+        const payments = payRes.data || [];
+        const subscriptions = subsRes.data || [];
+        const overrideUsers = overrideUsersRes.data || [];
 
-        // ── Fetch payments (latest per user) — includes coupon/discount fields ─
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let payments: any[] = [];
-        if (userIds.length > 0) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data: paymentsData, error: paymentsErr } = await (supabase as any)
-                .from('payments')
-                .select(`
-                    user_id, plan_name, amount, original_price, coupon_code,
-                    discount_amount, razorpay_payment_id, status, billing_address, created_at
-                `)
-                .in('user_id', userIds)
-                .eq('status', 'success')
-                .order('created_at', { ascending: false });
-            if (paymentsErr) console.error('[admin/subscriptions] Payments query error:', JSON.stringify(paymentsErr));
-            payments = paymentsData ?? [];
-        }
+        // ── 2. Collect all unique user IDs for related data ──────────────────
+        const allUserIds = new Set<string>();
+        payments.forEach(p => allUserIds.add(p.user_id));
+        subscriptions.forEach(s => allUserIds.add(s.user_id));
+        overrideUsers.forEach(u => allUserIds.add(u.id));
 
-        // ── Build payment lookup: user_id → latest payment ────────────────────
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const paymentMap: Record<string, any> = {};
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        payments.forEach((p: any) => {
-            if (!paymentMap[p.user_id]) paymentMap[p.user_id] = p;
-        });
+        const userIds = Array.from(allUserIds);
 
-        // ── Fetch billing details (latest per user) ───────────────────────────
+        // ── 3. Fetch missing user emails and billing details ────────────────
+        const [usersRes, billingRes] = await Promise.all([
+            admin.from('users').select('id, email').in('id', userIds),
+            admin.from('billing_details').select('*').in('user_id', userIds).order('created_at', { ascending: false })
+        ]);
+
+        // ── 4. Build lookups ─────────────────────────────────────────────────
+        const userMap: Record<string, string> = {};
+        (usersRes.data || []).forEach(u => { userMap[u.id] = u.email; });
+        // Include override users in map too
+        overrideUsers.forEach(u => { if (!userMap[u.id]) userMap[u.id] = u.email; });
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let billings: any[] = [];
-        if (userIds.length > 0) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data: billingsData, error: billingsErr } = await (supabase as any)
-                .from('billing_details')
-                .select('user_id, full_name, phone, country, state, city, zip_code, address, company_name, created_at')
-                .in('user_id', userIds)
-                .order('created_at', { ascending: false });
-            if (billingsErr) console.error('[admin/subscriptions] Billings query error:', JSON.stringify(billingsErr));
-            billings = billingsData ?? [];
-        }
+        const subMap: Record<string, any> = {};
+        subscriptions.forEach(s => { subMap[s.user_id] = s; });
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const billingMap: Record<string, any> = {};
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        billings.forEach((b: any) => {
+        (billingRes.data || []).forEach(b => {
             if (!billingMap[b.user_id]) billingMap[b.user_id] = b;
         });
 
-        // ── Format output ─────────────────────────────────────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const formatted = (subscriptions as any[]).map((s: any) => {
-            const payment = paymentMap[s.user_id] ?? null;
-            const billing = billingMap[s.user_id] ?? null;
+        const overrideMap: Record<string, any> = {};
+        overrideUsers.forEach(u => { overrideMap[u.id] = u; });
 
-            const paymentMethod = s.coupon_code
-                ? (payment?.amount === 0 ? 'coupon_free' : 'coupon_partial')
-                : payment?.razorpay_payment_id
-                    ? 'razorpay'
-                    : '—';
+        // ── 5. Build the rows ────────────────────────────────────────────────
+        // We want to show all payments, PLUS any subscription/override that has NO payment record
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const finalRows: any[] = [];
+        const usersWithPayment = new Set<string>();
 
-            const billingAddress = billing
-                ? [billing.address, billing.city, billing.state, billing.zip_code, billing.country]
-                    .filter(Boolean).join(', ')
-                : payment?.billing_address ?? null;
+        // A. Process Payments (The actual transactions)
+        payments.forEach(p => {
+            usersWithPayment.add(p.user_id);
+            const sub = subMap[p.user_id];
+            const billing = billingMap[p.user_id];
 
-            // Resolve coupon code from subscription OR payment row
-            const resolvedCoupon = s.coupon_code || payment?.coupon_code || null;
-
-            return {
-                id: s.id,
-                plan: s.plan,
-                status: s.status,
-                expires_at: s.expires_at,
-                created_at: s.created_at,
-                coupon_code: resolvedCoupon,
-                user_id: s.user_id,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                user_email: (Array.isArray(s.users) ? (s.users as any)[0]?.email : (s.users as any)?.email) || 'Unknown',
-                // Pricing breakdown
-                original_price: payment?.original_price ?? payment?.amount ?? 0,  // paise
-                discount_amount: payment?.discount_amount ?? 0,                    // paise
-                amount: payment?.amount ?? 0,                                      // final paid, paise
-                // Payment fields
-                payment_method: paymentMethod,
-                razorpay_payment_id: payment?.razorpay_payment_id ?? null,
-                // Billing
-                billing_name: billing?.full_name ?? null,
-                billing_phone: billing?.phone ?? null,
-                billing_company: billing?.company_name ?? null,
-                billing_address: billingAddress,
-            };
+            finalRows.push(formatRow(p, sub, billing, userMap[p.user_id]));
         });
 
-        return NextResponse.json({ success: true, subscriptions: formatted });
+        // B. Process Subscriptions that have NO payment record
+        subscriptions.forEach(s => {
+            if (!usersWithPayment.has(s.user_id)) {
+                usersWithPayment.add(s.user_id);
+                const billing = billingMap[s.user_id];
+                finalRows.push(formatRow(null, s, billing, userMap[s.user_id], 'subscription_only'));
+            }
+        });
+
+        // C. Process Overrides that have NO payment AND NO subscription record
+        overrideUsers.forEach(u => {
+            if (!usersWithPayment.has(u.id)) {
+                const billing = billingMap[u.id];
+                finalRows.push(formatRow(null, null, billing, u.email, 'admin_override', u));
+            }
+        });
+
+        // Final sort by created_at desc
+        finalRows.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+        return NextResponse.json({ success: true, subscriptions: finalRows });
     } catch (error: unknown) {
         const e = error as Error;
         return NextResponse.json({ error: e.message }, { status: 500 });
     }
+}
+
+// Helper to unify the different sources into the same row structure
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function formatRow(pay: any, sub: any, billing: any, email: string, source_type = 'payment', overrideUser?: any) {
+    const userId = pay?.user_id || sub?.user_id || overrideUser?.id;
+
+    let paymentMethod = '—';
+    if (pay) {
+        paymentMethod = pay.coupon_code
+            ? (pay.amount === 0 ? 'coupon_free' : 'coupon_partial')
+            : pay.razorpay_payment_id ? 'razorpay' : '—';
+    } else if (source_type === 'admin_override') {
+        paymentMethod = 'admin_override';
+    } else if (sub?.coupon_code) {
+        paymentMethod = 'coupon_free';
+    }
+
+    const billingAddress = billing
+        ? [billing.address, billing.city, billing.state, billing.zip_code, billing.country]
+            .filter(Boolean).join(', ')
+        : pay?.billing_address ?? null;
+
+    return {
+        id: sub?.id || pay?.id || `virtual-${userId}`,
+        plan: pay?.plan_name || sub?.plan || (overrideUser?.free_unlimited ? 'unlimited' : 'pro'),
+        status: sub?.status || (overrideUser ? 'active' : 'active'),
+        expires_at: sub?.expires_at || null,
+        created_at: pay?.created_at || sub?.created_at || overrideUser?.created_at || new Date().toISOString(),
+        coupon_code: pay?.coupon_code || sub?.coupon_code || null,
+        user_id: userId,
+        user_email: email || 'Unknown',
+        // Pricing
+        original_price: pay?.original_price ?? pay?.amount ?? 0,
+        discount_amount: pay?.discount_amount ?? 0,
+        amount: pay?.amount ?? 0,
+        currency: pay?.currency || 'INR',
+        // Payment
+        payment_method: paymentMethod,
+        razorpay_payment_id: pay?.razorpay_payment_id ?? null,
+        // Billing
+        billing_name: billing?.full_name ?? null,
+        billing_phone: billing?.phone ?? null,
+        billing_company: billing?.company_name ?? null,
+        billing_address: billingAddress,
+    };
 }

@@ -40,27 +40,33 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
         }
 
-        const basePrice = PLAN_PRICES[planName]; // INR
+        // ── 1. Detect Country and Set Currency ──────────────────────────────
+        // Priority: Vercel header > Cloudflare header > Browser query > Fallback
+        const countryCode = req.headers.get('x-vercel-ip-country') || req.headers.get('cf-ipcountry') || 'IN';
+        const isIndia = countryCode === 'IN';
+        const currency = isIndia ? 'INR' : 'USD';
+
+        // ── 2. Determine Pricing ──────────────────────────────────────────
+        // Career: 499 INR or 6 USD
+        const CURRENCY_PRICES: Record<string, Record<PlanName, number>> = {
+            INR: { PRO: 29, PREMIUM: 199, CAREER: 499 },
+            USD: { PRO: 1, PREMIUM: 3, CAREER: 6 }
+        };
+
+        const basePrice = CURRENCY_PRICES[currency][planName] || CURRENCY_PRICES['INR'][planName];
         let discountAmount = 0;
         let validatedCouponCode: string | null = null;
 
-        // ── Server-side coupon re-validation ───────────────────────────────
+        // ── 3. Server-side coupon re-validation ─────────────────────────────
         if (couponCode) {
             const supabase = createClient();
-
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const { data: coupon } = await (supabase as any)
                 .from('coupons')
                 .select('id, type, value, plan_type, expires_at, max_uses, used_count, is_active')
                 .eq('code', couponCode)
                 .eq('is_active', true)
-                .single() as {
-                    data: {
-                        id: string; type: string; value: number; plan_type: string;
-                        expires_at: string | null; max_uses: number | null;
-                        used_count: number; is_active: boolean;
-                    } | null
-                };
+                .single();
 
             if (coupon) {
                 const now = new Date();
@@ -74,7 +80,6 @@ export async function POST(req: NextRequest) {
                     } else if (coupon.type === 'fixed') {
                         discountAmount = Math.min(coupon.value, basePrice);
                     } else {
-                        // percentage
                         const pct = Math.min(coupon.value, 100);
                         discountAmount = Math.round((basePrice * pct) / 100);
                     }
@@ -82,20 +87,18 @@ export async function POST(req: NextRequest) {
                 }
             }
         }
-        // ───────────────────────────────────────────────────────────────────
 
-        const finalPrice = Math.max(0, basePrice - discountAmount); // INR
+        const finalPrice = Math.max(0, basePrice - discountAmount);
+        const amountPaise = Math.round(finalPrice * 100); // Razorpay expects subunits
 
-        // If coupon makes it truly ₹0 → should use activate-coupon path, not Razorpay
-        // Return early to signal frontend to switch path
+        // If coupon makes it ₹0/$0
         if (finalPrice === 0) {
             return NextResponse.json({
                 isFree: true,
-                message: 'Coupon makes total ₹0 — use activate-coupon endpoint',
+                message: 'Coupon makes total 0 — use activate-coupon endpoint',
             }, { status: 200 });
         }
 
-        const amountPaise = finalPrice * 100;
         const receipt = `rcpt_${session.userId.slice(0, 8)}_${Date.now()}`;
 
         const razorpay = new Razorpay({
@@ -103,37 +106,47 @@ export async function POST(req: NextRequest) {
             key_secret: process.env.RAZORPAY_KEY_SECRET!,
         });
 
+        // ── 4. Create Razorpay Order ──────────────────────────────────────
         const order = await razorpay.orders.create({
             amount: amountPaise,
-            currency: 'INR',
+            currency: currency, // INR or USD
             receipt,
+            notes: {
+                userId: session.userId,
+                planName,
+                country: countryCode
+            }
         });
 
-        // Store order in DB with full pricing breakdown
+        // ── 5. Store order in DB ──────────────────────────────────────────
         const supabase = createClient();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (supabase as any).from('orders').insert({
             user_id: session.userId,
             plan_name: planName,
-            // Pricing breakdown
-            original_price: basePrice * 100,     // paise
+            original_price: Math.round(basePrice * 100),
             coupon_code: validatedCouponCode,
-            discount_amount: discountAmount * 100, // paise
-            amount: amountPaise,                  // final amount in paise
+            discount_amount: Math.round(discountAmount * 100),
+            amount: amountPaise,
+            currency,
+            country_code: countryCode,
+            payment_gateway: 'razorpay',
             razorpay_order_id: order.id,
             status: 'pending',
         });
 
         return NextResponse.json({
             orderId: order.id,
-            amount: order.amount,         // paise — what Razorpay shows
+            amount: order.amount,
             currency: order.currency,
             keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-            // Extra info for UI display confirmation
+            // UI helper info
             originalPrice: basePrice,
             discountAmount,
             finalPrice,
+            currencySymbol: isIndia ? '₹' : '$',
             couponApplied: validatedCouponCode,
+            country: countryCode
         });
     } catch (err) {
         console.error('[create-order] Error:', err);

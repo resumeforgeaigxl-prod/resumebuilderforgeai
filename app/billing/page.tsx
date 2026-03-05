@@ -105,6 +105,14 @@ export default function BillingPage() {
         company_name: '',
     });
 
+    // ── Localized pricing state ──────────────────────────────────────────────
+    const [priceConfig, setPriceConfig] = useState<{
+        countryCode: string;
+        currency: string;
+        symbol: string;
+        prices: Record<string, number>;
+    } | null>(null);
+
     const [geo, setGeo] = useState<{ latitude: number | null; longitude: number | null }>({
         latitude: null,
         longitude: null,
@@ -121,21 +129,38 @@ export default function BillingPage() {
 
     const razorpayScriptLoaded = useRef(false);
 
-    // Derived pricing
-    const basePrice = planInfo.price;
-    const finalPrice = couponResult?.valid ? (couponResult.finalPrice ?? basePrice) : basePrice;
-    const discountAmount = couponResult?.valid ? (couponResult.discountAmount ?? 0) : 0;
-    const isFree = couponResult?.valid && couponResult.isFree === true;
-
-    // Load Razorpay script once
+    // Load Price Config + Razorpay script
     useEffect(() => {
+        // 1. Fetch Price/Country config
+        const fetchConfig = async () => {
+            try {
+                const res = await fetch('/api/payment/config');
+                const data = await res.json();
+                setPriceConfig(data);
+                if (data.countryCode && !form.country) {
+                    setForm(f => ({ ...f, country: data.countryCode === 'IN' ? 'India' : data.countryCode }));
+                }
+            } catch (e) { console.error('Failed to fetch pricing config:', e); }
+        };
+        fetchConfig();
+
+        // 2. Razorpay script
         if (razorpayScriptLoaded.current) return;
         const script = document.createElement('script');
         script.src = 'https://checkout.razorpay.com/v1/checkout.js';
         script.async = true;
         document.body.appendChild(script);
         razorpayScriptLoaded.current = true;
-    }, []);
+    }, [form.country]);
+
+    // Derived pricing using dynamic config
+    const currentPrice = priceConfig?.prices[plan.toLowerCase()] || planInfo.price;
+    const currentSymbol = priceConfig?.symbol || '₹';
+
+    const basePrice = currentPrice;
+    const finalPrice = couponResult?.valid ? (couponResult.finalPrice ?? basePrice) : basePrice;
+    const discountAmount = couponResult?.valid ? (couponResult.discountAmount ?? 0) : 0;
+    const isFree = couponResult?.valid && couponResult.isFree === true;
 
     const requestGeo = () => {
         if (!navigator.geolocation) { setGeoStatus('denied'); return; }
@@ -226,7 +251,6 @@ export default function BillingPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     plan,
-                    // Pass coupon code so backend re-validates and applies discount to Razorpay amount
                     coupon_code: couponResult?.valid && couponResult.code ? couponResult.code : undefined,
                 }),
             });
@@ -336,20 +360,20 @@ export default function BillingPage() {
                                 <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
                                     {planInfo.icon}
                                 </div>
-                                <div>
-                                    <h2 className="font-bold text-lg">{planInfo.label} Plan</h2>
-                                    <p className="text-slate-400 text-sm">{planInfo.description}</p>
+                                <div className="min-w-0 flex-1">
+                                    <h2 className="font-bold text-lg leading-tight">{planInfo.label} Plan</h2>
+                                    <p className="text-slate-400 text-sm truncate">{planInfo.description}</p>
                                 </div>
                                 <div className="ml-auto text-right">
                                     {discountAmount > 0 ? (
                                         <div>
-                                            <div className="text-slate-400 line-through text-sm">₹{basePrice}</div>
-                                            <div className="text-2xl font-bold text-emerald-400">
-                                                {finalPrice === 0 ? 'Free' : `₹${finalPrice}`}
+                                            <div className="text-slate-400 line-through text-xs font-medium">{currentSymbol}{basePrice}</div>
+                                            <div className="text-2xl font-bold text-emerald-400 leading-none">
+                                                {finalPrice === 0 ? 'Free' : `${currentSymbol}${finalPrice}`}
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="text-2xl font-bold">{planInfo.priceLabel}</div>
+                                        <div className="text-2xl font-bold">{currentSymbol}{currentPrice}</div>
                                     )}
                                 </div>
                             </div>
@@ -369,18 +393,18 @@ export default function BillingPage() {
                             <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 space-y-2">
                                 <div className="flex justify-between text-sm">
                                     <span className="text-slate-400">Original price</span>
-                                    <span className="text-slate-300">₹{basePrice}</span>
+                                    <span className="text-slate-300">{currentSymbol}{basePrice}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-emerald-400 flex items-center gap-1">
                                         <Tag className="w-3 h-3" /> Coupon ({couponResult.code}) — {couponResult.discountLabel}
                                     </span>
-                                    <span className="text-emerald-400">−₹{discountAmount}</span>
+                                    <span className="text-emerald-400">−{currentSymbol}{discountAmount}</span>
                                 </div>
-                                <div className="flex justify-between font-bold border-t border-emerald-500/20 pt-2">
+                                <div className="flex justify-between font-bold border-t border-emerald-500/20 pt-2 text-lg">
                                     <span>Total</span>
                                     <span className={finalPrice === 0 ? 'text-emerald-400' : 'text-white'}>
-                                        {finalPrice === 0 ? 'Free' : `₹${finalPrice}`}
+                                        {finalPrice === 0 ? 'Free' : `${currentSymbol}${finalPrice}`}
                                     </span>
                                 </div>
                             </div>
@@ -395,7 +419,7 @@ export default function BillingPage() {
                             ].map(({ icon, text }) => (
                                 <div key={text} className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col items-center gap-1 text-center">
                                     <div className="text-indigo-400">{icon}</div>
-                                    <span className="text-xs text-slate-400">{text}</span>
+                                    <span className="text-[10px] sm:text-xs text-slate-400 leading-tight">{text}</span>
                                 </div>
                             ))}
                         </div>
@@ -408,10 +432,10 @@ export default function BillingPage() {
                                     <Link
                                         key={p}
                                         href={`/billing?plan=${p}`}
-                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${p === plan ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${p === plan ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/20' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
                                             }`}
                                     >
-                                        {PLANS[p].label} — {PLANS[p].priceLabel}
+                                        {PLANS[p].label} — {currentSymbol}{priceConfig?.prices[p.toLowerCase()] || PLANS[p].price}
                                     </Link>
                                 ))}
                             </div>
@@ -419,7 +443,7 @@ export default function BillingPage() {
                     </div>
 
                     {/* ── Right: Billing Form ── */}
-                    <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 backdrop-blur-sm">
+                    <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 backdrop-blur-sm self-start">
                         <h2 className="text-lg font-semibold mb-5 flex items-center gap-2">
                             <CreditCard className="w-5 h-5 text-indigo-400" />
                             Billing Details
@@ -435,116 +459,102 @@ export default function BillingPage() {
                             {/* Full Name + Email */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs text-slate-400 mb-1.5">Full Name *</label>
+                                    <label className="block text-xs text-slate-400 mb-1.5 font-medium uppercase tracking-wider">Full Name *</label>
                                     <input name="full_name" value={form.full_name} onChange={handleChange} required placeholder="Arjun Sharma"
-                                        className="w-full px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors" />
+                                        className="w-full px-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-all" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs text-slate-400 mb-1.5">Email *</label>
+                                    <label className="block text-xs text-slate-400 mb-1.5 font-medium uppercase tracking-wider">Email *</label>
                                     <input name="email" type="email" value={form.email} onChange={handleChange} required placeholder="arjun@email.com"
-                                        className="w-full px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors" />
+                                        className="w-full px-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-all" />
                                 </div>
                             </div>
 
                             {/* Phone + Company */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs text-slate-400 mb-1.5">Phone Number</label>
+                                    <label className="block text-xs text-slate-400 mb-1.5 font-medium uppercase tracking-wider">Phone</label>
                                     <input name="phone" type="tel" value={form.phone} onChange={handleChange} placeholder="+91 98765 43210"
-                                        className="w-full px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors" />
+                                        className="w-full px-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-all" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs text-slate-400 mb-1.5">Company Name <span className="text-slate-600">(optional)</span></label>
+                                    <label className="block text-xs text-slate-400 mb-1.5 font-medium uppercase tracking-wider">Company <span className="text-slate-600">(opt)</span></label>
                                     <input name="company_name" value={form.company_name} onChange={handleChange} placeholder="Acme Corp"
-                                        className="w-full px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors" />
+                                        className="w-full px-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-all" />
                                 </div>
                             </div>
 
                             {/* Country + State */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs text-slate-400 mb-1.5">Country</label>
+                                    <label className="block text-xs text-slate-400 mb-1.5 font-medium uppercase tracking-wider">Country</label>
                                     <input name="country" value={form.country} onChange={handleChange} placeholder="India"
-                                        className="w-full px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors" />
+                                        className="w-full px-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-all" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs text-slate-400 mb-1.5">State</label>
+                                    <label className="block text-xs text-slate-400 mb-1.5 font-medium uppercase tracking-wider">State</label>
                                     <input name="state" value={form.state} onChange={handleChange} placeholder="Telangana"
-                                        className="w-full px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors" />
-                                </div>
-                            </div>
-
-                            {/* City + ZIP */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs text-slate-400 mb-1.5">City</label>
-                                    <input name="city" value={form.city} onChange={handleChange} placeholder="Hyderabad"
-                                        className="w-full px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors" />
-                                </div>
-                                <div>
-                                    <label className="block text-xs text-slate-400 mb-1.5">ZIP / Postal Code</label>
-                                    <input name="zip_code" value={form.zip_code} onChange={handleChange} placeholder="500001"
-                                        className="w-full px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors" />
+                                        className="w-full px-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-all" />
                                 </div>
                             </div>
 
                             {/* Billing Address */}
                             <div>
-                                <label className="block text-xs text-slate-400 mb-1.5">Billing Address</label>
+                                <label className="block text-xs text-slate-400 mb-1.5 font-medium uppercase tracking-wider">Address</label>
                                 <textarea name="address" value={form.address} onChange={handleChange}
-                                    placeholder="Flat 101, Building Name, Street, Area" rows={2}
-                                    className="w-full px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors resize-none" />
+                                    placeholder="Flat 101, Building Name, Street" rows={2}
+                                    className="w-full px-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-all resize-none" />
                             </div>
 
                             {/* Geolocation */}
-                            <div className="p-3 rounded-xl bg-slate-800/50 border border-slate-700">
+                            <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700">
                                 <div className="flex items-center justify-between gap-3">
-                                    <div className="flex items-center gap-2">
-                                        <MapPin className="w-4 h-4 text-indigo-400 shrink-0" />
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+                                            <MapPin className="w-4 h-4 text-indigo-400 shrink-0" />
+                                        </div>
                                         <div>
-                                            <p className="text-sm font-medium text-slate-300">Location</p>
-                                            <p className="text-xs text-slate-500">
+                                            <p className="text-sm font-semibold text-slate-300">Location Access</p>
+                                            <p className="text-[11px] text-slate-500">
                                                 {geoStatus === 'granted'
-                                                    ? `✓ Captured (${geo.latitude?.toFixed(4)}, ${geo.longitude?.toFixed(4)})`
+                                                    ? `✓ Detected (${geo.latitude?.toFixed(2)}, ${geo.longitude?.toFixed(2)})`
                                                     : geoStatus === 'denied'
                                                         ? 'Permission denied'
-                                                        : 'Optional — helps us serve you better'}
+                                                        : 'Helps prevent processing errors'}
                                             </p>
                                         </div>
                                     </div>
                                     {geoStatus !== 'granted' && (
                                         <button type="button" onClick={requestGeo} disabled={geoStatus === 'requesting'}
-                                            className="px-3 py-1.5 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 text-xs font-medium hover:bg-indigo-600/30 transition-all disabled:opacity-50 whitespace-nowrap">
-                                            {geoStatus === 'requesting' ? 'Requesting…' : 'Allow'}
+                                            className="px-3 py-1.5 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 text-xs font-bold hover:bg-indigo-600/30 transition-all disabled:opacity-50 whitespace-nowrap">
+                                            {geoStatus === 'requesting' ? 'Requesting…' : 'Detect'}
                                         </button>
                                     )}
                                 </div>
                             </div>
 
                             {/* ── Coupon Code ── */}
-                            <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700 space-y-3">
-                                <label className="block text-xs text-slate-400 font-medium flex items-center gap-1.5">
-                                    <Tag className="w-3.5 h-3.5" /> Coupon Code
+                            <div className="p-4 rounded-xl bg-slate-800/80 border border-slate-700 space-y-3 shadow-inner">
+                                <label className="block text-xs text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2">
+                                    <Tag className="w-3.5 h-3.5" /> Coupon Discount
                                 </label>
 
                                 {couponResult?.valid ? (
-                                    /* Applied coupon display */
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                                    <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
+                                        <div className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
                                             <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-bold text-emerald-400">{couponResult.code}</p>
-                                                <p className="text-xs text-emerald-300/70 truncate">{couponResult.message}</p>
+                                                <p className="text-sm font-bold text-emerald-400 uppercase tracking-widest leading-none">{couponResult.code}</p>
+                                                <p className="text-[10px] text-emerald-300/70 mt-1 truncate">{couponResult.message}</p>
                                             </div>
                                         </div>
                                         <button type="button" onClick={handleRemoveCoupon}
-                                            className="p-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-400 hover:text-white transition-colors shrink-0"
+                                            className="p-2.5 rounded-lg bg-slate-700 hover:bg-red-500/20 hover:text-red-400 text-slate-400 transition-all shrink-0"
                                             aria-label="Remove coupon">
                                             <X className="w-4 h-4" />
                                         </button>
                                     </div>
                                 ) : (
-                                    /* Coupon input */
                                     <div className="space-y-2">
                                         <div className="flex gap-2">
                                             <input
@@ -554,24 +564,22 @@ export default function BillingPage() {
                                                     if (couponResult) setCouponResult(null);
                                                 }}
                                                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleApplyCoupon(); } }}
-                                                placeholder="Enter coupon code"
-                                                className="flex-1 px-3 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors uppercase tracking-widest"
+                                                placeholder="Enter code"
+                                                className="flex-1 px-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-indigo-500 transition-all uppercase tracking-[0.2em]"
                                             />
                                             <button
                                                 type="button"
                                                 onClick={handleApplyCoupon}
                                                 disabled={couponLoading || !couponInput.trim()}
-                                                className="px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                                                className="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                                             >
                                                 {couponLoading ? (
                                                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                ) : 'Apply'}
+                                                ) : 'APPLY'}
                                             </button>
                                         </div>
-
-                                        {/* Coupon error */}
                                         {couponResult && !couponResult.valid && couponResult.error && (
-                                            <p className="text-xs text-red-400 flex items-center gap-1">
+                                            <p className="text-xs text-red-400 flex items-center gap-1.5 px-1">
                                                 <X className="w-3 h-3" /> {couponResult.error}
                                             </p>
                                         )}
@@ -583,9 +591,9 @@ export default function BillingPage() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className={`w-full py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.99] ${isFree
-                                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-900/30 hover:shadow-emerald-900/50'
-                                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-900/30 hover:shadow-indigo-900/50'
+                                className={`w-full py-4 rounded-xl font-bold text-sm tracking-widest uppercase transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3 active:scale-[0.98] mt-2 shadow-2xl ${isFree
+                                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-900/40'
+                                    : 'bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-blue-500 shadow-indigo-900/40'
                                     } text-white`}
                             >
                                 {loading ? (
@@ -595,21 +603,21 @@ export default function BillingPage() {
                                     </>
                                 ) : isFree ? (
                                     <>
-                                        <Sparkles className="w-4 h-4" />
+                                        <Sparkles className="w-5 h-5 text-emerald-300 animate-pulse" />
                                         Activate Plan
                                     </>
                                 ) : (
                                     <>
-                                        <CreditCard className="w-4 h-4" />
-                                        Pay ₹{finalPrice} securely
+                                        <CreditCard className="w-5 h-5" />
+                                        Pay {currentSymbol}{finalPrice} Securely
                                     </>
                                 )}
                             </button>
 
-                            <p className="text-center text-xs text-slate-500">
+                            <p className="text-center text-[10px] text-slate-500 uppercase tracking-widest font-medium">
                                 {isFree
-                                    ? 'Plan will be activated instantly — no payment required'
-                                    : 'Secured by Razorpay · SSL encrypted · No card data stored'}
+                                    ? 'Instant activation · Full access unlocked'
+                                    : 'Secured by Razorpay · PCI DSS Compliant'}
                             </p>
                         </form>
                     </div>
@@ -617,4 +625,4 @@ export default function BillingPage() {
             </div>
         </div>
     );
-}
+}

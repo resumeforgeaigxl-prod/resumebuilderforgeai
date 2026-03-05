@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 
 export async function GET() {
@@ -13,7 +14,8 @@ export async function GET() {
     }
 
     try {
-        const { data: tests, error } = await supabase
+        const admin = createAdminClient();
+        const { data: tests, error } = await admin
             .from('mock_tests')
             .select(`
                 id, company_name, job_title, total_questions, created_at,

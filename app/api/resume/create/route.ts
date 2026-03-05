@@ -34,9 +34,33 @@ export async function POST() {
     }
 
     try {
-        const supabase = createClient(); // Use service role for guaranteed write if session exists
+        const supabase = createClient();
+        const supabaseAdmin = createAdminClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
 
-        // 3. Await insert with .select().single()
+        // 3. Backend Protection: Avoid duplicate resumes within 2 seconds
+        const { data: recentResumes } = await supabaseAdmin
+            .from('resumes')
+            .select('id, created_at')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+        if (recentResumes && recentResumes.length > 0) {
+            const lastCreated = new Date(recentResumes[0].created_at).getTime();
+            const now = new Date().getTime();
+            if (now - lastCreated < 2000) {
+                console.warn('[API] Resume Create - Rate limited (duplicate request)');
+                return NextResponse.json({
+                    success: false,
+                    error: 'Please wait a moment before creating another resume.'
+                }, { status: 429 });
+            }
+        }
+
+        // 4. Await insert with .select().single()
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data, error } = await (supabase as any)
             .from('resumes')
@@ -44,12 +68,13 @@ export async function POST() {
                 user_id: userId,
                 title: 'Untitled Resume',
                 resume_json: DEFAULT_RESUME_JSON,
-                template_selected: 'modern'
+                template_selected: 'modern',
+                email_sent: false
             })
             .select('id')
             .single();
 
-        // 4. Handle insert errors explicitly
+        // 5. Handle insert errors explicitly
         if (error) {
             console.error("[API] Resume insert error:", error);
             return NextResponse.json({
@@ -67,25 +92,36 @@ export async function POST() {
             }, { status: 500 });
         }
 
-        // 5. Send resume-created email (non-blocking, fire-and-forget)
+        // 6. Send resume-created email (only if email_sent is false)
         try {
-            const supabaseAdmin = createAdminClient(
-                process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                process.env.SUPABASE_SERVICE_ROLE_KEY!
-            );
             const { data: userRow } = await supabaseAdmin
                 .from('users')
                 .select('email, full_name')
                 .eq('id', userId)
                 .single();
 
-            if (userRow?.email) {
-                sendResumeCreatedEmail(
+            // Re-fetch resume to check email_sent (to be triple safe)
+            const { data: resumeCheck } = await supabaseAdmin
+                .from('resumes')
+                .select('email_sent')
+                .eq('id', data.id)
+                .single();
+
+            if (userRow?.email && resumeCheck && !resumeCheck.email_sent) {
+                await sendResumeCreatedEmail(
                     userRow.email,
                     userRow.full_name || undefined,
                     'Untitled Resume',
                     data.id
-                ).catch(e => console.error('[Resume Create] Email error:', e));
+                );
+
+                // Update email_sent to true
+                await supabaseAdmin
+                    .from('resumes')
+                    .update({ email_sent: true })
+                    .eq('id', data.id);
+
+                console.log('[API] Resume Create - Email sent and flag updated for:', data.id);
             }
         } catch (emailErr) {
             console.error('[Resume Create] Failed to trigger email:', emailErr);

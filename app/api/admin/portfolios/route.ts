@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 
 export async function GET() {
@@ -14,7 +15,8 @@ export async function GET() {
     }
 
     try {
-        const { data: portfolios, error } = await supabase
+        const admin = createAdminClient();
+        const { data: portfolios, error } = await admin
             .from('portfolios')
             .select(`
                 id, username, is_public, theme, created_at,

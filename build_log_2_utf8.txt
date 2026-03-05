@@ -1,0 +1,95 @@
+﻿
+> ai-resume-builder@0.1.0 build
+> next build
+
+  Γû▓ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+node.exe : <w> [webpack.cache
+.PackFileCacheStrategy] 
+Caching failed for pack: 
+Error: EPERM: operation not 
+permitted, rename 'C:\ResumeF
+orgeAi\ai-resume-builder\.nex
+t\cache\webpack\client-produc
+tion\8.pack_' -> 'C:\ResumeFo
+rgeAi\ai-resume-builder\.next
+\cache\webpack\client-product
+ion\8.pack'
+At C:\Program 
+Files\nodejs\npm.ps1:29 
+char:3
++   & $NODE_EXE $NPM_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: (<w> [we  
+  bpack.ca...duction\8.pac   
+ k':String) [], RemoteExc    
+eption
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+ Γ£ô Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/85) ...
+   Generating static pages (21/85) 
+   Generating static pages (42/85) 
+   Generating static pages (63/85) 
+ Γ£ô Generating static pages (85/85)
+
+> Build error occurred
+Error: ENOENT: no such file 
+or directory, rename 'C:\Resu
+meForgeAi\ai-resume-builder\.
+next\export\500.html' -> 'C:\
+ResumeForgeAi\ai-resume-build
+er\.next\server\pages\500.htm
+l'
+    at async Object.rename (n
+ode:internal/fs/promises:784:
+10)
+    at async C:\ResumeForgeAi
+\ai-resume-builder\node_modul
+es\next\dist\build\index.js:1
+873:33
+    at async 
+Span.traceAsyncFn (C:\ResumeF
+orgeAi\ai-resume-builder\node
+_modules\next\dist\trace\trac
+e.js:154:20)
+    at async C:\ResumeForgeAi
+\ai-resume-builder\node_modul
+es\next\dist\build\index.js:1
+924:25
+    at async 
+Span.traceAsyncFn (C:\ResumeF
+orgeAi\ai-resume-builder\node
+_modules\next\dist\trace\trac
+e.js:154:20)
+    at async C:\ResumeForgeAi
+\ai-resume-builder\node_modul
+es\next\dist\build\index.js:1
+546:17
+    at async 
+Span.traceAsyncFn (C:\ResumeF
+orgeAi\ai-resume-builder\node
+_modules\next\dist\trace\trac
+e.js:154:20)
+    at async build (C:\Resume
+ForgeAi\ai-resume-builder\nod
+e_modules\next\dist\build\ind
+ex.js:368:9) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'rename',
+  path: 'C:\\ResumeForgeAi\\a
+i-resume-builder\\.next\\expo
+rt\\500.html',
+  dest: 'C:\\ResumeForgeAi\\a
+i-resume-builder\\.next\\serv
+er\\pages\\500.html'
+}

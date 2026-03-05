@@ -31,129 +31,136 @@ function getPlanLimit(plan: string | null | undefined): number {
 export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
-        const section = searchParams.get('section') || 'latest';
+
+        // --- 1. Detect User Location (Headers) ---
+        const userCountryHeader = req.headers.get('x-vercel-ip-country')?.toUpperCase();
+        let defaultCountryFilter = null;
+        if (userCountryHeader === 'IN') defaultCountryFilter = 'India';
+        else if (userCountryHeader === 'US') defaultCountryFilter = 'United States';
+
+        // --- 2. Extract Filters ---
+        const search = searchParams.get('search');
+        const location = searchParams.get('location'); // Specific city or country
+        const remote = searchParams.get('remote') === 'true';
+
+        // Support both 'experience' and legacy 'type' param
+        const experienceParam = searchParams.get('experience');
+        const typeParam = searchParams.get('type');
+        const level = experienceParam || typeParam;
+
+        const jobType = searchParams.get('job_type'); // Full-time, Contract, etc.
+        const country = searchParams.get('country') || defaultCountryFilter;
+
+        const page = parseInt(searchParams.get('page') || '1');
+        const limitParam = parseInt(searchParams.get('limit') || '20');
 
         const supabase = createClient();
 
-        // ── 1. Determine user plan ───────────────────────────────────────────
+        // ── 3. Determine user plan & limits ───────────────────────────────────
         let userPlan: string = 'free';
-
         const session = await getSession();
+
         if (session?.userId) {
-            // Admin shortcut
-            if (session.role === 'admin') {
-                userPlan = 'admin';
-            } else {
-                // Fetch plan from DB (service-role so RLS doesn't block)
-                const supabaseAdmin = createAdminClient(
-                    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                    process.env.SUPABASE_SERVICE_ROLE_KEY!
-                );
+            const supabaseAdmin = createAdminClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.SUPABASE_SERVICE_ROLE_KEY!
+            );
+            const { data: userRow } = await supabaseAdmin
+                .from('users')
+                .select('plan_type, role')
+                .eq('id', session.userId)
+                .single();
 
-                // Check user row first
-                const { data: userRow } = await supabaseAdmin
-                    .from('users')
-                    .select('plan, plan_type, role, free_unlimited, is_free_override, access_expires_at')
-                    .eq('id', session.userId)
-                    .single();
-
-                if (userRow) {
-                    const now = new Date();
-                    const expired = userRow.access_expires_at
-                        ? new Date(userRow.access_expires_at) < now
-                        : false;
-
-                    if (userRow.role === 'admin') {
-                        userPlan = 'admin';
-                    } else if (userRow.free_unlimited || userRow.is_free_override) {
-                        userPlan = 'premium';
-                    } else if (userRow.plan_type && !expired) {
-                        // plan_type = 'premium' | 'career' | 'pro'
-                        userPlan = userRow.plan_type;
-                    } else if (userRow.plan && userRow.plan !== 'free' && !expired) {
-                        userPlan = userRow.plan;
-                    } else {
-                        // Fall back to subscriptions table
-                        const { data: sub } = await supabaseAdmin
-                            .from('subscriptions')
-                            .select('plan')
-                            .eq('user_id', session.userId)
-                            .eq('status', 'active')
-                            .or(`expires_at.is.null,expires_at.gt.${now.toISOString()}`)
-                            .limit(1)
-                            .single();
-
-                        if (sub?.plan) userPlan = sub.plan;
-                    }
-                }
+            if (userRow) {
+                userPlan = userRow.role === 'admin' ? 'admin' : (userRow.plan_type || 'free');
             }
         }
 
-        const limit = getPlanLimit(userPlan);
+        const planLimit = getPlanLimit(userPlan);
 
-        // ── 2. Fetch ALL jobs for this section (up to 200 from DB) ──────────
+        // ── 4. Build Query ──────────────────────────────────────────────────
         let query = supabase
             .from('jobs')
-            .select('*')
-            .order('posted_at', { ascending: false })
-            .limit(200); // always fetch all available
+            .select('*', { count: 'exact' });
 
-        switch (section) {
-            case 'mnc':
-                query = query.eq('is_mnc', true);
-                break;
-            case 'remote':
-                query = query.ilike('location', '%remote%');
-                break;
-            case 'fresher':
-                query = query.eq('level', 'fresher');
-                break;
-            // 'latest' — no additional filter
+        // Apply Filters
+        if (search) {
+            query = query.or(`title.ilike.%${search}%,company.ilike.%${search}%`);
         }
 
-        const { data, error } = await query;
-
-        if (error) {
-            console.error('[API] Jobs List Error:', error);
-            return NextResponse.json({ error: 'Failed to fetch jobs' }, { status: 500 });
+        if (remote) {
+            query = query.ilike('location', '%remote%');
         }
 
-        const allJobs = data || [];
-        const totalJobs = allJobs.length;
-
-        // ── 3. Apply plan-based limits ──────────────────────────────────────
-        let visibleJobs = allJobs;
-        let lockedJobs: typeof allJobs = [];
-
-        if (limit !== Infinity && totalJobs > limit) {
-            visibleJobs = allJobs.slice(0, limit);
-            // Return locked job stubs (no description/apply_url for security)
-            lockedJobs = allJobs.slice(limit).map(job => ({
-                id: job.id,
-                title: job.title,
-                company: job.company,
-                location: job.location,
-                is_mnc: job.is_mnc,
-                level: job.level,
-                source: job.source,
-                employment_type: job.employment_type,
-                posted_at: job.posted_at,
-                // Sensitive fields stripped for locked jobs
-                description: null,
-                apply_url: null,
-                locked: true,
-            }));
+        // Priority: If country is explicitly set, use it.
+        // Otherwise try to infer country from location name (usa, india).
+        // Otherwise filter by location text.
+        if (country) {
+            query = query.eq('country', country);
+        } else if (location) {
+            const locLower = location.toLowerCase();
+            if (locLower === 'usa' || locLower === 'us') {
+                query = query.eq('country', 'United States');
+            } else if (locLower === 'india' || locLower === 'in') {
+                query = query.eq('country', 'India');
+            } else {
+                query = query.ilike('location', `%${location}%`);
+            }
         }
+
+        // Handle level/job_type overlap
+        if (level === 'fresher' && jobType === 'Internship') {
+            query = query.eq('level', 'intern');
+        } else {
+            if (level) query = query.eq('level', level);
+            if (jobType) query = query.eq('job_type', jobType);
+        }
+
+        // Pagination
+        const from = (page - 1) * limitParam;
+        const to = from + limitParam - 1;
+
+        const { data: allJobs, error, count } = await query
+            .order('created_at', { ascending: false })
+            .range(from, to);
+
+        if (error) throw error;
+
+        const totalMatching = count || 0;
+
+        // Apply plan-based locking
+        const jobs = (allJobs || []).map((job, idx) => {
+            const globalIndex = from + idx;
+            const isLocked = globalIndex >= planLimit;
+
+            if (isLocked) {
+                return {
+                    id: job.id,
+                    title: job.title,
+                    company: job.company,
+                    location: job.location,
+                    country: job.country,
+                    job_type: job.job_type,
+                    salary: 'Locked',
+                    level: job.level,
+                    source: job.source,
+                    created_at: job.created_at,
+                    description: null,
+                    apply_url: null,
+                    locked: true,
+                };
+            }
+            return job;
+        });
 
         return NextResponse.json({
             success: true,
-            jobs: visibleJobs,
-            lockedJobs,
-            totalJobs,
-            visibleCount: visibleJobs.length,
-            lockedCount: lockedJobs.length,
-            userPlan,
-            planLimit: limit === Infinity ? null : limit,
+            jobs,
+            totalJobs: totalMatching,
+            page,
+            totalPages: Math.ceil(totalMatching / limitParam),
+            userCountry: userCountryHeader || 'Other',
+            userPlan
         });
 
     } catch (error: unknown) {

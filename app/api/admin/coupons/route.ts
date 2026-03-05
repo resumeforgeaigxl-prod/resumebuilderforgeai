@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 
 export async function GET() {
@@ -13,7 +14,8 @@ export async function GET() {
     }
 
     try {
-        const { data: coupons, error } = await supabase
+        const admin = createAdminClient();
+        const { data: coupons, error } = await admin
             .from('coupons')
             .select('*')
             .order('created_at', { ascending: false });
@@ -21,7 +23,8 @@ export async function GET() {
         if (error) throw error;
 
         return NextResponse.json({ success: true, coupons });
-    } catch (error: unknown) { const e = error as Error;
+    } catch (error: unknown) {
+        const e = error as Error;
         return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }

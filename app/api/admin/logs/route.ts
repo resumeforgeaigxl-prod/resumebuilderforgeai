@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 
 export async function GET() {
@@ -14,15 +15,17 @@ export async function GET() {
     }
 
     try {
+        const admin = createAdminClient();
+
         // Primary: fetch from new audit_logs table (platform-wide user events)
-        const { data: auditLogs, error: auditErr } = await supabase
+        const { data: auditLogs, error: auditErr } = await admin
             .from('audit_logs')
             .select('id, user_id, action, metadata, created_at')
             .order('created_at', { ascending: false })
             .limit(100);
 
         // Secondary: fetch from admin_logs (admin panel actions) if available
-        const { data: adminLogs } = await supabase
+        const { data: adminLogs } = await admin
             .from('admin_logs')
             .select('id, action, target_id, metadata, created_at, admin_id, users(email)')
             .order('created_at', { ascending: false })

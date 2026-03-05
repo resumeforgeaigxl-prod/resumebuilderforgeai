@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { Download, Calendar, FileText, Shield, RefreshCw } from 'lucide-react';
 
 interface DownloadLog {
@@ -11,7 +11,7 @@ interface DownloadLog {
 }
 
 export default async function AdminDownloadsPage() {
-    const supabase = createClient();
+    const supabase = createAdminClient();
 
     // Query from the new pdf_downloads table
     const { data: logs } = await supabase

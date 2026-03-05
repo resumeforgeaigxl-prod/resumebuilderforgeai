@@ -18,16 +18,19 @@ const MNC_LIST = [
 ];
 
 // Keywords that mark a job as fresher/intern level
-const FRESHER_KEYWORDS = ['intern', 'internship', 'fresher', 'junior', 'entry level', 'entry-level', 'trainee', 'graduate'];
+const FRESHER_KEYWORDS = ['fresher', 'junior', 'entry level', 'entry-level', 'trainee', 'graduate'];
+const INTERN_KEYWORDS = ['intern', 'internship'];
 
 function isMNC(company: string): boolean {
     const lower = (company || '').toLowerCase();
     return MNC_LIST.some(m => lower.includes(m));
 }
 
-function classifyLevel(title: string): 'fresher' | 'experienced' {
+function classifyLevel(title: string): 'fresher' | 'intern' | 'experienced' {
     const lower = (title || '').toLowerCase();
-    return FRESHER_KEYWORDS.some(k => lower.includes(k)) ? 'fresher' : 'experienced';
+    if (INTERN_KEYWORDS.some(k => lower.includes(k))) return 'intern';
+    if (FRESHER_KEYWORDS.some(k => lower.includes(k))) return 'fresher';
+    return 'experienced';
 }
 
 // ─── Normalised Shape ─────────────────────────────────────────────────────────
@@ -36,137 +39,122 @@ interface NormalisedJob {
     title: string;
     company: string;
     location: string;
+    country: string;
+    job_type: string;
+    salary: string;
     description: string;
     apply_url: string;
     employment_type: string;
-    posted_at: string;
+    created_at: string;
     source: string;
     is_mnc: boolean;
-    level: 'fresher' | 'experienced';
+    level: 'fresher' | 'intern' | 'experienced';
 }
 
 // ─── API 1: JSearch (RapidAPI) ────────────────────────────────────────────────
 async function fetchJSearch(apiKey: string): Promise<NormalisedJob[]> {
-    // Targeted queries: general tech + fresher/intern specific
-    const queries = [
-        'software developer intern fresher entry level india',
-        'backend developer junior india',
-        'full stack developer fresher india',
-        'software engineer intern india remote'
+    const regions = [
+        { country: 'India', queries: ['software engineer fresher india', 'web developer intern india'] },
+        { country: 'United States', queries: ['software engineer entry level usa', 'remote developer usa'] }
     ];
     const results: NormalisedJob[] = [];
 
-    for (const q of queries) {
-        try {
-            const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(q)}&page=1&num_pages=1&date_posted=month`;
-            const res = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'X-RapidAPI-Key': apiKey,
-                    'X-RapidAPI-Host': 'jsearch.p.rapidapi.com'
-                },
-                next: { revalidate: 0 }
-            });
-
-            if (!res.ok) {
-                console.warn(`[JSearch] Non-OK for query "${q}": ${res.status}`);
-                continue;
-            }
-
-            const data = await res.json();
-            const jobs: Record<string, unknown>[] = data?.data || [];
-
-            for (const j of jobs) {
-                const company = (j.employer_name as string) || '';
-                const title = (j.job_title as string) || '';
-                const location = (j.job_city && j.job_country)
-                    ? `${j.job_city as string}, ${j.job_country as string}`
-                    : (j.job_is_remote ? 'Remote' : 'India');
-
-                results.push({
-                    external_id: `jsearch_${j.job_id as string}`,
-                    title,
-                    company,
-                    location,
-                    description: ((j.job_description as string) || '').slice(0, 500),
-                    apply_url: (j.job_apply_link as string) || '',
-                    employment_type: (j.job_employment_type as string) || 'FULLTIME',
-                    posted_at: j.job_posted_at_datetime_utc
-                        ? new Date(j.job_posted_at_datetime_utc as string).toISOString()
-                        : new Date().toISOString(),
-                    source: 'JSearch',
-                    is_mnc: isMNC(company),
-                    level: classifyLevel(title)
+    for (const region of regions) {
+        for (const q of region.queries) {
+            try {
+                const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(q)}&page=1&num_pages=1&date_posted=month`;
+                const res = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'X-RapidAPI-Key': apiKey,
+                        'X-RapidAPI-Host': 'jsearch.p.rapidapi.com'
+                    },
+                    next: { revalidate: 0 }
                 });
+
+                if (!res.ok) continue;
+
+                const data = await res.json();
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const jobs: any[] = data?.data || [];
+
+                for (const j of jobs) {
+                    const company = j.employer_name || 'Unknown';
+                    const title = j.job_title || '';
+
+                    let jobType = 'Full-time';
+                    const empType = j.job_employment_type?.toUpperCase() || 'FULLTIME';
+                    if (empType.includes('PARTTIME')) jobType = 'Part-time';
+                    if (empType.includes('CONTRACTOR')) jobType = 'Contract';
+                    if (empType.includes('INTERN')) jobType = 'Internship';
+
+                    results.push({
+                        external_id: `jsearch_${j.job_id}`,
+                        title,
+                        company,
+                        location: j.job_is_remote ? 'Remote' : (j.job_city ? `${j.job_city}, ${j.job_country || region.country}` : region.country),
+                        country: region.country,
+                        job_type: jobType,
+                        salary: j.job_salary_range || 'Competitive',
+                        description: (j.job_description || '').slice(0, 1000),
+                        apply_url: j.job_apply_link || '',
+                        employment_type: empType,
+                        created_at: j.job_posted_at_datetime_utc || new Date().toISOString(),
+                        source: 'JSearch',
+                        is_mnc: isMNC(company),
+                        level: classifyLevel(title)
+                    });
+                }
+            } catch (err) {
+                console.warn(`[JSearch] Error:`, err);
             }
-        } catch (err) {
-            console.warn(`[JSearch] Error for query "${q}":`, err);
         }
     }
-
     return results;
 }
 
 // ─── API 2: Adzuna ────────────────────────────────────────────────────────────
 async function fetchAdzuna(appId: string, appKey: string): Promise<NormalisedJob[]> {
-    // Targeted queries for fresher + general tech roles
     const queries = [
-        { what: 'intern OR fresher OR junior developer', maxDays: 7 },
-        { what: 'software engineer entry level', maxDays: 14 },
-        { what: 'backend developer freshers', maxDays: 14 }
+        { country: 'in', label: 'India', what: 'software engineer fresher' },
+        { country: 'us', label: 'United States', what: 'software engineer entry level' }
     ];
     const results: NormalisedJob[] = [];
 
     for (const q of queries) {
         try {
-            const url = [
-                `https://api.adzuna.com/v1/api/jobs/in/search/1`,
-                `?app_id=${appId}`,
-                `&app_key=${appKey}`,
-                `&what=${encodeURIComponent(q.what)}`,
-                `&results_per_page=20`,
-                `&max_days_old=${q.maxDays}`,
-                `&content-type=application/json`
-            ].join('');
-
+            const url = `https://api.adzuna.com/v1/api/jobs/${q.country}/search/1?app_id=${appId}&app_key=${appKey}&what=${encodeURIComponent(q.what)}&results_per_page=20&content-type=application/json`;
             const res = await fetch(url, { next: { revalidate: 0 } });
-
-            if (!res.ok) {
-                console.warn(`[Adzuna] Non-OK for query "${q.what}": ${res.status}`);
-                continue;
-            }
+            if (!res.ok) continue;
 
             const data = await res.json();
-            const jobs: Record<string, unknown>[] = data?.results || [];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const jobs: any[] = data?.results || [];
 
             for (const j of jobs) {
-                const companyObj = j.company as Record<string, unknown>;
-                const locationObj = j.location as Record<string, unknown>;
-                const company = (companyObj?.display_name as string) || 'Unknown';
-                const title = (j.title as string) || '';
-                const location = (locationObj?.display_name as string) || 'India';
-
+                const company = j.company?.display_name || 'Unknown';
+                const title = j.title || '';
                 results.push({
-                    external_id: `adzuna_${j.id as string}`,
+                    external_id: `adzuna_${j.id}`,
                     title,
                     company,
-                    location,
-                    description: ((j.description as string) || '').slice(0, 500),
-                    apply_url: (j.redirect_url as string) || '',
-                    employment_type: j.contract_type === 'permanent' ? 'FULLTIME' : ((j.contract_type as string) || 'FULLTIME'),
-                    posted_at: j.created
-                        ? new Date(j.created as string).toISOString()
-                        : new Date().toISOString(),
+                    location: j.location?.display_name || q.label,
+                    country: q.label,
+                    job_type: j.contract_type === 'permanent' ? 'Full-time' : 'Contract',
+                    salary: j.salary_min ? `${j.salary_min} - ${j.salary_max || ''}` : 'Competitive',
+                    description: (j.description || '').slice(0, 1000),
+                    apply_url: j.redirect_url || '',
+                    employment_type: j.contract_type === 'permanent' ? 'FULLTIME' : 'CONTRACT',
+                    created_at: j.created || new Date().toISOString(),
                     source: 'Adzuna',
                     is_mnc: isMNC(company),
                     level: classifyLevel(title)
                 });
             }
         } catch (err) {
-            console.warn(`[Adzuna] Error for query "${q.what}":`, err);
+            console.warn(`[Adzuna] Error:`, err);
         }
     }
-
     return results;
 }
 
@@ -221,6 +209,7 @@ export async function GET(req: Request) {
         const deduped = deduplicate(raw);
 
         const fresherCount = deduped.filter(j => j.level === 'fresher').length;
+        const internCount = deduped.filter(j => j.level === 'intern').length;
         const experiencedCount = deduped.filter(j => j.level === 'experienced').length;
 
         if (deduped.length === 0) {
@@ -253,6 +242,7 @@ export async function GET(req: Request) {
                 jsearch: jsearchJobs.length,
                 adzuna: adzunaJobs.length,
                 fresher: fresherCount,
+                intern: internCount,
                 experienced: experiencedCount
             }
         });

@@ -11,39 +11,45 @@ import { format } from 'date-fns';
  * Secure: user can only access their own; admins can access all.
  */
 export async function GET(
-    _req: NextRequest,
-    { params }: { params: { id: string } }
+  _req: NextRequest,
+  { params }: { params: { id: string } }
 ) {
-    try {
-        const session = await getSession();
-        if (!session?.userId) {
-            return new NextResponse('Unauthorized', { status: 401 });
-        }
+  try {
+    const session = await getSession();
+    if (!session?.userId) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
 
-        const supabase = createClient();
-        const { data: adminUser } = await supabase.from('users').select('role').eq('id', session.userId).single();
-        const isAdmin = adminUser?.role === 'admin';
+    const supabase = createClient();
+    const { data: adminUser } = await supabase.from('users').select('role').eq('id', session.userId).single();
+    const isAdmin = adminUser?.role === 'admin';
 
-        const invoice = await getInvoiceById(params.id);
-        if (!invoice) return new NextResponse('Invoice not found', { status: 404 });
-        if (!isAdmin && invoice.user_id !== session.userId) {
-            return new NextResponse('Forbidden', { status: 403 });
-        }
+    const invoice = await getInvoiceById(params.id);
+    if (!invoice) return new NextResponse('Invoice not found', { status: 404 });
+    if (!isAdmin && invoice.user_id !== session.userId) {
+      return new NextResponse('Forbidden', { status: 403 });
+    }
 
-        const amountINR = invoice.amount > 0 ? `₹${(invoice.amount / 100).toFixed(0)}` : '₹0 (Free)';
-        const dateStr = format(new Date(invoice.created_at), 'dd MMM yyyy');
-        const planLabel = invoice.plan.charAt(0) + invoice.plan.slice(1).toLowerCase();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const symbol = (invoice as any).currency === 'USD' ? '$' : '₹';
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const isUSD = (invoice as any).currency === 'USD';
+    const amountDisplay = invoice.amount > 0
+      ? `${symbol}${isUSD ? (invoice.amount / 100).toFixed(2) : (invoice.amount / 100).toFixed(0)}`
+      : `${symbol}0 (Free)`;
+    const dateStr = format(new Date(invoice.created_at), 'dd MMM yyyy');
+    const planLabel = invoice.plan.charAt(0) + invoice.plan.slice(1).toLowerCase();
 
-        const billingLines = [
-            invoice.billing_name,
-            invoice.billing_email,
-            invoice.billing_phone,
-            invoice.billing_address,
-            [invoice.billing_city, invoice.billing_state, invoice.billing_zip].filter(Boolean).join(', '),
-            invoice.billing_country,
-        ].filter(Boolean);
+    const billingLines = [
+      invoice.billing_name,
+      invoice.billing_email,
+      invoice.billing_phone,
+      invoice.billing_address,
+      [invoice.billing_city, invoice.billing_state, invoice.billing_zip].filter(Boolean).join(', '),
+      invoice.billing_country,
+    ].filter(Boolean);
 
-        const html = `<!DOCTYPE html>
+    const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -139,13 +145,13 @@ export async function GET(
               ${invoice.plan === 'PRO' ? '24-hour unlimited access' : invoice.plan === 'PREMIUM' ? 'Monthly subscription (30 days)' : 'Career plan — Monthly subscription (30 days)'}
             </div>
           </td>
-          <td style="text-align:right; font-weight:600">${amountINR}</td>
+          <td style="text-align:right; font-weight:600">${amountDisplay}</td>
         </tr>
       </tbody>
       <tfoot>
         <tr class="total-row">
           <td colspan="2" style="text-align:right;color:#64748b;font-size:13px;font-weight:500">Total Paid</td>
-          <td style="text-align:right;color:#4f46e5;">${amountINR}</td>
+          <td style="text-align:right;color:#4f46e5;">${amountDisplay}</td>
         </tr>
       </tfoot>
     </table>
@@ -165,14 +171,14 @@ export async function GET(
 </body>
 </html>`;
 
-        return new NextResponse(html, {
-            headers: {
-                'Content-Type': 'text/html; charset=utf-8',
-                'Content-Disposition': `inline; filename="${invoice.invoice_number}.pdf"`,
-            },
-        });
-    } catch (err) {
-        console.error('[invoice-download]', err);
-        return new NextResponse('Failed to generate invoice', { status: 500 });
-    }
+    return new NextResponse(html, {
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Disposition': `inline; filename="${invoice.invoice_number}.pdf"`,
+      },
+    });
+  } catch (err) {
+    console.error('[invoice-download]', err);
+    return new NextResponse('Failed to generate invoice', { status: 500 });
+  }
 }

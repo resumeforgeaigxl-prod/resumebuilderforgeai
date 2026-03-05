@@ -1,12 +1,9 @@
-import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { Activity, Star, Calendar, Target } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 export default async function AdminResumeScoresPage() {
-    const supabase = createAdminClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const supabase = createAdminClient();
 
     // Fetch latest ATS score checks from resume_scores table (logged by admin-logger)
     const { data: scores } = await supabase

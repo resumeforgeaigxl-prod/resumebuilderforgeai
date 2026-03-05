@@ -1,13 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
-
-// Use service role to allow cross-table join (RLS bypass)
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 export async function GET() {
     try {
@@ -16,13 +10,14 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        const admin = createAdminClient();
         const [totalRes, mncRes, appsRes, viewsRes, recentAppsRes] = await Promise.all([
-            supabaseAdmin.from('jobs').select('id', { count: 'exact', head: true }),
-            supabaseAdmin.from('jobs').select('id', { count: 'exact', head: true }).eq('is_mnc', true),
-            supabaseAdmin.from('job_applications').select('id', { count: 'exact', head: true }),
-            supabaseAdmin.from('job_views').select('id', { count: 'exact', head: true }),
+            admin.from('jobs').select('id', { count: 'exact', head: true }),
+            admin.from('jobs').select('id', { count: 'exact', head: true }).eq('is_mnc', true),
+            admin.from('job_applications').select('id', { count: 'exact', head: true }),
+            admin.from('job_views').select('id', { count: 'exact', head: true }),
             // JOIN with users table to get email and full_name
-            supabaseAdmin
+            admin
                 .from('job_applications')
                 .select(`
                     id,

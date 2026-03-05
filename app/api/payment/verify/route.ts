@@ -38,19 +38,23 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Invalid payment signature' }, { status: 400 });
         }
 
-        // ── Fetch the order row (contains coupon & pricing breakdown) ─────────
+        // ── Fetch the order row ───────────────────────────────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: orderRow } = await (supabase as any)
             .from('orders')
-            .select('amount, original_price, coupon_code, discount_amount')
+            .select('amount, original_price, coupon_code, discount_amount, currency, country_code')
             .eq('razorpay_order_id', razorpay_order_id)
             .single();
 
-        const amountPaise = orderRow?.amount ?? 0;                          // final paid
-        const originalPrice = orderRow?.original_price ?? amountPaise;     // before coupon
+        const currency = orderRow?.currency || 'INR';
+        const countryCode = orderRow?.country_code || 'IN';
+        const amountPaise = orderRow?.amount ?? 0;
+        const originalPrice = orderRow?.original_price ?? amountPaise;
         const couponCode = orderRow?.coupon_code ?? null;
-        const discountAmount = orderRow?.discount_amount ?? 0;             // paise
-        const amountINR = `₹${(amountPaise / 100).toFixed(0)}`;
+        const discountAmount = orderRow?.discount_amount ?? 0;
+
+        const currencySymbol = currency === 'INR' ? '₹' : '$';
+        const formattedAmount = `${currencySymbol}${(amountPaise / 100).toFixed(currency === 'INR' ? 0 : 2)}`;
 
         // ── Mark order success ────────────────────────────────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -74,24 +78,24 @@ export async function POST(req: NextRequest) {
                 .filter(Boolean).join(', ')
             : null;
 
-        // ── Insert payment record (full pricing breakdown) ────────────────────
+        // ── Insert payment record ─────────────────────────────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (supabase as any).from('payments').insert({
             user_id: session.userId,
             plan_name: plan_name.toUpperCase(),
-            // Pricing fields
-            original_price: originalPrice,     // paise, before coupon
-            coupon_code: couponCode,           // coupon used (or null)
-            discount_amount: discountAmount,   // paise saved
-            amount: amountPaise,               // final amount paid
-            // Razorpay
+            original_price: originalPrice,
+            coupon_code: couponCode,
+            discount_amount: discountAmount,
+            amount: amountPaise,
+            currency,
+            country_code: countryCode,
+            payment_gateway: 'razorpay',
             razorpay_payment_id,
             razorpay_order_id,
             status: 'success',
             billing_address: billingAddress,
         });
 
-        // ── If a coupon was used, increment its used_count ────────────────────
         if (couponCode) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await (supabase as any).rpc('increment_coupon_used', { p_code: couponCode });
@@ -105,6 +109,7 @@ export async function POST(req: NextRequest) {
             userId: session.userId,
             plan: plan_name.toUpperCase(),
             amount: amountPaise,
+            currency,
             paymentMethod: 'razorpay',
             razorpayPaymentId: razorpay_payment_id,
             razorpayOrderId: razorpay_order_id,
@@ -121,15 +126,15 @@ export async function POST(req: NextRequest) {
             } : null,
         });
 
-        // ── Send payment success email (non-blocking) ─────────────────────────
+        // ── Send payment success email ────────────────────────────────────────
         const userEmail = billing?.email ?? null;
         if (userEmail && invoice) {
             sendPaymentSuccessEmail({
                 userEmail,
                 userName: billing?.full_name,
                 plan: plan_name.toUpperCase(),
-                amountINR,
-                paymentMethod: 'razorpay',
+                amountINR: formattedAmount, // Still named amountINR but contains formatted string
+                paymentMethod: 'Razorpay',
                 couponCode: couponCode ?? undefined,
                 invoiceNumber: invoice.invoice_number,
                 invoiceId: invoice.id,

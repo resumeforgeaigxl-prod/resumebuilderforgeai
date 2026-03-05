@@ -6,11 +6,6 @@ import { createInvoice } from '@/lib/invoice';
 import { sendPaymentSuccessEmail } from '@/lib/brevo';
 import { format } from 'date-fns';
 
-const PLAN_PRICES: Record<PlanName, number> = {
-    PRO: 29,
-    PREMIUM: 199,
-    CAREER: 499,
-};
 
 /**
  * POST /api/payment/activate-coupon
@@ -59,7 +54,17 @@ export async function POST(req: NextRequest) {
         if (coupon.max_uses !== null && coupon.used_count >= coupon.max_uses)
             return NextResponse.json({ error: 'Coupon usage limit reached' }, { status: 400 });
 
-        const basePrice = PLAN_PRICES[planName] || 0;
+        // Detect country and set currency (even if free, for records)
+        const countryCode = req.headers.get('x-vercel-ip-country') || req.headers.get('cf-ipcountry') || 'IN';
+        const isIndia = countryCode === 'IN';
+        const currency = isIndia ? 'INR' : 'USD';
+
+        const CURRENCY_PRICES: Record<string, Record<PlanName, number>> = {
+            INR: { PRO: 29, PREMIUM: 199, CAREER: 499 },
+            USD: { PRO: 1, PREMIUM: 3, CAREER: 6 }
+        };
+
+        const basePrice = CURRENCY_PRICES[currency][planName] || CURRENCY_PRICES['INR'][planName];
         const isFullAccess = coupon.type === 'full' || coupon.value >= 100;
 
         if (!isFullAccess)
@@ -110,6 +115,9 @@ export async function POST(req: NextRequest) {
             coupon_code: couponCode,
             discount_amount: basePrice * 100, // 100% off for activate-coupon path
             amount: 0,
+            currency,
+            country_code: countryCode,
+            payment_gateway: 'coupon',
             razorpay_payment_id: null,
             razorpay_order_id: null,
             status: 'success',
@@ -131,12 +139,21 @@ export async function POST(req: NextRequest) {
 
         // Generate ₹0 invoice
         const invoice = await createInvoice({
-            userId: session.userId, plan: planName, amount: 0,
-            paymentMethod: 'coupon', couponCode,
+            userId: session.userId,
+            plan: planName,
+            amount: 0,
+            currency,
+            paymentMethod: 'coupon',
+            couponCode,
             billing: billing ? {
-                name: billing.full_name, email: billing.email, phone: billing.phone,
-                address: billing.address, city: billing.city, state: billing.state,
-                country: billing.country, zip: billing.zip_code,
+                name: billing.full_name,
+                email: billing.email,
+                phone: billing.phone,
+                address: billing.address,
+                city: billing.city,
+                state: billing.state,
+                country: billing.country,
+                zip: billing.zip_code,
             } : null,
         });
 
@@ -147,8 +164,8 @@ export async function POST(req: NextRequest) {
                 userEmail,
                 userName: billing?.full_name ?? userData?.full_name,
                 plan: planName,
-                amountINR: 'Free',
-                paymentMethod: 'coupon',
+                amountINR: isIndia ? 'Free' : '$0 (Free)',
+                paymentMethod: 'Coupon',
                 couponCode,
                 invoiceNumber: invoice.invoice_number,
                 invoiceId: invoice.id,

@@ -1,0 +1,149 @@
+﻿
+> ai-resume-builder@0.1.0 build
+> next build
+
+  Γû▓ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully
+   Linting and checking validity of types ...
+node.exe : 
+At C:\Program 
+Files\nodejs\npm.ps1:29 
+char:3
++   & $NODE_EXE $NPM_CLI_JS 
+$args
++   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: (:String  
+  ) [], RemoteException
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+Failed to compile.
+
+./app/(dashboard)/account/pag
+e.tsx
+4:11  Error: 'Mail' is 
+defined but never used.  @typ
+escript-eslint/no-unused-vars
+6:5  Error: 'Loader2' is 
+defined but never used.  @typ
+escript-eslint/no-unused-vars
+
+./app/(dashboard)/dashboard/p
+age.tsx
+2:24  Error: 'Globe' is 
+defined but never used.  @typ
+escript-eslint/no-unused-vars
+
+./app/(dashboard)/jobs/page.t
+sx
+8:29  Error: 'ExternalLink' 
+is defined but never used.  @
+typescript-eslint/no-unused-v
+ars
+9:5  Error: 'Sparkles' is 
+defined but never used.  @typ
+escript-eslint/no-unused-vars
+9:15  Error: 'Star' is 
+defined but never used.  @typ
+escript-eslint/no-unused-vars
+9:49  Error: 'Crown' is 
+defined but never used.  @typ
+escript-eslint/no-unused-vars
+9:56  Error: 'Zap' is 
+defined but never used.  @typ
+escript-eslint/no-unused-vars
+31:7  Error: 'SOURCE_COLOR' 
+is assigned a value but 
+never used.  @typescript-esli
+nt/no-unused-vars
+
+./app/(dashboard)/tools/page.
+tsx
+87:86  Error: `'` can be 
+escaped with `&apos;`, 
+`&lsquo;`, `&#39;`, 
+`&rsquo;`.  
+react/no-unescaped-entities
+
+./app/admin/subscriptions/pag
+e.tsx
+6:56  Error: 'Percent' is 
+defined but never used.  @typ
+escript-eslint/no-unused-vars
+143:11  Error: 
+'totalDiscount' is assigned 
+a value but never used.  @typ
+escript-eslint/no-unused-vars
+145:11  Error: 'couponCount' 
+is assigned a value but 
+never used.  @typescript-esli
+nt/no-unused-vars
+
+./app/api/admin/subscriptions
+/route.ts
+66:43  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
+
+./app/api/admin/subscriptions
+/[id]/fix-invoice/route.ts
+29:33  Error: 'subError' is 
+assigned a value but never 
+used.  @typescript-eslint/no-
+unused-vars
+29:33  Error: 'subError' is 
+never reassigned. Use 
+'const' instead.  
+prefer-const
+
+./app/api/invoices/[id]/downl
+oad/route.ts
+33:32  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
+34:31  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
+
+./app/api/jobs/fetch/route.ts
+78:29  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
+130:25  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
+
+./app/api/jobs/list/route.ts
+166:21  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
+
+./app/api/payment/activate-co
+upon/route.ts
+9:7  Error: 'PLAN_PRICES' is 
+assigned a value but never 
+used.  @typescript-eslint/no-
+unused-vars
+
+./components/dashboard/Sideba
+r.tsx
+13:5  Error: 'Sparkles' is 
+defined but never used.  @typ
+escript-eslint/no-unused-vars
+
+info  - Need to disable some 
+ESLint rules? Learn more 
+here: https://nextjs.org/docs
+/basic-features/eslint#disabl
+ing-rules

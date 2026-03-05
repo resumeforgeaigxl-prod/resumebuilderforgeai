@@ -22,12 +22,11 @@ export async function POST(req: NextRequest) {
 
         if (event.event === 'payment.captured') {
             const payloadPayment = event.payload?.payment?.entity;
-            if (!payloadPayment) {
-                return NextResponse.json({ ok: true });
-            }
+            if (!payloadPayment) return NextResponse.json({ ok: true });
 
             const razorpayOrderId: string = payloadPayment.order_id;
             const razorpayPaymentId: string = payloadPayment.id;
+            const currency: string = payloadPayment.currency || 'INR';
 
             const supabase = createClient();
 
@@ -35,21 +34,16 @@ export async function POST(req: NextRequest) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const { data: order } = await (supabase as any)
                 .from('orders')
-                .select('id, user_id, plan_name, status, amount')
+                .select('id, user_id, plan_name, status, amount, country_code')
                 .eq('razorpay_order_id', razorpayOrderId)
                 .single();
 
-            if (!order) {
-                console.error('[webhook] Order not found for', razorpayOrderId);
-                return NextResponse.json({ ok: true }); // ack so Razorpay doesn't retry
-            }
+            if (!order) return NextResponse.json({ ok: true });
 
-            // Idempotency — skip if already processed
-            if (order.status === 'success') {
-                return NextResponse.json({ ok: true });
-            }
+            // Idempotency
+            if (order.status === 'success') return NextResponse.json({ ok: true });
 
-            // Mark order as success
+            // Mark order success
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await (supabase as any)
                 .from('orders')
@@ -63,6 +57,9 @@ export async function POST(req: NextRequest) {
                     user_id: order.user_id,
                     plan_name: order.plan_name,
                     amount: order.amount,
+                    currency: currency,
+                    country_code: order.country_code,
+                    payment_gateway: 'razorpay',
                     razorpay_payment_id: razorpayPaymentId,
                     razorpay_order_id: razorpayOrderId,
                     status: 'success',
@@ -72,6 +69,18 @@ export async function POST(req: NextRequest) {
 
             // Activate plan
             await activateUserPlan(order.user_id, order.plan_name as PlanName);
+        }
+
+        if (event.event === 'payment.failed') {
+            const payloadPayment = event.payload?.payment?.entity;
+            if (payloadPayment?.order_id) {
+                const supabase = createClient();
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                await (supabase as any)
+                    .from('orders')
+                    .update({ status: 'failed' })
+                    .eq('razorpay_order_id', payloadPayment.order_id);
+            }
         }
 
         return NextResponse.json({ ok: true });

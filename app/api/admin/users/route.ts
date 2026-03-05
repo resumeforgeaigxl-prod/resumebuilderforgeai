@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { requireAdmin } from '@/lib/admin-guard';
 
 export const dynamic = 'force-dynamic';
@@ -10,9 +11,11 @@ export async function GET() {
     const guard = await requireAdmin(supabase);
     if (guard) return guard;
 
+    const admin = createAdminClient();
+
     // Fetch all profiles with user metadata
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: profiles, error } = await (supabase as any)
+    const { data: profiles, error } = await (admin as any)
         .from('users')
         .select('id, email, full_name, phone_number, role, is_blocked, terms_accepted, profile_completed, created_at, is_free_override, free_unlimited')
         .order('created_at', { ascending: false });
@@ -21,7 +24,7 @@ export async function GET() {
 
     // Attach resume count per user
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: resumeCounts } = await (supabase as any)
+    const { data: resumeCounts } = await (admin as any)
         .from('resumes')
         .select('user_id');
 
