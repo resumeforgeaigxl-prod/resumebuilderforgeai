@@ -11,7 +11,7 @@ export async function GET() {
         }
 
         const admin = createAdminClient();
-        const [totalRes, mncRes, appsRes, viewsRes, recentAppsRes] = await Promise.all([
+        const [totalRes, mncRes, appsRes, viewsRes, recentAppsRes, recentJobsRes] = await Promise.all([
             admin.from('jobs').select('id', { count: 'exact', head: true }),
             admin.from('jobs').select('id', { count: 'exact', head: true }).eq('is_mnc', true),
             admin.from('job_applications').select('id', { count: 'exact', head: true }),
@@ -29,8 +29,12 @@ export async function GET() {
                     users ( email, full_name )
                 `)
                 .order('applied_at', { ascending: false })
-                .limit(30)
+                .limit(30),
+            // Fetch recent jobs themselves to show ingestion status
+            admin.from('jobs').select('id, title, company, created_at, source').order('created_at', { ascending: false }).limit(15)
         ]);
+
+        const recentJobs = recentJobsRes.data || [];
 
         // Flatten user info into each application row
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -54,7 +58,8 @@ export async function GET() {
             mnc: mncRes.count ?? 0,
             applications: appsRes.count ?? 0,
             views: viewsRes.count ?? 0,
-            recentApplications
+            recentApplications,
+            recentJobs
         });
 
     } catch (error: unknown) {

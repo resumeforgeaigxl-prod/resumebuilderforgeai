@@ -19,7 +19,11 @@ export default async function Header({ lang = 'en', region = 'in' }: { lang?: st
         console.error('Header: Failed to load translations', e);
     }
 
-    const t = (key: string) => t_data[key] || key;
+    const t = (key: string) => {
+        if (t_data[key]) return t_data[key];
+        // Dynamic fallback: remove underscores and title-case
+        return key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    };
 
     return (
         <nav className="fixed top-0 w-full z-50 bg-[#070710]/80 backdrop-blur-md border-b border-white/5">

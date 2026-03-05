@@ -4,8 +4,16 @@ import React from 'react';
 import Link from 'next/link';
 import { useTranslation } from '@/lib/i18n/I18nProvider';
 
+import { usePathname } from 'next/navigation';
+
 export default function Footer() {
     const { locale, region } = useTranslation();
+    const pathname = usePathname();
+
+    // Hide footer on chat pages
+    if (pathname?.includes('/jobforgeai')) {
+        return null;
+    }
 
     return (
         <footer className="border-t border-white/5 py-8 bg-[#05050a] relative z-10 w-full text-center">

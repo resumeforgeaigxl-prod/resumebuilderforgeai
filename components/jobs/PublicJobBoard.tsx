@@ -162,7 +162,7 @@ export default function PublicJobBoard({ initialRole = '', initialLocation = '',
 }
 
 function JobCard({ job, region, lang }: { job: Job, region: string, lang: string }) {
-    const slug = `${job.title.toLowerCase().replace(/ /g, '-')}-${job.company.toLowerCase().replace(/ /g, '-')}-${job.id.slice(0, 8)}`;
+    const slug = `${job.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${job.company.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${job.id}`;
 
     return (
         <div className="group relative p-8 bg-slate-900/40 border border-white/5 rounded-[2.5rem] hover:bg-slate-900/60 hover:border-indigo-500/30 transition-all duration-500 flex flex-col h-full">

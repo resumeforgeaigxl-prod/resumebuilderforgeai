@@ -9,7 +9,7 @@ const TOOLS = [
         title: 'AI Mock Interview Test',
         description: 'Generate 50 role-specific questions from any job description. Practice Technical, Aptitude, Verbal, Logical & HR rounds.',
         icon: Brain,
-        href: '/mock-test',
+        href: '/mock-interview',
         color: 'text-purple-400',
         bg: 'bg-purple-500/10',
         border: 'border-purple-500/20',

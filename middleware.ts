@@ -122,7 +122,11 @@ export async function middleware(request: NextRequest) {
     const isSearchBot = isBot(userAgent);
 
     // If no valid region or locale in path, and NOT a bot being force-redirected
-    if ((!hasRegion || !hasLocale) && !pathname.startsWith('/api/') && !isApiSubdomain) {
+    if ((!hasRegion || !hasLocale) &&
+        !pathname.startsWith('/api/') &&
+        !pathname.startsWith('/admin') &&
+        !pathname.startsWith('/sitemap') &&
+        !isSubdomain) {
         // Only force-redirect if NOT a bot OR if it's the root path
         if (!isSearchBot || pathname === '/') {
             const url = new URL(request.url);
@@ -366,6 +370,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
-        '/((?!api|_next/static|_next/image|favicon.ico|locales|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        '/((?!api|_next/static|_next/image|favicon.ico|locales|.*\\.(?:svg|png|jpg|jpeg|gif|webp|xml)$).*)',
     ],
 };

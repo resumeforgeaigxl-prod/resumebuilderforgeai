@@ -6,14 +6,14 @@ import Link from 'next/link';
 
 
 export async function generateMetadata({ params }: { params: { region: string; lang: string, slug: string } }) {
-    const id = params.slug.split('-').pop();
+    const id = params.slug.split('-').slice(-5).join('-');
     if (!id) return { title: 'Job Not Found' };
 
     const supabase = await createClient();
     const { data: job } = await supabase
         .from('jobs')
         .select('title, company, location')
-        .ilike('id', `${id}%`)
+        .eq('id', id)
         .single();
 
     if (!job) return { title: 'Job Not Found' };
@@ -25,14 +25,14 @@ export async function generateMetadata({ params }: { params: { region: string; l
 }
 
 export default async function JobDetailPage({ params }: { params: { region: string; lang: string, slug: string } }) {
-    const idSuffix = params.slug.split('-').pop();
-    if (!idSuffix) notFound();
+    const id = params.slug.split('-').slice(-5).join('-');
+    if (!id) notFound();
 
     const supabase = await createClient();
     const { data: job } = await supabase
         .from('jobs')
         .select('*')
-        .ilike('id', `${idSuffix}%`)
+        .eq('id', id)
         .single();
 
     if (!job) notFound();

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Briefcase, Star, Users, MousePointerClick, Eye, RefreshCw, Loader2, ExternalLink, Mail } from 'lucide-react';
+import { Briefcase, Star, Users, MousePointerClick, Eye, RefreshCw, Loader2 } from 'lucide-react';
 
 interface Application {
     id: string;
@@ -104,83 +104,92 @@ export default function AdminJobsPage() {
                     </div>
 
                     {/* Recent Applications Table */}
-                    <div className="bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden">
-                        <div className="px-6 py-4 border-b border-white/5 flex items-center gap-2">
-                            <Users className="w-4 h-4 text-emerald-400" />
-                            <h2 className="font-semibold text-sm">Recent Job Applications</h2>
-                            <span className="ml-auto text-xs text-slate-500">Live · auto-refreshes every 10s</span>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div className="bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden">
+                            <div className="px-6 py-4 border-b border-white/5 flex items-center gap-2">
+                                <Users className="w-4 h-4 text-emerald-400" />
+                                <h2 className="font-semibold text-sm">Recent Job Applications</h2>
+                                <span className="ml-auto text-xs text-slate-500">Live</span>
+                            </div>
+
+                            {stats?.recentApplications?.length === 0 ? (
+                                <div className="py-16 text-center text-slate-600 text-sm">
+                                    No applications tracked yet.
+                                </div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm">
+                                        <thead>
+                                            <tr className="border-b border-white/5 text-xs text-slate-500 uppercase tracking-wider">
+                                                <th className="px-6 py-3 text-left font-bold">User</th>
+                                                <th className="px-6 py-3 text-left font-bold">Job</th>
+                                                <th className="px-6 py-3 text-left font-bold">Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-white/5">
+                                            {stats?.recentApplications?.map(app => (
+                                                <tr key={app.id} className="hover:bg-white/[0.02] transition-colors">
+                                                    <td className="px-6 py-3">
+                                                        <p className="text-slate-200 font-semibold text-xs truncate max-w-[120px]">{app.user_name || app.user_email}</p>
+                                                    </td>
+                                                    <td className="px-6 py-3">
+                                                        <p className="text-slate-200 font-medium truncate max-w-[150px]">{app.job_title}</p>
+                                                        <p className="text-slate-500 text-[10px]">{app.company}</p>
+                                                    </td>
+                                                    <td className="px-6 py-3 text-slate-500 text-[10px]">
+                                                        {new Date(app.applied_at).toLocaleDateString()}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
                         </div>
 
-                        {stats?.recentApplications?.length === 0 ? (
-                            <div className="py-16 text-center text-slate-600 text-sm">
-                                No applications tracked yet.
+                        {/* Recent Job Listings (Ingestion Monitor) */}
+                        <div className="bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden">
+                            <div className="px-6 py-4 border-b border-white/5 flex items-center gap-2">
+                                <RefreshCw className="w-4 h-4 text-blue-400" />
+                                <h2 className="font-semibold text-sm">Recently Ingested Jobs</h2>
+                                <span className="ml-auto text-xs text-slate-500">Updates live</span>
                             </div>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
-                                    <thead>
-                                        <tr className="border-b border-white/5 text-xs text-slate-500 uppercase tracking-wider">
-                                            <th className="px-6 py-3 text-left font-bold">User</th>
-                                            <th className="px-6 py-3 text-left font-bold">Job Title</th>
-                                            <th className="px-6 py-3 text-left font-bold">Company</th>
-                                            <th className="px-6 py-3 text-left font-bold">Date</th>
-                                            <th className="px-6 py-3 text-left font-bold">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-white/5">
-                                        {stats?.recentApplications?.map(app => (
-                                            <tr key={app.id} className="hover:bg-white/[0.02] transition-colors">
-                                                {/* User cell — shows avatar, name & email */}
-                                                <td className="px-6 py-3">
-                                                    <div className="flex items-center gap-2.5">
-                                                        {/* Avatar initials */}
-                                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500/40 to-purple-500/40 border border-indigo-500/20 flex items-center justify-center shrink-0">
-                                                            <span className="text-[11px] font-bold text-indigo-300 uppercase">
-                                                                {(app.user_name || app.user_email || '?').charAt(0)}
-                                                            </span>
-                                                        </div>
-                                                        <div className="min-w-0">
-                                                            {app.user_name && (
-                                                                <p className="text-slate-200 font-semibold text-xs truncate max-w-[150px]">
-                                                                    {app.user_name}
-                                                                </p>
-                                                            )}
-                                                            {app.user_email ? (
-                                                                <p className="text-slate-500 text-[11px] flex items-center gap-1 truncate max-w-[160px]">
-                                                                    <Mail className="w-2.5 h-2.5 shrink-0" />
-                                                                    {app.user_email}
-                                                                </p>
-                                                            ) : (
-                                                                <p className="font-mono text-[10px] text-slate-600">
-                                                                    {app.user_id?.slice(0, 12)}…
-                                                                </p>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-3 text-slate-200 font-medium">{app.job_title}</td>
-                                                <td className="px-6 py-3 text-slate-400">{app.company}</td>
-                                                <td className="px-6 py-3 text-slate-500 text-xs">
-                                                    {new Date(app.applied_at).toLocaleString('en-IN', {
-                                                        day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
-                                                    })}
-                                                </td>
-                                                <td className="px-6 py-3">
-                                                    <a
-                                                        href={app.apply_url}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="flex items-center gap-1 text-blue-400 hover:text-blue-300 text-xs font-medium transition-colors"
-                                                    >
-                                                        <ExternalLink className="w-3 h-3" /> View Job
-                                                    </a>
-                                                </td>
+
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                            {(stats as any)?.recentJobs?.length === 0 ? (
+                                <div className="py-16 text-center text-slate-600 text-sm">
+                                    No jobs added recently.
+                                </div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm">
+                                        <thead>
+                                            <tr className="border-b border-white/5 text-xs text-slate-500 uppercase tracking-wider">
+                                                <th className="px-6 py-3 text-left font-bold">Job Title</th>
+                                                <th className="px-6 py-3 text-left font-bold">Company</th>
+                                                <th className="px-6 py-3 text-left font-bold">Source</th>
+                                                <th className="px-6 py-3 text-left font-bold">Added</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
+                                        </thead>
+                                        <tbody className="divide-y divide-white/5">
+                                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                            {(stats as any)?.recentJobs?.map((job: any) => (
+                                                <tr key={job.id} className="hover:bg-white/[0.02] transition-colors">
+                                                    <td className="px-6 py-3 text-slate-200 font-semibold text-xs truncate max-w-[180px]">{job.title}</td>
+                                                    <td className="px-6 py-3 text-slate-400 text-xs">{job.company}</td>
+                                                    <td className="px-6 py-3">
+                                                        <span className="px-2 py-1 bg-white/5 text-[10px] text-slate-500 rounded-md font-bold uppercase tracking-widest">{job.source}</span>
+                                                    </td>
+                                                    <td className="px-6 py-3 text-slate-500 text-[10px]">
+                                                        {new Date(job.created_at).toLocaleDateString()}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </>
             )}

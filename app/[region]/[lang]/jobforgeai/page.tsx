@@ -185,7 +185,7 @@ export default function JobForgeAIPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#020205] text-slate-200 flex flex-col selection:bg-indigo-500/30">
+        <div className="h-screen bg-[#020205] text-slate-200 flex flex-col selection:bg-indigo-500/30 overflow-hidden">
             {/* Header */}
             <header className="sticky top-0 z-30 bg-[#020205]/80 backdrop-blur-2xl border-b border-white/5 px-6 py-4">
                 <div className="max-w-5xl mx-auto flex items-center justify-between">
@@ -290,10 +290,12 @@ export default function JobForgeAIPage() {
                 {messages.length === 1 && !chatLoading && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         {[
-                            { title: 'Find Direct Jobs', desc: 'Browse regional jobs with ATS scores', icon: SearchIcon, href: '/jobs' },
-                            { title: 'Practice Interview', desc: 'Generate JD-based mock tests', icon: Brain, href: '/mock-test' },
-                            { title: 'Resume Score', desc: 'Check ATS compatibility', icon: SparklesAssistant, href: '/dashboard' },
-                            { title: 'Career Path', desc: 'Get a strategic roadmap', icon: MapIconAssistant, prompt: 'Suggest a career roadmap for a senior software engineer' }
+                            { title: 'Create Resume', desc: 'Build ATS-optimized resume', icon: SearchIcon, href: '/builder' },
+                            { title: 'Start Mock Interview', desc: 'Practice with AI feedback', icon: Brain, href: '/mock-interview' },
+                            { title: 'Check ATS Score', desc: 'Analyze resume compatibility', icon: SparklesAssistant, href: '/dashboard' },
+                            { title: 'Coding Practice', desc: 'Solve DSA problems', icon: MapIconAssistant, prompt: 'Give me 5 easy-level DSA problems to practice' },
+                            { title: 'Browse Jobs', desc: 'Curated job listings', icon: SearchIcon, href: '/jobs' },
+                            { title: 'Career Roadmap', desc: 'Get your skill path', icon: MapIconAssistant, prompt: 'I want to become a senior backend engineer. What skills do I need?' }
                         ].map((card, i) => (
                             <button
                                 key={i}
@@ -374,14 +376,15 @@ export default function JobForgeAIPage() {
             </main>
 
             {/* Input Area */}
-            <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#020205] via-[#020205] to-transparent pointer-events-auto pb-10 flex flex-col items-center">
+            <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#020205] via-[#020205] to-transparent pointer-events-auto pb-10 flex flex-col items-center z-40">
 
                 {/* Scroll to Bottom hint or small suggestion chip */}
                 {!chatLoading && messages.length > 2 && (
                     <div className="mb-4 flex gap-2 overflow-x-auto max-w-2xl px-4 scrollbar-hide">
-                        <button onClick={() => { setInput("How to optimize my resume for ATS?"); handleSendMessage(); }} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase text-slate-400 hover:bg-white/10 hover:text-white transition-all whitespace-nowrap">Optimize Resume</button>
-                        <button onClick={() => { setInput("Tell me about local job market trends."); handleSendMessage(); }} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase text-slate-400 hover:bg-white/10 hover:text-white transition-all whitespace-nowrap">Market Trends</button>
-                        <button onClick={() => { setInput("How to answer 'Why should we hire you?'"); handleSendMessage(); }} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase text-slate-400 hover:bg-white/10 hover:text-white transition-all whitespace-nowrap">Interview Tip</button>
+                        <button onClick={() => { setInput("How do I improve my resume for ATS optimization?"); handleSendMessage(); }} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase text-slate-400 hover:bg-white/10 hover:text-white transition-all whitespace-nowrap">Improve Resume</button>
+                        <button onClick={() => { setInput("Give me a backend developer roadmap with skills to learn."); handleSendMessage(); }} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase text-slate-400 hover:bg-white/10 hover:text-white transition-all whitespace-nowrap">Skill Roadmap</button>
+                        <button onClick={() => { setInput("Ask me 5 technical interview questions for a senior role."); handleSendMessage(); }} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase text-slate-400 hover:bg-white/10 hover:text-white transition-all whitespace-nowrap">Interview Questions</button>
+                        <button onClick={() => { setInput("Give me a coding problem to practice DSA."); handleSendMessage(); }} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase text-slate-400 hover:bg-white/10 hover:text-white transition-all whitespace-nowrap">Coding Practice</button>
                     </div>
                 )}
 
@@ -390,7 +393,7 @@ export default function JobForgeAIPage() {
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder="Talk to your Coach... (e.g. 'Help me prep for a Google interview')"
+                        placeholder="Ask about resumes, ATS optimization, interview questions, coding practice, skill roadmaps, or job preparation."
                         disabled={chatLoading || blocked || showTerms || showNameCapture}
                         className="w-full bg-[#0a0a0f] border border-white/10 rounded-[2.5rem] pl-8 pr-16 py-6 outline-none focus:ring-2 focus:ring-indigo-500/50 text-white placeholder-slate-600 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all disabled:opacity-50 text-base font-medium group-hover:border-white/20"
                     />
