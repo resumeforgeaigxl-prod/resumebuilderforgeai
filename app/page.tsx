@@ -3,10 +3,13 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowRight, FileText, Sparkles, Zap, Shield, Target, Layout, Upload, CheckCircle2, Lock, TrendingUp, XCircle, BrainCircuit, Briefcase, MessageSquareWarning } from 'lucide-react';
+import GeoSuggestionBanner from '@/components/geo/GeoSuggestionBanner';
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-[#070710] text-slate-200 selection:bg-purple-500/30 overflow-hidden relative font-sans">
+      {/* Geo region suggestion banner — non-intrusive, auto-detects country */}
+      <GeoSuggestionBanner />
       {/* Background Effects */}
       <div className="absolute top-0 left-1/2 w-full -translate-x-1/2 h-[500px] bg-purple-600/20 blur-[120px] rounded-full pointer-events-none opacity-50" />
       <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-blue-600/20 blur-[120px] rounded-full pointer-events-none opacity-40" />

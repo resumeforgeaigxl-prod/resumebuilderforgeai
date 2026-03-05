@@ -38,12 +38,29 @@ export async function POST(req: NextRequest) {
             console.warn('[support] generate_ticket_id RPC failed, using fallback:', rpcEx);
         }
 
+        // Resolve user_id — verify it exists in the custom 'users' table.
+        // If the user doesn't exist there (shouldn't happen) set to null to
+        // avoid a FK violation against auth.users vs the custom users table.
+        let resolvedUserId: string | null = session?.userId ?? null;
+        if (resolvedUserId) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { data: userRow } = await (supabase as any)
+                .from('users')
+                .select('id')
+                .eq('id', resolvedUserId)
+                .maybeSingle();
+            if (!userRow) {
+                console.warn('[support POST] user_id not found in users table, inserting as anonymous:', resolvedUserId);
+                resolvedUserId = null;
+            }
+        }
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: ticket, error } = await (supabase as any)
             .from('support_tickets')
             .insert({
                 ticket_id: ticketId,
-                user_id: session?.userId ?? null,
+                user_id: resolvedUserId,
                 email,
                 name: name || null,
                 category,
@@ -55,7 +72,7 @@ export async function POST(req: NextRequest) {
             .single();
 
         if (error) {
-            console.error('[support POST] Insert error:', JSON.stringify(error));
+            console.error('[support POST] Insert error — code:', error.code, '| message:', error.message, '| details:', error.details);
             throw error;
         }
 

@@ -85,6 +85,12 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: BASE_URL,
+    languages: {
+      'en-IN': `${BASE_URL}/in`,
+      'en-US': `${BASE_URL}/us`,
+      'en-EU': `${BASE_URL}/eu`,
+      'x-default': BASE_URL,
+    },
   },
   icons: {
     icon: "/icon.svg",
