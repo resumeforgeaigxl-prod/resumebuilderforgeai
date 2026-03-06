@@ -8,7 +8,8 @@ import { getSession } from '@/lib/auth/jwt'
 import Link from 'next/link'
 import { PaymentSuccessBanner } from '@/components/dashboard/payment-success-banner'
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ params }: { params: { region: string, lang: string } }) {
+    const { region, lang } = params;
     const supabase = createClient()
     const session = await getSession()
 
@@ -91,7 +92,7 @@ export default async function DashboardPage() {
 
                     <div className="flex items-center gap-4">
                         {activePlan === 'FREE' ? (
-                            <Link href="/#pricing" className="px-8 py-4 rounded-[2rem] bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-black transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-indigo-600/30">
+                            <Link href={`/${region}/${lang}/#pricing`} className="px-8 py-4 rounded-[2rem] bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-black transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-indigo-600/30">
                                 Unlock Premium Access
                             </Link>
                         ) : (
@@ -144,7 +145,7 @@ export default async function DashboardPage() {
             <div className="space-y-6">
                 <h2 className="text-2xl font-black text-white tracking-tight ml-2">Quick Actions</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Link href="/resumes" className="group">
+                    <Link href={`/${region}/${lang}/resumes`} className="group">
                         <div className="p-8 rounded-[3rem] bg-slate-900/40 border border-white/5 hover:border-indigo-500/30 transition-all flex flex-col items-center text-center">
                             <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                 <PlusCircle className="w-8 h-8 text-indigo-400" />
@@ -155,7 +156,7 @@ export default async function DashboardPage() {
                         </div>
                     </Link>
 
-                    <Link href="/jobs" className="group">
+                    <Link href={`/${region}/${lang}/dashboard-jobs`} className="group">
                         <div className="p-8 rounded-[3rem] bg-slate-900/40 border border-white/5 hover:border-blue-500/30 transition-all flex flex-col items-center text-center">
                             <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                 <Briefcase className="w-8 h-8 text-blue-400" />
@@ -166,7 +167,7 @@ export default async function DashboardPage() {
                         </div>
                     </Link>
 
-                    <Link href="/tools" className="group">
+                    <Link href={`/${region}/${lang}/tools`} className="group">
                         <div className="p-8 rounded-[3rem] bg-slate-900/40 border border-white/5 hover:border-purple-500/30 transition-all flex flex-col items-center text-center">
                             <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                 <Brain className="w-8 h-8 text-purple-400" />
@@ -190,7 +191,7 @@ export default async function DashboardPage() {
                         <p className="text-slate-500 text-sm font-medium">Our team is here to help you solve any issues with your resumes or account.</p>
                     </div>
                 </div>
-                <Link href="/dashboard/support" className="px-10 py-4 bg-white/10 hover:bg-white/20 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all">
+                <Link href={`/${region}/${lang}/dashboard/support`} className="px-10 py-4 bg-white/10 hover:bg-white/20 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all">
                     Open Ticket
                 </Link>
             </div>

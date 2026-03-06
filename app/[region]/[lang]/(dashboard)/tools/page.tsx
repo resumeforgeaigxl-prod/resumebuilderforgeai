@@ -7,7 +7,7 @@ const TOOLS = [
     {
         id: 'mock-interview',
         title: 'AI Mock Interview Test',
-        description: 'Generate 50 role-specific questions from any job description. Practice Technical, Aptitude, Verbal, Logical & HR rounds.',
+        description: 'Generate role-specific questions from any job description. Practice technical and HR rounds with AI feedback.',
         icon: Brain,
         href: '/mock-interview',
         color: 'text-purple-400',
@@ -17,9 +17,21 @@ const TOOLS = [
         gradient: 'from-purple-600/15 to-blue-600/15'
     },
     {
+        id: 'mock-test',
+        title: 'JD-Based Mock Test (50+ Qs)',
+        description: 'Generate 50+ role-specific MCQs, Aptitude, Verbal and Logical questions from any JD.',
+        icon: Sparkles,
+        href: '/mock-test',
+        color: 'text-blue-400',
+        bg: 'bg-blue-500/10',
+        border: 'border-blue-500/20',
+        hoverBorder: 'hover:border-blue-400/40',
+        gradient: 'from-blue-600/15 to-indigo-600/15'
+    },
+    {
         id: 'portfolio',
         title: 'AI Portfolio Builder',
-        description: 'Generate a professional, hosted portfolio website instantly from your resume. Personalize themes and share with recruiters.',
+        description: 'Generate a professional, hosted portfolio website instantly from your resume. Personalize themes and share.',
         icon: Globe,
         href: '/portfolio',
         color: 'text-emerald-400',

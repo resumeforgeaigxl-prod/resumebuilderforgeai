@@ -3,6 +3,9 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 interface InterviewData {
     id: string;
     role: string;
@@ -73,7 +76,7 @@ export async function GET() {
             acc[interview.role] = (acc[interview.role] || 0) + 1;
             return acc;
         }, {});
-        const mostPopularRole = Object.entries(roleCounts).sort(([,a], [,b]) => b - a)[0]?.[0] || 'None';
+        const mostPopularRole = Object.entries(roleCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || 'None';
 
         return NextResponse.json({
             success: true,

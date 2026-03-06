@@ -3,7 +3,7 @@
 import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning, Briefcase, FileHeart, Receipt, LifeBuoy } from 'lucide-react';
+import { Shield, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning, Briefcase, FileHeart, Receipt, LifeBuoy, Mic } from 'lucide-react';
 
 export default function AdminLayoutClient({ children, profile }: { children: ReactNode, profile: { email: string } }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -30,6 +30,7 @@ export default function AdminLayoutClient({ children, profile }: { children: Rea
         { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
         { href: '/admin/users', label: 'Users', icon: Users },
         { href: '/admin/resumes', label: 'Resumes', icon: FileText },
+        { href: '/admin/interviews', label: 'Mock Interviews', icon: Mic },
         { href: '/admin/mock-tests', label: 'Mock Tests', icon: BrainCircuit },
         { href: '/admin/jobs', label: 'Jobs Monitor', icon: Briefcase },
         { href: '/admin/portfolios', label: 'Portfolios', icon: Globe },

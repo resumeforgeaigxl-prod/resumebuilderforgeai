@@ -14,13 +14,18 @@ export async function GET() {
         const userId = session.userId;
 
         // Try to get the most recent conversation
-        const { data: conversation } = await supabase
+        const { data: conversations, error: fetchError } = await supabase
             .from('conversations')
             .select('id')
             .eq('user_id', userId)
             .order('updated_at', { ascending: false })
-            .limit(1)
-            .single();
+            .limit(1);
+
+        if (fetchError) {
+            console.error('Failed to fetch conversation:', fetchError);
+        }
+
+        const conversation = conversations?.[0];
 
         if (conversation) {
             // Load messages for this conversation

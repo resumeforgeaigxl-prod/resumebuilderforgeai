@@ -11,7 +11,8 @@ import {
     ChevronLeft,
     ChevronRight,
     LogOut,
-    Mic
+    Mic,
+    Globe
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
@@ -22,6 +23,7 @@ const MENU_ITEMS = [
     { label: 'Job Board', href: '/dashboard-jobs', icon: Briefcase },
     { label: 'AI Tools', href: '/tools', icon: Wrench },
     { label: 'Mock Interview', href: '/mock-interview', icon: Mic },
+    { label: 'My Portfolio', href: '/portfolio', icon: Globe },
     { label: 'Account', href: '/account', icon: User },
 ];
 

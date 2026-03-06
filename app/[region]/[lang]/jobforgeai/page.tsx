@@ -117,11 +117,11 @@ export default function JobForgeAIPage() {
         setLoading(false);
     };
 
-    const handleSendMessage = async (e?: React.FormEvent) => {
+    const handleSendMessage = async (e?: React.FormEvent, customPrompt?: string) => {
         e?.preventDefault();
-        if (!input.trim() || chatLoading || blocked || !conversationId) return;
+        const userMsg = (customPrompt || input).trim();
+        if (!userMsg || chatLoading || blocked || !conversationId) return;
 
-        const userMsg = input.trim();
         setInput('');
         setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
         setChatLoading(true);
@@ -301,7 +301,7 @@ export default function JobForgeAIPage() {
                                 key={i}
                                 onClick={() => {
                                     if (card.href) router.push(`/${region}/${locale}${card.href}`);
-                                    else if (card.prompt) { setInput(card.prompt); handleSendMessage(); }
+                                    else if (card.prompt) { handleSendMessage(undefined, card.prompt); }
                                 }}
                                 className="flex items-center gap-4 p-5 bg-white/[0.03] border border-white/5 rounded-[2rem] hover:bg-white/[0.06] hover:border-indigo-500/30 transition-all text-left group"
                             >
@@ -381,10 +381,10 @@ export default function JobForgeAIPage() {
                 {/* Scroll to Bottom hint or small suggestion chip */}
                 {!chatLoading && messages.length > 2 && (
                     <div className="mb-4 flex gap-2 overflow-x-auto max-w-2xl px-4 scrollbar-hide">
-                        <button onClick={() => { setInput("How do I improve my resume for ATS optimization?"); handleSendMessage(); }} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase text-slate-400 hover:bg-white/10 hover:text-white transition-all whitespace-nowrap">Improve Resume</button>
-                        <button onClick={() => { setInput("Give me a backend developer roadmap with skills to learn."); handleSendMessage(); }} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase text-slate-400 hover:bg-white/10 hover:text-white transition-all whitespace-nowrap">Skill Roadmap</button>
-                        <button onClick={() => { setInput("Ask me 5 technical interview questions for a senior role."); handleSendMessage(); }} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase text-slate-400 hover:bg-white/10 hover:text-white transition-all whitespace-nowrap">Interview Questions</button>
-                        <button onClick={() => { setInput("Give me a coding problem to practice DSA."); handleSendMessage(); }} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase text-slate-400 hover:bg-white/10 hover:text-white transition-all whitespace-nowrap">Coding Practice</button>
+                        <button onClick={() => { handleSendMessage(undefined, "How do I improve my resume for ATS optimization?"); }} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase text-slate-400 hover:bg-white/10 hover:text-white transition-all whitespace-nowrap">Improve Resume</button>
+                        <button onClick={() => { handleSendMessage(undefined, "Give me a backend developer roadmap with skills to learn."); }} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase text-slate-400 hover:bg-white/10 hover:text-white transition-all whitespace-nowrap">Skill Roadmap</button>
+                        <button onClick={() => { handleSendMessage(undefined, "Ask me 5 technical interview questions for a senior role."); }} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase text-slate-400 hover:bg-white/10 hover:text-white transition-all whitespace-nowrap">Interview Questions</button>
+                        <button onClick={() => { handleSendMessage(undefined, "Give me a coding problem to practice DSA."); }} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase text-slate-400 hover:bg-white/10 hover:text-white transition-all whitespace-nowrap">Coding Practice</button>
                     </div>
                 )}
 
