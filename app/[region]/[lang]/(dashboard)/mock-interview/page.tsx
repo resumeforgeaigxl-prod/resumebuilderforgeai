@@ -64,7 +64,7 @@ export default function MockInterviewPage() {
       try {
         const { data: { user: authUser } } = await supabase.auth.getUser();
         if (!authUser) {
-          window.location.href = `/${region}/${lang}/auth`;
+          window.location.href = `/${region}/${lang}/login`;
           return;
         }
 
@@ -444,11 +444,11 @@ Example: {"score": 7, "feedback": "Good explanation but could be more specific",
 
             <div className="flex flex-wrap gap-4 justify-center">
               <Link
-                href={`/${region}/${lang}/builder`}
+                href={`/${region}/${lang}/resumes`}
                 className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all"
               >
                 <FileText className="w-4 h-4" />
-                Improve Resume
+                Improve Your Resume
               </Link>
               <Link
                 href={`/${region}/${lang}/tools`}

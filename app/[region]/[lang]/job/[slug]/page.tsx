@@ -2,8 +2,11 @@ import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { MapPin, Briefcase, Globe, ArrowRight, Building2, Calendar, DollarSign, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
+import ApplyTrackingButton from '@/components/jobs/ApplyTrackingButton';
 
 
+
+import TrackJobView from '@/components/jobs/TrackJobView';
 
 export async function generateMetadata({ params }: { params: { region: string; lang: string, slug: string } }) {
     const id = params.slug.split('-').slice(-5).join('-');
@@ -75,6 +78,7 @@ export default async function JobDetailPage({ params }: { params: { region: stri
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
+            <TrackJobView job={{ id: job.id, title: job.title, company: job.company }} />
 
             <div className="max-w-4xl mx-auto">
                 {/* Breadcrumbs */}
@@ -116,14 +120,12 @@ export default async function JobDetailPage({ params }: { params: { region: stri
                     </div>
 
                     <div className="mt-12 flex flex-wrap gap-4">
-                        <a
-                            href={job.apply_url || '#'}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase tracking-widest rounded-2xl flex items-center gap-2 transition-all shadow-xl shadow-indigo-600/20 active:scale-95"
-                        >
-                            Apply Now <ArrowRight className="w-5 h-5" />
-                        </a>
+                        <ApplyTrackingButton job={{
+                            id: job.id,
+                            title: job.title,
+                            company: job.company,
+                            apply_url: job.apply_url
+                        }} />
                         <Link
                             href={`/${params.region}/${params.lang}/dashboard`}
                             className="px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black uppercase tracking-widest rounded-2xl flex items-center gap-2 transition-all active:scale-95"

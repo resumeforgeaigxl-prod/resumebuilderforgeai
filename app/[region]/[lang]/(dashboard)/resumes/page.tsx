@@ -6,10 +6,13 @@ import { getSession } from '@/lib/auth/jwt'
 import Link from 'next/link'
 
 export default async function ResumesPage({
+    params,
     searchParams
 }: {
+    params: { region: string; lang: string };
     searchParams: { page?: string }
 }) {
+    const { region, lang } = params;
     const supabase = createClient()
     const session = await getSession()
 
@@ -73,7 +76,7 @@ export default async function ResumesPage({
                     ))}
 
                     {/* Support Card */}
-                    <Link href="/dashboard/support" className="group">
+                    <Link href={`/${region}/${lang}/dashboard/support`} className="group">
                         <div className="h-full bg-white/[0.02] border border-white/5 hover:border-indigo-500/30 rounded-[2.5rem] p-8 transition-all duration-500 flex flex-col items-center justify-center text-center group-hover:bg-indigo-500/5">
                             <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                 <PlusCircle className="w-7 h-7 text-indigo-400 rotate-45" />
@@ -89,7 +92,7 @@ export default async function ResumesPage({
             {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-4 pt-10">
                     <Link
-                        href={`/resumes?page=${page - 1}`}
+                        href={`/${region}/${lang}/resumes?page=${page - 1}`}
                         className={`p-3 bg-white/5 border border-white/10 rounded-xl transition-all ${page <= 1 ? 'opacity-30 pointer-events-none' : 'hover:bg-white/10'}`}
                     >
                         <ChevronLeft className="w-6 h-6" />
@@ -99,7 +102,7 @@ export default async function ResumesPage({
                         {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                             <Link
                                 key={p}
-                                href={`/resumes?page=${p}`}
+                                href={`/${region}/${lang}/resumes?page=${p}`}
                                 className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-black transition-all border
                                     ${page === p
                                         ? 'bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-500/30'
@@ -112,7 +115,7 @@ export default async function ResumesPage({
                     </div>
 
                     <Link
-                        href={`/resumes?page=${page + 1}`}
+                        href={`/${region}/${lang}/resumes?page=${page + 1}`}
                         className={`p-3 bg-white/5 border border-white/10 rounded-xl transition-all ${page >= totalPages ? 'opacity-30 pointer-events-none' : 'hover:bg-white/10'}`}
                     >
                         <ChevronRight className="w-6 h-6" />

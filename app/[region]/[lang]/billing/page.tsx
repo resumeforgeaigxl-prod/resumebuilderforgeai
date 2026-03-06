@@ -86,7 +86,8 @@ interface CouponResult {
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
-function BillingContent() {
+function BillingContent({ params }: { params: { region: string; lang: string } }) {
+    const { region, lang } = params;
     const router = useRouter();
     const searchParams = useSearchParams();
     const rawPlan = (searchParams.get('plan') ?? 'PRO').toUpperCase() as PlanName;
@@ -241,7 +242,7 @@ function BillingContent() {
                     const d = await activateRes.json();
                     throw new Error(d.error ?? 'Failed to activate plan via coupon');
                 }
-                router.push('/dashboard?payment=success');
+                router.push(`/${region}/${lang}/dashboard?payment=success`);
                 return;
             }
 
@@ -274,7 +275,7 @@ function BillingContent() {
                     const d = await activateRes.json();
                     throw new Error(d.error ?? 'Failed to activate plan via coupon');
                 }
-                router.push('/dashboard?payment=success');
+                router.push(`/${region}/${lang}/dashboard?payment=success`);
                 return;
             }
 
@@ -627,14 +628,14 @@ function BillingContent() {
     );
 }
 
-export default function BillingPage() {
+export default function BillingPage({ params }: { params: { region: string; lang: string } }) {
     return (
         <Suspense fallback={
             <div className="min-h-screen bg-slate-950 flex items-center justify-center">
                 <div className="w-8 h-8 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
             </div>
         }>
-            <BillingContent />
+            <BillingContent params={params} />
         </Suspense>
     );
 }

@@ -2,11 +2,13 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import { LogIn, Loader2, AlertCircle } from 'lucide-react'
 import { OAuthButtons } from '@/components/auth/oauth-buttons'
 
 export default function LoginPage() {
+    const params = useParams() as { region: string; lang: string };
+    const { region, lang } = params;
     const router = useRouter()
     const searchParams = useSearchParams()
     const [isLoading, setIsLoading] = useState(false)
@@ -38,9 +40,9 @@ export default function LoginPage() {
 
             // Redirect based on profile completion
             if (!data.profileCompleted) {
-                router.push('/complete-profile')
+                router.push(`/${region}/${lang}/complete-profile`)
             } else {
-                router.push('/dashboard')
+                router.push(`/${region}/${lang}/dashboard`)
             }
             router.refresh()
         } catch (err: unknown) {
@@ -95,7 +97,7 @@ export default function LoginPage() {
                     <div className="space-y-2">
                         <div className="flex justify-between items-center">
                             <label className="text-sm font-medium text-slate-300">Password</label>
-                            <Link href="/forgot-password" title='Forgot Password' className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors">
+                            <Link href={`/${region}/${lang}/forgot-password`} title='Forgot Password' className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors">
                                 Forgot password?
                             </Link>
                         </div>
@@ -127,7 +129,7 @@ export default function LoginPage() {
 
                 <p className="text-center text-sm text-slate-400 mt-6">
                     Don&apos;t have an account?{' '}
-                    <Link href="/signup" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
+                    <Link href={`/${region}/${lang}/signup`} className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
                         Sign up
                     </Link>
                 </p>

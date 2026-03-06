@@ -1,11 +1,13 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { UserPlus, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { OAuthButtons } from '@/components/auth/oauth-buttons';
 
 export default function SignupPage({ searchParams }: { searchParams: { error?: string; message?: string } }) {
+    const params = useParams() as { region: string; lang: string };
+    const { region, lang } = params;
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(searchParams.error || null);
@@ -56,7 +58,7 @@ export default function SignupPage({ searchParams }: { searchParams: { error?: s
 
             // Short delay before redirecting to login
             setTimeout(() => {
-                router.push(`/login?message=${encodeURIComponent(data.message || 'Account created! Please log in.')}`);
+                router.push(`/${region}/${lang}/login?message=${encodeURIComponent(data.message || 'Account created! Please log in.')}`);
             }, 2000);
         } catch (err: unknown) {
             setError((err as Error).message || 'Signup failed');
@@ -146,11 +148,11 @@ export default function SignupPage({ searchParams }: { searchParams: { error?: s
                         />
                         <span className="text-sm text-slate-400 leading-tight">
                             I agree to the{' '}
-                            <Link href="/terms" target="_blank" className="text-purple-400 hover:text-purple-300 underline underline-offset-4">
+                            <Link href={`/${region}/${lang}/terms-of-service`} target="_blank" className="text-purple-400 hover:text-purple-300 underline underline-offset-4">
                                 Terms & Conditions
                             </Link>
                             {' '}and{' '}
-                            <Link href="/privacy" target="_blank" className="text-purple-400 hover:text-purple-300 underline underline-offset-4">
+                            <Link href={`/${region}/${lang}/privacy-policy`} target="_blank" className="text-purple-400 hover:text-purple-300 underline underline-offset-4">
                                 Privacy Policy
                             </Link>.
                             My IP and acceptance time will be recorded.
@@ -175,7 +177,7 @@ export default function SignupPage({ searchParams }: { searchParams: { error?: s
 
                 <p className="text-center text-sm text-slate-400">
                     Already have an account?{' '}
-                    <Link href="/login" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">Sign in</Link>
+                    <Link href={`/${region}/${lang}/login`} className="text-purple-400 hover:text-purple-300 font-medium transition-colors">Sign in</Link>
                 </p>
             </div>
         </div>

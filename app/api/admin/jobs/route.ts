@@ -1,7 +1,9 @@
-export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET() {
     try {

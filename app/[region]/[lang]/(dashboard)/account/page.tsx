@@ -8,7 +8,8 @@ import {
 import Link from 'next/link';
 import { format } from 'date-fns';
 
-export default async function AccountPage() {
+export default async function AccountPage({ params }: { params: { region: string; lang: string } }) {
+    const { region, lang } = params;
     const supabase = createClient();
     const session = await getSession();
 
@@ -117,7 +118,7 @@ export default async function AccountPage() {
                             <p className="text-sm text-slate-300 font-bold">Lifetime Unlimited Access</p>
                         )}
 
-                        <Link href="/billing" className="block">
+                        <Link href={`/${region}/${lang}/billing`} className="block">
                             <button className="w-full py-3 px-6 bg-white text-black text-sm font-bold rounded-2xl hover:bg-slate-100 transition-all flex items-center justify-center gap-2">
                                 {activePlan === 'FREE' ? 'Upgrade Plan' : 'View Plans'}
                                 <ChevronRight className="w-4 h-4" />
@@ -126,7 +127,7 @@ export default async function AccountPage() {
                     </div>
 
                     <div className="space-y-4 pt-4 border-t border-white/5">
-                        <Link href="/dashboard/invoices" className="flex items-center justify-between p-4 rounded-2xl hover:bg-white/5 transition-all text-slate-400 hover:text-white">
+                        <Link href={`/${region}/${lang}/dashboard/invoices`} className="flex items-center justify-between p-4 rounded-2xl hover:bg-white/5 transition-all text-slate-400 hover:text-white">
                             <div className="flex items-center gap-3">
                                 <CreditCard className="w-5 h-5" />
                                 <span className="text-sm font-bold">Invoices & Billing History</span>
@@ -157,7 +158,7 @@ export default async function AccountPage() {
                         <p className="text-slate-500 text-sm">Reach out to our support team for assistance with payments or profile issues.</p>
                     </div>
                 </div>
-                <Link href="/dashboard/support">
+                <Link href={`/${region}/${lang}/dashboard/support`}>
                     <button className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-sm font-bold border border-white/10 transition-all">
                         Contact Support
                     </button>
