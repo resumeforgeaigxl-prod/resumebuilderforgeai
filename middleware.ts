@@ -173,7 +173,8 @@ export async function middleware(request: NextRequest) {
 
     // ─── API subdomain: rewrite to /api/* and add CORS headers ───────────────
     if (isApiSubdomain) {
-        const response = NextResponse.next();
+        const rewriteUrl = new URL(`/api${pathname}`, request.url);
+        const response = NextResponse.rewrite(rewriteUrl);
         const origin = request.headers.get('origin') ?? '';
         const allowedOrigins = [
             'https://app.resumeforgeai.in',
@@ -221,7 +222,7 @@ export async function middleware(request: NextRequest) {
         if (session.role !== 'admin') {
             return NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${currentRegion}/${currentLocale}/dashboard`));
         }
-        return NextResponse.next();
+        return NextResponse.rewrite(new URL(`/admin${pathname}`, request.url));
     }
 
     // ─── App subdomain ────────────────────────────────────────────────────────
@@ -256,7 +257,7 @@ export async function middleware(request: NextRequest) {
                 return NextResponse.redirect(`${origin}/dashboard`);
             }
         }
-        return NextResponse.next();
+        return NextResponse.rewrite(new URL(`${pathname}`, request.url));
     }
 
     // ─── Main domain: handle regional subfolders + geo detection ─────────────

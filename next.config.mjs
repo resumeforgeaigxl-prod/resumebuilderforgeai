@@ -28,28 +28,26 @@ const nextConfig = {
         // When deployed on Vercel with all subdomains pointing to this project,
         // the middleware handles host-based routing. These rewrites act as a
         // fallback for local development where you might proxy subdomains.
-        return {
-            beforeFiles: [
-                // app.resumeforgeai.in → pass through (middleware handles auth)
-                {
-                    source: '/:path*',
-                    has: [{ type: 'host', value: 'app.resumeforgeai.in' }],
-                    destination: '/:path*',
-                },
-                // admin.resumeforgeai.in → /admin/:path*
-                {
-                    source: '/:path*',
-                    has: [{ type: 'host', value: 'admin.resumeforgeai.in' }],
-                    destination: '/admin/:path*',
-                },
-                // api.resumeforgeai.in → /api/:path*
-                {
-                    source: '/:path*',
-                    has: [{ type: 'host', value: 'api.resumeforgeai.in' }],
-                    destination: '/api/:path*',
-                },
-            ],
-        };
+        return [
+            // app.resumeforgeai.in → pass through (middleware handles auth)
+            {
+                source: '/:path*',
+                has: [{ type: 'host', value: 'app.resumeforgeai.in' }],
+                destination: '/:path*',
+            },
+            // admin.resumeforgeai.in → /admin/:path*
+            {
+                source: '/:path*',
+                has: [{ type: 'host', value: 'admin.resumeforgeai.in' }],
+                destination: '/admin/:path*',
+            },
+            // api.resumeforgeai.in → /api/:path*
+            {
+                source: '/:path*',
+                has: [{ type: 'host', value: 'api.resumeforgeai.in' }],
+                destination: '/api/:path*',
+            },
+        ];
     },
 };
 
