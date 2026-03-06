@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { generateAIResponse, stripMarkdown } from '@/lib/ai-provider';
 import { Mic, CheckCircle, ArrowRight, RotateCcw, FileText, Target } from 'lucide-react';
 import Link from 'next/link';
 
@@ -106,32 +105,23 @@ export default function MockInterviewPage() {
     setError('');
 
     try {
-      const prompt = `Generate ${setup.numQuestions} interview questions for a ${setup.experienceLevel} level ${setup.interviewType} interview for the role: ${setup.role}.
+      const genRes = await fetch('/api/mock-interview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'generate-questions',
+          role: setup.role,
+          jobDescription: setup.jobDescription,
+          experienceLevel: setup.experienceLevel,
+          interviewType: setup.interviewType,
+          numQuestions: setup.numQuestions
+        })
+      });
 
-Job Description: ${setup.jobDescription || 'Not provided'}
+      const genData = await genRes.json();
+      if (genData.error) throw new Error(genData.error);
 
-Questions should be relevant to the role and experience level. Return only a JSON array of question strings, no other text.
-
-Example: ["Question 1", "Question 2", "Question 3"]`;
-
-      const response = await generateAIResponse(prompt);
-      const cleanText = stripMarkdown(response.text);
-      let questions;
-
-      try {
-        questions = JSON.parse(cleanText);
-      } catch (e) {
-        console.error('Failed to parse questions:', e, cleanText);
-        throw new Error('AI returned an invalid format. Please try again.');
-      }
-
-      if (!Array.isArray(questions)) {
-        throw new Error('Invalid response format: not an array');
-      }
-
-      if (questions.length === 0) {
-        throw new Error('AI failed to generate any questions');
-      }
+      const questions = genData.questions;
 
       const res = await fetch('/api/mock-interview', {
         method: 'POST',
@@ -177,29 +167,20 @@ Example: ["Question 1", "Question 2", "Question 3"]`;
 
     try {
       const question = session.questions[session.currentQuestionIndex];
-      const prompt = `Evaluate this interview answer on a scale of 0-10.
+      const evalRes = await fetch('/api/mock-interview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'evaluate-answer',
+          question,
+          answer: currentAnswer
+        })
+      });
 
-Question: ${question}
-Answer: ${currentAnswer}
+      const evalData = await evalRes.json();
+      if (evalData.error) throw new Error(evalData.error);
 
-Return a JSON object with:
-- score: number (0-10)
-- feedback: string (brief feedback on the answer)
-- tips: string (improvement suggestions)
-
-Example: {"score": 7, "feedback": "Good explanation but could be more specific", "tips": "Add examples from your experience"}`;
-
-      const response = await generateAIResponse(prompt);
-      const cleanText = stripMarkdown(response.text);
-      let evaluation: QuestionEvaluation;
-
-      try {
-        evaluation = JSON.parse(cleanText);
-      } catch (e) {
-        console.error('Failed to parse evaluation:', e, cleanText);
-        throw new Error('AI returned an invalid evaluation. Please try again.');
-      }
-
+      const evaluation: QuestionEvaluation = evalData.evaluation;
       const newAnswers = [...session.answers, currentAnswer];
       const newEvaluations = [...session.evaluations, evaluation];
 

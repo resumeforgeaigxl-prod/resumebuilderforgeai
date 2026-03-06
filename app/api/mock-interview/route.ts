@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { generateAIResponse, stripMarkdown } from '@/lib/ai-provider';
 
 export const runtime = 'nodejs';
 
@@ -89,6 +90,64 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { action, ...data } = body;
         const admin = createAdminClient();
+
+        if (action === 'generate-questions') {
+            const { role, jobDescription, experienceLevel, interviewType, numQuestions } = data;
+
+            const prompt = `Generate ${numQuestions} interview questions for a ${experienceLevel} level ${interviewType} interview for the role: ${role}.
+
+Job Description: ${jobDescription || 'Not provided'}
+
+Questions should be relevant to the role and experience level. Return only a JSON array of question strings, no other text.
+
+Example: ["Question 1", "Question 2", "Question 3"]`;
+
+            const response = await generateAIResponse(prompt);
+            const cleanText = stripMarkdown(response.text);
+            let questions;
+
+            try {
+                questions = JSON.parse(cleanText);
+            } catch (e) {
+                console.error('Failed to parse questions:', e, cleanText);
+                return NextResponse.json({ error: 'AI returned an invalid format' }, { status: 500 });
+            }
+
+            if (!Array.isArray(questions)) {
+                return NextResponse.json({ error: 'Invalid response format' }, { status: 500 });
+            }
+
+            return NextResponse.json({ success: true, questions });
+        }
+
+        if (action === 'evaluate-answer') {
+            const { question, answer } = data;
+
+            const prompt = `Evaluate this interview answer on a scale of 0-10.
+
+Question: ${question}
+Answer: ${answer}
+
+Return a JSON object with:
+- score: number (0-10)
+- feedback: string (brief feedback on the answer)
+- tips: string (improvement suggestions)
+
+Example: {"score": 7, "feedback": "Good explanation but could be more specific", "tips": "Add examples from your experience"}`;
+
+            const response = await generateAIResponse(prompt);
+            const cleanText = stripMarkdown(response.text);
+            let evaluation;
+
+            try {
+                evaluation = JSON.parse(cleanText);
+            } catch (e) {
+                console.error('Failed to parse evaluation:', e, cleanText);
+                return NextResponse.json({ error: 'AI returned an invalid evaluation' }, { status: 500 });
+            }
+
+            return NextResponse.json({ success: true, evaluation });
+        }
 
         if (action === 'create') {
             const { role, jobDescription, experienceLevel, interviewType, numQuestions, questions } = data;
