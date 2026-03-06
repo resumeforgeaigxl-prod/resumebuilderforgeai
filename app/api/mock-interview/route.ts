@@ -161,7 +161,8 @@ Example: {"score": 7, "feedback": "Good explanation but could be more specific",
                     experience_level: experienceLevel,
                     interview_type: interviewType,
                     num_questions: numQuestions,
-                    questions
+                    questions,
+                    interview_mode: data.interviewMode
                 })
                 .select()
                 .single();

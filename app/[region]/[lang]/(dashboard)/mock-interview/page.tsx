@@ -11,6 +11,7 @@ interface InterviewSetup {
   experienceLevel: string;
   interviewType: string;
   numQuestions: number;
+  interviewMode: 'chat' | 'voice';
 }
 
 interface QuestionEvaluation {
@@ -26,6 +27,7 @@ interface InterviewSession {
   evaluations: QuestionEvaluation[];
   currentQuestionIndex: number;
   isComplete: boolean;
+  interviewMode: 'chat' | 'voice';
 }
 
 interface User {
@@ -48,12 +50,16 @@ export default function MockInterviewPage() {
     jobDescription: '',
     experienceLevel: 'junior',
     interviewType: 'technical',
-    numQuestions: 10
+    numQuestions: 10,
+    interviewMode: 'chat'
   });
   const [session, setSession] = useState<InterviewSession | null>(null);
   const [currentAnswer, setCurrentAnswer] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [recognition, setRecognition] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -133,7 +139,8 @@ export default function MockInterviewPage() {
           experienceLevel: setup.experienceLevel,
           interviewType: setup.interviewType,
           numQuestions: setup.numQuestions,
-          questions: questions
+          questions: questions,
+          interviewMode: setup.interviewMode
         })
       });
 
@@ -146,8 +153,13 @@ export default function MockInterviewPage() {
         answers: [],
         evaluations: [],
         currentQuestionIndex: 0,
-        isComplete: false
+        isComplete: false,
+        interviewMode: setup.interviewMode
       });
+
+      if (setup.interviewMode === 'voice') {
+        speak(`Hello. Welcome to your AI mock interview. I will ask you a series of questions related to your selected job role. Question 1: ${questions[0]}`);
+      }
     } catch (err) {
       console.error('Failed to generate questions:', err);
       setError('Failed to generate interview questions. Please try again.');
@@ -214,6 +226,11 @@ export default function MockInterviewPage() {
       });
 
       setCurrentAnswer('');
+
+      if (session.interviewMode === 'voice' && !isComplete) {
+        const feedbackPrefix = evaluation.score >= 7 ? "Good answer. " : "I see. ";
+        speak(`${feedbackPrefix} Let's move to the next question. Question ${nextIndex + 1}: ${session.questions[nextIndex]}`);
+      }
     } catch (err) {
       console.error('Failed to evaluate answer:', err);
       setError('Failed to evaluate answer. Please try again.');
@@ -226,6 +243,89 @@ export default function MockInterviewPage() {
     setSession(null);
     setCurrentAnswer('');
     setError('');
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+  };
+
+  // Speech Recognition Setup
+  useEffect(() => {
+    if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'speechRecognition' in window)) {
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).speechRecognition; // eslint-disable-line @typescript-eslint/no-explicit-any
+      const recog = new SpeechRecognition();
+      recog.continuous = true;
+      recog.interimResults = true;
+      recog.lang = 'en-US';
+
+      recog.onresult = (event: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        setCurrentAnswer(transcript);
+      };
+
+      recog.onerror = (event: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+        console.error('Speech recognition error:', event.error);
+        setIsRecording(false);
+        if (event.error === 'not-allowed') {
+          setError('Microphone access denied. Switching to Chat mode.');
+          if (session) {
+            setSession({ ...session, interviewMode: 'chat' });
+          } else {
+            setSetup({ ...setup, interviewMode: 'chat' });
+          }
+        }
+      };
+
+      recog.onend = () => {
+        setIsRecording(false);
+      };
+
+      setRecognition(recog);
+    }
+  }, [session, setup]);
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      recognition?.stop();
+      setIsRecording(false);
+    } else {
+      setError('');
+      try {
+        recognition?.start();
+        setIsRecording(true);
+      } catch (err) {
+        console.error('Failed to start recording:', err);
+      }
+    }
+  };
+
+  const speak = (text: string) => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+
+      const setVoiceAndSpeak = () => {
+        const voices = window.speechSynthesis.getVoices();
+        const femaleVoice = voices.find(v =>
+          (v.name.includes('Female') || v.name.includes('Google US English') || v.name.includes('Samantha') || v.name.includes('Microsoft Zira') || v.name.includes('Victoria')) && v.lang.startsWith('en')
+        );
+
+        if (femaleVoice) utterance.voice = femaleVoice;
+        utterance.rate = 0.95;
+        utterance.pitch = 1.0;
+        utterance.onstart = () => setIsSpeaking(true);
+        utterance.onend = () => setIsSpeaking(false);
+        window.speechSynthesis.speak(utterance);
+      };
+
+      if (window.speechSynthesis.getVoices().length === 0) {
+        window.speechSynthesis.onvoiceschanged = setVoiceAndSpeak;
+      } else {
+        setVoiceAndSpeak();
+      }
+    }
   };
 
   if (loading) {
@@ -327,6 +427,40 @@ export default function MockInterviewPage() {
                 <option value={10}>10 Questions</option>
                 <option value={15}>15 Questions</option>
               </select>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-slate-300 mb-4">
+                Interview Mode
+              </label>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setSetup({ ...setup, interviewMode: 'chat' })}
+                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl border transition-all ${setup.interviewMode === 'chat'
+                    ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-lg shadow-indigo-500/10'
+                    : 'bg-slate-900/50 border-slate-700 text-slate-400 hover:border-slate-500'
+                    }`}
+                >
+                  <FileText className="w-5 h-5" />
+                  <div className="text-left">
+                    <div className="font-bold">Chat Interview</div>
+                    <div className="text-xs opacity-60">Text-based Q&A</div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setSetup({ ...setup, interviewMode: 'voice' })}
+                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl border transition-all ${setup.interviewMode === 'voice'
+                    ? 'bg-purple-600/20 border-purple-500 text-white shadow-lg shadow-purple-500/10'
+                    : 'bg-slate-900/50 border-slate-700 text-slate-400 hover:border-slate-500'
+                    }`}
+                >
+                  <Mic className="w-5 h-5" />
+                  <div className="text-left">
+                    <div className="font-bold">Voice Interview</div>
+                    <div className="text-xs opacity-60">Live voice Q&A</div>
+                  </div>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -446,8 +580,11 @@ export default function MockInterviewPage() {
     );
   }
 
+  if (!session) return null;
+
   const currentQuestion = session.questions[session.currentQuestionIndex];
   const questionNumber = session.currentQuestionIndex + 1;
+  const isLastQuestion = session.currentQuestionIndex === session.questions.length - 1;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -459,19 +596,25 @@ export default function MockInterviewPage() {
       </div>
 
       <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-8">
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-white mb-4">
-            Question {questionNumber}
-          </h2>
-          <div className="bg-slate-900/50 border border-slate-600 rounded-xl p-6">
-            <p className="text-lg text-slate-200 leading-relaxed">{currentQuestion}</p>
-          </div>
+        <div className="bg-slate-900/50 border border-slate-600 rounded-xl p-6 relative group">
+          <p className="text-lg text-slate-200 leading-relaxed pr-12">{currentQuestion}</p>
+          {session.interviewMode === 'voice' && (
+            <button
+              onClick={() => speak(currentQuestion)}
+              className="absolute top-6 right-6 p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-indigo-400 transition-colors"
+              title="Speak question again"
+            >
+              <RotateCcw className="w-5 h-5" />
+            </button>
+          )}
         </div>
+      </div>
 
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-slate-300 mb-2">
-            Your Answer
-          </label>
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-slate-300 mb-2">
+          Your Answer
+        </label>
+        {session.interviewMode === 'chat' ? (
           <textarea
             value={currentAnswer}
             onChange={(e) => setCurrentAnswer(e.target.value)}
@@ -479,25 +622,74 @@ export default function MockInterviewPage() {
             rows={6}
             className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
           />
-        </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={toggleRecording}
+                className={`relative flex items-center gap-3 px-8 py-4 rounded-2xl font-bold transition-all ${isRecording
+                  ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse'
+                  : 'bg-slate-700 hover:bg-slate-600 text-white'
+                  }`}
+              >
+                <Mic className={`w-5 h-5 ${isRecording ? 'animate-bounce' : ''}`} />
+                {isRecording ? 'Stop Recording' : 'Start Speaking'}
+                {isRecording && (
+                  <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                  </span>
+                )}
+              </button>
 
-        <div className="flex justify-center">
-          <button
-            onClick={submitAnswer}
-            disabled={isEvaluating || !currentAnswer.trim()}
-            className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isEvaluating ? 'Evaluating...' : 'Submit Answer'}
-          </button>
-        </div>
+              {isSpeaking && (
+                <div className="flex items-center gap-2 text-indigo-400 font-medium animate-pulse">
+                  <div className="w-2 h-2 bg-indigo-400 rounded-full"></div>
+                  AI is speaking...
+                </div>
+              )}
+            </div>
 
-        {error && (
-          <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400">
-            {error}
+            <div className="bg-slate-900/50 border border-slate-600 rounded-xl p-6 min-h-[150px] relative">
+              <div className="absolute top-4 left-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                Transcript Preview
+              </div>
+              <p className={`mt-6 text-lg ${currentAnswer ? 'text-slate-200' : 'text-slate-500 italic'}`}>
+                {currentAnswer || (isRecording ? "Listening... start speaking your answer." : "Click 'Start Speaking' and describe your answer.")}
+              </p>
+            </div>
+
+            {session.evaluations.length > 0 && session.currentQuestionIndex > 0 && (
+              <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-4 animate-in fade-in slide-in-from-top-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold text-indigo-300">Feedback for Question {session.currentQuestionIndex}</span>
+                  <span className={`text-sm font-bold ${session.evaluations[session.evaluations.length - 1].score >= 7 ? 'text-green-400' : 'text-yellow-400'}`}>
+                    Score: {session.evaluations[session.evaluations.length - 1].score}/10
+                  </span>
+                </div>
+                <p className="text-slate-200 text-sm mb-1">{session.evaluations[session.evaluations.length - 1].feedback}</p>
+                <p className="text-slate-400 text-xs italic">{session.evaluations[session.evaluations.length - 1].tips}</p>
+              </div>
+            )}
           </div>
         )}
       </div>
 
+      <div className="flex justify-center">
+        <button
+          onClick={submitAnswer}
+          disabled={isEvaluating || !currentAnswer.trim()}
+          className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isEvaluating ? 'Evaluating...' : session.interviewMode === 'voice' ? (isLastQuestion ? 'Submit & Finish' : 'Submit & Next Question') : 'Submit Answer'}
+        </button>
+      </div>
+
+      {error && (
+        <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400">
+          {error}
+        </div>
+      )}
       {session.evaluations.length > 0 && (
         <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6">
           <h3 className="text-lg font-bold text-white mb-4">Previous Feedback</h3>
