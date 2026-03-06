@@ -182,14 +182,15 @@ interface InvoiceEmailData {
   invoiceId: string;
   couponCode?: string | null;
   date: string;
+  attachmentBase64?: string;
 }
 
 export async function sendPaymentSuccessEmail(data: InvoiceEmailData): Promise<void> {
   const planLabel = data.plan.charAt(0) + data.plan.slice(1).toLowerCase();
   const isFree = data.amountINR === '₹0' || data.amountINR === 'Free';
-  const methodLabel = data.paymentMethod === 'coupon'
-    ? `Coupon${data.couponCode ? ` (${data.couponCode})` : ''}`
-    : 'Razorpay';
+  const methodLabel = data.paymentMethod === 'razorpay'
+    ? 'Razorpay'
+    : `Coupon${data.couponCode ? ` (${data.couponCode})` : ''}`;
 
   const html = emailWrapper(`
       ${headingAndSub(
@@ -220,6 +221,12 @@ export async function sendPaymentSuccessEmail(data: InvoiceEmailData): Promise<v
     to: [{ email: data.userEmail, name: data.userName }],
     subject: `${isFree ? '🎟 Plan Activated' : '✅ Payment Confirmed'} — ${planLabel} Plan | ResumeForgeAI`,
     html,
+    attachments: data.attachmentBase64 ? [
+      {
+        name: `Invoice_${data.invoiceNumber}.pdf`,
+        content: data.attachmentBase64
+      }
+    ] : undefined
   });
 }
 

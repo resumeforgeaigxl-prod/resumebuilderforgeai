@@ -6,6 +6,7 @@ import { createInvoice } from '@/lib/invoice';
 import { sendPaymentSuccessEmail } from '@/lib/brevo';
 import { format } from 'date-fns';
 
+export const runtime = 'nodejs';
 
 /**
  * POST /api/payment/activate-coupon
@@ -157,6 +158,22 @@ export async function POST(req: NextRequest) {
             } : null,
         });
 
+        // ── Generate PDF for email attachment ────────────────────────────────
+        let invoicePdfBase64: string | undefined;
+        if (invoice) {
+            try {
+                const { generateInvoiceHtml } = await import('@/lib/invoice-template');
+                const { generatePdfFromHtml } = await import('@/lib/pdf-generator');
+
+                // For activate-coupon path, discount = original price (100% off)
+                const html = await generateInvoiceHtml(invoice, basePrice * 100, basePrice * 100);
+                const pdfBuffer = await generatePdfFromHtml(html);
+                invoicePdfBase64 = pdfBuffer.toString('base64');
+            } catch (pdfErr) {
+                console.error('[activate-coupon] PDF Generation for Email failed:', pdfErr);
+            }
+        }
+
         // Send payment/activation email (non-blocking)
         const userEmail = billing?.email ?? userData?.email ?? null;
         if (userEmail && invoice) {
@@ -170,6 +187,7 @@ export async function POST(req: NextRequest) {
                 invoiceNumber: invoice.invoice_number,
                 invoiceId: invoice.id,
                 date: format(new Date(), 'dd MMM yyyy'),
+                attachmentBase64: invoicePdfBase64,
             }).catch(e => console.error('[activate-coupon] Email error:', e));
         }
 

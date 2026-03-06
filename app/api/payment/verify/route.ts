@@ -7,6 +7,8 @@ import { createInvoice } from '@/lib/invoice';
 import { sendPaymentSuccessEmail } from '@/lib/brevo';
 import { format } from 'date-fns';
 
+export const runtime = 'nodejs';
+
 export async function POST(req: NextRequest) {
     try {
         const session = await getSession();
@@ -126,6 +128,21 @@ export async function POST(req: NextRequest) {
             } : null,
         });
 
+        // ── Generate PDF for email attachment ────────────────────────────────
+        let invoicePdfBase64: string | undefined;
+        if (invoice) {
+            try {
+                const { generateInvoiceHtml } = await import('@/lib/invoice-template');
+                const { generatePdfFromHtml } = await import('@/lib/pdf-generator');
+
+                const html = await generateInvoiceHtml(invoice, originalPrice, discountAmount);
+                const pdfBuffer = await generatePdfFromHtml(html);
+                invoicePdfBase64 = pdfBuffer.toString('base64');
+            } catch (pdfErr) {
+                console.error('[verify] PDF Generation for Email failed:', pdfErr);
+            }
+        }
+
         // ── Send payment success email ────────────────────────────────────────
         const userEmail = billing?.email ?? null;
         if (userEmail && invoice) {
@@ -139,6 +156,7 @@ export async function POST(req: NextRequest) {
                 invoiceNumber: invoice.invoice_number,
                 invoiceId: invoice.id,
                 date: format(new Date(), 'dd MMM yyyy'),
+                attachmentBase64: invoicePdfBase64,
             }).catch(e => console.error('[verify] Email error:', e));
         }
 
