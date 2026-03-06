@@ -1,7 +1,7 @@
 import {
-    PlusCircle, Brain, MessageSquareWarning, Crown,
+    PlusCircle, MessageSquareWarning, Crown,
     User as UserIcon, Sparkles, CheckCircle2, FileText,
-    Briefcase, Zap, ArrowRight, Activity
+    Briefcase, Zap, ArrowRight, Activity, Calendar, ShieldCheck
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getSession } from '@/lib/auth/jwt'
@@ -24,11 +24,21 @@ export default async function DashboardPage({ params }: { params: { region: stri
         .single();
 
     // Fetch Summary Stats
-    const [resumesRes, jobsRes, scoresRes] = await Promise.all([
+    const [resumesRes, jobsRes, scoresRes, upcomingRes] = await Promise.all([
         supabase.from('resumes').select('id', { count: 'exact', head: true }).eq('user_id', session.userId),
         supabase.from('job_applications').select('id', { count: 'exact', head: true }).eq('user_id', session.userId),
         supabase.from('resume_scores').select('id', { count: 'exact', head: true }).eq('user_id', session.userId),
+        // Fetch upcoming interviews
+        supabase.from('interview_calendar')
+            .select('*')
+            .eq('user_id', session.userId)
+            .gte('interview_date', new Date().toISOString())
+            .order('interview_date', { ascending: true })
+            .limit(1)
     ]);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const upcomingInterviews = (upcomingRes as any).data || [];
 
     const stats = {
         resumes: resumesRes.count || 0,
@@ -80,7 +90,7 @@ export default async function DashboardPage({ params }: { params: { region: stri
                                 Overview Dashboard
                             </p>
                             <div className="flex flex-col gap-2">
-                                <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter Otros">
+                                <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
                                     Welcome back, {displayName.split(' ')[0]}!
                                 </h1>
                                 <div className={`inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black border uppercase tracking-widest w-fit ${planBadgeStyles[activePlan] || planBadgeStyles.FREE}`}>
@@ -107,6 +117,37 @@ export default async function DashboardPage({ params }: { params: { region: stri
                     </div>
                 </div>
             </div>
+
+            {/* Upcoming Interview HUD */}
+            {upcomingInterviews.length > 0 && (
+                <div className="p-10 rounded-[3rem] bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-transparent border border-indigo-500/20 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[80px] -z-10 group-hover:scale-110 transition-transform duration-700" />
+
+                    <div className="flex flex-col lg:flex-row items-center justify-between gap-12 relative z-10">
+                        <div className="flex-1 text-center lg:text-left">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest mb-6">
+                                <Calendar className="w-4 h-4" /> Next Interview Encounter
+                            </div>
+                            <h2 className="text-4xl font-black text-white italic tracking-tighter mb-4">
+                                Prepare for {upcomingInterviews[0].company_name}
+                            </h2>
+                            <p className="text-slate-400 font-medium text-lg leading-relaxed">
+                                Target Role: <span className="text-white font-bold">{upcomingInterviews[0].role_name}</span> &bull;
+                                Interview is on <span className="text-indigo-400 font-black">{new Date(upcomingInterviews[0].interview_date).toLocaleDateString()}</span>
+                            </p>
+                        </div>
+
+                        <div className="flex flex-wrap justify-center gap-4">
+                            <Link href={`/${region}/${lang}/dashboard/interview-prep/${upcomingInterviews[0].company_name.toLowerCase()}`} className="px-8 py-4 bg-white text-slate-950 font-black rounded-2xl transition-all shadow-xl hover:shadow-indigo-500/20 flex items-center gap-2">
+                                <ShieldCheck className="w-5 h-5" /> View Questions
+                            </Link>
+                            <Link href={`/${region}/${lang}/dashboard/interview-prep/${upcomingInterviews[0].company_name.toLowerCase()}`} className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl transition-all flex items-center gap-2">
+                                <PlusCircle className="w-5 h-5" /> Start Practice
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -167,14 +208,14 @@ export default async function DashboardPage({ params }: { params: { region: stri
                         </div>
                     </Link>
 
-                    <Link href={`/${region}/${lang}/tools`} className="group">
+                    <Link href={`/${region}/${lang}/dashboard/interview-prep`} className="group">
                         <div className="p-8 rounded-[3rem] bg-slate-900/40 border border-white/5 hover:border-purple-500/30 transition-all flex flex-col items-center text-center">
                             <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                <Brain className="w-8 h-8 text-purple-400" />
+                                <ShieldCheck className="w-8 h-8 text-purple-400" />
                             </div>
-                            <h3 className="text-lg font-black text-white mb-2 tracking-tight group-hover:text-purple-400 transition-colors">AI Mock Test</h3>
-                            <p className="text-xs text-slate-500 font-medium leading-relaxed mb-6 px-4">Prepare for interviews with our AI-powered mock testing system.</p>
-                            <span className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-purple-400 group-hover:translate-x-1 transition-transform">Practice Now <ArrowRight className="w-3 h-3" /></span>
+                            <h3 className="text-lg font-black text-white mb-2 tracking-tight group-hover:text-purple-400 transition-colors">Verified Prep</h3>
+                            <p className="text-xs text-slate-500 font-medium leading-relaxed mb-6 px-4">Prepare with actual questions from top companies.</p>
+                            <span className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-purple-400 group-hover:translate-x-1 transition-transform">Prep Now <ArrowRight className="w-3 h-3" /></span>
                         </div>
                     </Link>
                 </div>
@@ -198,3 +239,4 @@ export default async function DashboardPage({ params }: { params: { region: stri
         </div>
     )
 }
+

@@ -27,7 +27,7 @@ export async function GET() {
         const { data: invoices, error } = await (admin as any)
             .from('invoices')
             .select(`
-                id, invoice_number, plan, amount, payment_method, coupon_code,
+                id, invoice_number, plan, amount, currency, payment_method, coupon_code,
                 razorpay_payment_id, razorpay_order_id,
                 billing_name, billing_email, billing_phone,
                 billing_address, billing_city, billing_state, billing_country, billing_zip,

@@ -14,6 +14,7 @@ interface InvoiceRow {
     user_email: string;
     plan: string;
     amount: number;
+    currency: string;
     payment_method: string;
     coupon_code: string | null;
     razorpay_payment_id: string | null;
@@ -146,7 +147,10 @@ export default function AdminInvoicesPage() {
                                             <td className="px-5 py-4">
                                                 {inv.amount === 0
                                                     ? <span className="text-emerald-400 font-bold text-xs">Free</span>
-                                                    : <span className="text-white font-semibold text-xs">₹{(inv.amount / 100).toFixed(0)}</span>}
+                                                    : <span className="text-white font-semibold text-xs">
+                                                        {inv.currency === 'USD' ? '$' : '₹'}
+                                                        {(inv.amount / 100).toFixed(inv.currency === 'USD' ? 2 : 0)}
+                                                    </span>}
                                             </td>
 
                                             {/* Payment Method */}
