@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import { generateAIResponse } from '@/lib/ai-provider';
 import { Mic, CheckCircle, ArrowRight, RotateCcw, FileText, Target } from 'lucide-react';
 import Link from 'next/link';
@@ -42,7 +41,6 @@ interface User {
 export default function MockInterviewPage() {
   const params = useParams() as { region: string; lang: string };
   const { region, lang } = params;
-  const supabase = createClient();
 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -62,48 +60,26 @@ export default function MockInterviewPage() {
   useEffect(() => {
     const checkUserAccess = async () => {
       try {
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        if (!authUser) {
+        const res = await fetch('/api/mock-interview');
+        const data = await res.json();
+
+        if (res.status === 401) {
           window.location.href = `/${region}/${lang}/login`;
           return;
         }
 
-        const { data: userData } = await supabase
-          .from('users')
-          .select('id, plan_type, daily_mock_limit, plan_end')
-          .eq('id', authUser.id)
-          .single();
-
-        if (!userData) {
-          setError('User not found');
+        if (data.error) {
+          setError(data.error);
           return;
         }
 
-        // Check interview count for today
-        const today = new Date().toISOString().split('T')[0];
-        const { count } = await supabase
-          .from('mock_interviews')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', userData.id)
-          .gte('created_at', today);
-
-        const planLimits = {
-          free: 3,
-          pro: 10,
-          premium: 10,
-          career: 9999
-        };
-
-        const userPlan = userData.plan_type || 'free';
-        const limit = planLimits[userPlan as keyof typeof planLimits] || 3;
-        const used = count || 0;
-
-        if (used >= limit) {
-          setError(`You've reached your daily limit of ${limit} interviews. Upgrade your plan for more interviews.`);
+        if (data.user.interviewsUsed >= data.user.interviewLimit) {
+          setError(`You've reached your daily limit of ${data.user.interviewLimit} interviews. Upgrade your plan for more interviews.`);
+          setUser(data.user); // Store to show correct stats if needed
           return;
         }
 
-        setUser({ ...userData, interviewsUsed: used, interviewLimit: limit });
+        setUser(data.user);
       } catch (err) {
         console.error('Access check failed:', err);
         setError('Failed to verify access');
@@ -113,7 +89,7 @@ export default function MockInterviewPage() {
     };
 
     checkUserAccess();
-  }, [region, lang, supabase]);
+  }, [region, lang]);
 
   const startInterview = async () => {
     if (!setup.role.trim()) {
@@ -145,25 +121,25 @@ Example: ["Question 1", "Question 2", "Question 3"]`;
         throw new Error('Invalid response format');
       }
 
-      // Save to database
-      const { data: interviewData, error: insertError } = await supabase
-        .from('mock_interviews')
-        .insert({
-          user_id: user.id,
+      const res = await fetch('/api/mock-interview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
           role: setup.role,
-          job_description: setup.jobDescription,
-          experience_level: setup.experienceLevel,
-          interview_type: setup.interviewType,
-          num_questions: setup.numQuestions,
+          jobDescription: setup.jobDescription,
+          experienceLevel: setup.experienceLevel,
+          interviewType: setup.interviewType,
+          numQuestions: setup.numQuestions,
           questions: questions
         })
-        .select()
-        .single();
+      });
 
-      if (insertError) throw insertError;
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
 
       setSession({
-        id: interviewData.id,
+        id: data.interview.id,
         questions,
         answers: [],
         evaluations: [],
@@ -207,28 +183,26 @@ Example: {"score": 7, "feedback": "Good explanation but could be more specific",
       const newAnswers = [...session.answers, currentAnswer];
       const newEvaluations = [...session.evaluations, evaluation];
 
-      // Update database
-      await supabase
-        .from('mock_interviews')
-        .update({
-          answers: newAnswers,
-          scores: newEvaluations
-        })
-        .eq('id', session.id);
-
       const nextIndex = session.currentQuestionIndex + 1;
       const isComplete = nextIndex >= session.questions.length;
+      let finalScore: number | undefined;
 
       if (isComplete) {
-        // Calculate final score
         const totalScore = newEvaluations.reduce((sum: number, e: QuestionEvaluation) => sum + e.score, 0);
-        const finalScore = (totalScore / newEvaluations.length) * 10; // Convert to percentage
-
-        await supabase
-          .from('mock_interviews')
-          .update({ final_score: finalScore })
-          .eq('id', session.id);
+        finalScore = (totalScore / newEvaluations.length) * 10;
       }
+
+      await fetch('/api/mock-interview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          id: session.id,
+          answers: newAnswers,
+          scores: newEvaluations,
+          finalScore
+        })
+      });
 
       setSession({
         ...session,
