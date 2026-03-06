@@ -28,7 +28,14 @@ Rules:
 6. DO NOT fabricate impact, metrics, or percentages.
 7. Tone: Realistic and technical. No corporate fluff.
 8. Maintain the original meaning and project intent.
-9. Return ONLY valid JSON matching the input structure.`;
+9. Return a JSON object containing:
+   - "optimized_resume": The full ResumeData object (all fields).
+   - "analysis": {
+       "match_score": 0-100,
+       "matched_keywords": ["skill1", "tech2"],
+       "missing_keywords": ["skill3"],
+       "improvements": ["improvement description 1", "improvement description 2"]
+     }`;
 
         const prompt = `Enhance this Resume JSON to align with the provided Job Description.
         
@@ -45,14 +52,14 @@ Rules:
         ${jobDescription}`;
 
         const startTime = Date.now();
-        const aiResult = await generateAIResponse(prompt, undefined, systemPrompt, 0.2, 2000);
+        const aiResult = await generateAIResponse(prompt, undefined, systemPrompt, 0.2, 3000);
         const endTime = Date.now();
         const aiOutput = aiResult.text;
 
         const supabase = createClient();
         await logAIUsage(supabase, session.userId, null, aiResult, endTime - startTime);
 
-        let optimizedJson;
+        let parsedResult;
         try {
             // Clean AI Output from markdown artifacts before parsing
             const cleaned = aiOutput
@@ -61,7 +68,14 @@ Rules:
                 .replace(/```$/i, '')
                 .trim();
 
-            optimizedJson = JSON.parse(cleaned);
+            parsedResult = JSON.parse(cleaned);
+            let optimizedJson = parsedResult.optimized_resume || parsedResult;
+            const analysis = parsedResult.analysis || {
+                match_score: 0,
+                matched_keywords: [],
+                missing_keywords: [],
+                improvements: []
+            };
 
             // Validation and deep-cleaning the strings in the optimized JSON
             const cleanObj = (obj: unknown): unknown => {
@@ -88,13 +102,15 @@ Rules:
             if (!Array.isArray(optimizedJson.skills)) optimizedJson.skills = resumeData.skills || [];
             if (!Array.isArray(optimizedJson.skillCategories)) optimizedJson.skillCategories = resumeData.skillCategories || [];
 
-            console.log("[Optimize] Successfully validated and cleaned AI output.");
-        } catch {
-            console.log("[Optimize] JSON Parse Error. Raw output:", aiOutput);
-            throw new Error("AI returned an invalid format. Please try again.");
+            return NextResponse.json({
+                success: true,
+                optimizedData: optimizedJson,
+                analysis: analysis
+            });
+        } catch (e) {
+            console.error("[Optimize] Parse Error:", e);
+            return NextResponse.json({ success: false, error: "AI returned an invalid format." }, { status: 500 });
         }
-
-        return NextResponse.json({ success: true, optimizedData: optimizedJson });
 
 
     } catch (e: unknown) {
