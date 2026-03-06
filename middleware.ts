@@ -222,6 +222,10 @@ export async function middleware(request: NextRequest) {
         if (session.role !== 'admin') {
             return NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${currentRegion}/${currentLocale}/dashboard`));
         }
+
+        if (pathname.startsWith('/admin')) {
+            return NextResponse.next();
+        }
         return NextResponse.rewrite(new URL(`/admin${pathname}`, request.url));
     }
 

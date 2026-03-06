@@ -112,7 +112,7 @@ export default function AdminLayoutClient({ children, profile }: { children: Rea
                 {/* Sidebar Footer */}
                 <div className={`p-4 border-t border-white/5 shrink-0 transition-all duration-300 ${isCollapsed ? 'md:p-2' : 'p-4'}`}>
                     <Link
-                        href="/dashboard"
+                        href="https://resumeforgeai.in/in/en/dashboard"
                         title={isCollapsed ? 'Exit Admin' : ''}
                         className={`flex items-center py-2.5 rounded-xl text-sm text-slate-400 hover:text-white hover:bg-red-500/5 transition-all group overflow-hidden px-3.5 ${isCollapsed ? 'md:px-0 md:justify-center gap-3 md:gap-0' : 'gap-3'}`}
                     >
