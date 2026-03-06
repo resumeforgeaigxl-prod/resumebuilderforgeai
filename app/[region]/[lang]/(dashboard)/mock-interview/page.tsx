@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { generateAIResponse } from '@/lib/ai-provider';
+import { generateAIResponse, stripMarkdown } from '@/lib/ai-provider';
 import { Mic, CheckCircle, ArrowRight, RotateCcw, FileText, Target } from 'lucide-react';
 import Link from 'next/link';
 
@@ -115,10 +115,22 @@ Questions should be relevant to the role and experience level. Return only a JSO
 Example: ["Question 1", "Question 2", "Question 3"]`;
 
       const response = await generateAIResponse(prompt);
-      const questions = JSON.parse(response.text);
+      const cleanText = stripMarkdown(response.text);
+      let questions;
 
-      if (!Array.isArray(questions) || questions.length !== setup.numQuestions) {
-        throw new Error('Invalid response format');
+      try {
+        questions = JSON.parse(cleanText);
+      } catch (e) {
+        console.error('Failed to parse questions:', e, cleanText);
+        throw new Error('AI returned an invalid format. Please try again.');
+      }
+
+      if (!Array.isArray(questions)) {
+        throw new Error('Invalid response format: not an array');
+      }
+
+      if (questions.length === 0) {
+        throw new Error('AI failed to generate any questions');
       }
 
       const res = await fetch('/api/mock-interview', {
@@ -178,7 +190,15 @@ Return a JSON object with:
 Example: {"score": 7, "feedback": "Good explanation but could be more specific", "tips": "Add examples from your experience"}`;
 
       const response = await generateAIResponse(prompt);
-      const evaluation: QuestionEvaluation = JSON.parse(response.text);
+      const cleanText = stripMarkdown(response.text);
+      let evaluation: QuestionEvaluation;
+
+      try {
+        evaluation = JSON.parse(cleanText);
+      } catch (e) {
+        console.error('Failed to parse evaluation:', e, cleanText);
+        throw new Error('AI returned an invalid evaluation. Please try again.');
+      }
 
       const newAnswers = [...session.answers, currentAnswer];
       const newEvaluations = [...session.evaluations, evaluation];
@@ -235,7 +255,7 @@ Example: {"score": 7, "feedback": "Good explanation but could be more specific",
     );
   }
 
-  if (error && !session) {
+  if (error && !session && error.includes('limit')) {
     return (
       <div className="max-w-2xl mx-auto text-center py-12">
         <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6">

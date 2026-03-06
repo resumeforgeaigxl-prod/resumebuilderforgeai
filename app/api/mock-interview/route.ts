@@ -20,7 +20,7 @@ export async function GET() {
         // 1. Fetch user plan details
         const { data: userData, error: userError } = await admin
             .from('users')
-            .select('id, plan_type, daily_mock_limit, plan_end')
+            .select('role, plan_type, daily_mock_limit, plan_end')
             .eq('id', session.userId)
             .single();
 
@@ -29,12 +29,14 @@ export async function GET() {
         }
 
         // 2. Count interviews used today
-        const today = new Date().toISOString().split('T')[0];
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
         const { count, error: countError } = await admin
             .from('mock_interviews')
             .select('id', { count: 'exact', head: true })
             .eq('user_id', session.userId)
-            .gte('created_at', today);
+            .gte('created_at', today.toISOString());
 
         if (countError) {
             console.error('[MockInterview] Count error:', countError);
@@ -48,13 +50,21 @@ export async function GET() {
         };
 
         const userPlan = userData.plan_type || 'free';
-        const limit = planLimits[userPlan as keyof typeof planLimits] || 3;
+        // Use daily_mock_limit if set, otherwise fallback to plan defaults
+        let limit = userData.daily_mock_limit || (planLimits[userPlan as keyof typeof planLimits] || 3);
+
+        // Admins get unlimited access
+        if (userData.role === 'admin') {
+            limit = 9999;
+        }
+
         const used = count || 0;
 
         return NextResponse.json({
             success: true,
             user: {
-                id: userData.id,
+                id: session.userId,
+                role: userData.role,
                 plan_type: userPlan,
                 interviewsUsed: used,
                 interviewLimit: limit
