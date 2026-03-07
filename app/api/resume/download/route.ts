@@ -13,6 +13,8 @@ import { checkUserAccess } from '@/lib/access';
 import { logPDFDownload } from '@/lib/admin-logger';
 import puppeteer, { Browser, Page } from 'puppeteer-core';
 import chromium from '@sparticuz/chromium';
+import fs from 'fs';
+import path from 'path';
 
 // Trigger re-build with fixed ESLint types
 export const runtime = 'nodejs';
@@ -91,43 +93,36 @@ export async function POST(request: Request) {
         const template: string = body.template || 'harvard';
 
         console.log(`[Download] Starting PDF generation for template: ${template}`);
-
         if (!resumeData) {
             return NextResponse.json({ error: 'No resume data provided' }, { status: 400 });
         }
 
         // ── Access check (server-side, no frontend trust) ──────────────────────
         const session = await getSession();
+        console.log(`[Download] Session:`, session);
         let showWatermark = true;
 
         if (session?.userId) {
             const access = await checkUserAccess(session.userId);
             showWatermark = !access.hasAccess;
-            console.log(`[Download] userId=${session.userId} access=${access.reason} watermark=${showWatermark}`);
-        } else {
-            console.log('[Download] No session — applying watermark');
         }
-        // ──────────────────────────────────────────────────────────────────────
 
         const html = selectTemplate(resumeData, template);
 
-        // ── 1. PDF Generation logic for Production/Local ──
         const isLocal = process.env.NODE_ENV === 'development' || !process.env.VERCEL;
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const c = chromium as any;
-
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let launchOptions: any;
 
         if (isLocal) {
             launchOptions = {
-                args: [],
+                args: ['--no-sandbox', '--disable-setuid-sandbox'],
                 executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
                 headless: true,
             };
         } else {
-            // Updated Vercel configuration for @sparticuz/chromium 123+
             launchOptions = {
                 args: c.args,
                 defaultViewport: c.defaultViewport,
@@ -137,23 +132,23 @@ export async function POST(request: Request) {
         }
 
         browser = await puppeteer.launch(launchOptions);
-
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
 
         const ratio = await getOverflowRatio(page);
 
-        // ── 2. Inject watermark if needed ──
         if (showWatermark) {
             await injectWatermark(page);
         }
 
-        console.log('[Download] Generating PDF buffer...');
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
         });
-        console.log(`[Download] Done. Buffer size=${pdfBuffer.length} bytes`);
+
+        if (!pdfBuffer || pdfBuffer.length === 0) {
+            throw new Error('PDF generation produced an empty buffer');
+        }
 
         // Fire-and-forget admin log
         if (session?.userId) {
@@ -179,17 +174,26 @@ export async function POST(request: Request) {
     } catch (e: unknown) {
         console.error('[Download] CRITICAL PDF Error:', e);
         const error = e as Error;
-        return NextResponse.json(
-            {
-                error: 'PDF generation failed',
-                details: error.message || String(e),
-                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-            },
-            { status: 500 }
-        );
+        const errorDetail = {
+            error: 'PDF generation failed',
+            details: error.message || String(e),
+            stack: error.stack
+        };
+
+        // Write to a temporary file for the agent to read
+        try {
+            const logsDir = path.join(process.cwd(), 'tmp');
+            if (!fs.existsSync(logsDir)) {
+                fs.mkdirSync(logsDir, { recursive: true });
+            }
+            fs.writeFileSync(path.join(logsDir, 'pdf_download_error.json'), JSON.stringify(errorDetail, null, 2));
+        } catch (fileErr) {
+            console.error('[Download] Failed to write error to file:', fileErr);
+        }
+
+        return NextResponse.json(errorDetail, { status: 500 });
     } finally {
         if (browser) {
-            console.log('[Download] Closing browser instance');
             await browser.close();
         }
     }

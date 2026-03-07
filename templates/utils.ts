@@ -15,16 +15,42 @@ export function limitWords(s: string, max = 22): string {
 }
 
 export function enforceOnePage(r: ResumeData): ResumeData {
+    // Deep clone
     const d: ResumeData = JSON.parse(JSON.stringify(r));
-    if (d.projects.length > 4) d.projects = d.projects.slice(0, 4);
-    d.projects = d.projects.map(p => ({
-        ...p,
-        description: p.description.slice(0, 3).map(s => limitWords(s, 20)),
-    }));
-    d.experience = d.experience.map(e => ({
-        ...e,
-        points: e.points.slice(0, 4).map(s => limitWords(s, 20)),
-    }));
+
+    // Safety: ensure arrays exist
+    if (!Array.isArray(d.projects)) d.projects = [];
+    if (!Array.isArray(d.experience)) d.experience = [];
+    if (!Array.isArray(d.education)) d.education = [];
+
+    d.projects = d.projects.filter(Boolean).slice(0, 4).map(p => {
+        const descArray = Array.isArray(p.description)
+            ? p.description
+            : (typeof p.description === 'string' ? [p.description] : []);
+        const techArray = Array.isArray(p.tech) ? p.tech : [];
+        return {
+            ...p,
+            tech: techArray,
+            description: descArray.filter(Boolean).slice(0, 3).map(s => limitWords(String(s), 20)),
+        };
+    });
+
+    d.experience = d.experience.filter(Boolean).map(e => {
+        const pointsArray = Array.isArray(e.points)
+            ? e.points
+            : (typeof e.points === 'string' ? [e.points] : []);
+        return {
+            ...e,
+            points: pointsArray.filter(Boolean).slice(0, 4).map(s => limitWords(String(s), 20)),
+        };
+    });
+
+    d.education = d.education.filter(Boolean);
+
+    if (!Array.isArray(d.skills)) d.skills = [];
+    if (!Array.isArray(d.skillCategories)) d.skillCategories = [];
+    if (!Array.isArray(d.certifications)) d.certifications = [];
+
     return d;
 }
 

@@ -33,13 +33,13 @@ export default function JobsPage() {
     const searchParams = useSearchParams();
 
     // Filters from URL
-    const query = searchParams.get('search') || '';
-    const location = searchParams.get('location') || '';
-    const country = searchParams.get('country') || '';
-    const experience = searchParams.get('experience') || searchParams.get('type') || '';
-    const jobType = searchParams.get('job_type') || '';
-    const remote = searchParams.get('remote') === 'true';
-    const page = parseInt(searchParams.get('page') || '1');
+    const query = searchParams?.get('search') ?? '';
+    const location = searchParams?.get('location') ?? '';
+    const country = searchParams?.get('country') ?? '';
+    const experience = searchParams?.get('experience') ?? searchParams?.get('type') ?? '';
+    const jobType = searchParams?.get('job_type') ?? '';
+    const remote = (searchParams?.get('remote') ?? '') === 'true';
+    const page = parseInt(searchParams?.get('page') ?? '1');
 
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
@@ -90,7 +90,7 @@ export default function JobsPage() {
     };
 
     const updateFilters = (newFilters: Record<string, string>) => {
-        const current = new URLSearchParams(Array.from(searchParams.entries()));
+        const current = new URLSearchParams(searchParams ? Array.from(searchParams.entries()) : []);
         Object.entries(newFilters).forEach(([key, value]) => {
             if (value !== undefined) {
                 if (value === '') current.delete(key);

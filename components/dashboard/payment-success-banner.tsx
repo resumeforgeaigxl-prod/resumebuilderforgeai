@@ -9,7 +9,7 @@ export function PaymentSuccessBanner() {
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
-        if (searchParams.get('payment') === 'success') {
+        if (searchParams?.get('payment') === 'success') {
             setVisible(true);
         }
     }, [searchParams]);

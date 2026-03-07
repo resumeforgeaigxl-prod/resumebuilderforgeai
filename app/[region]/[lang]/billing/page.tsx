@@ -90,7 +90,7 @@ function BillingContent({ params }: { params: { region: string; lang: string } }
     const { region, lang } = params;
     const router = useRouter();
     const searchParams = useSearchParams();
-    const rawPlan = (searchParams.get('plan') ?? 'PRO').toUpperCase() as PlanName;
+    const rawPlan = ((searchParams?.get('plan') ?? 'PRO').toUpperCase() as PlanName);
     const plan = PLANS[rawPlan] ? rawPlan : 'PRO';
     const planInfo = PLANS[plan];
 

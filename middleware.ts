@@ -98,9 +98,11 @@ export async function middleware(request: NextRequest) {
     const isAdminSubdomain = host.startsWith('admin.');
     const isSubdomain = isAppSubdomain || isApiSubdomain || isAdminSubdomain;
 
-    // ─── Always pass through: static files, locales, etc.
+    // ─── Always pass through: static files, locales, and API routes early
     if (
         pathname.startsWith('/_next') ||
+        pathname.startsWith('/api/') || // Skip all API routes immediately
+        pathname === '/api' ||
         pathname.startsWith('/favicon') ||
         pathname.startsWith('/locales') ||
         pathname.endsWith('.svg') ||
@@ -121,19 +123,31 @@ export async function middleware(request: NextRequest) {
     const userAgent = request.headers.get('user-agent');
     const isSearchBot = isBot(userAgent);
 
-    // If no valid region or locale in path, and NOT a bot being force-redirected
+    // List of paths that exist at the root level and should NOT be redirected to regional paths
+    const ROOT_LEVEL_PATHS = [
+        '/api',
+        '/admin',
+        '/sitemap',
+        '/ai-resume-builder',
+        '/ats-resume-builder',
+        '/ai-mock-interview',
+        '/job-interview-ai-coach',
+        '/privacy',
+        '/terms',
+        '/robots.txt',
+        '/favicon.ico',
+        '/locales'
+    ];
+
+    const isRootLevelPath = ROOT_LEVEL_PATHS.some(p => pathname.startsWith(p));
+
+    // If no valid region or locale in path, and NOT a root level path, and NOT an API/Admin subdomain
     if ((!hasRegion || !hasLocale) &&
-        !pathname.startsWith('/api/') &&
-        !pathname.startsWith('/admin') &&
-        !pathname.startsWith('/sitemap') &&
-        !pathname.startsWith('/ai-resume-builder') &&
-        !pathname.startsWith('/ats-resume-builder') &&
-        !pathname.startsWith('/ai-mock-interview') &&
-        !pathname.startsWith('/job-interview-ai-coach') &&
-        !pathname.startsWith('/privacy') &&
-        !pathname.startsWith('/terms') &&
-        !isSubdomain) {
-        // Only force-redirect if NOT a bot OR if it's the root path
+        !isRootLevelPath &&
+        !isApiSubdomain &&
+        !isAdminSubdomain) {
+
+        // Only force-redirect if NOT a search bot OR if it's the root path
         if (!isSearchBot || pathname === '/') {
             const url = new URL(request.url);
             const lang = getLocale(request);
@@ -173,7 +187,11 @@ export async function middleware(request: NextRequest) {
 
     // ─── API subdomain: rewrite to /api/* and add CORS headers ───────────────
     if (isApiSubdomain) {
-        const rewriteUrl = new URL(`/api${pathname}`, request.url);
+        let apiPath = pathname;
+        if (!pathname.startsWith('/api')) {
+            apiPath = `/api${pathname}`;
+        }
+        const rewriteUrl = new URL(apiPath, request.url);
         const response = NextResponse.rewrite(rewriteUrl);
         const origin = request.headers.get('origin') ?? '';
         const allowedOrigins = [
@@ -211,27 +229,40 @@ export async function middleware(request: NextRequest) {
     // ─── Admin subdomain ──────────────────────────────────────────────────────
     if (isAdminSubdomain) {
         if (!session) {
-            const loginUrl = new URL(`https://${MAIN_DOMAIN}/${currentRegion}/${currentLocale}/login`);
+            const loginUrl = new URL(`/${currentRegion}/${currentLocale}/login`, request.url);
             return NextResponse.redirect(loginUrl);
         }
         if (session.isBlocked) {
-            const res = NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${currentRegion}/${currentLocale}/login?error=AccountBlocked`));
+            const res = NextResponse.redirect(new URL(`/${currentRegion}/${currentLocale}/login?error=AccountBlocked`, request.url));
             res.cookies.delete('resume_forge_auth');
             return res;
         }
         if (session.role !== 'admin') {
-            return NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${currentRegion}/${currentLocale}/dashboard`));
+            return NextResponse.redirect(new URL(`/${currentRegion}/${currentLocale}/dashboard`, request.url));
         }
 
-        if (pathname.startsWith('/admin')) {
-            return NextResponse.next();
+        // If the path has a region/locale prefix, strip it for internal routing on admin subdomain
+        let targetPath = pathname;
+        if (hasRegion && hasLocale) {
+            targetPath = '/' + pathParts.slice(2).join('/');
+        } else if (hasRegion || (SUPPORTED_LOCALES.includes(firstSegment))) {
+            targetPath = '/' + pathParts.slice(1).join('/');
         }
-        return NextResponse.rewrite(new URL(`/admin${pathname}`, request.url));
+
+        // Avoid double /admin prefix
+        let finalPath = targetPath;
+        if (!targetPath.startsWith('/admin')) {
+            finalPath = `/admin${targetPath === '/' ? '' : targetPath}`;
+        }
+
+        // Clean double slashes
+        finalPath = finalPath.replace(/\/+/g, '/');
+
+        return NextResponse.rewrite(new URL(finalPath, request.url));
     }
 
     // ─── App subdomain ────────────────────────────────────────────────────────
     if (isAppSubdomain) {
-        const origin = `https://app.${MAIN_DOMAIN}/${currentRegion}/${currentLocale}`;
         const isAuthRoute = normalizedPath.startsWith('/login') || normalizedPath.startsWith('/signup');
         const isPublicRoute = normalizedPath === '/' ||
             normalizedPath.startsWith('/privacy') ||
@@ -241,24 +272,24 @@ export async function middleware(request: NextRequest) {
         const isCompleteProfile = normalizedPath === '/complete-profile';
 
         if (!session && !isAuthRoute && !isPublicRoute && !isCompleteProfile) {
-            return NextResponse.redirect(`${origin}/login`);
+            return NextResponse.redirect(new URL(`/${currentRegion}/${currentLocale}/login`, request.url));
         }
 
         if (session) {
             if (session.isBlocked) {
-                const res = NextResponse.redirect(`${origin}/login?error=AccountBlocked`);
+                const res = NextResponse.redirect(new URL(`/${currentRegion}/${currentLocale}/login?error=AccountBlocked`, request.url));
                 res.cookies.delete('resume_forge_auth');
                 return res;
             }
             const profileIncomplete = !session.profileCompleted;
             if (profileIncomplete && !isCompleteProfile && !isAuthRoute && !isPublicRoute) {
-                return NextResponse.redirect(`${origin}/complete-profile`);
+                return NextResponse.redirect(new URL(`/${currentRegion}/${currentLocale}/complete-profile`, request.url));
             }
             if (!profileIncomplete && isCompleteProfile) {
-                return NextResponse.redirect(`${origin}/dashboard`);
+                return NextResponse.redirect(new URL(`/${currentRegion}/${currentLocale}/dashboard`, request.url));
             }
             if (isAuthRoute) {
-                return NextResponse.redirect(`${origin}/dashboard`);
+                return NextResponse.redirect(new URL(`/${currentRegion}/${currentLocale}/dashboard`, request.url));
             }
         }
         return NextResponse.rewrite(new URL(`${pathname}`, request.url));
@@ -303,7 +334,6 @@ export async function middleware(request: NextRequest) {
     }
 
     // ─── Standard auth logic for main domain ─────────────────────────────────
-    const origin = `https://${MAIN_DOMAIN}/${currentRegion}/${currentLocale}`;
     const isAuthRoute = normalizedPath.startsWith('/login') || normalizedPath.startsWith('/signup');
     const isPublicRoute =
         normalizedPath === '/' ||
@@ -325,32 +355,32 @@ export async function middleware(request: NextRequest) {
     const isCompleteProfile = normalizedPath === '/complete-profile';
 
     if (!session && !isAuthRoute && !isPublicRoute && !isCompleteProfile) {
-        return NextResponse.redirect(`${origin}/login`);
+        return NextResponse.redirect(new URL(`/${currentRegion}/${currentLocale}/login`, request.url));
     }
 
     if (session) {
         if (session.isBlocked) {
-            const res = NextResponse.redirect(`${origin}/login?error=AccountBlocked`);
+            const res = NextResponse.redirect(new URL(`/${currentRegion}/${currentLocale}/login?error=AccountBlocked`, request.url));
             res.cookies.delete('resume_forge_auth');
             return res;
         }
 
         const profileIncomplete = !session.profileCompleted;
         if (profileIncomplete && !isCompleteProfile && !isAuthRoute && !isPublicRoute) {
-            return NextResponse.redirect(`${origin}/complete-profile`);
+            return NextResponse.redirect(new URL(`/${currentRegion}/${currentLocale}/complete-profile`, request.url));
         }
 
         if (!profileIncomplete && isCompleteProfile) {
-            return NextResponse.redirect(`${origin}/dashboard`);
+            return NextResponse.redirect(new URL(`/${currentRegion}/${currentLocale}/dashboard`, request.url));
         }
 
         if (normalizedPath.startsWith('/admin') && session.role !== 'admin') {
-            return NextResponse.redirect(`${origin}/dashboard`);
+            return NextResponse.redirect(new URL(`/${currentRegion}/${currentLocale}/dashboard`, request.url));
         }
 
         if (isAuthRoute) {
-            if (profileIncomplete) return NextResponse.redirect(`${origin}/complete-profile`);
-            return NextResponse.redirect(`${origin}/dashboard`);
+            if (profileIncomplete) return NextResponse.redirect(new URL(`/${currentRegion}/${currentLocale}/complete-profile`, request.url));
+            return NextResponse.redirect(new URL(`/${currentRegion}/${currentLocale}/dashboard`, request.url));
         }
     }
 

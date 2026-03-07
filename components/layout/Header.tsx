@@ -3,27 +3,11 @@ import { Sparkles, LogOut } from 'lucide-react';
 import { getSession } from '@/lib/auth/jwt';
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
 import RegionSwitcher from '@/components/ui/RegionSwitcher';
-import fs from 'fs';
-import path from 'path';
+import { getTranslations } from '@/lib/i18n/server';
 
 export default async function Header({ lang = 'en', region = 'in' }: { lang?: string, region?: string }) {
     const session = await getSession();
-
-    // Load translations on the server
-    let t_data: Record<string, string> = {};
-    try {
-        const filePath = path.join(process.cwd(), 'public', 'locales', lang, 'common.json');
-        const fileContent = fs.readFileSync(filePath, 'utf8');
-        t_data = JSON.parse(fileContent);
-    } catch (e) {
-        console.error('Header: Failed to load translations', e);
-    }
-
-    const t = (key: string) => {
-        if (t_data[key]) return t_data[key];
-        // Dynamic fallback: remove underscores and title-case
-        return key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-    };
+    const t = getTranslations(lang);
 
     return (
         <nav className="fixed top-0 w-full z-50 bg-[#070710]/80 backdrop-blur-md border-b border-white/5">

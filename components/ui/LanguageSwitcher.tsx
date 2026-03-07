@@ -18,7 +18,7 @@ const LANGUAGES = [
 
 export default function LanguageSwitcher() {
     const router = useRouter();
-    const pathname = usePathname();
+    const pathname = usePathname() ?? '/';
     const { locale, region } = useTranslation();
 
     const handleLanguageChange = async (newLocale: string) => {

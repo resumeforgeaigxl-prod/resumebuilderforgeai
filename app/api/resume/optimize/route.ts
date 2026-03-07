@@ -17,6 +17,17 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing resume data or job description' }, { status: 400 });
         }
 
+        const supabase = createClient();
+        const { data: userProfile } = await supabase
+            .from('users')
+            .select('full_name, email')
+            .eq('id', session.userId)
+            .single();
+
+        // 1. Pre-fill missing personal info from profile if resume is empty
+        if (!resumeData.name && userProfile?.full_name) resumeData.name = userProfile.full_name;
+        if (!resumeData.email && userProfile?.email) resumeData.email = userProfile.email;
+
         const systemPrompt = `You are a resume enhancement engine focused on intelligent JD-alignment.
 
 Rules:
@@ -24,11 +35,12 @@ Rules:
 2. Compare them with the candidate's resume.
 3. Enhance ONLY matching sections (Experience points and Project descriptions) to highlight relevant skills.
 4. Insert missing relevant keywords NATURALLY where they fit the candidate's actual work.
-5. PRESERVE authenticity: Do NOT rewrite the entire resume or invent achievements.
-6. DO NOT fabricate impact, metrics, or percentages.
+5. PRESERVE authenticity: Do NOT rewrite the entire resume or invent personal info (name, email, phone).
+6. DO NOT invent new companies, schools, or entire projects. ONLY improve existing descriptions.
 7. Tone: Realistic and technical. No corporate fluff.
-8. Maintain the original meaning and project intent.
-9. Return a JSON object containing:
+8. If the input resume is mostly empty, DO NOT generate a sample resume. Keep it empty.
+9. CRITICAL: The "match_score" should reflect the REALITY of the input. If the input resume is empty or missing details, the match score MUST be very low (0-10%). Do NOT inflate the score.
+10. Return a JSON object containing:
    - "optimized_resume": The full ResumeData object (all fields).
    - "analysis": {
        "match_score": 0-100,
@@ -45,6 +57,10 @@ Rules:
         3. Inject keywords naturally while improving clarity.
         4. Focus on matching tech stacks.
         
+        CRITICAL: Do NOT change the candidate's name, email, phone, or LinkedIn. 
+        If these fields are provided as empty strings, KEEP them as empty strings. 
+        Do NOT invent "John Doe" or any placeholder details.
+
         RESUME:
         ${JSON.stringify(resumeData)}
         
@@ -56,7 +72,6 @@ Rules:
         const endTime = Date.now();
         const aiOutput = aiResult.text;
 
-        const supabase = createClient();
         await logAIUsage(supabase, session.userId, null, aiResult, endTime - startTime);
 
         let parsedResult;

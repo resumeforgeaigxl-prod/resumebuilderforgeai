@@ -6,6 +6,7 @@ import { formatDistanceToNow } from 'date-fns';
 interface ResumeRow {
     id: string; title: string; created_at: string; updated_at: string;
     user_email: string; ats_score: number | null;
+    type?: 'standard' | 'optimized';
 }
 
 export default function AdminResumesPage() {
@@ -81,6 +82,9 @@ export default function AdminResumesPage() {
                                                     <div className="flex items-center gap-2">
                                                         <FileText className="w-4 h-4 text-purple-400 shrink-0" />
                                                         <span className="text-white font-medium">{r.title || 'Untitled Resume'}</span>
+                                                        {r.type === 'optimized' && (
+                                                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-bold uppercase tracking-wider">Optimized</span>
+                                                        )}
                                                     </div>
                                                     <span className="text-[10px] text-slate-600 font-mono mt-1">ID: {r.id.split('-')[0]}...</span>
                                                 </div>

@@ -13,7 +13,7 @@ const REGIONS = [
 
 export default function RegionSwitcher() {
     const router = useRouter();
-    const pathname = usePathname();
+    const pathname = usePathname() ?? '/';
     const { locale, region } = useTranslation();
 
     const handleRegionChange = async (newRegion: string) => {

@@ -16,7 +16,7 @@ function CompleteProfileForm() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const searchParams = useSearchParams();
-    const errorKey = searchParams.get('error') ?? '';
+    const errorKey = searchParams?.get('error') ?? '';
     const initialError = ERROR_MESSAGES[errorKey] || (errorKey ? 'Something went wrong. Please try again.' : null);
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {

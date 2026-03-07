@@ -23,7 +23,9 @@ interface AnalysisData {
 export default function ResumeOptimizePage() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const params = useParams();
+    const params = useParams() as { region?: string; lang?: string } | null;
+    const region = params?.region ?? 'in';
+    const lang = params?.lang ?? 'en';
     const jobId = searchParams?.get('jobId');
     const supabase = createClient();
 
@@ -47,7 +49,7 @@ export default function ResumeOptimizePage() {
 
     useEffect(() => {
         if (!jobId) {
-            router.push(`/${params.region}/${params.lang}/jobs`);
+            router.push(`/${region}/${lang}/jobs`);
             return;
         }
 
@@ -64,13 +66,25 @@ export default function ResumeOptimizePage() {
         }
 
         init();
-    }, [jobId, supabase, router, params.region, params.lang]);
+    }, [jobId, supabase, router, region, lang]);
 
     async function handleOptimize() {
         if (!selectedResumeId || !job) return;
 
         const selectedResume = resumes.find(r => r.id === selectedResumeId);
         if (!selectedResume) return;
+
+        // Content check
+        const rJson = selectedResume.resume_json as ResumeData;
+        const hasContent = (rJson.experience?.length || 0) > 0 || (rJson.projects?.length || 0) > 0;
+
+        if (!hasContent) {
+            const proceed = window.confirm(
+                "Your resume appears to be empty (no experience or projects). " +
+                "Optimization works best on existing content. Do you want to continue anyway?"
+            );
+            if (!proceed) return;
+        }
 
         setStep('OPTIMIZING');
 
@@ -133,7 +147,7 @@ export default function ResumeOptimizePage() {
                 if (job?.apply_url) {
                     window.open(job.apply_url, '_blank');
                 }
-                router.push(`/${params.region}/${params.lang}/dashboard`);
+                router.push(`/${region}/${lang}/dashboard`);
             }
         } finally {
             setSaving(false);
@@ -181,7 +195,7 @@ export default function ResumeOptimizePage() {
                     <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
                     <h2 className="text-2xl font-bold">Job not found</h2>
                     <p className="text-slate-400 mt-2">The job you are looking for does not exist or has been removed.</p>
-                    <Link href={`/${params.region}/${params.lang}/jobs`} className="mt-6 inline-block text-indigo-400 font-bold hover:underline">
+                    <Link href={`/${region}/${lang}/jobs`} className="mt-6 inline-block text-indigo-400 font-bold hover:underline">
                         Back to jobs
                     </Link>
                 </div>
@@ -212,7 +226,7 @@ export default function ResumeOptimizePage() {
                                 <h3 className="text-2xl font-bold text-white mb-2">You need a resume first</h3>
                                 <p className="text-slate-500 mb-8 max-w-sm mx-auto">Create a base resume before we can optimize it for this specific job.</p>
                                 <Link
-                                    href={`/${params.region}/${params.lang}/dashboard`}
+                                    href={`/${region}/${lang}/dashboard`}
                                     className="inline-flex items-center gap-2 px-8 py-4 bg-white text-black font-black uppercase tracking-widest rounded-2xl hover:bg-slate-200 transition-all active:scale-95"
                                 >
                                     <PlusCircle className="w-5 h-5" /> Create Resume
@@ -384,7 +398,7 @@ export default function ResumeOptimizePage() {
                                 Download PDF
                             </button>
                             <Link
-                                href={`/builder/${selectedResumeId}`}
+                                href={`/${region}/${lang}/builder/${selectedResumeId}`}
                                 className="flex items-center justify-center gap-2 p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-3xl text-white font-bold transition-all active:scale-95"
                             >
                                 <Edit className="w-5 h-5" />

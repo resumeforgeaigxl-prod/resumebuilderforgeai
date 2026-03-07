@@ -7,7 +7,7 @@ import { useTranslation } from '@/lib/i18n/I18nProvider';
 import { usePathname } from 'next/navigation';
 
 export default function Footer() {
-    const { locale, region } = useTranslation();
+    const { t, locale, region } = useTranslation();
     const pathname = usePathname();
 
     // Hide footer on chat pages
@@ -22,19 +22,19 @@ export default function Footer() {
 
                 <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-slate-500 font-medium">
                     <Link href={`/${region}/${locale}/privacy-policy`} className="hover:text-slate-300 transition-colors cursor-pointer">
-                        Privacy Policy
+                        {t('privacy_policy')}
                     </Link>
                     <Link href={`/${region}/${locale}/terms-of-service`} className="hover:text-slate-300 transition-colors cursor-pointer">
-                        Terms of Service
+                        {t('terms_of_service')}
                     </Link>
                     <Link href={`/${region}/${locale}/cookie-policy`} className="hover:text-slate-300 transition-colors cursor-pointer">
-                        Cookie Policy
+                        {t('cookie_policy') || 'Cookie Policy'}
                     </Link>
                     <Link href={`/${region}/${locale}/data-deletion`} className="hover:text-slate-300 transition-colors cursor-pointer">
-                        Data Deletion
+                        {t('data_deletion') || 'Data Deletion'}
                     </Link>
                     <Link href={`/${region}/${locale}/dashboard/support`} className="hover:text-slate-300 transition-colors cursor-pointer underline decoration-purple-500/30">
-                        Contact / Support
+                        {t('support')}
                     </Link>
                 </div>
             </div>

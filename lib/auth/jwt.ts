@@ -14,6 +14,8 @@ export interface AuthSession {
     provider: string;
 }
 
+import { MAIN_DOMAIN } from '../constants';
+
 export async function createSession(payload: AuthSession) {
     const expiresInSec = 7 * 24 * 60 * 60; // 7 days
 
@@ -31,6 +33,7 @@ export async function createSession(payload: AuthSession) {
         sameSite: 'lax',
         maxAge: expiresInSec,
         path: '/',
+        domain: process.env.NODE_ENV === 'production' ? `.${MAIN_DOMAIN}` : undefined,
     });
 }
 

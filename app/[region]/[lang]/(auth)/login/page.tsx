@@ -11,8 +11,9 @@ export default function LoginPage() {
     const { region, lang } = params;
     const router = useRouter()
     const searchParams = useSearchParams()
+    const initialError = searchParams?.get('error') ?? null
     const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState(searchParams.get('error') || null)
+    const [error, setError] = useState<string | null>(initialError)
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()

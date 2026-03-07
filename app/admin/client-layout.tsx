@@ -31,6 +31,7 @@ export default function AdminLayoutClient({ children, profile }: { children: Rea
         { href: '/admin/users', label: 'Users', icon: Users },
         { href: '/admin/resumes', label: 'Resumes', icon: FileText },
         { href: '/admin/interviews', label: 'Mock Interviews', icon: Mic },
+        { href: '/admin/company-prep', label: 'Company Prep', icon: Shield },
         { href: '/admin/mock-tests', label: 'Mock Tests', icon: BrainCircuit },
         { href: '/admin/jobs', label: 'Jobs Monitor', icon: Briefcase },
         { href: '/admin/portfolios', label: 'Portfolios', icon: Globe },

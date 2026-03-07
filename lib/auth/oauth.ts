@@ -42,6 +42,8 @@ export function getRedirectUri(provider: string, baseUrl: string) {
     return `${baseUrl}/api/auth/${provider}/callback`;
 }
 
+import { MAIN_DOMAIN } from '../constants';
+
 export function setOAuthStateCookie(state: string) {
     cookies().set(OAUTH_STATE_COOKIE, state, {
         httpOnly: true,
@@ -49,6 +51,7 @@ export function setOAuthStateCookie(state: string) {
         path: '/',
         maxAge: 60 * 10, // 10 minutes
         sameSite: 'lax',
+        domain: process.env.NODE_ENV === 'production' ? `.${MAIN_DOMAIN}` : undefined,
     });
 }
 

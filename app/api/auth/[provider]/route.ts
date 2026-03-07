@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PROVIDERS, getRedirectUri, setOAuthStateCookie } from '@/lib/auth/oauth';
 import crypto from 'crypto';
+import { BASE_URL } from '@/lib/constants';
 
 export async function GET(request: Request, { params }: { params: { provider: string } }) {
     const provider = params.provider.toLowerCase();
@@ -19,8 +20,7 @@ export async function GET(request: Request, { params }: { params: { provider: st
     setOAuthStateCookie(state);
 
     // Build redirect URL
-    const url = new URL(request.url);
-    const redirectUri = getRedirectUri(provider, url.origin);
+    const redirectUri = getRedirectUri(provider, BASE_URL);
 
     const authParams = new URLSearchParams({
         client_id: config.clientId,

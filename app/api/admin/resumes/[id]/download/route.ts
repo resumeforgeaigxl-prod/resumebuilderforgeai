@@ -46,19 +46,43 @@ export async function GET(
 
         const { id } = params;
 
-        // Fetch resume data
-        const { data: resume, error: resumeError } = await supabase
+        // Fetch resume: First try standard resumes, then optimized resumes
+        let resumeData: ResumeData | null = null;
+        let template = 'harvard';
+
+        const { data: standardResume } = await supabase
             .from('resumes')
             .select('*')
             .eq('id', id)
             .single();
 
-        if (resumeError || !resume) {
-            return NextResponse.json({ error: 'Resume not found' }, { status: 404 });
+        if (standardResume) {
+            resumeData = standardResume.resume_json as unknown as ResumeData;
+            template = standardResume.template_selected || 'harvard';
+        } else {
+            const { data: optimizedResume } = await supabase
+                .from('optimized_resumes')
+                .select('optimized_resume, original_resume_id')
+                .eq('id', id)
+                .single();
+
+            if (optimizedResume) {
+                resumeData = optimizedResume.optimized_resume as unknown as ResumeData;
+
+                // Fetch original to get the template if needed, default to harvard
+                if (optimizedResume.original_resume_id) {
+                    const { data: orig } = await supabase.from('resumes')
+                        .select('template_selected')
+                        .eq('id', optimizedResume.original_resume_id)
+                        .single();
+                    if (orig) template = orig.template_selected || 'harvard';
+                }
+            }
         }
 
-        const resumeData = resume.resume_json as unknown as ResumeData;
-        const template = resume.template_selected || 'harvard';
+        if (!resumeData) {
+            return NextResponse.json({ error: 'Resume not found' }, { status: 404 });
+        }
 
         const html = selectTemplate(resumeData, template);
 

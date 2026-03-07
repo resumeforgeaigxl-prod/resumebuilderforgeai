@@ -42,7 +42,7 @@ export async function GET() {
                 user_id,
                 users ( email, full_name )
             `)
-            .neq('interview_mode', 'company_prep')
+            .eq('interview_mode', 'company_prep')
             .order('created_at', { ascending: false });
 
         if (error) throw error;

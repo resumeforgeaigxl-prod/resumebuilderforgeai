@@ -3,6 +3,8 @@ import { PROVIDERS, getOAuthStateCookie, clearOAuthStateCookie, getRedirectUri }
 import { createSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
 import { sendLoginEmail, sendWelcomeEmail } from '@/lib/brevo';
+import { BASE_URL } from '@/lib/constants';
+
 export async function GET(request: Request, { params }: { params: { provider: string } }) {
     const provider = params.provider.toLowerCase();
     const url = new URL(request.url);
@@ -26,7 +28,7 @@ export async function GET(request: Request, { params }: { params: { provider: st
         return NextResponse.redirect(`${url.origin}/login?error=InvalidState`);
     }
 
-    const redirectUri = getRedirectUri(provider, url.origin);
+    const redirectUri = getRedirectUri(provider, BASE_URL);
 
     try {
         // 1. Exchange code for access token

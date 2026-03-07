@@ -39,15 +39,15 @@ interface User {
   interviewLimit: number;
 }
 
-export default function MockInterviewPage() {
+export default function CompanyPrepInterviewPage() {
   return (
-    <Suspense fallback={<div>Loading interview setup...</div>}>
-      <MockInterviewContent />
+    <Suspense fallback={<div>Loading company prep setup...</div>}>
+      <CompanyPrepInterviewContent />
     </Suspense>
   );
 }
 
-function MockInterviewContent() {
+function CompanyPrepInterviewContent() {
   const params = useParams() as { region: string; lang: string };
   const { region, lang } = params;
   const searchParams = useSearchParams();
@@ -121,23 +121,32 @@ function MockInterviewContent() {
     setError('');
 
     try {
-      const genRes = await fetch('/api/mock-interview', {
+      const parts = setup.role.split(' - ');
+      const comp = parts[0]?.trim() || setup.role;
+      const jobRole = parts[1]?.trim() || setup.role;
+
+      const genRes = await fetch('/api/interview-prep/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'generate-questions',
-          role: setup.role,
-          jobDescription: setup.jobDescription,
-          experienceLevel: setup.experienceLevel,
-          interviewType: setup.interviewType,
-          numQuestions: setup.numQuestions
-        })
+        body: JSON.stringify({ company: comp, role: jobRole })
       });
 
       const genData = await genRes.json();
-      if (genData.error) throw new Error(genData.error);
+      if (!genData.success) throw new Error(genData.error || 'Failed to generate company questions');
 
-      const questions = genData.questions;
+      let questions: string[] = [];
+      if (genData.data && genData.data.rounds) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        genData.data.rounds.forEach((r: any) => {
+          if (r.questions) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            r.questions.forEach((q: any) => questions.push(q.question || q.text));
+          }
+        });
+      }
+
+      if (questions.length === 0) throw new Error("Could not extract questions from generation");
+      if (questions.length > 15) questions = questions.slice(0, 15);
 
       const res = await fetch('/api/mock-interview', {
         method: 'POST',
@@ -371,72 +380,30 @@ function MockInterviewContent() {
             <Mic className="w-4 h-4" />
             AI Interview Coach
           </div>
-          <h1 className="text-3xl font-bold text-white mb-4">AI Mock Interview</h1>
+          <h1 className="text-3xl font-bold text-white mb-4">Company Prep Simulator</h1>
           <p className="text-slate-400 max-w-2xl mx-auto">
-            Practice realistic job interviews powered by AI. Get instant feedback and improve your interview performance.
+            Confront the exact reported interview questions from your target company in a realistic, simulated environment.
           </p>
         </div>
 
         <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-8">
-          <h2 className="text-xl font-bold text-white mb-6">Setup Your Interview</h2>
+          <h1 className="text-3xl font-black text-white px-2">Company Prep Setup</h1>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Target Job Role *
+                Target Company & Role *
               </label>
               <input
                 type="text"
                 value={setup.role}
                 onChange={(e) => setSetup({ ...setup, role: e.target.value })}
-                placeholder="e.g. Software Engineer, Product Manager"
+                placeholder="e.g. Amazon - SDE1"
                 className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Experience Level
-              </label>
-              <select
-                value={setup.experienceLevel}
-                onChange={(e) => setSetup({ ...setup, experienceLevel: e.target.value })}
-                className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-              >
-                <option value="fresher">Fresher (0-2 years)</option>
-                <option value="junior">Junior (2-5 years)</option>
-                <option value="experienced">Experienced (5+ years)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Interview Type
-              </label>
-              <select
-                value={setup.interviewType}
-                onChange={(e) => setSetup({ ...setup, interviewType: e.target.value })}
-                className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-              >
-                <option value="technical">Technical</option>
-                <option value="hr">HR & Behavioral</option>
-                <option value="mixed">Mixed</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Number of Questions
-              </label>
-              <select
-                value={setup.numQuestions}
-                onChange={(e) => setSetup({ ...setup, numQuestions: parseInt(e.target.value) })}
-                className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-              >
-                <option value={5}>5 Questions</option>
-                <option value={10}>10 Questions</option>
-                <option value={15}>15 Questions</option>
-              </select>
+              <p className="text-slate-400 text-xs mt-2">
+                We will scrape the web and our databases to find the exact interview questions asked for this role.
+              </p>
             </div>
 
             <div className="md:col-span-2">
@@ -474,18 +441,7 @@ function MockInterviewContent() {
             </div>
           </div>
 
-          <div className="mt-6">
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Job Description (Optional)
-            </label>
-            <textarea
-              value={setup.jobDescription}
-              onChange={(e) => setSetup({ ...setup, jobDescription: e.target.value })}
-              placeholder="Paste the job description to generate more relevant questions..."
-              rows={4}
-              className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-            />
-          </div>
+
 
           <div className="mt-8 flex justify-center">
             <button

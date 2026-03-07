@@ -19,11 +19,21 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
             target_id: params.id
         });
 
-        const { error } = await supabase.from('resumes').delete().eq('id', params.id);
+        // Try deleting from standard resumes
+        let { error, count } = await supabase.from('resumes').delete({ count: 'exact' }).eq('id', params.id);
+
+        // If not found in standard resumes, try optimized_resumes
+        if (!error && count === 0) {
+            const result = await supabase.from('optimized_resumes').delete({ count: 'exact' }).eq('id', params.id);
+            error = result.error;
+            count = result.count;
+        }
+
         if (error) throw error;
 
         return NextResponse.json({ success: true, message: 'Resume deleted' });
-    } catch (error: unknown) { const e = error as Error;
+    } catch (error: unknown) {
+        const e = error as Error;
         return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }
