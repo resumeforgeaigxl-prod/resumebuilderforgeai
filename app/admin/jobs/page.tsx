@@ -27,9 +27,21 @@ export default function AdminJobsPage() {
     const [loading, setLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
+    // Filters
+    const [filters, setFilters] = useState({
+        company: '',
+        role: '',
+        location: ''
+    });
+
     const fetchStats = useCallback(async () => {
         try {
-            const res = await fetch('/api/admin/jobs');
+            const params = new URLSearchParams();
+            if (filters.company) params.set('company', filters.company);
+            if (filters.role) params.set('role', filters.role);
+            if (filters.location) params.set('location', filters.location);
+
+            const res = await fetch(`/api/admin/jobs?${params.toString()}`);
             const data = await res.json();
             if (data.success) {
                 setStats(data);
@@ -40,13 +52,16 @@ export default function AdminJobsPage() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [filters]);
 
     useEffect(() => {
         fetchStats();
-        const interval = setInterval(fetchStats, 10000);
-        return () => clearInterval(interval);
-    }, [fetchStats]);
+        // Refresh every 30s if no active filters, otherwise manual refresh only to avoid input jump
+        if (!filters.company && !filters.role && !filters.location) {
+            const interval = setInterval(fetchStats, 30000);
+            return () => clearInterval(interval);
+        }
+    }, [fetchStats, filters.company, filters.role, filters.location]);
 
     const cards = stats ? [
         { label: 'Total Jobs', value: stats.total, icon: Briefcase, color: 'text-blue-400', bg: 'bg-blue-500/10' },
@@ -90,6 +105,39 @@ export default function AdminJobsPage() {
                 </div>
             ) : (
                 <>
+                    {/* Filters Bar */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
+                        <input
+                            type="text"
+                            placeholder="Filter by Role..."
+                            value={filters.role}
+                            onChange={e => setFilters(f => ({ ...f, role: e.target.value }))}
+                            className="bg-slate-900/50 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Filter by Company..."
+                            value={filters.company}
+                            onChange={e => setFilters(f => ({ ...f, company: e.target.value }))}
+                            className="bg-slate-900/50 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Filter by Location..."
+                            value={filters.location}
+                            onChange={e => setFilters(f => ({ ...f, location: e.target.value }))}
+                            className="bg-slate-900/50 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setFilters({ role: '', company: '', location: '' })}
+                                className="text-[10px] text-slate-500 hover:text-white uppercase font-bold tracking-widest"
+                            >
+                                Clear Filters
+                            </button>
+                        </div>
+                    </div>
+
                     {/* Stats Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {cards.map(card => (

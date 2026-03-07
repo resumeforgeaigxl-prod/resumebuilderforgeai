@@ -24,59 +24,103 @@ $args
  
 Failed to compile.
 
-./app/(auth)/forgot-password/
-page.tsx
-41:23  Error: Unexpected 
-any. Specify a different 
-type.  @typescript-eslint/no-
-explicit-any
+./app/api/interview-prep/hist
+ory/route.ts
+7:27  Error: 'req' is 
+defined but never used.  @typ
+escript-eslint/no-unused-vars
+34:14  Error: 'e' is defined 
+but never used.  @typescript-
+eslint/no-unused-vars
+59:14  Error: 'e' is defined 
+but never used.  @typescript-
+eslint/no-unused-vars
 
-./app/(auth)/login/page.tsx
-46:23  Error: Unexpected 
-any. Specify a different 
-type.  @typescript-eslint/no-
-explicit-any
-
-./app/(auth)/reset-password/p
+./app/[region]/[lang]/(dashbo
+ard)/company-prep-interview/p
 age.tsx
-50:23  Error: Unexpected 
+82:42  Error: Unexpected 
 any. Specify a different 
 type.  @typescript-eslint/no-
 explicit-any
-
-./app/(auth)/signup/page.tsx
-53:23  Error: Unexpected 
+83:44  Error: Unexpected 
 any. Specify a different 
 type.  @typescript-eslint/no-
 explicit-any
-
-./app/api/coupon/redeem/route
-.ts
-82:18  Error: Unexpected 
+95:50  Error: Unexpected 
 any. Specify a different 
 type.  @typescript-eslint/no-
 explicit-any
-95:18  Error: Unexpected 
+227:14  Error: 'err' is 
+defined but never used.  @typ
+escript-eslint/no-unused-vars
+251:14  Error: 'e' is 
+defined but never used.  @typ
+escript-eslint/no-unused-vars
+627:152  Error: `"` can be 
+escaped with `&quot;`, 
+`&ldquo;`, `&#34;`, 
+`&rdquo;`.  
+react/no-unescaped-entities
+627:165  Error: `"` can be 
+escaped with `&quot;`, 
+`&ldquo;`, `&#34;`, 
+`&rdquo;`.  
+react/no-unescaped-entities
+650:64  Error: `"` can be 
+escaped with `&quot;`, 
+`&ldquo;`, `&#34;`, 
+`&rdquo;`.  
+react/no-unescaped-entities
+650:122  Error: `"` can be 
+escaped with `&quot;`, 
+`&ldquo;`, `&#34;`, 
+`&rdquo;`.  
+react/no-unescaped-entities
+672:94  Error: `"` can be 
+escaped with `&quot;`, 
+`&ldquo;`, `&#34;`, 
+`&rdquo;`.  
+react/no-unescaped-entities
+672:171  Error: `"` can be 
+escaped with `&quot;`, 
+`&ldquo;`, `&#34;`, 
+`&rdquo;`.  
+react/no-unescaped-entities
+714:25  Error: `"` can be 
+escaped with `&quot;`, 
+`&ldquo;`, `&#34;`, 
+`&rdquo;`.  
+react/no-unescaped-entities
+714:45  Error: `"` can be 
+escaped with `&quot;`, 
+`&ldquo;`, `&#34;`, 
+`&rdquo;`.  
+react/no-unescaped-entities
+884:62  Error: Unexpected 
 any. Specify a different 
 type.  @typescript-eslint/no-
 explicit-any
-
-./app/complete-profile/page.t
-sx
-5:32  Error: 'CheckCircle2' 
-is defined but never used.  @
-typescript-eslint/no-unused-v
-ars
-49:23  Error: Unexpected 
-any. Specify a different 
-type.  @typescript-eslint/no-
-explicit-any
-
-./lib/access.ts
-60:32  Error: Unexpected 
-any. Specify a different 
-type.  @typescript-eslint/no-
-explicit-any
+1020:84  Error: `"` can be 
+escaped with `&quot;`, 
+`&ldquo;`, `&#34;`, 
+`&rdquo;`.  
+react/no-unescaped-entities
+1020:97  Error: `"` can be 
+escaped with `&quot;`, 
+`&ldquo;`, `&#34;`, 
+`&rdquo;`.  
+react/no-unescaped-entities
+1037:54  Error: `"` can be 
+escaped with `&quot;`, 
+`&ldquo;`, `&#34;`, 
+`&rdquo;`.  
+react/no-unescaped-entities
+1037:141  Error: `"` can be 
+escaped with `&quot;`, 
+`&ldquo;`, `&#34;`, 
+`&rdquo;`.  
+react/no-unescaped-entities
 
 info  - Need to disable some 
 ESLint rules? Learn more 

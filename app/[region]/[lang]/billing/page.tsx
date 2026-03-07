@@ -195,6 +195,16 @@ function BillingContent({ params }: { params: { region: string; lang: string } }
             });
             const data: CouponResult = await res.json();
             setCouponResult(data);
+            if (data.valid) {
+                try {
+                    const posthog = (await import('@/lib/posthog')).default;
+                    posthog.capture('coupon_applied', {
+                        coupon_code: code,
+                        plan_name: plan,
+                        discount_amount: data.discountAmount
+                    });
+                } catch (e) { console.error('[PostHog] Event error:', e); }
+            }
         } catch {
             setCouponResult({ valid: false, error: 'Failed to validate coupon. Try again.' });
         } finally {
@@ -212,6 +222,14 @@ function BillingContent({ params }: { params: { region: string; lang: string } }
         e.preventDefault();
         setError(null);
         setLoading(true);
+
+        try {
+            const posthog = (await import('@/lib/posthog')).default;
+            posthog.capture('payment_started', {
+                plan_name: plan,
+                coupon_code: couponResult?.code
+            });
+        } catch (e) { console.error('[PostHog] Event error:', e); }
 
         try {
             // 1. Save billing details
@@ -313,8 +331,22 @@ function BillingContent({ params }: { params: { region: string; lang: string } }
                             const d = await verifyRes.json();
                             setError(d.error ?? 'Payment verification failed');
                             setLoading(false);
+                            try {
+                                const posthog = (await import('@/lib/posthog')).default;
+                                posthog.capture('payment_failed', {
+                                    plan_name: plan,
+                                    error: d.error || 'Verification failed'
+                                });
+                            } catch (e) { console.error('[PostHog] Event error:', e); }
                             return;
                         }
+                        try {
+                            const posthog = (await import('@/lib/posthog')).default;
+                            posthog.capture('payment_completed', {
+                                plan_name: plan,
+                                coupon_code: couponResult?.code
+                            });
+                        } catch (e) { console.error('[PostHog] Event error:', e); }
                         router.push('/dashboard?payment=success');
                     } catch {
                         setError('Payment verification failed. Please contact support.');

@@ -172,13 +172,14 @@ Example: {"score": 7, "feedback": "Good explanation but could be more specific",
         }
 
         if (action === 'update') {
-            const { id, answers, scores, finalScore } = data;
+            const { id, answers, scores, finalScore, detailedScores } = data;
 
             const updateData: Record<string, unknown> = {
                 answers,
                 scores
             };
             if (finalScore !== undefined) updateData.final_score = finalScore;
+            if (detailedScores !== undefined) updateData.detailed_scores = detailedScores;
 
             const { error: updateError } = await admin
                 .from('mock_interviews')
@@ -188,6 +189,48 @@ Example: {"score": 7, "feedback": "Good explanation but could be more specific",
 
             if (updateError) throw updateError;
             return NextResponse.json({ success: true });
+        }
+
+        if (action === 'generate-final-report') {
+            const { questions, answers, scores } = data;
+
+            const prompt = `Analyze this interview transcript and individual scores to provide a final Interview Intelligence Scorecard.
+            
+            Questions: ${JSON.stringify(questions)}
+            Answers: ${JSON.stringify(answers)}
+            Individual Feedback: ${JSON.stringify(scores)}
+            
+            Evaluate the user across these 4 categories (0-10 scale):
+            1. Technical Knowledge (accuracy and depth)
+            2. Communication (clarity and flow)
+            3. Problem Solving (approach and logic)
+            4. Confidence (tone and delivery)
+            
+            Also calculate "Overall Readiness" (0-100 percentage).
+            
+            Return ONLY a JSON object:
+            {
+              "technical": number,
+              "communication": number,
+              "problem_solving": number,
+              "confidence": number,
+              "overall_readiness": number,
+              "readiness_comparison_percentile": number (generate a realistic random percentile between 40-95 based on performance),
+              "improvement_suggestions": ["string"]
+            }`;
+
+            const response = await generateAIResponse(prompt, 'openai/gpt-4o-mini');
+            const cleanText = stripMarkdown(response.text);
+            let report;
+
+            try {
+                report = JSON.parse(cleanText);
+            } catch (e) {
+                console.error('Failed to parse final report:', e, cleanText);
+                return NextResponse.json({ error: 'AI returned an invalid report format' }, { status: 500 });
+            }
+
+            return NextResponse.json({ success: true, report });
         }
 
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });

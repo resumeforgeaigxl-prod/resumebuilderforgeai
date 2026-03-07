@@ -77,12 +77,12 @@ export default async function LocaleLayout({
         const supabase = await createClient();
         const { data } = await supabase
             .from("users")
-            .select("id, email, full_name, preferred_language")
+            .select("id, email, full_name, preferred_language, plan_type")
             .eq("id", session.userId)
             .single();
 
         if (data) {
-            user = { id: data.id, email: data.email, name: data.full_name as string };
+            user = { id: data.id, email: data.email, name: data.full_name as string, plan_type: data.plan_type };
         }
     }
 

@@ -121,6 +121,20 @@ function MockInterviewContent() {
     setError('');
 
     try {
+      // PostHog Tracking
+      try {
+        const posthog = (await import('@/lib/posthog')).default;
+        posthog.capture('mock_test_started', {
+          user_id: user.id,
+          job_role: setup.role,
+          experience_level: setup.experienceLevel,
+          interview_type: setup.interviewType,
+          interview_mode: setup.interviewMode
+        });
+      } catch (e) {
+        console.error('[PostHog] Event error:', e);
+      }
+
       const genRes = await fetch('/api/mock-interview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -213,6 +227,20 @@ function MockInterviewContent() {
       if (isComplete) {
         const totalScore = newEvaluations.reduce((sum: number, e: QuestionEvaluation) => sum + e.score, 0);
         finalScore = (totalScore / newEvaluations.length) * 10;
+
+        // PostHog Tracking
+        try {
+          const posthog = (await import('@/lib/posthog')).default;
+          posthog.capture('mock_test_completed', {
+            user_id: user?.id,
+            interview_id: session.id,
+            final_score: finalScore,
+            job_role: setup.role,
+            interview_mode: setup.interviewMode
+          });
+        } catch (e) {
+          console.error('[PostHog] Event error:', e);
+        }
       }
 
       await fetch('/api/mock-interview', {

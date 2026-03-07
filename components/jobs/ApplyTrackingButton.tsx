@@ -15,6 +15,7 @@ export default function ApplyTrackingButton({ job }: ApplyButtonProps) {
     const handleApply = async () => {
         window.open(job.apply_url || '#', '_blank');
         try {
+            // Internal tracking
             await fetch('/api/jobs/track-apply', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -24,6 +25,14 @@ export default function ApplyTrackingButton({ job }: ApplyButtonProps) {
                     company: job.company,
                     apply_url: job.apply_url
                 })
+            });
+
+            // PostHog Tracking
+            const posthog = (await import('@/lib/posthog')).default;
+            posthog.capture('job_apply_button_clicked', {
+                job_id: job.id,
+                job_role: job.title,
+                company_name: job.company
             });
         } catch (e) {
             console.error('Failed to track application:', e);

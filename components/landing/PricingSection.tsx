@@ -56,7 +56,18 @@ export default function PricingSection() {
                         <li className="flex items-center gap-3"><CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" /> Full job access</li>
                         <li className="flex items-center gap-3"><CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" /> Watermark-free PDF</li>
                     </ul>
-                    <Link href={`/${region}/${locale}/billing?plan=PRO`} className="block w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white text-center rounded-xl font-bold transition-colors shadow-lg shadow-blue-500/25">Unlock 24h Access</Link>
+                    <Link
+                        href={`/${region}/${locale}/billing?plan=PRO`}
+                        onClick={async () => {
+                            try {
+                                const posthog = (await import('@/lib/posthog')).default;
+                                posthog.capture('plan_selected', { plan_type: 'PRO' });
+                            } catch (e) { console.error('[PostHog] Event error:', e); }
+                        }}
+                        className="block w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white text-center rounded-xl font-bold transition-colors shadow-lg shadow-blue-500/25"
+                    >
+                        Unlock 24h Access
+                    </Link>
                 </div>
 
                 {/* PREMIUM */}
@@ -76,7 +87,18 @@ export default function PricingSection() {
                             <span>Job recommendations <span className="inline-flex items-center gap-1 ml-1 text-xs font-bold text-amber-400 bg-amber-400/10 border border-amber-400/20 px-1.5 py-0.5 rounded-full"><Briefcase className="w-3 h-3" /> JobForgeAI</span></span>
                         </li>
                     </ul>
-                    <Link href={`/${region}/${locale}/billing?plan=PREMIUM`} className="block w-full py-3 px-4 bg-purple-600 hover:bg-purple-500 text-white text-center rounded-xl font-bold transition-colors shadow-lg shadow-purple-500/25">Upgrade Monthly</Link>
+                    <Link
+                        href={`/${region}/${locale}/billing?plan=PREMIUM`}
+                        onClick={async () => {
+                            try {
+                                const posthog = (await import('@/lib/posthog')).default;
+                                posthog.capture('plan_selected', { plan_type: 'PREMIUM' });
+                            } catch (e) { console.error('[PostHog] Event error:', e); }
+                        }}
+                        className="block w-full py-3 px-4 bg-purple-600 hover:bg-purple-500 text-white text-center rounded-xl font-bold transition-colors shadow-lg shadow-purple-500/25"
+                    >
+                        Upgrade Monthly
+                    </Link>
                 </div>
 
                 {/* CAREER */}
@@ -97,7 +119,18 @@ export default function PricingSection() {
                         </li>
                         <li className="flex items-center gap-3"><CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" /> MNC &amp; fresher job alerts</li>
                     </ul>
-                    <Link href={`/${region}/${locale}/billing?plan=CAREER`} className="block w-full py-3 px-4 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-center rounded-xl font-bold transition-colors shadow-lg shadow-amber-500/25">Unlock Unlimited</Link>
+                    <Link
+                        href={`/${region}/${locale}/billing?plan=CAREER`}
+                        onClick={async () => {
+                            try {
+                                const posthog = (await import('@/lib/posthog')).default;
+                                posthog.capture('plan_selected', { plan_type: 'CAREER' });
+                            } catch (e) { console.error('[PostHog] Event error:', e); }
+                        }}
+                        className="block w-full py-3 px-4 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-center rounded-xl font-bold transition-colors shadow-lg shadow-amber-500/25"
+                    >
+                        Unlock Unlimited
+                    </Link>
                 </div>
             </div>
 

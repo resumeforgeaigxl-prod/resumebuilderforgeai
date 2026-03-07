@@ -5,14 +5,27 @@ import { getSession } from '@/lib/auth/jwt';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
+        const { searchParams } = new URL(request.url);
+        const company = searchParams.get('company');
+        const role = searchParams.get('role');
+        const location = searchParams.get('location');
+
         const session = await getSession();
         if (!session || session.role !== 'admin') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const admin = createAdminClient();
+
+        // Base jobs query for recent list
+        let jobsQuery = admin.from('jobs').select('id, title, company, created_at, source, location');
+
+        if (company) jobsQuery = jobsQuery.ilike('company', `%${company}%`);
+        if (role) jobsQuery = jobsQuery.ilike('title', `%${role}%`);
+        if (location) jobsQuery = jobsQuery.ilike('location', `%${location}%`);
+
         const [totalRes, mncRes, appsRes, viewsRes, recentAppsRes, recentJobsRes] = await Promise.all([
             admin.from('jobs').select('id', { count: 'exact', head: true }),
             admin.from('jobs').select('id', { count: 'exact', head: true }).eq('is_mnc', true),
@@ -32,8 +45,8 @@ export async function GET() {
                 `)
                 .order('applied_at', { ascending: false })
                 .limit(30),
-            // Fetch recent jobs themselves to show ingestion status
-            admin.from('jobs').select('id, title, company, created_at, source').order('created_at', { ascending: false }).limit(15)
+            // Fetch filtered recent jobs
+            jobsQuery.order('created_at', { ascending: false }).limit(50)
         ]);
 
         const recentJobs = recentJobsRes.data || [];

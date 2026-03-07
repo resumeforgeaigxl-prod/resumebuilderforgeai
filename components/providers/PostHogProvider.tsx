@@ -4,7 +4,7 @@ import posthog from '@/lib/posthog';
 import { useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
-export function PostHogInit({ user }: { user: { id: string; email?: string; name?: string } | null }) {
+export function PostHogInit({ user }: { user: { id: string; email?: string; name?: string; plan_type?: string } | null }) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
@@ -15,6 +15,7 @@ export function PostHogInit({ user }: { user: { id: string; email?: string; name
                 posthog.identify(user.id, {
                     email: user.email,
                     name: user.name,
+                    plan_type: user.plan_type || 'free',
                 });
             } else if (!user && posthog) {
                 posthog.reset();
@@ -26,11 +27,16 @@ export function PostHogInit({ user }: { user: { id: string; email?: string; name
 
     useEffect(() => {
         try {
-            if (searchParams?.get('message')?.includes('Account created') && posthog) {
-                posthog.capture('user_signed_up');
+            if (posthog) {
+                if (searchParams?.get('message')?.includes('Account created')) {
+                    posthog.capture('user_signed_up');
+                }
+                if (searchParams?.get('message')?.includes('Logged in successfully')) {
+                    posthog.capture('user_logged_in');
+                }
             }
         } catch (err) {
-            console.error('[PostHog] Signup track error:', err);
+            console.error('[PostHog] Auth track error:', err);
         }
     }, [searchParams]);
 

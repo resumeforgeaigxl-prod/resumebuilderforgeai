@@ -171,7 +171,19 @@ function JobCard({ job, region, lang }: { job: Job, region: string, lang: string
                     <span className="text-xl font-black text-indigo-400 uppercase">{job.company?.charAt(0)}</span>
                 </div>
                 <div className="min-w-0 flex-1">
-                    <Link href={`/${region}/${lang}/job/${slug}`}>
+                    <Link
+                        href={`/${region}/${lang}/job/${slug}`}
+                        onClick={async () => {
+                            try {
+                                const posthog = (await import('@/lib/posthog')).default;
+                                posthog.capture('job_card_clicked', {
+                                    job_id: job.id,
+                                    job_role: job.title,
+                                    company_name: job.company
+                                });
+                            } catch (e) { console.error('[PostHog] Event error:', e); }
+                        }}
+                    >
                         <h3 className="text-lg font-bold text-white group-hover:text-indigo-400 transition-colors truncate tracking-tight">{job.title}</h3>
                     </Link>
                     <p className="text-sm text-slate-400 font-medium flex items-center gap-2 mt-1">
@@ -189,6 +201,16 @@ function JobCard({ job, region, lang }: { job: Job, region: string, lang: string
 
             <Link
                 href={`/${region}/${lang}/job/${slug}`}
+                onClick={async () => {
+                    try {
+                        const posthog = (await import('@/lib/posthog')).default;
+                        posthog.capture('job_card_clicked', {
+                            job_id: job.id,
+                            job_role: job.title,
+                            company_name: job.company
+                        });
+                    } catch (e) { console.error('[PostHog] Event error:', e); }
+                }}
                 className="w-full py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-black uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-95"
             >
                 View Details <ArrowRight className="w-4 h-4" />

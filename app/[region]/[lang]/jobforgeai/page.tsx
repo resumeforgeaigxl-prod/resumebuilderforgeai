@@ -128,7 +128,15 @@ export default function JobForgeAIPage() {
 
         try {
             const posthog = (await import('@/lib/posthog')).default;
-            posthog.capture('jobforgeai_used');
+            if (messages.length === 1) { // Only first message from user
+                posthog.capture('jobforgeai_chat_started', {
+                    conversation_id: conversationId,
+                    initial_query: userMsg
+                });
+            }
+            posthog.capture('jobforgeai_message_sent', {
+                conversation_id: conversationId
+            });
         } catch (err) { console.error('[PostHog] Event error:', err); }
 
         try {

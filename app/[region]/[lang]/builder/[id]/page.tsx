@@ -179,7 +179,7 @@ export default function BuilderPage() {
         if (!resumeData || !jobDescription) return;
         setOptimizing(true);
         try {
-            posthog.capture('ai_optimize_clicked', { resume_id: id });
+            posthog.capture('resume_optimized_with_ai', { resume_id: id });
         } catch (e) { console.error('[PostHog] Event error:', e); }
 
         try {
@@ -252,7 +252,7 @@ export default function BuilderPage() {
         if (!resumeData) return;
         setDownloading(true);
         try {
-            posthog.capture('pdf_downloaded', { resume_id: id, template: selectedTemplate });
+            posthog.capture('resume_downloaded', { resume_id: id, template: selectedTemplate });
         } catch (e) { console.error('[PostHog] Event error:', e); }
 
         try {

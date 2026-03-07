@@ -8,13 +8,33 @@ export const maxDuration = 60; // Set higher timeout limit for Vercel
 export const dynamic = 'force-dynamic';
 
 type GeneratedPrep = {
-    company?: string;
-    role?: string;
-    rounds?: Array<{
-        round?: string;
-        questions?: Array<{
-            question?: string;
-        }>;
+    company: string;
+    role: string;
+    difficulty_level: 'Entry' | 'Intermediate' | 'Advanced';
+    hiring_process: Array<{
+        round_name: string;
+        details: string;
+        expected_difficulty: string;
+    }>;
+    top_questions: Array<{
+        question: string;
+        topic: string;
+        difficulty: 'Easy' | 'Medium' | 'Hard';
+        frequency: 'High' | 'Medium' | 'Low';
+        answer_coach: {
+            ideal_structure: string[];
+            example_answer: string;
+            common_mistakes: string[];
+        }
+    }>;
+    topic_heatmap: Array<{
+        topic: string;
+        percentage: number;
+    }>;
+    prep_roadmap: Array<{
+        day: number;
+        topics: string[];
+        tasks: string[];
     }>;
 };
 
@@ -28,116 +48,126 @@ export async function POST(req: NextRequest) {
 
         // 1. Perform web search queries
         const queries = [
-            `${company} ${role} interview questions`,
-            `${company} ${role} interview experience`,
-            `${company} ${role} coding interview problems`
+            `${company} ${role} interview process hiring rounds`,
+            `${company} ${role} interview questions glassdoor geeksforgeeks`,
+            `${company} ${role} interview difficulty and frequency`,
+            `${company} ${role} interview preparation guide reddit`
         ];
 
         let webContext = '';
         const options = {
             page: 0,
-            safe: false, // Safe Search
-            parse_ads: false, // If set to true sponsored results will be parsed
-            additional_params: {
-                hl: 'en'
-            }
+            safe: false,
+            parse_ads: false,
+            additional_params: { hl: 'en' }
         };
 
-        // Execute searches in parallel
+        // Parallel searches
         await Promise.all(queries.map(async (query) => {
             try {
                 const response = await google.search(query, options);
                 if (response.results && response.results.length > 0) {
                     const descriptions = response.results.map(r => r.description).join(' ');
-                    webContext += `\nSearch Query: ${query}\nResults: ${descriptions}\n`;
+                    webContext += `\n[SEARCH: ${query}]\nResults: ${descriptions}\n`;
                 }
             } catch (err) {
-                console.error(`Search failed for query: ${query}`, err);
+                console.error(`Search failed: ${query}`, err);
             }
         }));
 
-        if (!webContext.trim()) {
-            webContext = "No specific online context found. Rely on general industry knowledge.";
-        }
-
         // 2. Prepare AI Prompt
-        const systemPrompt = `You are an expert technical recruiter and interview prep AI. 
-Generate realistic interview preparation for specific companies and roles using the provided web search context.
+        const systemPrompt = `You are an expert AI Interview Intelligence Coach. 
+Generate a comprehensive, data-driven "Interview Intelligence Report" for specific companies and roles.
 
 RULES:
-- Extract commonly reported interview questions from the web context provided.
-- Do NOT invent unrealistic or overly generic questions if specific ones are mentioned.
-- Prefer frequently mentioned interview questions and topics.
-- Structure the questions accurately by interview rounds (e.g., Online Assessment, Technical Interview, HR Interview).
-- Each question must include: question text, difficulty (Easy, Medium, or Hard), topic, and interview round.
+- Use the web context to find ACTUAL hiring rounds and questions if possible.
+- If specific data is missing, use patterns from similar Tier-1 or Mid-size companies.
+- HIRING PROCESS: Provide 3-5 rounds with detailed context.
+- TOP QUESTIONS: Aggregate 15-20 most asked questions. For each, provide an "Answer Coach".
+- HEATMAP: Breakdown topics (e.g., DSA, System Design, Behavioral) as percentages.
+- ROADMAP: A 4-day intensive study plan.
+- DIFFICULTY: Estimate overall difficulty (Entry, Intermediate, Advanced).
 
 OUTPUT FORMAT:
-Return ONLY a valid JSON object matching this structure EXACTLY. No markdown, no extra text.
+Return ONLY a valid JSON object matching the structured schema.
+
+SCHEMA:
 {
   "company": "string",
   "role": "string",
-  "rounds": [
+  "difficulty_level": "Entry" | "Intermediate" | "Advanced",
+  "hiring_process": [
+    { "round_name": "string", "details": "string", "expected_difficulty": "string" }
+  ],
+  "top_questions": [
     {
-      "round": "string (e.g. Round 1 - Online Assessment)",
-      "questions": [
-        {
-          "question": "string",
-          "difficulty": "Easy" | "Medium" | "Hard",
-          "topic": "string",
-          "interview_round": "string"
-        }
-      ]
+      "question": "string",
+      "topic": "string",
+      "difficulty": "Easy" | "Medium" | "Hard",
+      "frequency": "High" | "Medium" | "Low",
+      "answer_coach": {
+         "ideal_structure": ["point 1", "point 2"],
+         "example_answer": "string",
+         "common_mistakes": ["mistake 1", "mistake 2"]
+      }
     }
+  ],
+  "topic_heatmap": [
+    { "topic": "string", "percentage": number }
+  ],
+  "prep_roadmap": [
+    { "day": number, "topics": ["string"], "tasks": ["string"] }
   ]
 }`;
 
-        const userPrompt = `Company: ${company}
-Role: ${role}
+        const userPrompt = `Target: ${company} - ${role}
 
---- WEB SEARCH CONTEXT ---
+--- WEB INTELLIGENCE ---
 ${webContext}
---------------------------
+-----------------------
 
-Extract and generate the structured interview preparation for this company and role based primarily on the context above.`;
+Generate the full Interview Intelligence Report. Be specific about ${company}'s culture and technical bar.`;
 
         // 3. Call AI
-        const aiResponseMeta = await generateAIResponse(userPrompt, 'openai/gpt-4o-mini', systemPrompt, 0.7);
+        const aiResponseMeta = await generateAIResponse(userPrompt, 'openai/gpt-4o', systemPrompt, 0.4);
         const rawAiResponse = aiResponseMeta.text;
 
         let parsedData: GeneratedPrep;
         try {
-            parsedData = JSON.parse(rawAiResponse);
+            // Cleanup in case of markdown
+            const cleanJson = rawAiResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+            parsedData = JSON.parse(cleanJson);
         } catch {
-            console.error("Failed to parse AI response JSON:", rawAiResponse);
-            // Fallback cleanup
             const jsonMatch = rawAiResponse.match(/\{[\s\S]*\}/);
             if (jsonMatch) parsedData = JSON.parse(jsonMatch[0]);
             else throw new Error("Invalid AI JSON response format.");
         }
 
-        // 4. Log the generation (Company Prep)
+        // 4. Save to Intelligence Cache
+        const admin = createAdminClient();
+        await admin.from('interview_intelligence_reports').upsert({
+            company: company,
+            role: role,
+            hiring_process: parsedData.hiring_process,
+            top_questions: parsedData.top_questions,
+            topic_heatmap: parsedData.topic_heatmap,
+            prep_roadmap: parsedData.prep_roadmap
+        }, { onConflict: 'company,role' });
+
+        // 5. Log the generation (Company Prep)
         const session = await getSession();
         if (session && session.userId) {
-            const admin = createAdminClient();
-
             // Extract some sample generated questions for logging
             let sampleQuestions: string[] = [];
-            if (parsedData.rounds && Array.isArray(parsedData.rounds)) {
-                for (const r of parsedData.rounds) {
-                    if (r.questions && Array.isArray(r.questions)) {
-                        sampleQuestions = [
-                            ...sampleQuestions,
-                            ...r.questions.map(q => q.question).filter((q): q is string => typeof q === 'string' && q.length > 0),
-                        ];
-                    }
-                }
+            if (parsedData.top_questions && Array.isArray(parsedData.top_questions)) {
+                sampleQuestions = parsedData.top_questions.map((q: { question: string }) => q.question);
             }
 
             // We log this in mock_interviews with interview_mode = 'company_prep'
             await admin.from('mock_interviews').insert({
                 user_id: session.userId,
-                role: `${company} - ${role}`, // Storing both in role field
-                job_description: 'Generated Company Prep Interview Guide',
+                role: `${company} - ${role}`,
+                job_description: 'Generated Interview Intelligence Report',
                 experience_level: 'various',
                 interview_type: 'Company Prep',
                 num_questions: sampleQuestions.length,

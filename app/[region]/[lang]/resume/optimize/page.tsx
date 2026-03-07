@@ -60,7 +60,20 @@ export default function ResumeOptimizePage() {
                 supabase.from('resumes').select('*').order('updated_at', { ascending: false })
             ]);
 
-            if (jobRes.data) setJob(jobRes.data);
+            if (jobRes.data) {
+                setJob(jobRes.data);
+                // PostHog Tracking
+                try {
+                    const posthog = (await import('@/lib/posthog')).default;
+                    posthog.capture('job_resume_optimization_started', {
+                        job_id: jobId,
+                        job_role: jobRes.data.title,
+                        company_name: jobRes.data.company
+                    });
+                } catch (e) {
+                    console.error('[PostHog] Event error:', e);
+                }
+            }
             if (resumeRes.data) setResumes(resumeRes.data);
             setLoading(false);
         }
