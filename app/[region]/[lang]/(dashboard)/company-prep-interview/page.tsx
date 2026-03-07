@@ -176,7 +176,8 @@ function CompanyPrepInterviewContent() {
       });
 
       const genData = await genRes.json();
-      if (!genData.success) throw new Error(genData.error || 'Failed to generate intelligence report');
+      console.log('[Interview Prep] Response Data:', genData);
+      if (!genData.success || !genData.data) throw new Error(genData.error || 'Failed to generate intelligence report');
 
       setIntelligenceReport(genData.data);
     } catch (err) {

@@ -7,20 +7,29 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface PrepQuestion {
     question: string;
-    difficulty: 'Easy' | 'Medium' | 'Hard';
     topic: string;
-    interview_round: string;
+    difficulty: 'Easy' | 'Medium' | 'Hard';
+    frequency: 'High' | 'Medium' | 'Low';
+    answer_coach: {
+        ideal_structure: string[];
+        example_answer: string;
+        common_mistakes: string[];
+    };
 }
 
 interface PrepRound {
-    round: string;
-    questions: PrepQuestion[];
+    round_name: string;
+    details: string;
+    expected_difficulty: string;
 }
 
 interface PrepData {
     company: string;
     role: string;
-    rounds: PrepRound[];
+    difficulty_level: string;
+    hiring_process: PrepRound[];
+    top_questions: PrepQuestion[];
+    prep_roadmap: Array<{ day: number, topics: string[], tasks: string[] }>;
 }
 
 import { useParams } from 'next/navigation';
@@ -167,37 +176,62 @@ export default function InterviewPrepGenerator() {
                                 <p className="text-slate-400 font-medium">Here is the extracted interview process and commonly asked questions based on recent web data.</p>
                             </div>
 
-                            <div className="grid gap-12">
-                                {data.rounds.map((round, rIndex) => (
-                                    <div key={rIndex} className="bg-white/[0.02] border border-white/5 rounded-[2rem] p-8 sm:p-12 relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 p-8 opacity-20 text-[120px] font-black italic text-indigo-500 -translate-y-1/4 translate-x-1/4 select-none pointer-events-none">
-                                            {rIndex + 1}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <div className="space-y-8">
+                                    <h3 className="text-xl font-black text-indigo-400 italic flex items-center gap-2">
+                                        <Building2 className="w-5 h-5" /> Hiring Process
+                                    </h3>
+                                    {data.hiring_process?.map((round, rIndex) => (
+                                        <div key={rIndex} className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 relative group border-l-4 border-l-indigo-500">
+                                            <h4 className="text-lg font-black text-white mb-2">{round.round_name}</h4>
+                                            <p className="text-slate-400 text-sm mb-2 leading-relaxed">{round.details}</p>
+                                            <span className="text-[10px] font-black uppercase text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded italic">Difficulty: {round.expected_difficulty}</span>
                                         </div>
-                                        <h3 className="text-2xl font-black text-indigo-400 italic mb-8 relative z-10">{round.round}</h3>
-                                        <div className="space-y-4 relative z-10">
-                                            {round.questions.map((q, qIndex) => (
-                                                <div key={qIndex} className="bg-slate-900 border border-white/10 p-6 rounded-2xl flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between hover:border-indigo-500/50 transition-colors">
-                                                    <div className="flex-1">
-                                                        <h4 className="text-white font-bold text-lg mb-2">{q.question}</h4>
-                                                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500">
-                                                            <span className="bg-white/5 px-2 py-1 rounded-md">{q.topic}</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className={`px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest shrink-0 ${q.difficulty === 'Easy' ? 'bg-emerald-500/10 text-emerald-400' :
-                                                        q.difficulty === 'Medium' ? 'bg-amber-500/10 text-amber-400' :
-                                                            'bg-rose-500/10 text-rose-400'
+                                    ))}
+                                </div>
+
+                                <div className="space-y-8">
+                                    <h3 className="text-xl font-black text-purple-400 italic flex items-center gap-2">
+                                        <Zap className="w-5 h-5" /> Top Questions
+                                    </h3>
+                                    <div className="grid gap-4">
+                                        {data.top_questions?.map((q, qIndex) => (
+                                            <div key={qIndex} className="bg-slate-900 border border-white/10 p-6 rounded-2xl hover:border-indigo-500/50 transition-colors">
+                                                <div className="flex justify-between items-start gap-4 mb-3">
+                                                    <h4 className="text-white font-bold text-sm italic pr-8">&quot;{q.question}&quot;</h4>
+                                                    <div className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest shrink-0 ${q.difficulty === 'Easy' ? 'bg-emerald-500/10 text-emerald-400' :
+                                                        q.difficulty === 'Medium' ? 'bg-amber-500/10 text-amber-400' : 'bg-rose-500/10 text-rose-400'
                                                         }`}>
                                                         {q.difficulty}
                                                     </div>
                                                 </div>
-                                            ))}
-                                            {round.questions.length === 0 && (
-                                                <p className="text-slate-500 italic">No specific questions found for this round.</p>
-                                            )}
-                                        </div>
+                                                <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-slate-500">
+                                                    <span className="bg-white/5 px-2 py-0.5 rounded">{q.topic}</span>
+                                                    <span className="bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded">{q.frequency} Frequency</span>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
+                                </div>
                             </div>
+
+                            {/* Roadmap Preview */}
+                            {data.prep_roadmap && (
+                                <div className="bg-white/[0.02] border border-white/5 rounded-[2rem] p-10 mt-12">
+                                    <h3 className="text-xl font-black text-emerald-400 italic mb-8 flex items-center gap-2">
+                                        <ShieldCheck className="w-5 h-5" /> 4-Day Intensity Plan
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                        {data.prep_roadmap.map((day, i) => (
+                                            <div key={i} className="bg-black/20 p-5 rounded-2xl border border-white/5">
+                                                <div className="text-emerald-500 text-[10px] font-black uppercase mb-3">Day {day.day}</div>
+                                                <p className="text-white text-xs font-bold mb-2">{day.topics[0]}</p>
+                                                <p className="text-[10px] text-slate-500 leading-relaxed italic">{day.tasks[0]}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="mt-20 p-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2.5rem]">
                                 <div className="bg-slate-900 rounded-[2.4rem] p-10 sm:p-14 flex flex-col items-center text-center gap-6">
