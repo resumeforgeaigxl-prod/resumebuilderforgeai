@@ -93,27 +93,37 @@ export default function JobForgeAIPage() {
 
     const handleAcceptTerms = async () => {
         setLoading(true);
-        await fetch('/api/ai/settings', {
+        const res = await fetch('/api/ai/settings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'accept_terms' })
         });
-        setShowTerms(false);
-        setShowNameCapture(true);
+        const data = await res.json();
+        if (data.success) {
+            setShowTerms(false);
+            setShowNameCapture(true);
+        } else {
+            alert('Failed to authorize protocol. Please try again.');
+        }
         setLoading(false);
     };
 
     const handleSaveName = async () => {
         if (!tempName.trim()) return;
         setLoading(true);
-        await fetch('/api/ai/settings', {
+        const res = await fetch('/api/ai/settings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'set_name', name: tempName.trim() })
         });
-        setUserName(tempName.trim());
-        setShowNameCapture(false);
-        loadConversation();
+        const data = await res.json();
+        if (data.success) {
+            setUserName(tempName.trim());
+            setShowNameCapture(false);
+            loadConversation();
+        } else {
+            alert('Failed to sync identity. Please try again.');
+        }
         setLoading(false);
     };
 
