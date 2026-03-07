@@ -5,6 +5,8 @@ import { activateUserPlan } from '@/lib/plan-activation';
 import { createInvoice } from '@/lib/invoice';
 import { sendPaymentSuccessEmail } from '@/lib/brevo';
 import { format } from 'date-fns';
+import { generateInvoiceHtml } from '@/lib/invoice-template';
+import { generatePdfFromHtml } from '@/lib/pdf-generator';
 
 export const runtime = 'nodejs';
 
@@ -145,6 +147,21 @@ export async function POST(request: Request) {
             } : null,
         });
 
+        // Generate PDF for email attachment
+        let invoicePdfBase64: string | undefined;
+        if (invoice) {
+            try {
+                // For coupons, originalPrice is typically the standard price, discount is 100%
+                const PRICE_MAP: Record<string, number> = { 'PRO': 2900, 'PREMIUM': 19900, 'CAREER': 49900 };
+                const originalPrice = PRICE_MAP['PRO'];
+                const html = await generateInvoiceHtml(invoice, originalPrice, originalPrice); // 100% discount
+                const pdfBuffer = await generatePdfFromHtml(html);
+                invoicePdfBase64 = pdfBuffer.toString('base64');
+            } catch (pdfErr) {
+                console.error('[redeem LAUNCH100] PDF Generation failed:', pdfErr);
+            }
+        }
+
         // Send activation email
         const userEmail = billing?.email ?? userData?.email ?? null;
         if (userEmail && invoice) {
@@ -158,6 +175,7 @@ export async function POST(request: Request) {
                 invoiceNumber: invoice.invoice_number,
                 invoiceId: invoice.id,
                 date: format(new Date(), 'dd MMM yyyy'),
+                attachmentBase64: invoicePdfBase64,
             }).catch(e => console.error('[redeem LAUNCH100] Email error:', e));
         }
 
@@ -219,6 +237,20 @@ export async function POST(request: Request) {
             } : null,
         });
 
+        // Generate PDF for email attachment
+        let invoicePdfBase64: string | undefined;
+        if (invoice) {
+            try {
+                const PRICE_MAP: Record<string, number> = { 'PRO': 2900, 'PREMIUM': 19900, 'CAREER': 49900 };
+                const originalPrice = PRICE_MAP['PRO'];
+                const html = await generateInvoiceHtml(invoice, originalPrice, originalPrice);
+                const pdfBuffer = await generatePdfFromHtml(html);
+                invoicePdfBase64 = pdfBuffer.toString('base64');
+            } catch (pdfErr) {
+                console.error('[redeem FullAccess] PDF Generation failed:', pdfErr);
+            }
+        }
+
         // Send activation email
         const userEmail = billing?.email ?? userData?.email ?? null;
         if (userEmail && invoice) {
@@ -232,6 +264,7 @@ export async function POST(request: Request) {
                 invoiceNumber: invoice.invoice_number,
                 invoiceId: invoice.id,
                 date: format(new Date(), 'dd MMM yyyy'),
+                attachmentBase64: invoicePdfBase64,
             }).catch(e => console.error('[redeem FullAccess] Email error:', e));
         }
 

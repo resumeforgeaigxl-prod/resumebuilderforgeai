@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createHmac } from 'crypto';
 import { createClient } from '@/lib/supabase/server';
 import { activateUserPlan, PlanName } from '@/lib/plan-activation';
+import { createInvoice } from '@/lib/invoice';
+import { sendPaymentSuccessEmail } from '@/lib/brevo';
+import { format } from 'date-fns';
+import { generateInvoiceHtml } from '@/lib/invoice-template';
+import { generatePdfFromHtml } from '@/lib/pdf-generator';
 
 export async function POST(req: NextRequest) {
     try {
@@ -50,10 +55,19 @@ export async function POST(req: NextRequest) {
                 .update({ status: 'success' })
                 .eq('id', order.id);
 
-            // Upsert payment record
+            // Check if payment already recorded
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await (supabase as any).from('payments').upsert(
-                {
+            const { data: existingPay } = await (supabase as any)
+                .from('payments')
+                .select('id')
+                .eq('razorpay_order_id', razorpayOrderId)
+                .limit(1)
+                .single();
+
+            if (!existingPay) {
+                // Insert payment record
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                await (supabase as any).from('payments').insert({
                     user_id: order.user_id,
                     plan_name: order.plan_name,
                     amount: order.amount,
@@ -63,12 +77,75 @@ export async function POST(req: NextRequest) {
                     razorpay_payment_id: razorpayPaymentId,
                     razorpay_order_id: razorpayOrderId,
                     status: 'success',
-                },
-                { onConflict: 'razorpay_order_id' }
-            );
+                });
+            }
 
             // Activate plan
             await activateUserPlan(order.user_id, order.plan_name as PlanName);
+
+            // ── GENERATE INVOICE & SEND EMAIL (Fallback for missing verify flow) ──
+            try {
+                // Fetch billing details
+                const { data: billing } = await supabase
+                    .from('billing_details')
+                    .select('full_name, email, phone, address, city, state, country, zip_code')
+                    .eq('user_id', order.user_id)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+
+                // Create invoice record
+                const invoice = await createInvoice({
+                    userId: order.user_id,
+                    plan: order.plan_name.toUpperCase(),
+                    amount: order.amount,
+                    currency,
+                    paymentMethod: 'razorpay',
+                    razorpayOrderId: razorpayOrderId,
+                    razorpayPaymentId: razorpayPaymentId,
+                    billing: billing ? {
+                        name: billing.full_name,
+                        email: billing.email,
+                        phone: billing.phone,
+                        address: billing.address,
+                        city: billing.city,
+                        state: billing.state,
+                        country: billing.country,
+                        zip: billing.zip_code,
+                    } : null,
+                });
+
+                if (invoice) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const { data: user } = await (supabase as any).from('users').select('email, full_name').eq('id', order.user_id).single();
+                    const userEmail = billing?.email ?? user?.email;
+
+                    if (userEmail) {
+                        const currencySymbol = currency === 'INR' ? '₹' : '$';
+                        const formattedAmount = `${currencySymbol}${(order.amount / 100).toFixed(currency === 'INR' ? 0 : 2)}`;
+
+                        // Generate PDF
+                        const originalPrice = order.amount; // fallback if orderRow not fully loaded
+                        const html = await generateInvoiceHtml(invoice, originalPrice, 0);
+                        const pdfBuffer = await generatePdfFromHtml(html);
+                        const invoicePdfBase64 = pdfBuffer.toString('base64');
+
+                        await sendPaymentSuccessEmail({
+                            userEmail,
+                            userName: billing?.full_name ?? user?.full_name,
+                            plan: order.plan_name.toUpperCase(),
+                            amountINR: formattedAmount,
+                            paymentMethod: 'Razorpay (Webhook)',
+                            invoiceNumber: invoice.invoice_number,
+                            invoiceId: invoice.id,
+                            date: format(new Date(), 'dd MMM yyyy'),
+                            attachmentBase64: invoicePdfBase64,
+                        });
+                    }
+                }
+            } catch (emailErr) {
+                console.error('[webhook] Invoice/Email fallback error:', emailErr);
+            }
         }
 
         if (event.event === 'payment.failed') {

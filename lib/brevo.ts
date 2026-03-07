@@ -35,7 +35,8 @@ export async function sendEmail(opts: SendEmailOptions): Promise<boolean> {
   }
 
   // NOTE: We have removed the NODE_ENV check to allow emails in all environments.
-  console.log(`[Brevo] Attempting to send email: "${opts.subject}" to ${opts.to.map(r => r.email).join(', ')}`);
+  const recipientDomains = opts.to.map(r => r.email.split('@')[1]).join(', ');
+  console.log(`[Brevo] Sending "${opts.subject}" to domains: [${recipientDomains}]`);
 
   try {
     const res = await fetch(BREVO_API_URL, {

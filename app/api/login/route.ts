@@ -56,8 +56,8 @@ export async function POST(request: Request) {
             provider: 'credentials'
         });
 
-        // 5. Send login notification email (non-blocking)
-        sendLoginEmail(user.email, user.full_name || undefined)
+        // 5. Send login notification email (Awaited to ensure it doesn't get cut off)
+        await sendLoginEmail(user.email, user.full_name || undefined)
             .catch(e => console.error('[Login] Email error:', e));
 
         // 6. Return JSON success

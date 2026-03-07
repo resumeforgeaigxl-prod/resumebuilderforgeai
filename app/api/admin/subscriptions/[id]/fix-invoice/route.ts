@@ -4,6 +4,8 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 import { createInvoice } from '@/lib/invoice';
 import { sendPaymentSuccessEmail } from '@/lib/brevo';
+import { generateInvoiceHtml } from '@/lib/invoice-template';
+import { generatePdfFromHtml } from '@/lib/pdf-generator';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,7 +58,7 @@ export async function POST(
         // 3. Check if payment record exists
         const { data: existingPayment } = await admin
             .from('payments')
-            .select('id')
+            .select('*')
             .eq('user_id', sub.user_id)
             .eq('plan_name', sub.plan)
             .eq('status', 'success')
@@ -105,7 +107,7 @@ export async function POST(
         // 5. Check if invoice exists
         const { data: existingInvoice } = await admin
             .from('invoices')
-            .select('id, invoice_number')
+            .select('*')
             .eq('user_id', sub.user_id)
             .eq('plan', sub.plan)
             .order('created_at', { ascending: false })
@@ -115,13 +117,18 @@ export async function POST(
         let invoice = existingInvoice;
 
         if (!existingInvoice) {
+            const amount = existingPayment?.amount ?? 0;
+            const method = existingPayment?.razorpay_payment_id ? 'razorpay' : 'coupon';
+
             // Create missing invoice
             invoice = await createInvoice({
                 userId: sub.user_id,
                 plan: sub.plan,
-                amount: 0,
-                paymentMethod: 'coupon',
+                amount: amount,
+                paymentMethod: method as 'razorpay' | 'coupon',
                 couponCode: sub.coupon_code,
+                razorpayPaymentId: existingPayment?.razorpay_payment_id,
+                razorpayOrderId: existingPayment?.razorpay_order_id,
                 billing: billing ? {
                     name: billing.full_name,
                     email: user.email,
@@ -140,17 +147,30 @@ export async function POST(
 
         if (!invoice) throw new Error('Failed to ensure invoice exists');
 
-        // 5. Resend the "Payment Success" email which includes the invoice information
+        // 6. Generate PDF for email attachment
+        let invoicePdfBase64: string | undefined;
+        if (invoice) {
+            try {
+                const html = await generateInvoiceHtml(invoice, originalPrice, originalPrice);
+                const pdfBuffer = await generatePdfFromHtml(html);
+                invoicePdfBase64 = pdfBuffer.toString('base64');
+            } catch (pdfErr) {
+                console.error('[fix-invoice] PDF Generation failed:', pdfErr);
+            }
+        }
+
+        // 7. Resend the "Payment Success" email which includes the invoice information
         await sendPaymentSuccessEmail({
             userEmail: user.email,
             userName: user.full_name || 'User',
             plan: sub.plan,
-            amountINR: "0", // amount
+            amountINR: "₹0", // amount
             paymentMethod: "Coupon (Free)",
             invoiceNumber: invoice.invoice_number,
             invoiceId: invoice.id,
             couponCode: sub.coupon_code,
-            date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+            date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
+            attachmentBase64: invoicePdfBase64
         });
 
         return NextResponse.json({

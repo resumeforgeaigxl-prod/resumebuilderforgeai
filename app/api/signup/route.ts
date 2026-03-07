@@ -50,8 +50,8 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: false, message: 'Signup failed' }, { status: 500 });
         }
 
-        // Send welcome email (non-blocking)
-        sendWelcomeEmail(email).catch(e => console.error('[Signup] Welcome email error:', e));
+        // Send welcome email (Awaited for reliability)
+        await sendWelcomeEmail(email).catch(e => console.error('[Signup] Welcome email error:', e));
 
         return NextResponse.json({ success: true, message: 'Account created! Please log in.' });
     } catch (err: unknown) {

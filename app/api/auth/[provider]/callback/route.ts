@@ -171,8 +171,8 @@ export async function GET(request: Request, { params }: { params: { provider: st
                 userRecord = newUser;
             }
 
-            // --- PROACTIVE FIX: Send Welcome Email for new OAuth users ---
-            sendWelcomeEmail(email, name).catch(e => console.error('[OAuth] Welcome email error:', e));
+            // Send welcome email (Awaited for reliability)
+            await sendWelcomeEmail(email, name).catch(e => console.error('[OAuth] Welcome email error:', e));
         } else {
             // Existing user — refresh avatar/name and re-assert admin role on each login
             const correctRole = email === process.env.ADMIN_EMAIL ? 'admin' : (userRecord.role ?? 'user');
@@ -183,8 +183,9 @@ export async function GET(request: Request, { params }: { params: { provider: st
                 .eq('id', userRecord.id);
             userRecord.role = correctRole;
 
-            // --- PROACTIVE FIX: Send Login Email for returning OAuth users ---
-            sendLoginEmail(email, name).catch(e => console.error('[OAuth] Login email error:', e));
+            // 5. Send login notification email (Awaited to ensure it doesn't get cut off)
+            await sendLoginEmail(userRecord.email, userRecord.full_name || undefined)
+                .catch(e => console.error('[Login] Email error:', e));
         }
 
         // 5. Issue JWT session
