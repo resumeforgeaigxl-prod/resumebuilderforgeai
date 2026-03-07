@@ -1,7 +1,26 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Mic, Loader2, Search, Calendar, User, Briefcase, Eye, Trash2, BarChart3, Target, TrendingUp } from 'lucide-react';
+import { Mic, Loader2, Search, Calendar, User, Briefcase, Eye, Trash2, BarChart3, Target, TrendingUp, Building2 } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
+
+interface PrepData {
+    company: string;
+    role: string;
+    difficulty_level: string;
+    hiring_process: Array<{ round_name: string; details: string; expected_difficulty: string }>;
+    top_questions: Array<{
+        question: string;
+        topic: string;
+        difficulty: string;
+        frequency: string;
+        answer_coach: {
+            ideal_structure: string[];
+            example_answer: string;
+            common_mistakes: string[];
+        }
+    }>;
+    prep_roadmap: Array<{ day: number; topics: string[]; tasks: string[] }>;
+}
 
 interface InterviewRow {
     id: string;
@@ -17,6 +36,7 @@ interface InterviewRow {
     created_at: string;
     user_email: string;
     user_name: string;
+    complete_prep?: PrepData;
 }
 
 interface Metrics {
@@ -40,7 +60,20 @@ export default function AdminCompanyPrepPage() {
             const res = await fetch('/api/admin/company-prep');
             const data = await res.json();
             if (data.success) {
-                setInterviews(data.interviews);
+                const formattedInterviews = data.interviews.map((interview: InterviewRow) => {
+                    if (interview.interview_type === 'Company Prep' && interview.job_description?.startsWith('{')) {
+                        try {
+                            return {
+                                ...interview,
+                                complete_prep: JSON.parse(interview.job_description)
+                            };
+                        } catch (e) {
+                            console.error('Failed to parse complete prep:', e);
+                        }
+                    }
+                    return interview;
+                });
+                setInterviews(formattedInterviews);
                 setMetrics(data.metrics);
             }
         } catch (error) {
@@ -200,8 +233,8 @@ export default function AdminCompanyPrepPage() {
                                         </td>
                                         <td className="px-4 py-4 whitespace-nowrap">
                                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${interview.final_score >= 80 ? 'bg-green-100 text-green-800' :
-                                                    interview.final_score >= 60 ? 'bg-yellow-100 text-yellow-800' :
-                                                        'bg-red-100 text-red-800'
+                                                interview.final_score >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                                                    'bg-red-100 text-red-800'
                                                 }`}>
                                                 {interview.final_score ? `${interview.final_score}%` : 'N/A'}
                                             </span>
@@ -266,42 +299,115 @@ export default function AdminCompanyPrepPage() {
 
                         <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
                             <div className="space-y-6">
-                                {selectedInterview.questions.map((question, index) => (
-                                    <div key={index} className="bg-slate-800/50 border border-slate-600 rounded-xl p-4">
-                                        <h3 className="text-lg font-semibold text-white mb-3">
-                                            Question {index + 1}
-                                        </h3>
-                                        <p className="text-slate-200 mb-4">{question}</p>
-
-                                        {selectedInterview.answers && selectedInterview.answers[index] && (
-                                            <div className="mb-4">
-                                                <h4 className="text-sm font-medium text-slate-300 mb-2">User Answer:</h4>
-                                                <div className="bg-slate-900/50 border border-slate-600 rounded-lg p-3">
-                                                    <p className="text-slate-200 whitespace-pre-wrap">{selectedInterview.answers[index]}</p>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {selectedInterview.scores && selectedInterview.scores[index] && (
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
-                                                    <div className="text-2xl font-bold text-blue-400">
-                                                        {selectedInterview.scores[index].score}/10
+                                {selectedInterview.complete_prep ? (
+                                    <div className="space-y-8">
+                                        {/* Hiring Process */}
+                                        <div className="bg-slate-800/50 border border-slate-600 rounded-xl p-6">
+                                            <h3 className="text-xl font-bold text-indigo-400 mb-4 flex items-center gap-2">
+                                                <Building2 className="w-5 h-5" /> Hiring Process
+                                            </h3>
+                                            <div className="space-y-4">
+                                                {selectedInterview.complete_prep.hiring_process.map((round, idx) => (
+                                                    <div key={idx} className="border-l-2 border-indigo-500 pl-4 py-1">
+                                                        <h4 className="font-bold text-white text-sm">{round.round_name}</h4>
+                                                        <p className="text-slate-400 text-xs mt-1">{round.details}</p>
+                                                        <span className="text-[10px] text-indigo-300 font-bold uppercase mt-1 inline-block bg-indigo-500/10 px-2 py-0.5 rounded">
+                                                            {round.expected_difficulty} Difficulty
+                                                        </span>
                                                     </div>
-                                                    <div className="text-sm text-blue-300">AI Score</div>
-                                                </div>
-                                                <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
-                                                    <h4 className="text-sm font-medium text-green-300 mb-1">Feedback</h4>
-                                                    <p className="text-sm text-green-200">{selectedInterview.scores[index].feedback}</p>
-                                                </div>
-                                                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
-                                                    <h4 className="text-sm font-medium text-yellow-300 mb-1">Improvement Tips</h4>
-                                                    <p className="text-sm text-yellow-200">{selectedInterview.scores[index].tips}</p>
-                                                </div>
+                                                ))}
                                             </div>
-                                        )}
+                                        </div>
+
+                                        {/* Roadmap */}
+                                        <div className="bg-slate-800/50 border border-slate-600 rounded-xl p-6">
+                                            <h3 className="text-xl font-bold text-emerald-400 mb-4 flex items-center gap-2">
+                                                <Target className="w-5 h-5" /> 4-Day Roadmap
+                                            </h3>
+                                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                                {selectedInterview.complete_prep.prep_roadmap.map((day, idx) => (
+                                                    <div key={idx} className="bg-slate-900/50 p-3 rounded-lg border border-slate-700">
+                                                        <div className="text-emerald-500 text-[10px] font-bold uppercase mb-1">Day {day.day}</div>
+                                                        <p className="text-white text-[11px] font-bold line-clamp-1">{day.topics[0]}</p>
+                                                        <p className="text-slate-500 text-[10px] italic mt-1 line-clamp-2">{day.tasks[0]}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Questions with Answer Coach */}
+                                        <div className="space-y-6">
+                                            <h3 className="text-xl font-bold text-purple-400 flex items-center gap-2">
+                                                <TrendingUp className="w-5 h-5" /> Top Questions & Coaching
+                                            </h3>
+                                            {selectedInterview.complete_prep.top_questions.map((q, qIdx) => (
+                                                <div key={qIdx} className="bg-slate-800/50 border border-slate-600 rounded-xl p-6">
+                                                    <div className="flex justify-between items-start gap-4 mb-3">
+                                                        <h4 className="text-white font-bold italic">&quot;{q.question}&quot;</h4>
+                                                        <span className="bg-purple-500/10 text-purple-400 text-[10px] font-bold px-2 py-1 rounded shrink-0 uppercase tracking-widest">
+                                                            {q.difficulty}
+                                                        </span>
+                                                    </div>
+                                                    <div className="mt-4 space-y-4">
+                                                        <div>
+                                                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Ideal Structure</p>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {q.answer_coach.ideal_structure.map((s, sIdx) => (
+                                                                    <span key={sIdx} className="bg-white/5 border border-white/10 px-2 py-1 rounded text-[10px] text-slate-300">
+                                                                        {s}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Example Answer</p>
+                                                            <p className="text-xs text-slate-300 leading-relaxed italic border-l-2 border-indigo-500/30 pl-3">
+                                                                {q.answer_coach.example_answer}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                ))}
+                                ) : (
+                                    selectedInterview.questions.map((question, index) => (
+                                        <div key={index} className="bg-slate-800/50 border border-slate-600 rounded-xl p-4">
+                                            <h3 className="text-lg font-semibold text-white mb-3">
+                                                Question {index + 1}
+                                            </h3>
+                                            <p className="text-slate-200 mb-4">{question}</p>
+
+                                            {selectedInterview.answers && selectedInterview.answers[index] && (
+                                                <div className="mb-4">
+                                                    <h4 className="text-sm font-medium text-slate-300 mb-2">User Answer:</h4>
+                                                    <div className="bg-slate-900/50 border border-slate-600 rounded-lg p-3">
+                                                        <p className="text-slate-200 whitespace-pre-wrap">{selectedInterview.answers[index]}</p>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {selectedInterview.scores && selectedInterview.scores[index] && (
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+                                                        <div className="text-2xl font-bold text-blue-400">
+                                                            {selectedInterview.scores[index].score}/10
+                                                        </div>
+                                                        <div className="text-sm text-blue-300">AI Score</div>
+                                                    </div>
+                                                    <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+                                                        <h4 className="text-sm font-medium text-green-300 mb-1">Feedback</h4>
+                                                        <p className="text-sm text-green-200">{selectedInterview.scores[index].feedback}</p>
+                                                    </div>
+                                                    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
+                                                        <h4 className="text-sm font-medium text-yellow-300 mb-1">Improvement Tips</h4>
+                                                        <p className="text-sm text-yellow-200">{selectedInterview.scores[index].tips}</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))
+                                )}
 
                                 {selectedInterview.final_score && (
                                     <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-xl p-6 text-center">

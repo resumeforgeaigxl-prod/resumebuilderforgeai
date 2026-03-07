@@ -282,7 +282,7 @@ SCHEMA:
             const { error: insertError } = await admin.from('mock_interviews').insert({
                 user_id: session.userId,
                 role: `${parsedData.company} - ${parsedData.role}`,
-                job_description: 'Generated Interview Intelligence Report',
+                job_description: JSON.stringify(parsedData),
                 experience_level: 'various',
                 interview_type: 'Company Prep',
                 num_questions: sampleQuestions.length,
