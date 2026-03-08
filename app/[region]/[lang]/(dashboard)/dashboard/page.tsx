@@ -2,7 +2,7 @@ import {
     PlusCircle, MessageSquareWarning, Crown,
     User as UserIcon, Sparkles, CheckCircle2, FileText,
     Briefcase, Zap, ArrowRight, Activity, Calendar, ShieldCheck,
-    Compass, TrendingUp, Bell
+    Compass, TrendingUp, Bell, Building2
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getSession } from '@/lib/auth/jwt'
@@ -196,7 +196,7 @@ export default async function DashboardPage({ params }: { params: { region: stri
                 {/* Quick Actions & AI Features */}
                 <div className="space-y-6">
                     <h2 className="text-2xl font-black text-white tracking-tight ml-2">Smart Features</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                         <Link href={`/${region}/${lang}/resumes`} className="group">
                             <div className="h-full p-8 rounded-[3rem] bg-slate-900/40 border border-white/5 hover:border-indigo-500/30 transition-all flex flex-col items-center text-center">
                                 <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
@@ -227,6 +227,17 @@ export default async function DashboardPage({ params }: { params: { region: stri
                                 <h3 className="text-lg font-black text-white mb-2 tracking-tight group-hover:text-purple-400 transition-colors">Skill Hub</h3>
                                 <p className="text-[10px] text-slate-500 font-medium leading-relaxed mb-6 px-4 uppercase tracking-widest">Weakness & Scores</p>
                                 <span className="mt-auto inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-purple-400 group-hover:translate-x-1 transition-transform">Track <ArrowRight className="w-3 h-3" /></span>
+                            </div>
+                        </Link>
+
+                        <Link href={`/${region}/${lang}/company-prep-interview`} className="group">
+                            <div className="h-full p-8 rounded-[3rem] bg-slate-900/40 border border-white/5 hover:border-cyan-500/30 transition-all flex flex-col items-center text-center">
+                                <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                    <Building2 className="w-8 h-8 text-cyan-400" />
+                                </div>
+                                <h3 className="text-lg font-black text-white mb-2 tracking-tight group-hover:text-cyan-400 transition-colors">Company Prep</h3>
+                                <p className="text-[10px] text-slate-500 font-medium leading-relaxed mb-6 px-4 uppercase tracking-widest">Role-Based Interview Plans</p>
+                                <span className="mt-auto inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-cyan-400 group-hover:translate-x-1 transition-transform">Prepare <ArrowRight className="w-3 h-3" /></span>
                             </div>
                         </Link>
 
