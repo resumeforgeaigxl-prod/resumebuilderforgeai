@@ -12,7 +12,11 @@ import {
     ChevronRight,
     LogOut,
     Mic,
-    Globe
+    Globe,
+    Compass,
+    TrendingUp,
+    Bell,
+    ShieldCheck
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
@@ -20,6 +24,9 @@ import { useParams } from 'next/navigation';
 const MENU_ITEMS = [
     { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
     { label: 'My Resumes', href: '/resumes', icon: FileText },
+    { label: 'Career Roadmap', href: '/roadmap', icon: Compass },
+    { label: 'Interview Data', href: '/interview-intelligence', icon: TrendingUp },
+    { label: 'Job Alerts', href: '/job-alerts', icon: Bell },
     { label: 'Job Board', href: '/dashboard-jobs', icon: Briefcase },
     { label: 'AI Tools', href: '/tools', icon: Wrench },
     { label: 'Mock Interview', href: '/mock-interview', icon: Mic },
@@ -33,19 +40,32 @@ export function Sidebar({ isCollapsed, onToggle }: { isCollapsed: boolean, onTog
 
     const params = useParams() as { region: string; lang: string };
     const { region, lang } = params;
+    const [userRole, setUserRole] = useState<string | null>(null);
 
     useEffect(() => {
         setMounted(true);
+        // Fetch role to determine recruiter access
+        fetch('/api/user/profile')
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) setUserRole(data.user.role);
+            })
+            .catch(() => { });
     }, []);
 
     if (!mounted) return null;
+
+    const items = [...MENU_ITEMS];
+    if (userRole === 'admin' || userRole === 'recruiter') {
+        items.splice(1, 0, { label: 'Recruiter Hub', href: '/recruiter/dashboard', icon: ShieldCheck });
+    }
 
     return (
         <aside
             className={`fixed left-0 top-20 h-[calc(100vh-5rem)] bg-[#070710]/80 backdrop-blur-xl border-r border-white/5 transition-all duration-500 z-40
                 ${isCollapsed ? 'w-20' : 'w-64'} hidden md:flex flex-col`}
         >
-            <div className="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
+            <div className="flex-1 py-6 px-4 space-y-2 overflow-y-auto custom-scrollbar">
                 {/* Improved Toggle at Top */}
                 <button
                     onClick={onToggle}
@@ -56,8 +76,8 @@ export function Sidebar({ isCollapsed, onToggle }: { isCollapsed: boolean, onTog
                     {!isCollapsed && <span className="ml-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Collapse Panel</span>}
                 </button>
 
-                {MENU_ITEMS.map((item) => {
-                    const fullHref = `/${region}/${lang}${item.href}`;
+                {items.map((item) => {
+                    const fullHref = item.href.startsWith('/recruiter') ? item.href : `/${region}/${lang}${item.href}`;
                     const isActive = pathname === fullHref;
                     return (
                         <Link
@@ -96,11 +116,26 @@ export function MobileNav() {
     const pathname = usePathname();
     const params = useParams() as { region: string; lang: string };
     const { region, lang } = params;
+    const [userRole, setUserRole] = useState<string | null>(null);
+
+    useEffect(() => {
+        fetch('/api/user/profile')
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) setUserRole(data.user.role);
+            })
+            .catch(() => { });
+    }, []);
+
+    const items = [...MENU_ITEMS];
+    if (userRole === 'admin' || userRole === 'recruiter') {
+        items.splice(1, 0, { label: 'Recruit', href: '/recruiter/dashboard', icon: ShieldCheck });
+    }
 
     return (
         <nav className="fixed bottom-0 left-0 right-0 h-16 bg-[#070710]/90 backdrop-blur-xl border-t border-white/5 flex md:hidden items-center justify-around px-2 z-50">
-            {MENU_ITEMS.map((item) => {
-                const fullHref = `/${region}/${lang}${item.href}`;
+            {items.slice(0, 5).map((item) => {
+                const fullHref = item.href.startsWith('/recruiter') ? item.href : `/${region}/${lang}${item.href}`;
                 const isActive = pathname === fullHref;
                 return (
                     <Link

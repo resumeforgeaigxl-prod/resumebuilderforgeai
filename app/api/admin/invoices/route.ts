@@ -27,12 +27,8 @@ export async function GET() {
         const { data: invoices, error } = await (admin as any)
             .from('invoices')
             .select(`
-                id, invoice_number, plan, amount, currency, payment_method, coupon_code,
-                razorpay_payment_id, razorpay_order_id,
-                billing_name, billing_email, billing_phone,
-                billing_address, billing_city, billing_state, billing_country, billing_zip,
-                created_at, user_id,
-                users ( email )
+                *,
+                user:user_id ( email, full_name )
             `)
             .order('created_at', { ascending: false });
 
@@ -41,8 +37,9 @@ export async function GET() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const formatted = (invoices as any[]).map((inv: any) => ({
             ...inv,
-            user_email: (Array.isArray(inv.users) ? inv.users[0]?.email : inv.users?.email) || 'Unknown',
-            users: undefined,
+            user_email: inv.user?.email || inv.billing_email || 'Unknown',
+            user_full_name: inv.user?.full_name || inv.billing_name || 'Unknown',
+            user: undefined,
         }));
 
         return NextResponse.json({ success: true, invoices: formatted });

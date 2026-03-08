@@ -12,6 +12,8 @@ interface Invoice {
     payment_method: string;
     coupon_code: string | null;
     created_at: string;
+    status: string;
+    invoice_url: string | null;
 }
 
 function planColor(plan: string) {
@@ -40,8 +42,12 @@ export default function InvoicesPage() {
     }, []);
 
     const handleDownload = (inv: Invoice) => {
-        // Open in new tab — print dialog fires automatically
-        window.open(`/api/invoices/${inv.id}/download`, '_blank');
+        if (inv.invoice_url) {
+            window.open(inv.invoice_url, '_blank');
+        } else {
+            // Open in new tab — print dialog fires automatically
+            window.open(`/api/invoices/${inv.id}/download`, '_blank');
+        }
     };
 
     return (

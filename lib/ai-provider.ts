@@ -35,6 +35,26 @@ export function stripMarkdown(text: string): string {
         .trim();
 }
 
+/**
+ * Specifically extracts JSON from a string, handles code fences.
+ */
+export function extractJson(text: string): string {
+    // Try to find content between ```json and ```
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    if (jsonMatch && jsonMatch[1]) {
+        return jsonMatch[1].trim();
+    }
+
+    // If no code blocks, try to find the first { and last }
+    const firstBrace = text.indexOf('{');
+    const lastBrace = text.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+        return text.substring(firstBrace, lastBrace + 1).trim();
+    }
+
+    return text.trim();
+}
+
 async function fetchFromOpenRouter(
     prompt: string,
     model: string,

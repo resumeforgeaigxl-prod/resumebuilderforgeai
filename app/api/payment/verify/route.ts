@@ -104,11 +104,12 @@ export async function POST(req: NextRequest) {
         }
 
         // ── Activate user plan ────────────────────────────────────────────────
-        await activateUserPlan(session.userId, plan_name.toUpperCase() as PlanName);
+        const subscriptionId = await activateUserPlan(session.userId, plan_name.toUpperCase() as PlanName, razorpay_payment_id);
 
         // ── Generate invoice ──────────────────────────────────────────────────
         const invoice = await createInvoice({
             userId: session.userId,
+            subscriptionId,
             plan: plan_name.toUpperCase(),
             amount: amountPaise,
             currency,
@@ -116,6 +117,7 @@ export async function POST(req: NextRequest) {
             razorpayPaymentId: razorpay_payment_id,
             razorpayOrderId: razorpay_order_id,
             couponCode: couponCode ?? undefined,
+            status: 'paid',
             billing: billing ? {
                 name: billing.full_name,
                 email: billing.email,
@@ -128,29 +130,62 @@ export async function POST(req: NextRequest) {
             } : null,
         });
 
-        // ── Generate PDF for email attachment ────────────────────────────────
+        // ── Generate PDF and Upload to Storage ───────────────────────────────
         let invoicePdfBase64: string | undefined;
+        let invoiceUrl: string | null = null;
+
         if (invoice) {
             try {
+                console.log(`[verify] Generating PDF for invoice: ${invoice.invoice_number}`);
                 const { generateInvoiceHtml } = await import('@/lib/invoice-template');
                 const { generatePdfFromHtml } = await import('@/lib/pdf-generator');
 
                 const html = await generateInvoiceHtml(invoice, originalPrice, discountAmount);
                 const pdfBuffer = await generatePdfFromHtml(html);
                 invoicePdfBase64 = pdfBuffer.toString('base64');
+
+                // Upload to Supabase Storage
+                const storagePath = `invoices/${session.userId}/${invoice.invoice_number}.pdf`;
+                const { error: uploadError } = await supabase.storage
+                    .from('invoices')
+                    .upload(storagePath, pdfBuffer, {
+                        contentType: 'application/pdf',
+                        upsert: true
+                    });
+
+                if (uploadError) {
+                    console.error('[verify] PDF Upload failed:', uploadError);
+                } else {
+                    const { data: urlData } = supabase.storage
+                        .from('invoices')
+                        .getPublicUrl(storagePath);
+                    invoiceUrl = urlData.publicUrl;
+                    console.log(`[verify] PDF Uploaded: ${invoiceUrl}`);
+
+                    // Update invoice record with URL
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    await (supabase as any)
+                        .from('invoices')
+                        .update({ invoice_url: invoiceUrl })
+                        .eq('id', invoice.id);
+
+                    // Update local object for email
+                    invoice.invoice_url = invoiceUrl;
+                }
             } catch (pdfErr) {
-                console.error('[verify] PDF Generation for Email failed:', pdfErr);
+                console.error('[verify] PDF Generation/Upload failed:', pdfErr);
             }
         }
 
         // ── Send payment success email ────────────────────────────────────────
         const userEmail = billing?.email ?? null;
         if (userEmail && invoice) {
+            console.log(`[verify] Sending success email to: ${userEmail}`);
             sendPaymentSuccessEmail({
                 userEmail,
                 userName: billing?.full_name,
                 plan: plan_name.toUpperCase(),
-                amountINR: formattedAmount, // Still named amountINR but contains formatted string
+                amountINR: formattedAmount,
                 paymentMethod: 'Razorpay',
                 couponCode: couponCode ?? undefined,
                 invoiceNumber: invoice.invoice_number,
@@ -160,7 +195,8 @@ export async function POST(req: NextRequest) {
             }).catch(e => console.error('[verify] Email error:', e));
         }
 
-        return NextResponse.json({ success: true });
+        console.log(`[verify] Payment pipeline complete for user: ${session.userId}`);
+        return NextResponse.json({ success: true, invoice_url: invoiceUrl });
     } catch (err) {
         console.error('[verify] Error:', err);
         return NextResponse.json({ error: 'Payment verification failed' }, { status: 500 });

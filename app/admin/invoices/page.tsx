@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import {
     Receipt, Loader2, Search, FileText, CreditCard, Ticket,
     Calendar, User, IndianRupee, MapPin, ChevronDown, ChevronUp,
-    Smartphone
+    Smartphone, Mail, CheckCircle2, AlertCircle
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 
@@ -15,6 +15,9 @@ interface InvoiceRow {
     plan: string;
     amount: number;
     currency: string;
+    status: string;
+    invoice_url: string | null;
+    payment_id: string | null;
     payment_method: string;
     coupon_code: string | null;
     razorpay_payment_id: string | null;
@@ -43,6 +46,8 @@ export default function AdminInvoicesPage() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [expandedId, setExpandedId] = useState<string | null>(null);
+    const [sendingEmail, setSendingEmail] = useState<string | null>(null);
+    const [emailStatus, setEmailStatus] = useState<{ id: string, type: 'success' | 'error', msg: string } | null>(null);
 
     useEffect(() => {
         fetch('/api/admin/invoices')
@@ -50,6 +55,25 @@ export default function AdminInvoicesPage() {
             .then(d => { if (d.success) setInvoices(d.invoices); })
             .finally(() => setLoading(false));
     }, []);
+
+    const handleSendEmail = async (id: string) => {
+        setSendingEmail(id);
+        setEmailStatus(null);
+        try {
+            const res = await fetch(`/api/admin/invoices/${id}/send-email`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                setEmailStatus({ id, type: 'success', msg: 'Email Sent!' });
+            } else {
+                setEmailStatus({ id, type: 'error', msg: data.error || 'Failed' });
+            }
+        } catch {
+            setEmailStatus({ id, type: 'error', msg: 'Error' });
+        } finally {
+            setSendingEmail(null);
+            setTimeout(() => setEmailStatus(null), 3000);
+        }
+    };
 
     const filtered = invoices.filter(inv =>
         inv.user_email.toLowerCase().includes(search.toLowerCase()) ||
@@ -118,6 +142,8 @@ export default function AdminInvoicesPage() {
                             {filtered.map(inv => {
                                 const isExpanded = expandedId === inv.id;
                                 const hasBilling = !!(inv.billing_name || inv.billing_address);
+                                const isSending = sendingEmail === inv.id;
+                                const currentStatus = emailStatus?.id === inv.id ? emailStatus : null;
 
                                 return (
                                     <>
@@ -125,6 +151,11 @@ export default function AdminInvoicesPage() {
                                             {/* Invoice number */}
                                             <td className="px-5 py-4">
                                                 <span className="font-mono font-bold text-indigo-300 text-xs">{inv.invoice_number}</span>
+                                                <div className="mt-1">
+                                                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase ${inv.status === 'paid' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                                                        {inv.status}
+                                                    </span>
+                                                </div>
                                             </td>
 
                                             {/* User */}
@@ -156,10 +187,10 @@ export default function AdminInvoicesPage() {
                                             {/* Payment Method */}
                                             <td className="px-5 py-4">
                                                 <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-bold ${inv.payment_method === 'coupon' ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'}`}>
-                                                    {inv.payment_method === 'coupon' ? <><Ticket className="w-3 h-3" /> Coupon</> : <><CreditCard className="w-3 h-3" /> Razorpay</>}
+                                                    {inv.payment_method === 'coupon' ? <><Ticket className="w-3 h-3" /> Coupon</> : (inv.payment_method === 'razorpay' ? <><CreditCard className="w-3 h-3" /> Razorpay</> : <><CreditCard className="w-3 h-3" /> {inv.payment_method}</>)}
                                                 </span>
-                                                {inv.razorpay_payment_id && (
-                                                    <div className="text-[10px] text-slate-600 font-mono mt-0.5 truncate max-w-[120px]">{inv.razorpay_payment_id}</div>
+                                                {(inv.razorpay_payment_id || inv.payment_id) && (
+                                                    <div className="text-[10px] text-slate-600 font-mono mt-0.5 truncate max-w-[120px]">{inv.razorpay_payment_id || inv.payment_id}</div>
                                                 )}
                                             </td>
 
@@ -185,11 +216,24 @@ export default function AdminInvoicesPage() {
                                             <td className="px-5 py-4">
                                                 <div className="flex items-center gap-2">
                                                     <button
-                                                        onClick={() => window.open(`/api/invoices/${inv.id}/download`, '_blank')}
+                                                        onClick={() => inv.invoice_url ? window.open(inv.invoice_url, '_blank') : window.open(`/api/invoices/${inv.id}/download`, '_blank')}
                                                         className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/20 transition-all"
                                                         title="Download Invoice PDF"
                                                     >
-                                                        <FileText className="w-3 h-3" /> PDF
+                                                        <FileText className="w-3.5 h-3.5" /> PDF
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleSendEmail(inv.id)}
+                                                        disabled={isSending}
+                                                        className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all ${currentStatus
+                                                                ? (currentStatus.type === 'success' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-red-500/20 text-red-400 border-red-500/40')
+                                                                : 'bg-white/5 text-slate-300 hover:bg-white/10 border-white/10'
+                                                            }`}
+                                                    >
+                                                        {isSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> :
+                                                            currentStatus ? (currentStatus.type === 'success' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />) :
+                                                                <Mail className="w-3.5 h-3.5" />}
+                                                        {currentStatus ? currentStatus.msg : 'Email'}
                                                     </button>
                                                     {hasBilling && (
                                                         <button

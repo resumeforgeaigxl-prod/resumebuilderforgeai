@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin';
-import { Users, FileText, Activity, CreditCard, LayoutTemplate, CopyCheck, Coins } from 'lucide-react';
+import { Users, FileText, Activity, CreditCard, } from 'lucide-react';
 import { startOfDay, endOfDay } from 'date-fns';
 
 export default async function AdminDashboard() {
@@ -12,18 +12,20 @@ export default async function AdminDashboard() {
     resumesRes,
     logsRes,
     subsRes,
-    portfoliosRes,
-    mocksRes,
-    usageRes
+    usageRes,
+    roadmapsRes,
+    jobAlertsRes,
+    interviewScoresRes
   ] = await Promise.all([
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     supabase.from('users').select('id, is_blocked', { count: 'exact' }) as any,
     supabase.from('resumes').select('id', { count: 'exact' }),
     supabase.from('admin_logs').select('id', { count: 'exact' }),
-    supabase.from('subscriptions').select('plan').eq('status', 'active'),
-    supabase.from('portfolios').select('id', { count: 'exact' }),
-    supabase.from('mock_tests').select('id', { count: 'exact' }),
+    supabase.from('subscriptions').select('plan', { count: 'exact' }).eq('status', 'active'),
     supabase.from('usage_logs').select('id', { count: 'exact' }).gte('created_at', todayStart).lte('created_at', todayEnd),
+    supabase.from('roadmaps').select('id', { count: 'exact' }),
+    supabase.from('job_alerts').select('id', { count: 'exact' }),
+    supabase.from('interview_scores').select('id', { count: 'exact' }),
   ]);
 
   const totalUsers = profilesRes.count ?? 0;
@@ -31,23 +33,20 @@ export default async function AdminDashboard() {
   const blockedUsers = (profilesRes.data ?? []).filter((p: any) => p.is_blocked).length;
   const totalResumes = resumesRes.count ?? 0;
   const totalLogs = logsRes.count ?? 0;
-
-  const activeSubs = subsRes.data?.length ?? 0;
-  const totalPortfolios = portfoliosRes.count ?? 0;
-  const totalMocks = mocksRes.count ?? 0;
+  const activeSubs = subsRes.count ?? 0;
   const aiUsageToday = usageRes.count ?? 0;
-
-  // Assuming $9/mo for Pro plan for pure analytical visualization purposes
-  const estRevenue = activeSubs * 9;
+  const totalRoadmaps = roadmapsRes.count ?? 0;
+  const totalJobAlerts = jobAlertsRes.count ?? 0;
+  const totalInterviewScores = interviewScoresRes.count ?? 0;
 
   const stats = [
     { label: 'Total Users', value: totalUsers, icon: Users, color: 'text-blue-400', bg: 'bg-blue-500/10' },
     { label: 'Active Subs', value: activeSubs, icon: CreditCard, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
     { label: 'Total Resumes', value: totalResumes, icon: FileText, color: 'text-purple-400', bg: 'bg-purple-500/10' },
-    { label: 'Portfolios', value: totalPortfolios, icon: LayoutTemplate, color: 'text-pink-400', bg: 'bg-pink-500/10' },
-    { label: 'Mock Tests', value: totalMocks, icon: CopyCheck, color: 'text-orange-400', bg: 'bg-orange-500/10' },
-    { label: 'MRR (Est.)', value: `$${estRevenue}`, icon: Coins, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
-    { label: 'AI Calls Today', value: aiUsageToday, icon: Activity, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+    { label: 'AI Roadmaps', value: totalRoadmaps, icon: Activity, color: 'text-orange-400', bg: 'bg-orange-500/10' },
+    { label: 'Job Alerts', value: totalJobAlerts, icon: Activity, color: 'text-pink-400', bg: 'bg-pink-500/10' },
+    { label: 'Interview Intel', value: totalInterviewScores, icon: Activity, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+    { label: 'AI Calls Today', value: aiUsageToday, icon: Activity, color: 'text-white', bg: 'bg-white/10' },
     { label: 'Blocked Users', value: blockedUsers, icon: Users, color: 'text-red-400', bg: 'bg-red-500/10' }
   ];
 

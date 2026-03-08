@@ -114,7 +114,7 @@ export async function POST(request: Request) {
 
         // Record in subscriptions table
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (supabase as any)
+        const { data: subData } = await (supabase as any)
             .from('subscriptions')
             .upsert({
                 user_id: session.userId,
@@ -122,7 +122,9 @@ export async function POST(request: Request) {
                 status: 'active',
                 expires_at: expiresAt.toISOString(),
                 coupon_code: 'LAUNCH100',
-            }, { onConflict: 'user_id' });
+            }, { onConflict: 'user_id' })
+            .select()
+            .single();
 
         // Record in payments table for admin visibility
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -139,6 +141,7 @@ export async function POST(request: Request) {
         // Generate ₹0 invoice
         const invoice = await createInvoice({
             userId: session.userId, plan: 'PRO', amount: 0,
+            subscriptionId: subData?.id,
             paymentMethod: 'coupon', couponCode: 'LAUNCH100',
             billing: billing ? {
                 name: billing.full_name, email: billing.email, phone: billing.phone,
@@ -193,19 +196,7 @@ export async function POST(request: Request) {
 
     if (isFullAccess) {
         // Use unified activation
-        await activateUserPlan(session.userId, 'PRO');
-
-        // Record in subscriptions table
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (supabase as any)
-            .from('subscriptions')
-            .upsert({
-                user_id: session.userId,
-                plan: 'pro',
-                status: 'active',
-                expires_at: null, // permanent via coupon
-                coupon_code: normalizedCode,
-            }, { onConflict: 'user_id' });
+        const subscriptionId = await activateUserPlan(session.userId, 'PRO');
 
         // Record in payments table for admin visibility
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -229,6 +220,7 @@ export async function POST(request: Request) {
         // Generate ₹0 invoice
         const invoice = await createInvoice({
             userId: session.userId, plan: 'PRO', amount: 0,
+            subscriptionId,
             paymentMethod: 'coupon', couponCode: normalizedCode,
             billing: billing ? {
                 name: billing.full_name, email: billing.email, phone: billing.phone,

@@ -72,6 +72,7 @@ export default async function ResumesPage({
                             id={resume.id}
                             title={resume.title}
                             updatedAt={resume.updated_at}
+                            versionName={resume.version_name}
                         />
                     ))}
 

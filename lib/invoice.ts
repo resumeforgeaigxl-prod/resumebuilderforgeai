@@ -5,8 +5,12 @@ export interface InvoiceInput {
     plan: string;
     amount: number;               // paise (2900 = ₹29). 0 for coupon.
     currency?: string;            // 'INR' or 'USD'
-    paymentMethod: 'razorpay' | 'coupon';
+    paymentMethod: 'razorpay' | 'coupon' | 'paypal';
+    status?: string;              // 'paid' | 'pending' | 'failed'
+    invoiceUrl?: string | null;
+    paymentId?: string | null;     // Generic payment ID
     couponCode?: string | null;
+    subscriptionId?: string | null;
     razorpayPaymentId?: string | null;
     razorpayOrderId?: string | null;
     billing?: {
@@ -28,6 +32,9 @@ export interface InvoiceRecord {
     plan: string;
     amount: number;
     currency: string;
+    status: string;
+    invoice_url: string | null;
+    payment_id: string | null;
     payment_method: string;
     coupon_code: string | null;
     razorpay_payment_id: string | null;
@@ -67,6 +74,10 @@ export async function createInvoice(input: InvoiceInput): Promise<InvoiceRecord 
                 plan: input.plan,
                 amount: input.amount,
                 currency: input.currency || 'INR',
+                status: input.status || 'paid',
+                invoice_url: input.invoiceUrl ?? null,
+                payment_id: input.paymentId ?? input.razorpayPaymentId ?? null,
+                subscription_id: input.subscriptionId ?? null,
                 payment_method: input.paymentMethod,
                 coupon_code: input.couponCode ?? null,
                 razorpay_payment_id: input.razorpayPaymentId ?? null,

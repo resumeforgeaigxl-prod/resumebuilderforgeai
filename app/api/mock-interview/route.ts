@@ -225,9 +225,23 @@ Example: {"score": 7, "feedback": "Good explanation but could be more specific",
 
             try {
                 report = JSON.parse(cleanText);
+
+                // Save to interview_scores table for historical tracking
+                console.log(`[MockInterview] Saving final report for user: ${session.userId}`);
+                await admin.from('interview_scores').insert({
+                    user_id: session.userId,
+                    technical_score: report.technical,
+                    communication_score: report.communication,
+                    confidence_score: report.confidence,
+                    problem_solving_score: report.problem_solving,
+                    overall_readiness: report.overall_readiness,
+                    suggestions: report.improvement_suggestions
+                });
+                console.log('[MockInterview] Score saved successfully.');
+
             } catch (e) {
-                console.error('Failed to parse final report:', e, cleanText);
-                return NextResponse.json({ error: 'AI returned an invalid report format' }, { status: 500 });
+                console.error('Failed to parse or save final report:', e, cleanText);
+                return NextResponse.json({ error: 'AI returned an invalid report format or DB error' }, { status: 500 });
             }
 
             return NextResponse.json({ success: true, report });

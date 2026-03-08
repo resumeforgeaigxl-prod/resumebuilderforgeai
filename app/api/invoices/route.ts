@@ -19,13 +19,14 @@ export async function GET() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data, error } = await (supabase as any)
             .from('invoices')
-            .select('id, invoice_number, plan, amount, payment_method, coupon_code, created_at')
+            .select('id, invoice_number, plan, amount, payment_method, coupon_code, created_at, status, invoice_url')
             .eq('user_id', session.userId)
             .order('created_at', { ascending: false }) as {
                 data: {
                     id: string; invoice_number: string; plan: string;
                     amount: number; payment_method: string;
                     coupon_code: string | null; created_at: string;
+                    status: string; invoice_url: string | null;
                 }[] | null;
                 error: unknown;
             };

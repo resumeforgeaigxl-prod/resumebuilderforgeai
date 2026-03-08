@@ -158,10 +158,12 @@ export async function POST(req: NextRequest) {
             } : null,
         });
 
-        // ── Generate PDF for email attachment ────────────────────────────────
+        // ── Generate PDF and Upload to Storage ───────────────────────────────
         let invoicePdfBase64: string | undefined;
+        let invoiceUrl: string | null = null;
         if (invoice) {
             try {
+                console.log(`[activate-coupon] Generating PDF for invoice: ${invoice.invoice_number}`);
                 const { generateInvoiceHtml } = await import('@/lib/invoice-template');
                 const { generatePdfFromHtml } = await import('@/lib/pdf-generator');
 
@@ -169,14 +171,43 @@ export async function POST(req: NextRequest) {
                 const html = await generateInvoiceHtml(invoice, basePrice * 100, basePrice * 100);
                 const pdfBuffer = await generatePdfFromHtml(html);
                 invoicePdfBase64 = pdfBuffer.toString('base64');
+
+                // Upload to Supabase Storage
+                const storagePath = `invoices/${session.userId}/${invoice.invoice_number}.pdf`;
+                const { error: uploadError } = await supabase.storage
+                    .from('invoices')
+                    .upload(storagePath, pdfBuffer, {
+                        contentType: 'application/pdf',
+                        upsert: true
+                    });
+
+                if (uploadError) {
+                    console.error('[activate-coupon] PDF Upload failed:', uploadError);
+                } else {
+                    const { data: urlData } = supabase.storage
+                        .from('invoices')
+                        .getPublicUrl(storagePath);
+                    invoiceUrl = urlData.publicUrl;
+                    console.log(`[activate-coupon] PDF Uploaded: ${invoiceUrl}`);
+
+                    // Update invoice record with URL
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    await (supabase as any)
+                        .from('invoices')
+                        .update({ invoice_url: invoiceUrl })
+                        .eq('id', invoice.id);
+
+                    invoice.invoice_url = invoiceUrl;
+                }
             } catch (pdfErr) {
-                console.error('[activate-coupon] PDF Generation for Email failed:', pdfErr);
+                console.error('[activate-coupon] PDF Generation/Upload failed:', pdfErr);
             }
         }
 
         // Send payment/activation email (non-blocking)
         const userEmail = billing?.email ?? userData?.email ?? null;
         if (userEmail && invoice) {
+            console.log(`[activate-coupon] Sending success email to: ${userEmail}`);
             sendPaymentSuccessEmail({
                 userEmail,
                 userName: billing?.full_name ?? userData?.full_name,

@@ -60,8 +60,8 @@ export default function SupportPage() {
     useEffect(() => {
         // Pre-fill email from session if available
         fetch('/api/user/profile').then(r => r.json()).then(d => {
-            if (d?.email) setEmail(d.email);
-            if (d?.name) setName(d.name);
+            if (d?.user?.email) setEmail(d.user.email);
+            if (d?.user?.name) setName(d.user.name);
         }).catch(() => { });
         loadTickets();
     }, []);

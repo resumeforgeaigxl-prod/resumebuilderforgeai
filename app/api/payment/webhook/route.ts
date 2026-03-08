@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
             }
 
             // Activate plan
-            await activateUserPlan(order.user_id, order.plan_name as PlanName);
+            await activateUserPlan(order.user_id, order.plan_name as PlanName, razorpayPaymentId);
 
             // ── GENERATE INVOICE & SEND EMAIL (Fallback for missing verify flow) ──
             try {
@@ -103,6 +103,7 @@ export async function POST(req: NextRequest) {
                     paymentMethod: 'razorpay',
                     razorpayOrderId: razorpayOrderId,
                     razorpayPaymentId: razorpayPaymentId,
+                    status: 'paid',
                     billing: billing ? {
                         name: billing.full_name,
                         email: billing.email,
@@ -116,20 +117,48 @@ export async function POST(req: NextRequest) {
                 });
 
                 if (invoice) {
+                    console.log(`[webhook] Generating PDF for invoice: ${invoice.invoice_number}`);
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const { data: user } = await (supabase as any).from('users').select('email, full_name').eq('id', order.user_id).single();
                     const userEmail = billing?.email ?? user?.email;
 
+                    const currencySymbol = currency === 'INR' ? '₹' : '$';
+                    const formattedAmount = `${currencySymbol}${(order.amount / 100).toFixed(currency === 'INR' ? 0 : 2)}`;
+
+                    // Generate PDF
+                    const originalPrice = order.amount;
+                    const html = await generateInvoiceHtml(invoice, originalPrice, 0);
+                    const pdfBuffer = await generatePdfFromHtml(html);
+                    const invoicePdfBase64 = pdfBuffer.toString('base64');
+
+                    // Upload to Supabase Storage
+                    const storagePath = `invoices/${order.user_id}/${invoice.invoice_number}.pdf`;
+                    const { error: uploadError } = await supabase.storage
+                        .from('invoices')
+                        .upload(storagePath, pdfBuffer, {
+                            contentType: 'application/pdf',
+                            upsert: true
+                        });
+
+                    let invoiceUrl = null;
+                    if (!uploadError) {
+                        const { data: urlData } = supabase.storage
+                            .from('invoices')
+                            .getPublicUrl(storagePath);
+                        invoiceUrl = urlData.publicUrl;
+
+                        // Update invoice record with URL
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        await (supabase as any)
+                            .from('invoices')
+                            .update({ invoice_url: invoiceUrl })
+                            .eq('id', invoice.id);
+
+                        invoice.invoice_url = invoiceUrl;
+                    }
+
                     if (userEmail) {
-                        const currencySymbol = currency === 'INR' ? '₹' : '$';
-                        const formattedAmount = `${currencySymbol}${(order.amount / 100).toFixed(currency === 'INR' ? 0 : 2)}`;
-
-                        // Generate PDF
-                        const originalPrice = order.amount; // fallback if orderRow not fully loaded
-                        const html = await generateInvoiceHtml(invoice, originalPrice, 0);
-                        const pdfBuffer = await generatePdfFromHtml(html);
-                        const invoicePdfBase64 = pdfBuffer.toString('base64');
-
+                        console.log(`[webhook] Sending success email to: ${userEmail}`);
                         await sendPaymentSuccessEmail({
                             userEmail,
                             userName: billing?.full_name ?? user?.full_name,

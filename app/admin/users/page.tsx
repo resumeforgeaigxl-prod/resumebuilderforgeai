@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Ban, Loader2, Phone, User, Unlock, Infinity } from 'lucide-react';
+import { Ban, Loader2, Phone, User, Unlock, Infinity, ShieldCheck } from 'lucide-react';
 
 interface UserRow {
     id: string; email: string; phone_number: string | null;
@@ -42,6 +42,23 @@ export default function AdminUsersPage() {
             alert('Failed to upgrade user.');
         }
         await loadUsers();
+        setToggling(null);
+    }
+
+    async function toggleRole(userId: string, currentRole: string) {
+        const newRole = currentRole === 'recruiter' ? 'user' : 'recruiter';
+        if (!confirm(`Are you sure you want to change this user's role to ${newRole.toUpperCase()}?`)) return;
+        setToggling(`role-${userId}`);
+        const res = await fetch(`/api/admin/users/${userId}/role`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: newRole })
+        });
+        if (res.ok) {
+            await loadUsers();
+        } else {
+            alert('Failed to change user role.');
+        }
         setToggling(null);
     }
 
@@ -171,6 +188,14 @@ export default function AdminUsersPage() {
                                                     {u.role !== 'admin' && (
                                                         <>
                                                             <button
+                                                                onClick={() => toggleRole(u.id, u.role)}
+                                                                disabled={toggling === `role-${u.id}`}
+                                                                className={`p-2 rounded-lg transition-all active:scale-95 border ${u.role === 'recruiter' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20 hover:bg-purple-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20 hover:bg-slate-500/20'}`}
+                                                                title={u.role === 'recruiter' ? 'Revoke Recruiter Access' : 'Grant Recruiter Access'}
+                                                            >
+                                                                {toggling === `role-${u.id}` ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
+                                                            </button>
+                                                            <button
                                                                 onClick={() => upgradeUser(u.id)}
                                                                 disabled={toggling === `upgrade-${u.id}`}
                                                                 className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/20 transition-all active:scale-95"
@@ -257,7 +282,14 @@ export default function AdminUsersPage() {
                                 )}
 
                                 {u.role !== 'admin' && (
-                                    <div className="grid grid-cols-3 gap-2">
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <button
+                                            onClick={() => toggleRole(u.id, u.role)}
+                                            disabled={toggling === `role-${u.id}`}
+                                            className={`flex items-center justify-center py-2 rounded-xl border text-xs font-semibold ${u.role === 'recruiter' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'}`}
+                                        >
+                                            {toggling === `role-${u.id}` ? <Loader2 className="w-3 h-3 animate-spin" /> : (u.role === 'recruiter' ? 'Revoke Recruiter' : 'Make Recruiter')}
+                                        </button>
                                         <button
                                             onClick={() => upgradeUser(u.id)}
                                             disabled={toggling === `upgrade-${u.id}`}

@@ -42,7 +42,7 @@ const PLAN_CONFIG: Record<PlanName, PlanConfig> = {
  * Activates a paid plan for a user after successful payment.
  * Updates users table with plan details and upserts subscriptions for legacy access checks.
  */
-export async function activateUserPlan(userId: string, planName: PlanName): Promise<void> {
+export async function activateUserPlan(userId: string, planName: PlanName, paymentId?: string): Promise<string | undefined> {
     const supabase = createClient();
     const config = PLAN_CONFIG[planName];
 
@@ -78,7 +78,7 @@ export async function activateUserPlan(userId: string, planName: PlanName): Prom
 
     // Upsert subscription for backward compat with checkUserAccess
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: subError } = await (supabase as any)
+    const { data: subData, error: subError } = await (supabase as any)
         .from('subscriptions')
         .upsert(
             {
@@ -86,12 +86,17 @@ export async function activateUserPlan(userId: string, planName: PlanName): Prom
                 plan: config.subscriptionPlan,
                 status: 'active',
                 expires_at: planEnd.toISOString(),
+                payment_id: paymentId ?? null,
             },
             { onConflict: 'user_id' }
-        );
+        )
+        .select()
+        .single();
 
     if (subError) {
         // Non-fatal — log but don't throw; user record is already updated
         console.error('[Plan Activation] Failed to upsert subscription:', subError);
     }
+
+    return subData?.id;
 }
