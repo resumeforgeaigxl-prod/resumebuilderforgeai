@@ -66,8 +66,10 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({ success: true, response: responseText });
     } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'AI processing failed';
         console.error('AI Session Error:', error);
-        return NextResponse.json({ error: message }, { status: 500 });
+        return NextResponse.json(
+            { error: 'AI assistant is temporarily unavailable. Please try again in a few minutes.' },
+            { status: 503 }
+        );
     }
 }

@@ -32,7 +32,26 @@ export async function GET(
 
         if (sessionError) throw sessionError;
 
-        return NextResponse.json({ document, sessions: sessions || [] });
+        let fileUrl: string | null = null;
+        if (document?.file_path) {
+            const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+                .from('study-documents')
+                .createSignedUrl(document.file_path, 60 * 60);
+
+            if (signedUrlError) {
+                console.error('[StudyForge] Signed URL generation failed:', signedUrlError);
+            } else {
+                fileUrl = signedUrlData?.signedUrl || null;
+            }
+        }
+
+        return NextResponse.json({
+            document: {
+                ...document,
+                file_url: fileUrl,
+            },
+            sessions: sessions || []
+        });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Failed to fetch document';
         return NextResponse.json({ error: message }, { status: 500 });

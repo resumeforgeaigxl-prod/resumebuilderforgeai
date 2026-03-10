@@ -32,6 +32,7 @@ interface StudyDocument {
     name: string;
     file_type: string;
     file_path: string;
+    file_url?: string | null;
     text_content: string;
     created_at: string;
 }
@@ -87,7 +88,9 @@ export default function DocumentDetailPage() {
         );
     }
 
-    const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/study-documents/${document.file_path}`;
+    const fileUrl =
+        document.file_url ||
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/study-documents/${document.file_path}`;
 
     return (
         <div className="flex bg-[#030308] -m-8 h-[calc(100vh-5rem)] overflow-hidden">

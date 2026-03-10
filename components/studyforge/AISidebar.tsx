@@ -19,9 +19,11 @@ interface AISidebarProps {
 export default function AISidebar({ documentId, onResponse }: AISidebarProps) {
     const [loadingType, setLoadingType] = useState<string | null>(null);
     const [query, setQuery] = useState('');
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const handleAction = async (type: string, customQuery?: string) => {
         setLoadingType(type);
+        setErrorMessage(null);
         try {
             const res = await fetch('/api/studyforge/session', {
                 method: 'POST',
@@ -33,10 +35,11 @@ export default function AISidebar({ documentId, onResponse }: AISidebarProps) {
                 onResponse(data.response);
                 if (type === 'Ask') setQuery('');
             } else {
-                alert(data.error || 'AI Error');
+                setErrorMessage(data.error || 'AI Error');
             }
         } catch (error) {
             console.error('AI error:', error);
+            setErrorMessage('Unable to connect to AI service. Please try again.');
         } finally {
             setLoadingType(null);
         }
@@ -97,6 +100,11 @@ export default function AISidebar({ documentId, onResponse }: AISidebarProps) {
                         {loadingType === 'Ask' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                     </button>
                 </div>
+                {errorMessage && (
+                    <p className="mt-3 text-[10px] font-bold text-rose-400 uppercase tracking-wide">
+                        {errorMessage}
+                    </p>
+                )}
                 <p className="text-[9px] text-slate-700 font-black uppercase tracking-[0.2em] text-center mt-3">Powered by ForgeAI Gemini</p>
             </div>
         </div>
