@@ -16,6 +16,15 @@ export async function POST(request: NextRequest) {
         }
 
         const lowerName = file.name.toLowerCase();
+        const inferredType =
+            lowerName.endsWith('.pdf')
+                ? 'application/pdf'
+                : lowerName.endsWith('.docx')
+                    ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                    : lowerName.endsWith('.txt')
+                        ? 'text/plain'
+                        : '';
+        const resolvedFileType = file.type || inferredType;
         const allowedTypes = new Set([
             'application/pdf',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -23,7 +32,7 @@ export async function POST(request: NextRequest) {
         ]);
         const maxBytes = 4 * 1024 * 1024;
 
-        if (!allowedTypes.has(file.type) && !lowerName.endsWith('.pdf') && !lowerName.endsWith('.docx') && !lowerName.endsWith('.txt')) {
+        if (!allowedTypes.has(resolvedFileType) && !lowerName.endsWith('.pdf') && !lowerName.endsWith('.docx') && !lowerName.endsWith('.txt')) {
             return NextResponse.json(
                 { error: 'Unsupported file type. Please upload PDF, DOCX, or TXT.' },
                 { status: 400 }
@@ -52,7 +61,7 @@ export async function POST(request: NextRequest) {
         const { data: uploadData, error: uploadError } = await supabase.storage
             .from('study-documents')
             .upload(fileName, buffer, {
-                contentType: file.type,
+                contentType: resolvedFileType || 'application/octet-stream',
                 cacheControl: '3600',
                 upsert: false
             });
@@ -67,11 +76,11 @@ export async function POST(request: NextRequest) {
         // 2. Extract Text
         let textContent = '';
         try {
-            if (file.type === 'application/pdf' || lowerName.endsWith('.pdf')) {
+            if (resolvedFileType === 'application/pdf' || lowerName.endsWith('.pdf')) {
                 // Keep upload response fast and stable on serverless; PDF text is extracted on-demand in session API.
                 console.log('[StudyForge] Skipping PDF text extraction at upload time.');
                 textContent = '';
-            } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || lowerName.endsWith('.docx')) {
+            } else if (resolvedFileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || lowerName.endsWith('.docx')) {
                 console.log('[StudyForge] Extracting text from DOCX...');
                 const result = await mammoth.extractRawText({ buffer });
                 textContent = result.value;
@@ -92,7 +101,7 @@ export async function POST(request: NextRequest) {
                 user_id: userId,
                 name: file.name,
                 file_path: uploadData.path,
-                file_type: file.type,
+                file_type: resolvedFileType,
                 text_content: textContent
             })
             .select()

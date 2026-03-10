@@ -89,6 +89,13 @@ export default function DocumentDetailPage() {
     }
 
     const fileUrl = document.file_url || `/api/studyforge/documents/${id}/file`;
+    const lowerName = (document.name || '').toLowerCase();
+    const lowerPath = (document.file_path || '').toLowerCase();
+    const isPdfDocument =
+        document.file_type === 'application/pdf' ||
+        lowerName.endsWith('.pdf') ||
+        lowerPath.endsWith('.pdf');
+    const showPdfPreview = viewMode === 'preview' && isPdfDocument;
 
     return (
         <div className="flex bg-[#030308] -m-8 h-[calc(100vh-5rem)] overflow-hidden">
@@ -167,8 +174,8 @@ export default function DocumentDetailPage() {
                             </div>
                         ) : null}
 
-                        <div className="max-w-4xl mx-auto h-full min-h-[500px] border border-white/5 rounded-[40px] overflow-hidden bg-black/40 backdrop-blur-sm relative shadow-2xl">
-                            {viewMode === 'preview' && document.file_type === 'application/pdf' ? (
+                        <div className="max-w-4xl mx-auto min-h-[500px] border border-white/5 rounded-[40px] overflow-hidden bg-black/40 backdrop-blur-sm relative shadow-2xl">
+                            {showPdfPreview ? (
                                 <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center bg-[#050510] p-8">
                                     <PDFViewer
                                         fileUrl={fileUrl}
@@ -177,7 +184,7 @@ export default function DocumentDetailPage() {
                                     />
                                 </div>
                             ) : (
-                                <div className="p-12 text-slate-400 font-medium leading-loose text-lg whitespace-pre-wrap">
+                                <div className="max-h-[calc(100vh-14rem)] overflow-y-auto custom-scrollbar p-12 text-slate-400 font-medium leading-loose text-lg whitespace-pre-wrap">
                                     {document.text_content || 'No text extracted from this document.'}
                                 </div>
                             )}
