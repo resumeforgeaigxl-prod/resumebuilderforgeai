@@ -83,12 +83,21 @@ export default function StudyForgePage() {
                 method: 'POST',
                 body: formData,
             });
-            const data = await res.json();
-            if (data.success) {
+            const contentType = res.headers.get('content-type') || '';
+            let data: { success?: boolean; document?: { id: string }; error?: string } = {};
+
+            if (contentType.includes('application/json')) {
+                data = await res.json();
+            } else {
+                const raw = await res.text();
+                data.error = raw?.trim() || `Upload failed (HTTP ${res.status})`;
+            }
+
+            if (res.ok && data.success && data.document?.id) {
                 fetchDocuments();
                 router.push(`/${region}/${lang}/studyforge/document/${data.document.id}`);
             } else {
-                setUploadError(data.error || 'Upload failed');
+                setUploadError(data.error || `Upload failed (HTTP ${res.status})`);
             }
         } catch (error) {
             console.error('Upload error:', error);

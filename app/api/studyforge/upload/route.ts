@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
-import { PDFParse } from 'pdf-parse';
 import mammoth from 'mammoth';
 
 export async function POST(request: NextRequest) {
@@ -68,15 +67,10 @@ export async function POST(request: NextRequest) {
         // 2. Extract Text
         let textContent = '';
         try {
-            if (file.type === 'application/pdf') {
-                console.log('[StudyForge] Extracting text from PDF...');
-                const parser = new PDFParse({ data: buffer });
-                try {
-                    const data = await parser.getText();
-                    textContent = data.text;
-                } finally {
-                    await parser.destroy();
-                }
+            if (file.type === 'application/pdf' || lowerName.endsWith('.pdf')) {
+                // Keep upload response fast and stable on serverless; PDF text is extracted on-demand in session API.
+                console.log('[StudyForge] Skipping PDF text extraction at upload time.');
+                textContent = '';
             } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || lowerName.endsWith('.docx')) {
                 console.log('[StudyForge] Extracting text from DOCX...');
                 const result = await mammoth.extractRawText({ buffer });

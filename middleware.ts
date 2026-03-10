@@ -91,6 +91,10 @@ function getRegion(request: NextRequest): string {
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const host = request.headers.get('host') ?? '';
+    const STATIC_FILE_EXTENSIONS = [
+        '.svg', '.png', '.ico', '.jpg', '.jpeg', '.gif', '.webp', '.xml',
+        '.js', '.mjs', '.css', '.map', '.txt', '.woff', '.woff2', '.ttf', '.otf'
+    ];
 
     // Determine if this is a subdomain request
     const isAppSubdomain = host.startsWith('app.');
@@ -105,9 +109,8 @@ export async function middleware(request: NextRequest) {
         pathname === '/api' ||
         pathname.startsWith('/favicon') ||
         pathname.startsWith('/locales') ||
-        pathname.endsWith('.svg') ||
-        pathname.endsWith('.png') ||
-        pathname.endsWith('.ico')
+        pathname.startsWith('/pdfjs-worker') ||
+        STATIC_FILE_EXTENSIONS.some((ext) => pathname.endsWith(ext))
     ) {
         return NextResponse.next();
     }
@@ -137,6 +140,7 @@ export async function middleware(request: NextRequest) {
         '/robots.txt',
         '/favicon.ico',
         '/locales',
+        '/pdfjs-worker',
         '/portfolio',
         '/preview',
         '/codingforge'
@@ -417,6 +421,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
-        '/((?!api|_next/static|_next/image|favicon.ico|locales|.*\\.(?:svg|png|jpg|jpeg|gif|webp|xml)$).*)',
+        '/((?!api|_next/static|_next/image|favicon.ico|locales|pdfjs-worker|.*\\.(?:svg|png|jpg|jpeg|gif|webp|xml|ico|js|mjs|css|map|txt|woff|woff2|ttf|otf)$).*)',
     ],
 };
