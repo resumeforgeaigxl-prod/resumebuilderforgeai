@@ -30,12 +30,22 @@ export default function AISidebar({ documentId, onResponse }: AISidebarProps) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ documentId, type, query: customQuery }),
             });
-            const data = await res.json();
-            if (data.success) {
+
+            const contentType = res.headers.get('content-type') || '';
+            let data: { success?: boolean; response?: string; error?: string } = {};
+
+            if (contentType.includes('application/json')) {
+                data = await res.json();
+            } else {
+                const raw = await res.text();
+                data.error = raw?.trim() || `AI request failed (HTTP ${res.status})`;
+            }
+
+            if (data.success && typeof data.response === 'string') {
                 onResponse(data.response);
                 if (type === 'Ask') setQuery('');
             } else {
-                setErrorMessage(data.error || 'AI Error');
+                setErrorMessage(data.error || `AI request failed (HTTP ${res.status})`);
             }
         } catch (error) {
             console.error('AI error:', error);

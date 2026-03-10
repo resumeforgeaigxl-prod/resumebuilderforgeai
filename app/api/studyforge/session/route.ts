@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 import { generateContentGemini } from '@/lib/gemini-service';
-import { PDFParse } from 'pdf-parse';
 import mammoth from 'mammoth';
+
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
     try {
@@ -39,6 +40,8 @@ export async function POST(request: NextRequest) {
                     const buffer = Buffer.from(await fileBlob.arrayBuffer());
 
                     if (doc.file_type === 'application/pdf' || doc.file_path.toLowerCase().endsWith('.pdf')) {
+                        // Lazy-load PDF parser to avoid route init failures when pdf-parse has runtime incompatibilities.
+                        const { PDFParse } = await import('pdf-parse');
                         const parser = new PDFParse({ data: buffer });
                         try {
                             const parsed = await parser.getText();

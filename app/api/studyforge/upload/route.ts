@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 import mammoth from 'mammoth';
 
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
     try {
         const session = await getSession();
