@@ -29,6 +29,7 @@ export default function StudyForgePage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isUploading, setIsUploading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [uploadError, setUploadError] = useState<string | null>(null);
 
     useEffect(() => {
         fetchDocuments();
@@ -36,7 +37,7 @@ export default function StudyForgePage() {
 
     const fetchDocuments = async () => {
         try {
-            const res = await fetch('/api/studyforge/documents');
+            const res = await fetch('/api/studyforge/documents', { cache: 'no-store' });
             const data = await res.json();
             if (data.documents) {
                 setDocuments(data.documents);
@@ -51,6 +52,27 @@ export default function StudyForgePage() {
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+        setUploadError(null);
+
+        const allowedTypes = new Set([
+            'application/pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'text/plain',
+        ]);
+        const lowerName = file.name.toLowerCase();
+
+        const maxBytes = 4 * 1024 * 1024; // Keep below typical serverless body limits.
+        if (!allowedTypes.has(file.type) && !lowerName.endsWith('.docx') && !lowerName.endsWith('.txt') && !lowerName.endsWith('.pdf')) {
+            setUploadError('Unsupported file type. Please upload PDF, DOCX, or TXT.');
+            e.target.value = '';
+            return;
+        }
+
+        if (file.size > maxBytes) {
+            setUploadError('File is too large. Please upload a file up to 4 MB.');
+            e.target.value = '';
+            return;
+        }
 
         setIsUploading(true);
         const formData = new FormData();
@@ -66,12 +88,14 @@ export default function StudyForgePage() {
                 fetchDocuments();
                 router.push(`/${region}/${lang}/studyforge/document/${data.document.id}`);
             } else {
-                alert(data.error || 'Upload failed');
+                setUploadError(data.error || 'Upload failed');
             }
         } catch (error) {
             console.error('Upload error:', error);
+            setUploadError('Upload failed due to a network/server issue. Please try again.');
         } finally {
             setIsUploading(false);
+            e.target.value = '';
         }
     };
 
@@ -131,6 +155,12 @@ export default function StudyForgePage() {
                     className="w-full bg-slate-900/50 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 transition-all"
                 />
             </div>
+
+            {uploadError && (
+                <div className="max-w-md rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm font-medium text-rose-300">
+                    {uploadError}
+                </div>
+            )}
 
             {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-4">

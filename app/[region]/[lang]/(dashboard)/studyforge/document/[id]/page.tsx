@@ -56,7 +56,7 @@ export default function DocumentDetailPage() {
 
     const fetchData = async () => {
         try {
-            const res = await fetch(`/api/studyforge/documents/${id}`);
+            const res = await fetch(`/api/studyforge/documents/${id}`, { cache: 'no-store' });
             const data = await res.json();
             if (data.document) {
                 setDocument(data.document);
@@ -88,9 +88,7 @@ export default function DocumentDetailPage() {
         );
     }
 
-    const fileUrl =
-        document.file_url ||
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/study-documents/${document.file_path}`;
+    const fileUrl = document.file_url || `/api/studyforge/documents/${id}/file`;
 
     return (
         <div className="flex bg-[#030308] -m-8 h-[calc(100vh-5rem)] overflow-hidden">

@@ -18,7 +18,16 @@ export async function GET() {
 
         if (error) throw error;
 
-        return NextResponse.json({ documents: data });
+        return NextResponse.json(
+            { documents: data },
+            {
+                headers: {
+                    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+                    Pragma: 'no-cache',
+                    Expires: '0',
+                },
+            }
+        );
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Failed to fetch documents';
         return NextResponse.json({ error: message }, { status: 500 });

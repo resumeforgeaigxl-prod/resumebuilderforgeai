@@ -19,6 +19,7 @@ interface PDFViewerProps {
 
 export default function PDFViewer({ fileUrl, onLoadSuccess, numPages }: PDFViewerProps) {
     const [isMounted, setIsMounted] = useState(false);
+    const [loadError, setLoadError] = useState<string | null>(null);
 
     useEffect(() => {
         setIsMounted(true);
@@ -29,7 +30,14 @@ export default function PDFViewer({ fileUrl, onLoadSuccess, numPages }: PDFViewe
     return (
         <Document
             file={fileUrl}
-            onLoadSuccess={({ numPages }) => onLoadSuccess(numPages)}
+            onLoadSuccess={({ numPages }) => {
+                setLoadError(null);
+                onLoadSuccess(numPages);
+            }}
+            onLoadError={(error) => {
+                console.error('[StudyForge] PDF load error:', error);
+                setLoadError(error instanceof Error ? error.message : 'Failed to load PDF');
+            }}
             loading={
                 <div className="flex flex-col items-center justify-center p-20 gap-4">
                     <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
@@ -39,7 +47,7 @@ export default function PDFViewer({ fileUrl, onLoadSuccess, numPages }: PDFViewe
             error={
                 <div className="p-10 text-center">
                     <p className="text-rose-400 font-bold mb-2">Failed to load PDF</p>
-                    <p className="text-slate-500 text-xs text-balance">This could be due to a corrupted file or connection issue.</p>
+                    <p className="text-slate-500 text-xs text-balance">{loadError || 'This could be due to a corrupted file or connection issue.'}</p>
                 </div>
             }
         >

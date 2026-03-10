@@ -16,6 +16,28 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'No file uploaded or invalid file format' }, { status: 400 });
         }
 
+        const lowerName = file.name.toLowerCase();
+        const allowedTypes = new Set([
+            'application/pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'text/plain',
+        ]);
+        const maxBytes = 4 * 1024 * 1024;
+
+        if (!allowedTypes.has(file.type) && !lowerName.endsWith('.pdf') && !lowerName.endsWith('.docx') && !lowerName.endsWith('.txt')) {
+            return NextResponse.json(
+                { error: 'Unsupported file type. Please upload PDF, DOCX, or TXT.' },
+                { status: 400 }
+            );
+        }
+
+        if (file.size > maxBytes) {
+            return NextResponse.json(
+                { error: 'File too large. Please upload a file up to 4 MB.' },
+                { status: 413 }
+            );
+        }
+
         console.log(`[StudyForge] Processing file: ${file.name}, type: ${file.type}, size: ${file.size}`);
 
         const supabase = createAdminClient();
@@ -55,7 +77,7 @@ export async function POST(request: NextRequest) {
                 } finally {
                     await parser.destroy();
                 }
-            } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.name.endsWith('.docx')) {
+            } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || lowerName.endsWith('.docx')) {
                 console.log('[StudyForge] Extracting text from DOCX...');
                 const result = await mammoth.extractRawText({ buffer });
                 textContent = result.value;
