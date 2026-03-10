@@ -6,22 +6,55 @@ import { useTranslation } from '@/lib/i18n/I18nProvider';
 import { usePathname } from 'next/navigation';
 import { Sparkles, Github, Twitter, Linkedin, Shield, FileLock } from 'lucide-react';
 
+const INTERNAL_APP_ROOTS = new Set([
+    'dashboard',
+    'careerforge',
+    'resumes',
+    'resume',
+    'roadmap',
+    'mock-interview',
+    'mock-test',
+    'company-prep',
+    'company-prep-interview',
+    'codingforge',
+    'studyforge',
+    'jobforgeai',
+    'dashboard-jobs',
+    'interview-intelligence',
+    'job-alerts',
+    'portfolio',
+    'tools',
+    'account',
+    'billing',
+    'recruiter',
+    'builder',
+]);
+
+function getRouteRoot(pathname: string | null): string {
+    if (!pathname) return '';
+
+    const segments = pathname.split('/').filter(Boolean);
+    if (segments.length === 0) return '';
+
+    // Locale path format: /{region}/{lang}/{root}
+    if (segments.length >= 3) {
+        return segments[2];
+    }
+
+    return segments[0] || '';
+}
+
 export default function Footer() {
     const { t, locale, region } = useTranslation();
     const pathname = usePathname();
 
-    const isDashboard = pathname?.includes('/dashboard') ||
-        pathname?.includes('/roadmap') ||
-        pathname?.includes('/resumes') ||
-        pathname?.includes('/mock-interview') ||
-        pathname?.includes('/company-prep') ||
-        pathname?.includes('/portfolio') ||
-        pathname?.includes('/account') ||
-        pathname?.includes('/jobforgeai') ||
-        pathname?.includes('/mock-test') ||
-        pathname?.includes('/admin');
+    const root = getRouteRoot(pathname);
+    const shouldHideFooter =
+        pathname?.startsWith('/admin') ||
+        pathname?.startsWith('/api') ||
+        INTERNAL_APP_ROOTS.has(root);
 
-    if (isDashboard) {
+    if (shouldHideFooter) {
         return null;
     }
 
