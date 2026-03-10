@@ -17,7 +17,8 @@ export async function getUserCredits(userId: string): Promise<{ credits: number;
 
     if (fetchError && fetchError.code === 'PGRST116') { // Record not found
         // Create initial credits for new user
-        const { data: newUserCredit, error: insertError } = await (supabase as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: newUserCredit, error: insertError } = await supabase
             .from('user_credits')
             .insert({ user_id: userId, credits: DAILY_CREDITS, last_reset: new Date().toISOString() })
             .select()
@@ -27,7 +28,9 @@ export async function getUserCredits(userId: string): Promise<{ credits: number;
             console.error('[Credits] Failed to create record:', insertError);
             return { credits: 0, lastReset: new Date().toISOString() };
         }
-        return { credits: newUserCredit.credits, lastReset: newUserCredit.last_reset };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result = newUserCredit as any;
+        return { credits: result.credits, lastReset: result.last_reset };
     } else if (fetchError) {
         console.error('[Credits] Failed to fetch record:', fetchError);
         return { credits: 0, lastReset: new Date().toISOString() };
@@ -39,7 +42,8 @@ export async function getUserCredits(userId: string): Promise<{ credits: number;
     const diffHours = (now.getTime() - lastReset.getTime()) / (1000 * 60 * 60);
 
     if (diffHours >= 24) {
-        const { data: resetResult, error: resetError } = await (supabase as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: resetResult, error: resetError } = await supabase
             .from('user_credits')
             .update({ credits: DAILY_CREDITS, last_reset: now.toISOString() })
             .eq('user_id', userId)
@@ -48,13 +52,16 @@ export async function getUserCredits(userId: string): Promise<{ credits: number;
 
         if (resetError) {
             console.error('[Credits] Failed to reset record:', resetError);
-            return creditData;
+            return { credits: creditData.credits, lastReset: creditData.last_reset };
         }
-        return { credits: resetResult.credits, lastReset: resetResult.last_reset };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result = resetResult as any;
+        return { credits: result.credits, lastReset: result.last_reset };
     }
 
     return { credits: creditData.credits, lastReset: creditData.last_reset };
 }
+
 
 /**
  * Consumes one ProjectForge credit.
@@ -67,7 +74,7 @@ export async function consumeCredit(userId: string): Promise<boolean> {
         return false;
     }
 
-    const { error } = await (supabase as any)
+    const { error } = await supabase
         .from('user_credits')
         .update({ credits: credits - 1 })
         .eq('user_id', userId);

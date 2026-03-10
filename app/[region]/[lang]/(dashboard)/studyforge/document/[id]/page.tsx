@@ -2,7 +2,8 @@
 
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+
 import { useParams } from 'next/navigation';
 import {
     ChevronLeft,
@@ -63,13 +64,7 @@ export default function DocumentDetailPage() {
     const [numPages, setNumPages] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (id) {
-            fetchData();
-        }
-    }, [id]);
-
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             const res = await fetch(`/api/studyforge/documents/${id}`, { cache: 'no-store' });
             if (!res.ok) {
@@ -88,7 +83,14 @@ export default function DocumentDetailPage() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [id]);
+
+    useEffect(() => {
+        if (id) {
+            fetchData();
+        }
+    }, [id, fetchData]);
+
 
     if (isLoading) {
         return (

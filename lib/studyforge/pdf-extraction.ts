@@ -49,7 +49,8 @@ async function extractTextWithPdfJs(buffer: Buffer): Promise<string> {
             data: new Uint8Array(buffer),
             useSystemFonts: true,
             isEvalSupported: false,
-        } as any);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as unknown as any);
 
         const pdf = await loadingTask.promise;
         let fullText = '';
@@ -58,8 +59,12 @@ async function extractTextWithPdfJs(buffer: Buffer): Promise<string> {
         for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const content = await page.getTextContent();
-            const pageText = content.items
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const pageText = (content.items as any[])
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 .map((item: any) => item.str || '')
+
+
                 .join(' ');
             fullText += pageText + '\n\n';
         }
@@ -77,14 +82,14 @@ async function extractTextWithPdfJs(buffer: Buffer): Promise<string> {
 async function extractOcrText(buffer: Buffer): Promise<string> {
     try {
         console.log('[StudyForge] Initializing OCR fallback...');
-        // @ts-ignore - version 5 imports
         const { getDocument } = await import('pdfjs-dist/legacy/build/pdf.mjs');
         const canvasModule = await import('@napi-rs/canvas');
 
         const loadingTask = getDocument({
             data: new Uint8Array(buffer),
             isEvalSupported: false,
-        } as any);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as unknown as any);
 
         const pdf = await loadingTask.promise;
         const numPages = Math.min(pdf.numPages, MAX_OCR_PAGES);
@@ -96,15 +101,22 @@ async function extractOcrText(buffer: Buffer): Promise<string> {
             const page = await pdf.getPage(i);
             const viewport = page.getViewport({ scale: 2.0 });
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const canvas = (canvasModule as any).createCanvas(viewport.width, viewport.height);
+
             const context = canvas.getContext('2d');
 
             // Render parameters for v5 often require canvas context properly typed or casted
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await (page as any).render({
-                canvasContext: context as any,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                canvasContext: context as unknown as any,
                 viewport: viewport,
                 canvas: canvas, // some versions of v5 need this
             }).promise;
+
+
 
             const imageBuffer = canvas.toBuffer('image/png');
             const { data: { text } } = await worker.recognize(imageBuffer);

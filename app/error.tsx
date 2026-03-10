@@ -1,21 +1,15 @@
 'use client';
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { useEffect } from 'react';
+
 import { ShieldAlert } from 'lucide-react';
 
 export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-
     useEffect(() => {
         if (process.env.NODE_ENV !== 'production') {
             console.error('[App Error Boundary]', error);
         }
-        // Basic heuristic to check login status on the client safely
-        // The session cookie might be HttpOnly, but often there are other context markers, 
-        // or we can just try to see if nextjs has any routing state for it.
-        // If the session token string exists at all, or a similar flag:
-        setIsLoggedIn(document.cookie.includes('session=') || document.cookie.includes('sb-'));
     }, [error]);
+
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-[#070710] text-slate-100 p-4 selection:bg-rose-500/30">

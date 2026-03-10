@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
     try {
         // Step 1: Save request
-        const { data: request, error: requestError } = await (supabase as any)
+        const { data: request, error: requestError } = await supabase
             .from('project_requests')
             .insert({
                 user_id: user.userId,
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
         const projectData = await generateProject(idea);
 
         // Step 3: Save output
-        const { data: output, error: outputError } = await (supabase as any)
+        const { data: output, error: outputError } = await supabase
             .from('project_outputs')
             .insert({
                 request_id: request.id,

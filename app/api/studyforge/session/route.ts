@@ -2,10 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 import { generateContentGemini } from '@/lib/gemini-service';
-import mammoth from 'mammoth';
+interface StudyDocument {
+    id: string;
+    name: string;
+    extracted_text?: string;
+    text_content?: string;
+    text_chunks?: string[];
+    file_type: string;
+}
 
 export const runtime = 'nodejs';
-const MIN_USEFUL_TEXT_LENGTH = 120;
 
 export async function POST(request: NextRequest) {
     try {
@@ -19,23 +25,26 @@ export async function POST(request: NextRequest) {
         const userId = session.userId;
 
         // Verify ownership and fetch pre-processed text
-        const { data: doc, error: docError } = await supabase
+        const { data: docRaw, error: docError } = await supabase
             .from('study_documents')
             .select('id, name, extracted_text, text_content, text_chunks, file_type')
             .eq('id', documentId)
             .eq('user_id', userId)
             .single();
 
-        if (docError || !doc) return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+        if (docError || !docRaw) return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+
+        const doc = docRaw as unknown as StudyDocument;
 
         // Use pre-processed text or chunks
         let extractedText = doc.extracted_text || '';
         const chunks = Array.isArray(doc.text_chunks) ? doc.text_chunks : [];
 
         // If for some reason text is missing in the new fields, fallback to text_content (legacy)
-        if (!extractedText && (doc as any).text_content) {
-            extractedText = (doc as any).text_content;
+        if (!extractedText && doc.text_content) {
+            extractedText = doc.text_content;
         }
+
 
         if (!extractedText || extractedText.length < 10) {
             return NextResponse.json(

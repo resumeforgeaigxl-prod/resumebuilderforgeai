@@ -17,7 +17,6 @@ import {
     Loader2
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 
 export default function ProjectForgeLanding() {
     const params = useParams() as { region: string; lang: string };
@@ -66,9 +65,10 @@ export default function ProjectForgeLanding() {
 
             // Redirect to the project view
             router.push(`/${region}/${lang}/projectforge/${data.projectId}`);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'An unknown error occurred');
         } finally {
+
             setIsGenerating(false);
         }
     };
@@ -228,7 +228,7 @@ export default function ProjectForgeLanding() {
                                 <div className="h-32 bg-white/5 rounded-[20px] w-full animate-pulse animation-delay-300"></div>
                             </div>
                             <div className="mt-auto pt-8 flex items-center justify-between">
-                                <div className="text-xs font-bold text-slate-500 line-clamp-1 italic max-w-[70%]">"Build a fintech dashboard with transaction history..."</div>
+                                <div className="text-xs font-bold text-slate-500 line-clamp-1 italic max-w-[70%]">&quot;Build a fintech dashboard with transaction history...&quot;</div>
                                 <ChevronRight className="w-5 h-5 text-blue-500 animate-bounce-x" />
                             </div>
                         </div>
@@ -239,11 +239,4 @@ export default function ProjectForgeLanding() {
     );
 }
 
-// Custom Animations via CSS (Added to tailwind config or a style tag)
-const styles = `
-@keyframes bounce-x {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(5px); }
-}
-.animate-bounce-x { animation: bounce-x 2s infinite; }
-`;
+

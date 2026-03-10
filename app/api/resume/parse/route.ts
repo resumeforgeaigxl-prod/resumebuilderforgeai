@@ -3,7 +3,6 @@ import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
 import { generateAIResponse, logAIUsage } from '@/lib/ai-provider';
 import mammoth from 'mammoth';
-import { runOCR } from '@/lib/parser/ocrParser';
 
 export const runtime = 'nodejs';
 
@@ -173,9 +172,9 @@ ${rawText}
       return NextResponse.json({ success: true, data: parsed });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: row, error: dbErr } = await (supabase as any)
+    const { data: row, error: dbErr } = await supabase
       .from('resumes')
+
       .insert({
         user_id: session.userId,
         title: parsed.name ? `${parsed.name}'s Resume` : 'Imported Resume',

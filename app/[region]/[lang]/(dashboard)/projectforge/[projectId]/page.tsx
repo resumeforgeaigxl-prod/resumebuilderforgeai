@@ -6,17 +6,15 @@ import {
     ChevronLeft,
     Download,
     Share2,
-    Maximize2,
-    Monitor,
     Layout,
     FileText,
     Code,
     Info,
     Loader2,
-    RefreshCw,
     Terminal,
     Sparkles
 } from 'lucide-react';
+
 import FileTree from '@/components/projectforge/FileTree';
 import CodeViewer from '@/components/projectforge/CodeViewer';
 import PreviewFrame from '@/components/projectforge/PreviewFrame';
@@ -163,10 +161,10 @@ export default function ProjectViewer() {
                         ].map((tab) => (
                             <button
                                 key={tab.id}
-                                onClick={() => setActiveTab(tab.id as any)}
+                                onClick={() => setActiveTab(tab.id as 'code' | 'preview' | 'explanation')}
                                 className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-3 transition-all ${activeTab === tab.id
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                                        : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                                    : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'
                                     }`}
                             >
                                 {tab.icon}

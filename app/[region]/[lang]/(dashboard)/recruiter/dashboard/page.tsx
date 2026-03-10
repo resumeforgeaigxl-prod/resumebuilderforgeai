@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+
 import { useRouter } from 'next/navigation';
 import {
     Search, Filter, User, MapPin,
@@ -36,13 +37,7 @@ export default function RecruiterHubPage() {
             .catch(() => router.push('/dashboard'));
     }, [router]);
 
-    useEffect(() => {
-        if (!authorizing) {
-            handleSearch();
-        }
-    }, [authorizing, expFilters, typeFilters]); // Trigger search on filter change
-
-    const handleSearch = async (e?: React.FormEvent) => {
+    const handleSearch = useCallback(async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
         setLoading(true);
         try {
@@ -61,7 +56,14 @@ export default function RecruiterHubPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [query, expFilters, typeFilters]);
+
+    useEffect(() => {
+        if (!authorizing) {
+            handleSearch();
+        }
+    }, [authorizing, handleSearch]); // Trigger search on filter change or authorization
+
 
     if (authorizing) {
         return (
@@ -223,8 +225,11 @@ export default function RecruiterHubPage() {
                                     >
                                         <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex-shrink-0 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
                                             {c.users?.profile_image ? (
-                                                <img src={c.users.profile_image} className="w-full h-full rounded-3xl object-cover" />
+                                                /* eslint-disable-next-line @next/next/no-img-element */
+                                                <img src={c.users.profile_image} alt={c.users?.full_name || 'Candidate'} className="w-full h-full rounded-3xl object-cover" />
                                             ) : (
+
+
                                                 <User className="w-10 h-10" />
                                             )}
                                         </div>
