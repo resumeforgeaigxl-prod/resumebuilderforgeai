@@ -59,6 +59,250 @@ interface Question {
     coding_companies: Company[];
 }
 
+const EXPLANATION_SECTION_ORDER = [
+    'Problem Understanding',
+    'Intuition',
+    'Algorithm Steps',
+    'Code Explanation',
+    'Example Walkthrough',
+    'Time Complexity',
+    'Space Complexity',
+    'Edge Cases',
+    'Interview Follow-Up Questions',
+] as const;
+
+type ExplanationSectionTitle = (typeof EXPLANATION_SECTION_ORDER)[number];
+type StructuredExplanation = Record<ExplanationSectionTitle, string>;
+
+type ExplanationChunk =
+    | { type: 'markdown'; content: string }
+    | { type: 'code'; language: string; content: string };
+
+const SECTION_ALIAS_MAP: Record<ExplanationSectionTitle, string[]> = {
+    'Problem Understanding': ['problem understanding', 'problem explanation', 'problem statement', 'problem'],
+    'Intuition': ['intuition', 'core idea', 'idea', 'insight'],
+    'Algorithm Steps': ['algorithm steps', 'approach', 'step by step', 'steps', 'algorithm'],
+    'Code Explanation': ['code explanation', 'solution', 'implementation', 'code walkthrough'],
+    'Example Walkthrough': ['example walkthrough', 'walkthrough', 'dry run', 'example trace', 'example'],
+    'Time Complexity': ['time complexity', 'complexity analysis'],
+    'Space Complexity': ['space complexity', 'memory complexity'],
+    'Edge Cases': ['edge cases', 'corner cases', 'special cases'],
+    'Interview Follow-Up Questions': ['interview follow-up questions', 'interview follow up questions', 'follow-up questions', 'follow up questions', 'interview tips'],
+};
+
+const BULLET_PREFERRED_SECTIONS = new Set<ExplanationSectionTitle>([
+    'Intuition',
+    'Algorithm Steps',
+    'Example Walkthrough',
+    'Edge Cases',
+    'Interview Follow-Up Questions',
+]);
+
+function createEmptyStructuredExplanation(): StructuredExplanation {
+    return EXPLANATION_SECTION_ORDER.reduce((acc, section) => {
+        acc[section] = '';
+        return acc;
+    }, {} as StructuredExplanation);
+}
+
+function normalizeHeadingText(value: string): string {
+    return value
+        .toLowerCase()
+        .replace(/[*_`:#]/g, '')
+        .replace(/[^\w\s-]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function getCanonicalSection(heading: string): ExplanationSectionTitle | null {
+    const normalized = normalizeHeadingText(heading);
+    if (!normalized) {
+        return null;
+    }
+
+    for (const section of EXPLANATION_SECTION_ORDER) {
+        for (const alias of SECTION_ALIAS_MAP[section]) {
+            if (normalized === alias || normalized.includes(alias)) {
+                return section;
+            }
+        }
+    }
+
+    return null;
+}
+
+function detectSectionHeading(line: string): ExplanationSectionTitle | null {
+    const trimmed = line.trim();
+    if (!trimmed) {
+        return null;
+    }
+
+    const markdownHeading = trimmed.match(/^#{1,6}\s+(.+)$/);
+    if (markdownHeading) {
+        return getCanonicalSection(markdownHeading[1]);
+    }
+
+    const numberedHeading = trimmed.match(/^\d+\s*[.)-]\s*(.+)$/);
+    if (numberedHeading) {
+        return getCanonicalSection(numberedHeading[1]);
+    }
+
+    const boldHeading = trimmed.match(/^\*\*(.+)\*\*:?\s*$/);
+    if (boldHeading) {
+        return getCanonicalSection(boldHeading[1]);
+    }
+
+    return null;
+}
+
+function extractComplexityLine(markdown: string, kind: 'time' | 'space'): string | null {
+    const regex = new RegExp(`${kind}\\s*complexity\\s*[:\\-]\\s*([^\\n]+)`, 'i');
+    const match = markdown.match(regex);
+    return match?.[1]?.trim() || null;
+}
+
+function ensureBulletFormatting(content: string): string {
+    if (!content || content.includes('```')) {
+        return content;
+    }
+
+    const alreadyList = /^\s*([-*+]|\d+\.)\s+/m.test(content);
+    if (alreadyList) {
+        return content;
+    }
+
+    const points = content
+        .split(/\n+/)
+        .flatMap((line) => line.split(/(?<=[.!?])\s+(?=[A-Z])/))
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
+
+    if (points.length === 0) {
+        return content;
+    }
+
+    return points.map((point) => `- ${point}`).join('\n');
+}
+
+function normalizeSectionContent(section: ExplanationSectionTitle, content: string): string {
+    const trimmed = content.replace(/\n{3,}/g, '\n\n').trim();
+    if (!trimmed) {
+        return '';
+    }
+
+    if (section === 'Time Complexity' || section === 'Space Complexity') {
+        if (/^\s*[-*+]\s+/m.test(trimmed)) {
+            return trimmed;
+        }
+        return `- ${trimmed}`;
+    }
+
+    if (BULLET_PREFERRED_SECTIONS.has(section)) {
+        return ensureBulletFormatting(trimmed);
+    }
+
+    return trimmed;
+}
+
+function parseStructuredExplanation(markdown: string): StructuredExplanation {
+    const normalized = (markdown || '').replace(/\r\n/g, '\n').trim();
+    const sections = createEmptyStructuredExplanation();
+
+    if (!normalized) {
+        return sections;
+    }
+
+    const lines = normalized.split('\n');
+    let currentSection: ExplanationSectionTitle = 'Problem Understanding';
+    let hasRecognizedHeading = false;
+
+    for (const line of lines) {
+        const mappedSection = detectSectionHeading(line);
+        if (mappedSection) {
+            currentSection = mappedSection;
+            hasRecognizedHeading = true;
+            continue;
+        }
+
+        sections[currentSection] = sections[currentSection]
+            ? `${sections[currentSection]}\n${line}`
+            : line;
+    }
+
+    if (!hasRecognizedHeading) {
+        sections['Problem Understanding'] = normalized;
+    }
+
+    const combinedContent = Object.values(sections).join('\n');
+    if (!sections['Time Complexity']) {
+        const extractedTime = extractComplexityLine(combinedContent, 'time');
+        if (extractedTime) {
+            sections['Time Complexity'] = extractedTime;
+        }
+    }
+
+    if (!sections['Space Complexity']) {
+        const extractedSpace = extractComplexityLine(combinedContent, 'space');
+        if (extractedSpace) {
+            sections['Space Complexity'] = extractedSpace;
+        }
+    }
+
+    if (!sections['Code Explanation']) {
+        const firstCodeBlock = combinedContent.match(/```[a-zA-Z0-9_+\-]*\n[\s\S]*?```/);
+        if (firstCodeBlock) {
+            sections['Code Explanation'] = firstCodeBlock[0];
+        }
+    }
+
+    for (const section of EXPLANATION_SECTION_ORDER) {
+        sections[section] = normalizeSectionContent(section, sections[section]);
+    }
+
+    return sections;
+}
+
+function splitMarkdownAndCodeBlocks(markdown: string): ExplanationChunk[] {
+    if (!markdown.trim()) {
+        return [];
+    }
+
+    const chunks: ExplanationChunk[] = [];
+    const codeBlockRegex = /```([a-zA-Z0-9_+\-]*)\n([\s\S]*?)```/g;
+    let lastIndex = 0;
+
+    while (true) {
+        const match = codeBlockRegex.exec(markdown);
+        if (!match) {
+            break;
+        }
+
+        const before = markdown.slice(lastIndex, match.index).trim();
+        if (before) {
+            chunks.push({ type: 'markdown', content: before });
+        }
+
+        chunks.push({
+            type: 'code',
+            language: match[1] || 'text',
+            content: match[2].trimEnd(),
+        });
+
+        lastIndex = codeBlockRegex.lastIndex;
+    }
+
+    const trailing = markdown.slice(lastIndex).trim();
+    if (trailing) {
+        chunks.push({ type: 'markdown', content: trailing });
+    }
+
+    if (chunks.length === 0) {
+        chunks.push({ type: 'markdown', content: markdown });
+    }
+
+    return chunks;
+}
+
 export default function QuestionDetailPage() {
     const params = useParams() as { region: string; lang: string; slug: string };
     const router = useRouter();
@@ -113,6 +357,8 @@ export default function QuestionDetailPage() {
             setExplaining(false);
         }
     };
+
+    const structuredExplanation = parseStructuredExplanation(aiExplanation);
 
     if (loading) return (
         <div className="flex justify-center items-center h-[60vh]">
@@ -343,19 +589,70 @@ export default function QuestionDetailPage() {
                                             <p className="text-[10px] text-slate-500 uppercase tracking-widest">Powered by Gemini Flash</p>
                                         </div>
                                     </div>
-                                    <div className="prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed prose-code:text-blue-400 prose-strong:text-white prose-headings:text-indigo-400">
-                                        {explaining ? (
-                                            <div className="space-y-4">
-                                                <div className="h-4 bg-white/5 rounded-full w-3/4 animate-pulse"></div>
-                                                <div className="h-4 bg-white/5 rounded-full w-1/2 animate-pulse"></div>
-                                                <div className="h-4 bg-white/5 rounded-full w-5/6 animate-pulse"></div>
-                                            </div>
-                                        ) : (
-                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                                {aiExplanation}
-                                            </ReactMarkdown>
-                                        )}
-                                    </div>
+                                    {explaining ? (
+                                        <div className="space-y-4">
+                                            <div className="h-4 bg-white/5 rounded-full w-3/4 animate-pulse"></div>
+                                            <div className="h-4 bg-white/5 rounded-full w-1/2 animate-pulse"></div>
+                                            <div className="h-4 bg-white/5 rounded-full w-5/6 animate-pulse"></div>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {EXPLANATION_SECTION_ORDER.map((sectionTitle, index) => {
+                                                const sectionMarkdown =
+                                                    structuredExplanation[sectionTitle] ||
+                                                    '- Not provided in this response.';
+
+                                                const chunks = splitMarkdownAndCodeBlocks(sectionMarkdown);
+
+                                                return (
+                                                    <article
+                                                        key={sectionTitle}
+                                                        className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
+                                                    >
+                                                        <h4 className="text-[11px] font-black uppercase tracking-widest text-indigo-300 mb-3">
+                                                            {index + 1}. {sectionTitle}
+                                                        </h4>
+
+                                                        <div className="space-y-3">
+                                                            {chunks.map((chunk, chunkIndex) => (
+                                                                chunk.type === 'code' ? (
+                                                                    <div
+                                                                        key={`${sectionTitle}-code-${chunkIndex}`}
+                                                                        className="rounded-xl border border-white/10 overflow-hidden bg-[#0d0d1a]"
+                                                                    >
+                                                                        <div className="px-3 py-2 text-[10px] uppercase tracking-widest font-bold text-slate-400 border-b border-white/10 bg-white/5">
+                                                                            {chunk.language || selectedLang || 'code'}
+                                                                        </div>
+                                                                        <SyntaxHighlighter
+                                                                            language={chunk.language.toLowerCase()}
+                                                                            style={atomOneDark}
+                                                                            customStyle={{
+                                                                                margin: 0,
+                                                                                padding: '14px',
+                                                                                fontSize: '12px',
+                                                                                background: 'transparent',
+                                                                            }}
+                                                                        >
+                                                                            {chunk.content}
+                                                                        </SyntaxHighlighter>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div
+                                                                        key={`${sectionTitle}-markdown-${chunkIndex}`}
+                                                                        className="prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed prose-code:text-blue-300 prose-strong:text-white prose-li:marker:text-indigo-400"
+                                                                    >
+                                                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                                            {chunk.content}
+                                                                        </ReactMarkdown>
+                                                                    </div>
+                                                                )
+                                                            ))}
+                                                        </div>
+                                                    </article>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
                                 </div>
                             </section>
                         )}

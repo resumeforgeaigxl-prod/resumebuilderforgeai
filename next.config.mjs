@@ -11,6 +11,7 @@ const nextConfig = {
     experimental: {
         serverComponentsExternalPackages: ["@sparticuz/chromium"],
     },
+    transpilePackages: ['react-pdf', 'pdfjs-dist'],
     async headers() {
         return [
             {

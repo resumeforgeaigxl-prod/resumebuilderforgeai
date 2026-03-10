@@ -3,7 +3,7 @@
 import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning, Briefcase, FileHeart, Receipt, LifeBuoy, Mic, Compass, TrendingUp, Bell } from 'lucide-react';
+import { Shield, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning, Briefcase, FileHeart, Receipt, LifeBuoy, Mic, Compass, TrendingUp, Bell, BookOpen } from 'lucide-react';
 
 export default function AdminLayoutClient({ children, profile }: { children: ReactNode, profile: { email: string } }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -45,6 +45,8 @@ export default function AdminLayoutClient({ children, profile }: { children: Rea
         { href: '/admin/invoices', label: 'Invoices', icon: Receipt },
         { href: '/admin/support', label: 'Support Tickets', icon: LifeBuoy },
         { href: '/admin/coupons', label: 'Coupons', icon: Ticket },
+        { href: '/admin/codingforge', label: 'CodingForge AI', icon: BrainCircuit },
+        { href: '/admin/studyforge', label: 'StudyForge AI', icon: BookOpen },
         { href: '/admin/ai-monitoring', label: 'AI Monitoring', icon: MessageSquareWarning },
         { href: '/admin/logs', label: 'Audit Logs', icon: ScrollText },
     ];

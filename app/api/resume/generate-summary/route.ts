@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 Generate an authentic, JD-aligned professional summary.
 
 RULES:
-- Keep it 2–3 concise lines (no more).
+- Keep it 2–4 concise lines (no more).
 - If a Job Description is provided, align the summary to that role by including matching keywords naturally.
 - Reflect the candidate's REAL career stage (e.g., student, junior, or professional) based on Education and Projects.
 - Tone: Realistic and hands-on. 

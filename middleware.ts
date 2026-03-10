@@ -136,7 +136,10 @@ export async function middleware(request: NextRequest) {
         '/terms',
         '/robots.txt',
         '/favicon.ico',
-        '/locales'
+        '/locales',
+        '/portfolio',
+        '/preview',
+        '/codingforge'
     ];
 
     const isRootLevelPath = ROOT_LEVEL_PATHS.some(p => pathname.startsWith(p));
@@ -351,7 +354,9 @@ export async function middleware(request: NextRequest) {
         normalizedPath.startsWith('/jobs') ||
         normalizedPath.startsWith('/job/') ||
         normalizedPath.startsWith('/companies/') ||
-        normalizedPath.startsWith('/p/');
+        normalizedPath.startsWith('/p/') ||
+        normalizedPath.startsWith('/portfolio/') ||
+        normalizedPath.startsWith('/preview/');
     const isCompleteProfile = normalizedPath === '/complete-profile';
 
     if (!session && !isAuthRoute && !isPublicRoute && !isCompleteProfile) {

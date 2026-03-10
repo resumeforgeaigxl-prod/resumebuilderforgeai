@@ -37,6 +37,7 @@ export function stripMarkdown(text: string): string {
 
 /**
  * Specifically extracts JSON from a string, handles code fences.
+ * Supports both objects {...} and arrays [...]
  */
 export function extractJson(text: string): string {
     // Try to find content between ```json and ```
@@ -45,10 +46,21 @@ export function extractJson(text: string): string {
         return jsonMatch[1].trim();
     }
 
-    // If no code blocks, try to find the first { and last }
+    // Try to find the first and last array brackets
+    const firstBracket = text.indexOf('[');
+    const lastBracket = text.lastIndexOf(']');
+
+    // Try to find the first and last braces
     const firstBrace = text.indexOf('{');
     const lastBrace = text.lastIndexOf('}');
-    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+
+    // Determine if we should treat it as an array or object based on which appears first
+    const hasArray = firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket;
+    const hasObject = firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace;
+
+    if (hasArray && (!hasObject || firstBracket < firstBrace)) {
+        return text.substring(firstBracket, lastBracket + 1).trim();
+    } else if (hasObject) {
         return text.substring(firstBrace, lastBrace + 1).trim();
     }
 
@@ -91,7 +103,7 @@ async function fetchFromOpenRouter(
                 },
             ],
             temperature: temp ?? 0.2,
-            max_tokens: maxTokens ?? 2000,
+            max_tokens: maxTokens ?? 4000,
         }),
     });
 

@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-import { cookies } from 'next/headers';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_change_in_production';
 const COOKIE_NAME = 'resume_forge_auth';
@@ -27,6 +26,7 @@ export async function createSession(payload: AuthSession) {
 
     const token = jwt.sign(cleanPayload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 
+    const { cookies } = await import('next/headers');
     cookies().set(COOKIE_NAME, token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -38,6 +38,7 @@ export async function createSession(payload: AuthSession) {
 }
 
 export async function getSession(): Promise<AuthSession | null> {
+    const { cookies } = await import('next/headers');
     const token = cookies().get(COOKIE_NAME)?.value;
 
     if (!token) return null;
@@ -51,6 +52,7 @@ export async function getSession(): Promise<AuthSession | null> {
 }
 
 export async function clearSession() {
+    const { cookies } = await import('next/headers');
     cookies().delete(COOKIE_NAME);
 }
 

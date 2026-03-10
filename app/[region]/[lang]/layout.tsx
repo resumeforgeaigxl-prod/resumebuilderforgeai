@@ -88,14 +88,16 @@ export default async function LocaleLayout({
 
     return (
         <I18nProvider>
-            <div className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#070710] text-slate-200`}>
+            <div className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#070710] text-slate-200 min-h-screen flex flex-col`}>
                 <Suspense fallback={null}>
                     <PostHogInit user={user} />
                 </Suspense>
                 <HeaderWrapper>
                     <Header lang={params.lang} region={params.region} />
                 </HeaderWrapper>
-                {children}
+                <div className="flex-1 flex flex-col">
+                    {children}
+                </div>
                 <Footer />
                 <CookieBanner />
             </div>

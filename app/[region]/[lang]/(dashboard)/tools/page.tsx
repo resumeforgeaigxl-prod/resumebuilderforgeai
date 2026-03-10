@@ -1,6 +1,6 @@
 'use client';
 import { useParams } from 'next/navigation';
-import { Brain, Globe, MessageSquareWarning, Sparkles, Wrench, ArrowRight } from 'lucide-react';
+import { Brain, Globe, MessageSquareWarning, Sparkles, Wrench, ArrowRight, Code2 } from 'lucide-react';
 import Link from 'next/link';
 
 const TOOLS = [
@@ -51,6 +51,18 @@ const TOOLS = [
         border: 'border-orange-500/20',
         hoverBorder: 'hover:border-orange-400/40',
         gradient: 'from-orange-600/15 to-red-600/15'
+    },
+    {
+        id: 'codingforge',
+        title: 'CodingForge Integrated IDE',
+        description: 'Solve interview coding problems, run code in real-time, and master data structures with our built-in Monaco editor.',
+        icon: Code2,
+        href: '/codingforge',
+        color: 'text-blue-500',
+        bg: 'bg-blue-500/10',
+        border: 'border-blue-500/20',
+        hoverBorder: 'hover:border-blue-400/40',
+        gradient: 'from-blue-600/15 to-cyan-600/15'
     }
 ];
 

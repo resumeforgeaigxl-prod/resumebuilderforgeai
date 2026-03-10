@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import {
     Compass, Loader2, Send, CheckCircle2,
     Calendar, Clock, Target, Info, Sparkles, BookOpen
@@ -27,7 +29,30 @@ interface RoadmapData {
     created_at: string;
 }
 
+interface MappedSkillItem {
+    item_index: number;
+    skill: string;
+    confidence: number;
+    topic: {
+        id: string;
+        title: string;
+        slug: string;
+        language_name: string;
+        language_slug: string;
+    };
+}
+
+interface MappedStep {
+    step_index: number;
+    step_name: string;
+    items: MappedSkillItem[];
+}
+
 export default function RoadmapGenerator() {
+    const params = useParams() as { region: string; lang: string };
+    const region = params?.region || 'in';
+    const lang = params?.lang || 'en';
+
     const [targetRole, setTargetRole] = useState('');
     const [experience, setExperience] = useState('beginner');
     const [time, setTime] = useState('5-10 hours');
@@ -35,6 +60,8 @@ export default function RoadmapGenerator() {
     const [roadmaps, setRoadmaps] = useState<RoadmapData[]>([]);
     const [activeRoadmap, setActiveRoadmap] = useState<RoadmapData | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [mappingLoading, setMappingLoading] = useState(false);
+    const [skillTopicMap, setSkillTopicMap] = useState<Record<string, MappedSkillItem>>({});
 
     useEffect(() => {
         setError(null);
@@ -51,6 +78,59 @@ export default function RoadmapGenerator() {
                 setError('Failed to load your previously generated roadmaps.');
             });
     }, []);
+
+    useEffect(() => {
+        if (!activeRoadmap?.roadmap_json?.steps?.length) {
+            setSkillTopicMap({});
+            return;
+        }
+
+        let cancelled = false;
+        setMappingLoading(true);
+
+        fetch('/api/careerforge/skills/map', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                targetRole: activeRoadmap.target_role,
+                steps: activeRoadmap.roadmap_json.steps.map((step) => ({
+                    name: step.name,
+                    items: step.items,
+                })),
+            }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (cancelled) return;
+
+                if (data.success && Array.isArray(data.mapped_steps)) {
+                    const nextMap: Record<string, MappedSkillItem> = {};
+                    (data.mapped_steps as MappedStep[]).forEach((step) => {
+                        step.items.forEach((item) => {
+                            nextMap[`${step.step_index}:${item.item_index}`] = item;
+                        });
+                    });
+                    setSkillTopicMap(nextMap);
+                } else {
+                    setSkillTopicMap({});
+                }
+            })
+            .catch((mapError) => {
+                console.error('Failed to map roadmap skills to learning topics', mapError);
+                if (!cancelled) {
+                    setSkillTopicMap({});
+                }
+            })
+            .finally(() => {
+                if (!cancelled) {
+                    setMappingLoading(false);
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [activeRoadmap]);
 
     const generateRoadmap = async () => {
         if (!targetRole) return;
@@ -255,12 +335,36 @@ export default function RoadmapGenerator() {
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div className="space-y-3">
                                                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5"><Send className="w-3 h-3" /> Core Skills</p>
+                                                    {mappingLoading && (
+                                                        <p className="text-[10px] font-bold text-indigo-400/80 uppercase tracking-widest">Mapping to Learning Library...</p>
+                                                    )}
                                                     <div className="flex flex-wrap gap-2">
                                                         {step.items.map((item, i) => (
-                                                            <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 text-xs text-slate-300 border border-white/5 hover:border-indigo-500/30 transition-colors">
-                                                                <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />
-                                                                {item}
-                                                            </div>
+                                                            (() => {
+                                                                const mapped = skillTopicMap[`${idx}:${i}`];
+
+                                                                if (!mapped?.topic) {
+                                                                    return (
+                                                                        <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 text-xs text-slate-300 border border-white/5 hover:border-indigo-500/30 transition-colors">
+                                                                            <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />
+                                                                            {item}
+                                                                        </div>
+                                                                    );
+                                                                }
+
+                                                                return (
+                                                                    <Link
+                                                                        key={i}
+                                                                        href={`/${region}/${lang}/careerforge/library/${mapped.topic.language_slug}/${mapped.topic.slug}`}
+                                                                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 text-xs text-slate-200 border border-indigo-500/20 hover:border-indigo-500/60 hover:bg-indigo-500/10 transition-colors"
+                                                                        title={`Open ${mapped.topic.title} (${mapped.topic.language_name})`}
+                                                                    >
+                                                                        <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />
+                                                                        {item}
+                                                                        <BookOpen className="w-3.5 h-3.5 text-indigo-300" />
+                                                                    </Link>
+                                                                );
+                                                            })()
                                                         ))}
                                                     </div>
                                                 </div>
