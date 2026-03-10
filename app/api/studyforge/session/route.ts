@@ -3,8 +3,10 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 import { generateContentGemini } from '@/lib/gemini-service';
 import mammoth from 'mammoth';
+import { extractPdfTextWithFallback } from '@/lib/studyforge/pdf-extraction';
 
 export const runtime = 'nodejs';
+const MIN_USEFUL_TEXT_LENGTH = 120;
 
 export async function POST(request: NextRequest) {
     try {
@@ -28,9 +30,15 @@ export async function POST(request: NextRequest) {
         if (docError || !doc) return NextResponse.json({ error: 'Document not found' }, { status: 404 });
 
         let extractedText = (doc.text_content || '').trim();
+        const isPdfDocument =
+            doc.file_type === 'application/pdf' ||
+            (doc.file_path || '').toLowerCase().endsWith('.pdf');
+        const shouldReExtract =
+            !!doc.file_path &&
+            (!extractedText || (isPdfDocument && extractedText.length < MIN_USEFUL_TEXT_LENGTH));
 
         // Backfill text extraction if legacy document row has empty text_content.
-        if (!extractedText && doc.file_path) {
+        if (shouldReExtract) {
             try {
                 const { data: fileBlob, error: fileError } = await supabase.storage
                     .from('study-documents')
@@ -39,16 +47,20 @@ export async function POST(request: NextRequest) {
                 if (!fileError && fileBlob) {
                     const buffer = Buffer.from(await fileBlob.arrayBuffer());
 
-                    if (doc.file_type === 'application/pdf' || doc.file_path.toLowerCase().endsWith('.pdf')) {
-                        // Lazy-load PDF parser to avoid route init failures when pdf-parse has runtime incompatibilities.
-                        const { PDFParse } = await import('pdf-parse');
-                        const parser = new PDFParse({ data: buffer });
-                        try {
-                            const parsed = await parser.getText();
-                            extractedText = (parsed.text || '').trim();
-                        } finally {
-                            await parser.destroy();
+                    if (isPdfDocument) {
+                        console.log('[StudyForge] Analyzing document text...');
+                        const pdfResult = await extractPdfTextWithFallback(buffer, {
+                            enableOcrFallback: true,
+                            minUsefulTextLength: MIN_USEFUL_TEXT_LENGTH,
+                            maxOcrPages: 15,
+                            ocrScale: 2,
+                            ocrLanguage: 'eng',
+                        });
+                        extractedText = (pdfResult.text || '').trim();
+                        if (pdfResult.ocrUsed) {
+                            console.log('[StudyForge] Running OCR extraction...');
                         }
+                        console.log(`[StudyForge] Extraction method: ${pdfResult.method} | chars: ${extractedText.length}`);
                     } else if (doc.file_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || doc.file_path.toLowerCase().endsWith('.docx')) {
                         const result = await mammoth.extractRawText({ buffer });
                         extractedText = (result.value || '').trim();
@@ -71,7 +83,7 @@ export async function POST(request: NextRequest) {
 
         if (!extractedText) {
             return NextResponse.json(
-                { error: 'Could not extract readable text from this file. Please upload a text-based PDF/DOCX/TXT.' },
+                { error: 'Document analysis is still in progress. Please try again in a moment.' },
                 { status: 422 }
             );
         }

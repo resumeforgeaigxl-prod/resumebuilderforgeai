@@ -9,7 +9,7 @@ const nextConfig = {
         ],
     },
     experimental: {
-        serverComponentsExternalPackages: ["@sparticuz/chromium"],
+        serverComponentsExternalPackages: ["@sparticuz/chromium", "@napi-rs/canvas"],
     },
     transpilePackages: ['react-pdf', 'pdfjs-dist'],
     async headers() {

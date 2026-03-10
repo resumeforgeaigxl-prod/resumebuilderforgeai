@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
     Sparkles,
     FileText,
@@ -20,10 +20,23 @@ export default function AISidebar({ documentId, onResponse }: AISidebarProps) {
     const [loadingType, setLoadingType] = useState<string | null>(null);
     const [query, setQuery] = useState('');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
+    const ocrHintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (ocrHintTimerRef.current) clearTimeout(ocrHintTimerRef.current);
+        };
+    }, []);
 
     const handleAction = async (type: string, customQuery?: string) => {
         setLoadingType(type);
         setErrorMessage(null);
+        setLoadingMessage('Analyzing document...');
+        if (ocrHintTimerRef.current) clearTimeout(ocrHintTimerRef.current);
+        ocrHintTimerRef.current = setTimeout(() => {
+            setLoadingMessage('Running OCR extraction...');
+        }, 4500);
         try {
             const res = await fetch('/api/studyforge/session', {
                 method: 'POST',
@@ -51,6 +64,11 @@ export default function AISidebar({ documentId, onResponse }: AISidebarProps) {
             console.error('AI error:', error);
             setErrorMessage('Unable to connect to AI service. Please try again.');
         } finally {
+            if (ocrHintTimerRef.current) {
+                clearTimeout(ocrHintTimerRef.current);
+                ocrHintTimerRef.current = null;
+            }
+            setLoadingMessage(null);
             setLoadingType(null);
         }
     };
@@ -110,6 +128,11 @@ export default function AISidebar({ documentId, onResponse }: AISidebarProps) {
                         {loadingType === 'Ask' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                     </button>
                 </div>
+                {loadingType && loadingMessage && (
+                    <p className="mt-3 text-[10px] font-bold text-indigo-300 uppercase tracking-wide">
+                        {loadingMessage}
+                    </p>
+                )}
                 {errorMessage && (
                     <p className="mt-3 text-[10px] font-bold text-rose-400 uppercase tracking-wide">
                         {errorMessage}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 import mammoth from 'mammoth';
+import { extractPdfTextWithFallback } from '@/lib/studyforge/pdf-extraction';
 
 export const runtime = 'nodejs';
 
@@ -79,9 +80,12 @@ export async function POST(request: NextRequest) {
         let textContent = '';
         try {
             if (resolvedFileType === 'application/pdf' || lowerName.endsWith('.pdf')) {
-                // Keep upload response fast and stable on serverless; PDF text is extracted on-demand in session API.
-                console.log('[StudyForge] Skipping PDF text extraction at upload time.');
-                textContent = '';
+                console.log('[StudyForge] Running PDF text extraction (step 1: pdf-parse)...');
+                const pdfResult = await extractPdfTextWithFallback(buffer, {
+                    enableOcrFallback: false,
+                });
+                textContent = pdfResult.text;
+                console.log(`[StudyForge] PDF extraction method: ${pdfResult.method} | chars: ${textContent.length}`);
             } else if (resolvedFileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || lowerName.endsWith('.docx')) {
                 console.log('[StudyForge] Extracting text from DOCX...');
                 const result = await mammoth.extractRawText({ buffer });
