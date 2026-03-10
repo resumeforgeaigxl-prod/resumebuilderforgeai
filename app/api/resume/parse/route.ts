@@ -7,20 +7,14 @@ import { runOCR } from '@/lib/parser/ocrParser';
 
 export const runtime = 'nodejs';
 
-async function parsePdf(buffer: Buffer): Promise<string> {
+import { extractTextFromPdf } from '@/lib/pdf-service';
+
+async function parsePdf(buffer: Buffer, filename: string): Promise<string> {
   try {
-    const mod = await import('pdf-parse');
-    if ('PDFParse' in mod) {
-      const { PDFParse } = mod as unknown as { PDFParse: new (o: { data: Uint8Array }) => { getText: () => Promise<{ text: string }> } };
-      const result = await new PDFParse({ data: new Uint8Array(buffer) }).getText();
-      return result.text;
-    }
-    const fn = (mod as unknown as { default?: (b: Buffer) => Promise<{ text: string }> }).default;
-    if (typeof fn === 'function') return (await fn(buffer)).text;
-    throw new Error('pdf-parse: no usable export');
+    return await extractTextFromPdf(buffer, filename);
   } catch (err) {
-    console.error('[PDF]', err);
-    throw new Error('PDF parsing failed.');
+    console.error('[PDF Service Integration]', err);
+    throw new Error('PDF parsing failed. The extraction service might be offline.');
   }
 }
 
@@ -49,31 +43,9 @@ export async function POST(request: Request) {
       rawText = (await mammoth.extractRawText({ buffer })).value;
       parseMethod = 'mammoth';
     } else {
-      // PDF: try pdf-parse first
-      let pdfText = '';
-      try {
-        pdfText = await parsePdf(buffer);
-      } catch {
-        console.warn('[Parse] pdf-parse threw — will attempt OCR fallback');
-      }
-
-      if (pdfText && pdfText.trim().length >= 100) {
-        // pdf-parse succeeded with enough text
-        rawText = pdfText;
-        parseMethod = 'pdf-parse';
-      } else {
-        // Text too short or empty — scanned / image PDF → try OCR
-        console.log('[Parse] PDF text too small (got', pdfText.trim().length, 'chars). Running OCR fallback...');
-        const ocrText = await runOCR(buffer);
-        if (ocrText && ocrText.trim().length > 50) {
-          rawText = ocrText;
-          parseMethod = 'ocr-fallback';
-        } else {
-          // Both methods failed — use whatever we have or error
-          rawText = pdfText || ocrText;
-          parseMethod = rawText.trim() ? 'pdf-parse-partial' : 'failed';
-        }
-      }
+      // PDF: using Python Extraction Service (PyMuPDF / fitz)
+      rawText = await parsePdf(buffer, file.name);
+      parseMethod = 'python-service-fitz';
     }
 
     console.log(`[Parse] Extraction method: ${parseMethod} | chars: ${rawText?.trim().length ?? 0}`);

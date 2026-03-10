@@ -28,6 +28,7 @@ export default function StudyForgePage() {
     const [documents, setDocuments] = useState<Document[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isUploading, setIsUploading] = useState(false);
+    const [uploadStage, setUploadStage] = useState<'idle' | 'uploading' | 'extracting' | 'preparing'>('idle');
     const [searchTerm, setSearchTerm] = useState('');
     const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -75,14 +76,22 @@ export default function StudyForgePage() {
         }
 
         setIsUploading(true);
+        setUploadStage('uploading');
         const formData = new FormData();
         formData.append('file', file);
 
         try {
+            // After initial network upload, the server takes over extraction
             const res = await fetch('/api/studyforge/upload', {
                 method: 'POST',
                 body: formData,
             });
+
+            // If it's a PDF, we know the backend is doing extra work
+            if (file.type === 'application/pdf') {
+                setUploadStage('extracting');
+            }
+
             const contentType = res.headers.get('content-type') || '';
             let data: { success?: boolean; document?: { id: string }; error?: string } = {};
 
@@ -94,6 +103,7 @@ export default function StudyForgePage() {
             }
 
             if (res.ok && data.success && data.document?.id) {
+                setUploadStage('preparing');
                 fetchDocuments();
                 router.push(`/${region}/${lang}/studyforge/document/${data.document.id}`);
             } else {
@@ -104,6 +114,7 @@ export default function StudyForgePage() {
             setUploadError('Upload failed due to a network/server issue. Please try again.');
         } finally {
             setIsUploading(false);
+            setUploadStage('idle');
             e.target.value = '';
         }
     };
@@ -149,7 +160,10 @@ export default function StudyForgePage() {
                         className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-bold transition-all cursor-pointer shadow-lg shadow-indigo-500/20 active:scale-95"
                     >
                         {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <FileUp className="w-5 h-5" />}
-                        {isUploading ? 'Uploading...' : 'Upload Document'}
+                        {uploadStage === 'uploading' ? 'Uploading...' :
+                            uploadStage === 'extracting' ? 'Extracting Text...' :
+                                uploadStage === 'preparing' ? 'Preparing Assistant...' :
+                                    'Upload Document'}
                     </label>
                 </div>
             </div>

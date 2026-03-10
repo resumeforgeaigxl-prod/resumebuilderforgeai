@@ -11,7 +11,7 @@ const nextConfig = {
     experimental: {
         serverComponentsExternalPackages: ["@sparticuz/chromium", "@napi-rs/canvas"],
     },
-    transpilePackages: ['react-pdf', 'pdfjs-dist'],
+    transpilePackages: ['react-pdf', 'pdfjs-dist', 'react-markdown', 'remark-gfm'],
     async headers() {
         return [
             {

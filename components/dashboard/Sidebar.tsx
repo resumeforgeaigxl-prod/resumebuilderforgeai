@@ -20,7 +20,8 @@ import {
     ShieldCheck,
     HelpCircle,
     BookOpen,
-    Code2
+    Code2,
+    Zap
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
@@ -57,6 +58,12 @@ const MODULES = [
         name: 'CodingForge',
         items: [
             { label: 'Coding Practice', href: '/codingforge', icon: Code2 },
+        ]
+    },
+    {
+        name: 'ProjectForge',
+        items: [
+            { label: 'Project Generator', href: '/projectforge', icon: Zap },
         ]
     },
     {

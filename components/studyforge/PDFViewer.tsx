@@ -8,9 +8,6 @@ import { Loader2 } from 'lucide-react';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
-// Set worker
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdfjs-worker/pdf.worker.min.mjs';
-
 interface PDFViewerProps {
     fileUrl: string;
     onLoadSuccess: (numPages: number) => void;
@@ -22,6 +19,10 @@ export default function PDFViewer({ fileUrl, onLoadSuccess, numPages }: PDFViewe
     const [loadError, setLoadError] = useState<string | null>(null);
 
     useEffect(() => {
+        // Safe worker initialization inside useEffect
+        if (typeof window !== 'undefined') {
+            pdfjs.GlobalWorkerOptions.workerSrc = '/pdfjs-worker/pdf.worker.min.mjs';
+        }
         setIsMounted(true);
     }, []);
 
@@ -36,18 +37,20 @@ export default function PDFViewer({ fileUrl, onLoadSuccess, numPages }: PDFViewe
             }}
             onLoadError={(error) => {
                 console.error('[StudyForge] PDF load error:', error);
-                setLoadError(error instanceof Error ? error.message : 'Failed to load PDF');
+                setLoadError(error instanceof Error ? error.message : 'Failed to load PDF. Authentication session may have expired.');
             }}
             loading={
-                <div className="flex flex-col items-center justify-center p-20 gap-4">
+                <div className="flex flex-col items-center justify-center p-20 gap-4 min-w-[300px]">
                     <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
-                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Loading PDF Engine</p>
+                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest leading-none">Initializing PDF Engine</p>
                 </div>
             }
             error={
-                <div className="p-10 text-center">
+                <div className="p-10 text-center border border-dashed border-rose-500/20 rounded-3xl bg-rose-500/5">
                     <p className="text-rose-400 font-bold mb-2">Failed to load PDF</p>
-                    <p className="text-slate-500 text-xs text-balance">{loadError || 'This could be due to a corrupted file or connection issue.'}</p>
+                    <p className="text-slate-500 text-xs text-balance leading-relaxed">
+                        {loadError || 'This could be due to a corrupted file or network issue.'}
+                    </p>
                 </div>
             }
         >
