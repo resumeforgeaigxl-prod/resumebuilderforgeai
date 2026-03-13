@@ -17,17 +17,17 @@ export default function RegionSwitcher() {
     const { locale, region } = useTranslation();
 
     const handleRegionChange = async (newRegion: string) => {
-        const currentPrefix = `/${region}/${locale}`;
-        const newPrefix = `/${newRegion}/${locale}`;
+        const currentPrefix = `/${locale}-${region}`;
+        const newPrefix = `/${locale}-${newRegion}`;
         let newPathname = pathname;
 
         if (pathname.startsWith(currentPrefix)) {
             newPathname = pathname.replace(currentPrefix, newPrefix);
         } else {
             const segments = pathname.split('/');
-            // /region/lang/path -> segments = ['', region, lang, path]
-            if (segments.length >= 3) {
-                segments[1] = newRegion;
+            // /locale-region/path -> segments = ['', 'locale-region', 'path']
+            if (segments.length >= 2 && segments[1].includes('-')) {
+                segments[1] = `${locale}-${newRegion}`;
             }
             newPathname = segments.join('/');
         }

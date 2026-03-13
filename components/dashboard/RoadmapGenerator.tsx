@@ -4,9 +4,15 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import {
-    Compass, Loader2, Send, CheckCircle2,
-    Calendar, Clock, Target, Info, Sparkles, BookOpen
+    Compass, Loader2, CheckCircle2,
+    Clock, Target, Info, Sparkles, BookOpen,
+    ChevronRight,
+    Map
 } from 'lucide-react';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Input } from '@/components/ui/Input';
 
 interface RoadmapStep {
     name: string;
@@ -49,9 +55,8 @@ interface MappedStep {
 }
 
 export default function RoadmapGenerator() {
-    const params = useParams() as { region: string; lang: string };
-    const region = params?.region || 'in';
-    const lang = params?.lang || 'en';
+    const params = useParams() as { locale: string };
+    const locale = params?.locale || 'en-IN';
 
     const [targetRole, setTargetRole] = useState('');
     const [experience, setExperience] = useState('beginner');
@@ -163,226 +168,240 @@ export default function RoadmapGenerator() {
     };
 
     return (
-        <div className="space-y-8 max-w-5xl mx-auto">
+        <div className="space-y-12 animate-fade-in max-w-7xl mx-auto py-6">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-8 border-b border-white/5">
                 <div>
-                    <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                        <Compass className="w-6 h-6 text-indigo-400" /> AI Career Roadmap
-                    </h2>
-                    <p className="text-slate-400 text-sm mt-1">Generate a personalized step-by-step learning path for your dream role.</p>
+                    <div className="flex items-center gap-2 text-indigo-400 font-bold tracking-[0.2em] text-[10px] uppercase mb-4">
+                         <Target className="w-4 h-4" /> Strategic Planning
+                    </div>
+                    <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight">
+                        Career<span className="text-gradient">Forge</span> Roadmap
+                    </h1>
+                    <p className="text-slate-400 mt-2 font-medium italic">Neural career path synthesis based on market intelligence.</p>
                 </div>
-                <div className="flex gap-2">
-                    {roadmaps.length > 0 && (
-                        <select
-                            className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+
+                {roadmaps.length > 0 && (
+                    <div className="w-full lg:w-72">
+                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Active Trajectory</label>
+                         <select
+                            className="w-full bg-white/[0.02] border border-white/5 rounded-2xl px-5 py-4 text-sm text-white font-black italic focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all appearance-none cursor-pointer"
                             onChange={(e) => setActiveRoadmap(roadmaps.find(r => r.id === e.target.value) || null)}
                             value={activeRoadmap?.id || ''}
                         >
                             {roadmaps.map(r => (
-                                <option key={r.id} value={r.id}>{r.target_role}</option>
+                                <option key={r.id} value={r.id} className="bg-[#0a0a1a]">{r.target_role.toUpperCase()}</option>
                             ))}
                         </select>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                 {/* Input Panel */}
-                <div className="lg:col-span-1 space-y-6">
-                    <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm space-y-4">
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Target Role</label>
-                            <input
-                                id="roadmap-target-role"
-                                name="targetRole"
-                                type="text"
-                                value={targetRole}
-                                onChange={(e) => setTargetRole(e.target.value)}
-                                disabled={loading}
-                                autoFocus
-                                placeholder="e.g. Senior Frontend Engineer"
-                                className="w-full bg-slate-900 border border-white/20 rounded-xl px-4 py-4 text-base text-white placeholder:text-slate-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-bold relative z-30 shadow-2xl"
-                                style={{ color: 'white' }}
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Experience Level</label>
-                            <div className="grid grid-cols-2 gap-2">
-                                {['beginner', 'intermediate', 'advanced', 'expert'].map((lvl) => (
-                                    <button
-                                        key={lvl}
-                                        onClick={() => setExperience(lvl)}
-                                        className={`px-3 py-2 rounded-lg text-xs font-bold capitalize transition-all border ${experience === lvl
-                                            ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/40 shadow-[0_0_15px_rgba(99,102,241,0.1)]'
-                                            : 'bg-white/5 text-slate-400 border-white/5 hover:border-white/10'
-                                            }`}
-                                    >
-                                        {lvl}
-                                    </button>
-                                ))}
+                <div className="lg:col-span-4 space-y-8">
+                    <Card glass className="p-10 border-white/5 bg-white/[0.01]">
+                        <div className="space-y-8">
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Trajectory Goal</label>
+                                <Input
+                                    value={targetRole}
+                                    onChange={(e) => setTargetRole(e.target.value)}
+                                    disabled={loading}
+                                    placeholder="e.g. SYSTEMS ARCHITECT"
+                                    className="h-16 rounded-2xl bg-white/[0.03] border-white/10 text-white font-black italic placeholder:text-slate-700 uppercase"
+                                />
                             </div>
-                        </div>
 
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Time Commitment</label>
-                            <select
-                                value={time}
-                                onChange={(e) => setTime(e.target.value)}
-                                className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none font-medium"
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Seniority level</label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {['beginner', 'intermediate', 'advanced', 'expert'].map((lvl) => (
+                                        <button
+                                            key={lvl}
+                                            onClick={() => setExperience(lvl)}
+                                            className={`px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${experience === lvl
+                                                ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/40 shadow-xl shadow-indigo-500/10'
+                                                : 'bg-white/5 text-slate-500 border-white/5 hover:border-white/10'
+                                                }`}
+                                        >
+                                            {lvl}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Temporal Commitment</label>
+                                <div className="relative">
+                                    <select
+                                        value={time}
+                                        onChange={(e) => setTime(e.target.value)}
+                                        className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 text-xs text-white font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-indigo-500/30 appearance-none transition-all cursor-pointer shadow-inner"
+                                    >
+                                        <option value="5-10 hours" className="bg-[#0a0a1a]">Standard (5-10h)</option>
+                                        <option value="10-20 hours" className="bg-[#0a0a1a]">Accelerated (10-20h)</option>
+                                        <option value="20-40 hours" className="bg-[#0a0a1a]">Hyper (20-40h)</option>
+                                        <option value="40+ hours" className="bg-[#0a0a1a]">Absolute (40+h)</option>
+                                    </select>
+                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-600">
+                                        <ChevronRight className="w-4 h-4 rotate-90" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <Button
+                                onClick={generateRoadmap}
+                                disabled={loading || !targetRole}
+                                variant="premium"
+                                className="w-full h-16 rounded-[1.8rem] font-black uppercase tracking-widest group shadow-2xl shadow-indigo-500/10"
                             >
-                                <option value="5-10 hours">5-10 hours / week</option>
-                                <option value="10-20 hours">10-20 hours / week</option>
-                                <option value="20-40 hours">20-40 hours / week</option>
-                                <option value="40+ hours">Full-time (40+ hours)</option>
-                            </select>
+                                {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <><Sparkles className="w-5 h-5 mr-3 group-hover:animate-pulse" /> Initialize Synthesis</>}
+                            </Button>
                         </div>
+                    </Card>
 
-                        <button
-                            onClick={generateRoadmap}
-                            disabled={loading || !targetRole}
-                            className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-600/20 group"
-                        >
-                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Sparkles className="w-5 h-5 group-hover:animate-pulse" /> Generate Roadmap</>}
-                        </button>
-                    </div>
-
-                    {/* Quick Stats if active */}
+                    {/* Quick Stats */}
                     {activeRoadmap && (
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-1 items-center justify-center text-center">
-                                <Calendar className="w-5 h-5 text-emerald-400 mb-1" />
-                                <span className="text-xs text-slate-500">Duration</span>
-                                <span className="text-lg font-bold text-white">{activeRoadmap.roadmap_json.estimated_total_months} Mo</span>
-                            </div>
-                            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-1 items-center justify-center text-center">
-                                <Target className="w-5 h-5 text-amber-400 mb-1" />
-                                <span className="text-xs text-slate-500">Goal</span>
-                                <span className="text-xs font-bold text-white truncate max-w-full px-2">{activeRoadmap.target_role}</span>
-                            </div>
+                            <Card glass className="p-6 border-white/5 bg-white/[0.01] flex flex-col items-center justify-center text-center">
+                                <Clock className="w-6 h-6 text-emerald-400 mb-3" />
+                                <span className="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Timeline</span>
+                                <span className="text-xl font-black text-white italic">{activeRoadmap.roadmap_json.estimated_total_months} MO</span>
+                            </Card>
+                            <Card glass className="p-6 border-white/5 bg-white/[0.01] flex flex-col items-center justify-center text-center">
+                                <Compass className="w-6 h-6 text-indigo-400 mb-3" />
+                                <span className="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Phases</span>
+                                <span className="text-xl font-black text-white italic">{activeRoadmap.roadmap_json.steps.length} UNIT</span>
+                            </Card>
                         </div>
                     )}
                 </div>
 
                 {/* Display Panel */}
-                <div className="lg:col-span-2">
+                <div className="lg:col-span-8">
                     {error && (
-                        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm font-bold animate-in fade-in slide-in-from-top-2">
-                            <div className="flex items-center gap-2">
-                                <Info className="w-4 h-4" />
-                                {error}
-                            </div>
-                        </div>
+                        <Card glass className="p-6 border-rose-500/20 bg-rose-500/[0.02] mb-8 flex items-center gap-3 animate-shake">
+                            <Badge variant="destructive" className="font-black">CORE_ERR</Badge>
+                            <span className="text-sm font-bold text-rose-400 uppercase tracking-tight">{error}</span>
+                        </Card>
                     )}
 
                     {!activeRoadmap && !loading && (
-                        <div className="h-full min-h-[400px] flex flex-col items-center justify-center p-12 rounded-3xl bg-white/5 border border-dashed border-white/10 text-center">
-                            <div className="w-20 h-20 rounded-full bg-indigo-500/10 flex items-center justify-center mb-6">
-                                <BookOpen className="w-10 h-10 text-indigo-400" />
+                        <div className="h-full min-h-[500px] flex flex-col items-center justify-center p-20 rounded-[4rem] border-2 border-dashed border-white/5 bg-white/[0.01] text-center">
+                            <div className="w-24 h-24 rounded-[2.5rem] bg-indigo-500/5 flex items-center justify-center mb-8 border border-white/5 shadow-2xl">
+                                <Map className="w-12 h-12 text-slate-800" />
                             </div>
-                            <h3 className="text-xl font-bold text-white mb-2">Ready to Level Up?</h3>
-                            <p className="text-slate-400 max-w-sm text-sm">Enter your target role and experience to generate a complete learning pathway powered by AI.</p>
+                            <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter mb-4">Trajectory Offline</h3>
+                            <p className="text-slate-500 max-w-md text-lg font-medium">Input your career parameters to synthesize a tactical learning roadmap powered by the Forge intelligence engine.</p>
                         </div>
                     )}
 
                     {loading && (
-                        <div className="h-full min-h-[400px] flex flex-col items-center justify-center p-12 rounded-3xl bg-white/5 border border-white/10 text-center space-y-4">
+                        <div className="h-full min-h-[500px] flex flex-col items-center justify-center p-20 rounded-[4rem] border border-white/5 bg-white/[0.02] text-center space-y-8">
                             <div className="relative">
-                                <div className="w-20 h-20 rounded-full border-4 border-indigo-500/20 border-t-indigo-500 animate-spin"></div>
+                                <div className="w-24 h-24 rounded-full border-4 border-indigo-500/10 border-t-indigo-500 animate-spin" />
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <Sparkles className="w-8 h-8 text-indigo-400 animate-pulse" />
+                                    <Sparkles className="w-10 h-10 text-indigo-400 animate-pulse" />
                                 </div>
                             </div>
-                            <div className="space-y-2">
-                                <h3 className="text-xl font-bold text-white">Crafting Your Roadmap...</h3>
-                                <p className="text-slate-500 text-sm animate-pulse">Our AI is analyzing industry requirements for {targetRole}</p>
+                            <div className="space-y-3">
+                                <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter">Synthesizing Path_</h3>
+                                <p className="text-slate-500 text-lg font-medium animate-pulse italic">Mapping high-fidelity industry requirements for {targetRole.toUpperCase()}</p>
                             </div>
                         </div>
                     )}
 
                     {activeRoadmap && !loading && (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                            <div className="p-8 rounded-3xl bg-gradient-to-br from-indigo-500/10 via-transparent to-purple-500/10 border border-white/10 relative overflow-hidden group">
-                                <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px] group-hover:bg-indigo-500/20 transition-all duration-1000"></div>
-
-                                <h3 className="text-3xl font-black text-white leading-tight">
+                        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+                            <Card glass className="p-12 border-white/5 bg-gradient-to-br from-indigo-500/[0.03] to-transparent relative overflow-hidden group rounded-[3.5rem]">
+                                <div className="absolute -top-32 -right-32 w-80 h-80 bg-indigo-500/10 rounded-full blur-[120px] group-hover:bg-indigo-500/20 transition-all duration-1000" />
+                                <Badge variant="secondary" className="bg-indigo-500/10 text-indigo-400 font-black px-4 py-1.5 rounded-full mb-6">INTEL_LOG_01</Badge>
+                                <h3 className="text-4xl font-black text-white leading-tight uppercase italic tracking-tighter mb-4">
                                     {activeRoadmap.roadmap_json.title}
                                 </h3>
-                                <p className="text-slate-400 mt-2 text-lg">
+                                <p className="text-slate-400 text-xl font-medium leading-relaxed max-w-2xl">
                                     {activeRoadmap.roadmap_json.description}
                                 </p>
-                            </div>
+                            </Card>
 
-                            <div className="space-y-4 relative">
+                            <div className="space-y-6 relative ml-4 sm:ml-0">
                                 {/* Connection line */}
-                                <div className="absolute left-6 top-8 bottom-8 w-0.5 bg-gradient-to-b from-indigo-500 via-indigo-500/50 to-transparent opacity-20 hidden sm:block"></div>
+                                <div className="absolute left-8 top-12 bottom-12 w-0.5 bg-gradient-to-b from-indigo-500 via-indigo-500/20 to-transparent opacity-20 hidden sm:block" />
 
                                 {activeRoadmap?.roadmap_json?.steps?.map((step, idx) => (
-                                    <div key={idx} className="flex gap-4 sm:gap-8 group">
+                                    <div key={idx} className="flex gap-6 sm:gap-12 group/step items-start">
                                         <div className="relative hidden sm:flex flex-col items-center">
-                                            <div className="w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center z-10 group-hover:scale-110 group-hover:bg-indigo-600/30 transition-all shadow-[0_0_20px_rgba(99,102,241,0.15)]">
-                                                <span className="text-lg font-black text-indigo-400">{idx + 1}</span>
+                                            <div className="w-16 h-16 rounded-[2rem] bg-indigo-600/10 border border-indigo-500/20 flex items-center justify-center z-10 group-hover/step:scale-110 group-hover/step:bg-indigo-600/20 group-hover/step:border-indigo-500/50 transition-all shadow-xl italic font-black text-xl text-indigo-400">
+                                                0{idx + 1}
                                             </div>
                                         </div>
-                                        <div className="flex-1 p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-all hover:bg-white/[0.07] group-hover:translate-x-1 duration-300">
-                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-                                                <h4 className="text-xl font-bold text-white group-hover:text-indigo-300 transition-colors uppercase tracking-tight">{step.name}</h4>
-                                                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">
-                                                    <Clock className="w-3 h-3" /> {step.estimated_weeks} Weeks
-                                                </div>
+                                        <Card glass className="flex-1 p-10 border-white/5 hover:border-white/20 transition-all bg-white/[0.01] hover:bg-white/[0.03] rounded-[3rem] group-hover/step:translate-x-4 duration-500">
+                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 pb-6 border-b border-white/5">
+                                                <h4 className="text-2xl font-black text-white italic uppercase tracking-tighter group-hover/step:text-indigo-400 transition-colors">{step.name}</h4>
+                                                <Badge variant="outline" className="h-10 px-5 rounded-2xl bg-indigo-500/5 text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] border-indigo-500/20 flex items-center gap-2">
+                                                    <Clock className="w-4 h-4" /> {step.estimated_weeks} WEEK CYCLE
+                                                </Badge>
                                             </div>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                <div className="space-y-3">
-                                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5"><Send className="w-3 h-3" /> Core Skills</p>
+
+                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                                                <div className="space-y-5">
+                                                    <div className="flex items-center gap-2 text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] mb-2">
+                                                        <Sparkles className="w-3.5 h-3.5" /> Logical Nodes
+                                                    </div>
                                                     {mappingLoading && (
-                                                        <p className="text-[10px] font-bold text-indigo-400/80 uppercase tracking-widest">Mapping to Learning Library...</p>
+                                                        <div className="flex items-center gap-2 text-[10px] font-black text-indigo-500/50 uppercase tracking-widest animate-pulse">
+                                                            <Loader2 className="w-3 h-3 animate-spin" /> Mapping Nodes...
+                                                        </div>
                                                     )}
-                                                    <div className="flex flex-wrap gap-2">
+                                                    <div className="flex flex-wrap gap-2.5">
                                                         {step.items.map((item, i) => (
                                                             (() => {
                                                                 const mapped = skillTopicMap[`${idx}:${i}`];
-
                                                                 if (!mapped?.topic) {
                                                                     return (
-                                                                        <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 text-xs text-slate-300 border border-white/5 hover:border-indigo-500/30 transition-colors">
-                                                                            <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />
+                                                                        <div key={i} className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-white/5 text-[11px] font-black text-slate-400 border border-white/5 hover:border-indigo-500/20 transition-all italic uppercase">
+                                                                            <CheckCircle2 className="w-4 h-4 text-slate-800" />
                                                                             {item}
                                                                         </div>
                                                                     );
                                                                 }
-
                                                                 return (
                                                                     <Link
                                                                         key={i}
-                                                                        href={`/${region}/${lang}/careerforge/library/${mapped.topic.language_slug}/${mapped.topic.slug}`}
-                                                                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 text-xs text-slate-200 border border-indigo-500/20 hover:border-indigo-500/60 hover:bg-indigo-500/10 transition-colors"
-                                                                        title={`Open ${mapped.topic.title} (${mapped.topic.language_name})`}
+                                                                        href={`/${locale}/careerforge/library/${mapped.topic.language_slug}/${mapped.topic.slug}`}
+                                                                        className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-indigo-500/5 text-[11px] font-black text-indigo-300 border border-indigo-500/20 hover:border-indigo-500/50 hover:bg-indigo-500/10 transition-all italic uppercase shadow-xl"
                                                                     >
-                                                                        <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />
+                                                                        <CheckCircle2 className="w-4 h-4 text-indigo-500" />
                                                                         {item}
-                                                                        <BookOpen className="w-3.5 h-3.5 text-indigo-300" />
+                                                                        <BookOpen className="w-4 h-4 text-indigo-400 ml-1" />
                                                                     </Link>
                                                                 );
                                                             })()
                                                         ))}
                                                     </div>
                                                 </div>
+
                                                 {step.resources && step.resources.length > 0 && (
-                                                    <div className="space-y-3 bg-white/5 p-4 rounded-xl border border-white/5">
-                                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5"><Info className="w-3 h-3" /> Resources</p>
-                                                        <ul className="space-y-2">
+                                                    <div className="space-y-5 bg-white/[0.02] p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden group/res">
+                                                        <div className="absolute top-0 right-0 p-4 opacity-5">
+                                                            <Info className="w-20 h-20 text-indigo-500" />
+                                                        </div>
+                                                        <div className="flex items-center gap-2 text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] mb-2">
+                                                            <Info className="w-3.5 h-3.5" /> Protocol Assets
+                                                        </div>
+                                                        <ul className="space-y-4">
                                                             {step.resources.map((res, i) => (
-                                                                <li key={i} className="text-xs text-slate-400 flex items-start gap-2 group/item">
-                                                                    <div className="w-1 h-1 rounded-full bg-indigo-500/50 mt-1.5 group-hover/item:scale-150 transition-all"></div>
-                                                                    {res}
+                                                                <li key={i} className="text-xs text-slate-500 flex items-start gap-4 group/item">
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1.5 group-hover/item:scale-150 transition-all shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
+                                                                    <span className="font-medium group-hover/item:text-slate-300 transition-colors uppercase tracking-tight">{res}</span>
                                                                 </li>
                                                             ))}
                                                         </ul>
                                                     </div>
                                                 )}
                                             </div>
-                                        </div>
+                                        </Card>
                                     </div>
                                 ))}
                             </div>

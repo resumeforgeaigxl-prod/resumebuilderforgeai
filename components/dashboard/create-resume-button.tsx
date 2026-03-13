@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { PlusCircle, Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 
 export function CreateResumeButton({ variant = 'primary' }: { variant?: 'primary' | 'secondary' }) {
     const router = useRouter()
@@ -24,11 +25,11 @@ export function CreateResumeButton({ variant = 'primary' }: { variant?: 'primary
             const data = await res.json()
 
             if (!res.ok) {
-                throw new Error(data.error || data.details || 'Failed to create resume')
+                throw new Error(data.error || data.details || 'Protocol Failure')
             }
 
             if (!data.id) {
-                throw new Error('Server did not return a valid Resume ID')
+                throw new Error('Signal Loss: No Resume ID')
             }
 
             // Tracking
@@ -41,7 +42,6 @@ export function CreateResumeButton({ variant = 'primary' }: { variant?: 'primary
                 console.error('[PostHog] Event error:', err);
             }
 
-            // Small delay to ensure DB consistency before redirect
             await new Promise(resolve => setTimeout(resolve, 300));
             router.push(`/builder/${data.id}`)
 
@@ -56,32 +56,32 @@ export function CreateResumeButton({ variant = 'primary' }: { variant?: 'primary
     if (variant === 'secondary') {
         return (
             <div className="flex flex-col items-center">
-                <button
-                    type="button"
+                <Button
                     onClick={handleCreate}
                     disabled={isCreating}
-                    className="flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-white font-medium rounded-xl transition-colors"
+                    variant="outline"
+                    className="gap-2 px-8 rounded-xl border-white/5 bg-white/5 hover:bg-white/10"
                 >
-                    {isCreating ? <Loader2 className="w-5 h-5 animate-spin" /> : <PlusCircle className="w-5 h-5" />}
-                    Create Resume
-                </button>
-                {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
+                    {isCreating ? <Loader2 className="w-4 h-4 animate-spin text-indigo-400" /> : <PlusCircle className="w-4 h-4 text-indigo-400" />}
+                    Initialize New Profile
+                </Button>
+                {error && <p className="text-red-400 text-[10px] font-black uppercase tracking-widest mt-3">{error}</p>}
             </div>
         )
     }
 
     return (
         <div className="flex flex-col items-end">
-            <button
-                type="button"
+            <Button
                 onClick={handleCreate}
                 disabled={isCreating}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium rounded-xl transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]"
+                variant="premium"
+                className="gap-2 px-8 rounded-xl shadow-lg shadow-indigo-500/20"
             >
-                {isCreating ? <Loader2 className="w-5 h-5 animate-spin" /> : <PlusCircle className="w-5 h-5" />}
-                Create New Resume
-            </button>
-            {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
+                {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlusCircle className="w-4 h-4" />}
+                Forge New Resume
+            </Button>
+            {error && <p className="text-red-400 text-[10px] font-black uppercase tracking-widest mt-2">{error}</p>}
         </div>
     )
 }

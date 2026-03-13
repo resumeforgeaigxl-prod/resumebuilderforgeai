@@ -6,9 +6,26 @@ import { ReactNode } from 'react';
 export default function HeaderWrapper({ children }: { children: ReactNode }) {
     const pathname = usePathname();
 
-    // Hide main header on all admin and chat routes
-    if (pathname?.startsWith('/admin') || pathname?.includes('/jobforgeai')) {
-        return null; // Return empty (hidden header)
+    // Hide main header on all internal dashboard and app routes
+    const isInternalApp = 
+        pathname?.includes('/dashboard') || 
+        pathname?.includes('/admin') || 
+        pathname?.includes('/resumes') || 
+        pathname?.includes('/codingforge') || 
+        pathname?.includes('/projectforge') || 
+        pathname?.includes('/mock-interview') || 
+        pathname?.includes('/studyforge') || 
+        pathname?.includes('/careerforge') || 
+        pathname?.includes('/jobs') || 
+        pathname?.includes('/jobforgeai') || 
+        pathname?.includes('/tools') ||
+        pathname?.includes('/billing') ||
+        pathname?.includes('/account') ||
+        pathname?.includes('/companies') ||
+        pathname?.includes('/mock-test');
+
+    if (isInternalApp) {
+        return null;
     }
 
     return <>{children}</>;

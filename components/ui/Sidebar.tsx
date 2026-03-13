@@ -1,0 +1,113 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { 
+  LayoutDashboard, 
+  FileText, 
+  Code, 
+  Projector, 
+  MessageSquare, 
+  BookOpen, 
+  Briefcase, 
+  Search,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface SidebarProps {
+  locale: string;
+}
+
+export function Sidebar({ locale }: SidebarProps) {
+  const [collapsed, setCollapsed] = useState(false);
+  const pathname = usePathname();
+
+  const navItems = [
+    { name: "Overview", icon: LayoutDashboard, href: `/${locale}/dashboard` },
+    { name: "ResumeForge", icon: FileText, href: `/${locale}/resumes` },
+    { name: "CodingForge", icon: Code, href: `/${locale}/codingforge` },
+    { name: "ProjectForge", icon: Projector, href: `/${locale}/projectforge` },
+    { name: "InterviewForge", icon: MessageSquare, href: `/${locale}/mock-interview` },
+    { name: "StudyForge", icon: BookOpen, href: `/${locale}/studyforge` },
+    { name: "CareerForge", icon: Briefcase, href: `/${locale}/careerforge` },
+    { name: "JobForge", icon: Search, href: `/${locale}/jobs` },
+  ];
+
+  return (
+    <aside
+      className={cn(
+        "fixed left-0 top-0 z-40 h-screen border-r border-white/5 bg-[#050510]/80 backdrop-blur-xl transition-all duration-300",
+        collapsed ? "w-20" : "w-64"
+      )}
+    >
+      <div className="flex h-full flex-col p-4">
+        {/* Logo */}
+        <div className="mb-8 flex items-center gap-3 px-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-[0_0_15px_rgba(255,255,255,0.2)] shrink-0">
+            <Sparkles className="h-5 w-5 text-black" />
+          </div>
+          {!collapsed && (
+            <span className="text-lg font-bold tracking-tight text-white whitespace-nowrap">
+              ResumeForge<span className="text-indigo-400">AI</span>
+            </span>
+          )}
+        </div>
+
+        {/* Nav Items */}
+        <nav className="flex-1 space-y-1">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all group",
+                  isActive 
+                    ? "bg-white/10 text-white shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]" 
+                    : "text-slate-400 hover:bg-white/5 hover:text-white"
+                )}
+              >
+                <item.icon className={cn(
+                  "h-5 w-5 shrink-0 transition-colors",
+                  isActive ? "text-indigo-400" : "group-hover:text-indigo-300"
+                )} />
+                {!collapsed && <span>{item.name}</span>}
+                {isActive && !collapsed && (
+                  <div className="ml-auto h-1.5 w-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Bottom Actions */}
+        <div className="mt-auto space-y-1 pt-4 border-t border-white/5">
+          <Link
+            href={`/${locale}/dashboard/settings`}
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all",
+              pathname?.includes("settings") ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"
+            )}
+          >
+            <Settings className="h-5 w-5" />
+            {!collapsed && <span>Settings</span>}
+          </Link>
+          
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition-all hover:bg-white/5 hover:text-white"
+          >
+            {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+            {!collapsed && <span>Collapse</span>}
+          </button>
+        </div>
+      </div>
+    </aside>
+  );
+}

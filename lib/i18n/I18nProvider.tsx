@@ -15,8 +15,9 @@ const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
     const params = useParams();
-    const locale = (params?.lang as string) || 'en';
-    const region = (params?.region as string) || 'in';
+    const localeParam = (params?.locale as string) || 'en-in';
+    const [lang, region] = localeParam.includes('-') ? localeParam.split('-') : [localeParam, 'in'];
+    const locale = lang || 'en';
     const [translations, setTranslations] = useState<Translations>({});
 
     useEffect(() => {

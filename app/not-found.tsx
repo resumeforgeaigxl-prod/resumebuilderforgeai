@@ -11,7 +11,7 @@ export default async function NotFound() {
     const region = cookieStore.get('preferred_region')?.value || 'in';
     const lang = cookieStore.get('preferred_lang')?.value || 'en';
 
-    const dashboardLink = `/${region}/${lang}/dashboard`;
+    const dashboardLink = `/${lang}-${region}/dashboard`;
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-[#070710] text-slate-100 p-4 selection:bg-indigo-500/30">

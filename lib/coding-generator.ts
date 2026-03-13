@@ -13,7 +13,13 @@ const LANGUAGES = [
 ];
 
 export async function generateCodingQuestions(count: number = 5) {
-    let totalInserted = 0;
+    const stats = {
+        requested: count,
+        generated: 0,
+        inserted: 0,
+        skipped: 0,
+        failed: 0
+    };
 
     for (let i = 0; i < count; i++) {
         try {
@@ -24,8 +30,10 @@ export async function generateCodingQuestions(count: number = 5) {
             Type: Randomly pick from [Programming, SQL, Debugging, Logic].
             Topic: ${topic}.
             
+            UNiQUENESS RULE: Generate a highly specific and creative problem. Avoid generic titles like "Reverse a String" or "Binary Search". Try to create a scenario-based or advanced version of common problems.
+            
             Provide:
-            - title: Clear and concise.
+            - title: Highly specific and unique.
             - description: Detailed problem statement.
             - difficulty: Easy, Medium, or Hard.
             - type: The picked type.
@@ -40,9 +48,6 @@ export async function generateCodingQuestions(count: number = 5) {
               For SQL: include 'SQL'.
               For Logic: include explanation.
             
-            SPECIAL REQUEST:
-            If type is 'Logic' or if the question is visual, generate a high-quality 'image_svg' string (white/indigo strokes, transparent).
-            
             Return ONLY a valid JSON object:
             {
               "title": "...",
@@ -51,7 +56,6 @@ export async function generateCodingQuestions(count: number = 5) {
               "type": "...",
               "topic": "...",
               "company_tags": ["..."],
-              "image_svg": "...",
               "approach": "...",
               "interview_tips": "... ",
               "time_complexity": "...",
@@ -64,11 +68,12 @@ export async function generateCodingQuestions(count: number = 5) {
             const response = await generateAIResponse(
                 prompt,
                 'openai/gpt-4o-mini',
-                "expert competitive programmer. Return ONLY ONE JSON object.",
-                0.1,
-                4000 // Much smaller token limit per call
+                "expert competitive programmer. Focus on creating unique, non-generic interview questions.",
+                0.8, // Increased temperature for variety
+                4000
             );
 
+            stats.generated++;
             const jsonString = extractJson(response.text);
             const q = JSON.parse(jsonString);
 
@@ -83,6 +88,7 @@ export async function generateCodingQuestions(count: number = 5) {
 
             if (existing) {
                 console.log(`[Gen] Skipping duplicate: ${q.title}`);
+                stats.skipped++;
                 continue;
             }
 
@@ -95,7 +101,6 @@ export async function generateCodingQuestions(count: number = 5) {
                     difficulty: q.difficulty,
                     topic: q.topic,
                     type: q.type || 'Programming',
-                    image_svg: q.image_svg,
                     approach: q.approach,
                     interview_tips: q.interview_tips,
                     time_complexity: q.time_complexity,
@@ -106,6 +111,7 @@ export async function generateCodingQuestions(count: number = 5) {
 
             if (qError) {
                 console.error(`[Gen] Error inserting question ${q.title}:`, qError);
+                stats.failed++;
                 continue;
             }
 
@@ -130,11 +136,13 @@ export async function generateCodingQuestions(count: number = 5) {
                 await supabase.from('coding_companies').insert(companiesToInsert);
             }
 
-            totalInserted++;
+            stats.inserted++;
         } catch (err) {
             console.error(`[Gen] Error in iteration ${i}:`, err);
+            stats.failed++;
         }
     }
 
-    return totalInserted;
+    return stats;
 }
+

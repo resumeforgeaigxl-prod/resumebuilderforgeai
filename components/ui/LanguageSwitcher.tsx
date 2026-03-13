@@ -23,16 +23,17 @@ export default function LanguageSwitcher() {
 
     const handleLanguageChange = async (newLocale: string) => {
         // Replace current locale in pathname with new one while preserving region
-        const currentPrefix = `/${region}/${locale}`;
-        const newPrefix = `/${region}/${newLocale}`;
+        const currentPrefix = `/${locale}-${region}`;
+        const newPrefix = `/${newLocale}-${region}`;
         let newPathname = pathname;
 
         if (pathname.startsWith(currentPrefix)) {
             newPathname = pathname.replace(currentPrefix, newPrefix);
         } else {
             const segments = pathname.split('/');
-            if (segments.length >= 3) {
-                segments[2] = newLocale;
+            // /locale-region/path -> segments = ['', 'locale-region', 'path']
+            if (segments.length >= 2 && segments[1].includes('-')) {
+                segments[1] = `${newLocale}-${region}`;
             }
             newPathname = segments.join('/');
         }

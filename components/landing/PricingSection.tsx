@@ -38,7 +38,7 @@ export default function PricingSection() {
                         <li className="flex items-center gap-3 text-slate-500"><XCircle className="w-4 h-4 shrink-0" /> No mock tests</li>
                         <li className="flex items-center gap-3 text-slate-500"><XCircle className="w-4 h-4 shrink-0" /> No cover letters</li>
                     </ul>
-                    <Link href={`/${region}/${locale}/signup`} className="block w-full py-3 px-4 bg-white/5 hover:bg-white/10 text-white text-center rounded-xl font-bold transition-colors border border-white/10">Start Free</Link>
+                    <Link href={`/${locale}-${region}/signup`} className="block w-full py-3 px-4 bg-white/5 hover:bg-white/10 text-white text-center rounded-xl font-bold transition-colors border border-white/10">Start Free</Link>
                 </div>
 
                 {/* PRO */}
@@ -57,7 +57,7 @@ export default function PricingSection() {
                         <li className="flex items-center gap-3"><CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" /> Watermark-free PDF</li>
                     </ul>
                     <Link
-                        href={`/${region}/${locale}/billing?plan=PRO`}
+                        href={`/${locale}-${region}/billing?plan=PRO`}
                         onClick={async () => {
                             try {
                                 const posthog = (await import('@/lib/posthog')).default;
@@ -88,7 +88,7 @@ export default function PricingSection() {
                         </li>
                     </ul>
                     <Link
-                        href={`/${region}/${locale}/billing?plan=PREMIUM`}
+                        href={`/${locale}-${region}/billing?plan=PREMIUM`}
                         onClick={async () => {
                             try {
                                 const posthog = (await import('@/lib/posthog')).default;
@@ -120,7 +120,7 @@ export default function PricingSection() {
                         <li className="flex items-center gap-3"><CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" /> MNC &amp; fresher job alerts</li>
                     </ul>
                     <Link
-                        href={`/${region}/${locale}/billing?plan=CAREER`}
+                        href={`/${locale}-${region}/billing?plan=CAREER`}
                         onClick={async () => {
                             try {
                                 const posthog = (await import('@/lib/posthog')).default;

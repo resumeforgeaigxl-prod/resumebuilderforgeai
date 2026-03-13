@@ -28,11 +28,10 @@ interface Job {
 interface PublicJobBoardProps {
     initialRole?: string;
     initialLocation?: string;
-    region?: string;
-    lang?: string;
+    locale?: string;
 }
 
-export default function PublicJobBoard({ initialRole = '', initialLocation = '', region = 'in', lang = 'en' }: PublicJobBoardProps) {
+export default function PublicJobBoard({ initialRole = '', initialLocation = '', locale = 'en-in' }: PublicJobBoardProps) {
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
@@ -126,7 +125,7 @@ export default function PublicJobBoard({ initialRole = '', initialLocation = '',
             ) : jobs.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {jobs.map(job => (
-                        <JobCard key={job.id} job={job} region={region} lang={lang} />
+                        <JobCard key={job.id} job={job} locale={locale} />
                     ))}
                 </div>
             ) : (
@@ -161,7 +160,7 @@ export default function PublicJobBoard({ initialRole = '', initialLocation = '',
     );
 }
 
-function JobCard({ job, region, lang }: { job: Job, region: string, lang: string }) {
+function JobCard({ job, locale }: { job: Job, locale: string }) {
     const slug = `${job.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${job.company.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${job.id}`;
 
     return (
@@ -172,7 +171,7 @@ function JobCard({ job, region, lang }: { job: Job, region: string, lang: string
                 </div>
                 <div className="min-w-0 flex-1">
                     <Link
-                        href={`/${region}/${lang}/job/${slug}`}
+                        href={`/${locale}/job/${slug}`}
                         onClick={async () => {
                             try {
                                 const posthog = (await import('@/lib/posthog')).default;
@@ -200,7 +199,7 @@ function JobCard({ job, region, lang }: { job: Job, region: string, lang: string
             </p>
 
             <Link
-                href={`/${region}/${lang}/job/${slug}`}
+                href={`/${locale}/job/${slug}`}
                 onClick={async () => {
                     try {
                         const posthog = (await import('@/lib/posthog')).default;

@@ -13,11 +13,12 @@ export async function POST(request: NextRequest) {
         const count = body.count || 5;
 
         console.log(`[Admin] Manually triggered coding question generation: count=${count}`);
-        const insertedCount = await generateCodingQuestions(count);
+        const stats = await generateCodingQuestions(count);
 
         return NextResponse.json({
             success: true,
-            message: `Successfully generated and inserted ${insertedCount} new questions.`
+            stats,
+            message: `Process complete: Requested ${stats.requested}, Generated ${stats.generated}, Inserted ${stats.inserted}, Skipped ${stats.skipped} duplicates.`
         });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Generation failed';
