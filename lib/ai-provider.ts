@@ -67,6 +67,29 @@ export function extractJson(text: string): string {
     return text.trim();
 }
 
+// OpenRouter API Keys list for rotation to avoid rate limits
+const OPENROUTER_KEYS = [
+    process.env.OPENROUTER_API_KEY,
+    process.env.OPENROUTER_API_KEY_1,
+    process.env.OPENROUTER_API_KEY_2,
+    process.env.OPENROUTER_API_KEY_3,
+    process.env.OPENROUTER_API_KEY_4,
+    process.env.OPENROUTER_API_KEY_5,
+    process.env.OPENROUTER_API_KEY_6,
+    process.env.OPENROUTER_API_KEY_7,
+].filter(Boolean) as string[];
+
+/**
+ * Get a random OpenRouter API key from the list
+ */
+function getRandomOpenRouterKey(): string | null {
+    if (OPENROUTER_KEYS.length === 0) {
+        return null;
+    }
+    const randomIndex = Math.floor(Math.random() * OPENROUTER_KEYS.length);
+    return OPENROUTER_KEYS[randomIndex];
+}
+
 async function fetchFromOpenRouter(
     prompt: string,
     model: string,
@@ -74,10 +97,10 @@ async function fetchFromOpenRouter(
     temp?: number,
     maxTokens?: number
 ): Promise<AIResponseMetadata> {
-    const apiKey = (process.env.OPENROUTER_API_KEY || "").trim();
+    const apiKey = getRandomOpenRouterKey();
 
     if (!apiKey) {
-        throw new Error("OPENROUTER_API_KEY is not set in environment variables.");
+        throw new Error("No OPENROUTER_API_KEY found in environment variables.");
     }
 
     const systemPrompt = customSystemPrompt || "You are an ATS resume optimization AI. When asked to return JSON, return ONLY valid JSON with no markdown formatting, no code blocks, and no extra text.";

@@ -1,8 +1,26 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { generateAIResponse, extractJson } from "@/lib/ai-provider";
 
-const GEMINI_API_KEY = (process.env.GEMINI_API_KEY || "").trim();
-const geminiClient = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
+// List of Gemini API Keys for rotation to avoid rate limits
+const GEMINI_KEYS = [
+    process.env.GEMINI_API_KEY,
+    process.env.GEMINI_API_KEY_1,
+    process.env.GEMINI_API_KEY_2,
+    process.env.GEMINI_API_KEY_3,
+    process.env.GEMINI_API_KEY_4,
+    process.env.GEMINI_API_KEY_5,
+    process.env.GEMINI_API_KEY_6,
+    process.env.GEMINI_API_KEY_7,
+].filter(Boolean) as string[];
+
+/**
+ * Get a random Gemini client
+ */
+function getGeminiClient() {
+    if (GEMINI_KEYS.length === 0) return null;
+    const randomIndex = Math.floor(Math.random() * GEMINI_KEYS.length);
+    return new GoogleGenerativeAI(GEMINI_KEYS[randomIndex]);
+}
 
 async function fallbackViaOpenRouter(
     prompt: string,
@@ -20,8 +38,9 @@ async function fallbackViaOpenRouter(
 
 export async function generateContentGemini(prompt: string, systemInstruction?: string) {
     try {
-        if (geminiClient) {
-            const model = geminiClient.getGenerativeModel({
+        const client = getGeminiClient();
+        if (client) {
+            const model = client.getGenerativeModel({
                 model: "gemini-1.5-flash",
                 systemInstruction: systemInstruction,
             });
@@ -46,8 +65,9 @@ export async function generateContentGemini(prompt: string, systemInstruction?: 
 
 export async function generateJsonGemini(prompt: string, systemInstruction?: string) {
     try {
-        if (geminiClient) {
-            const model = geminiClient.getGenerativeModel({
+        const client = getGeminiClient();
+        if (client) {
+            const model = client.getGenerativeModel({
                 model: "gemini-1.5-flash",
                 systemInstruction: systemInstruction,
                 generationConfig: {

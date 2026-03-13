@@ -4,6 +4,7 @@ import { generateAIResponse, extractJson } from "@/lib/ai-provider";
 // Configuration for Gemini API Keys
 // In production, these should be in environment variables like GEMINI_API_KEY_1, GEMINI_API_KEY_2, etc.
 const GEMINI_KEYS = [
+    process.env.GEMINI_API_KEY,
     process.env.GEMINI_API_KEY_1,
     process.env.GEMINI_API_KEY_2,
     process.env.GEMINI_API_KEY_3,
