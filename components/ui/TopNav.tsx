@@ -12,12 +12,15 @@ import {
   DropdownMenuTrigger 
 } from "./DropdownMenu";
 
+import Link from "next/link";
+
 interface TopNavProps {
   userName?: string;
   pageTitle: string;
+  locale?: string;
 }
 
-export function TopNav({ userName = "User", pageTitle }: TopNavProps) {
+export function TopNav({ userName = "User", pageTitle, locale = "en" }: TopNavProps) {
   return (
     <header className="fixed top-0 right-0 z-30 flex h-16 w-[calc(100%-260px)] items-center justify-between border-b border-white/5 bg-[#070710]/50 px-8 backdrop-blur-md transition-all">
       {/* Breadcrumbs / Page Title */}
@@ -40,10 +43,12 @@ export function TopNav({ userName = "User", pageTitle }: TopNavProps) {
         </div>
 
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative text-slate-400 hover:text-white hover:bg-white/5">
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-2.5 right-2.5 h-1.5 w-1.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,1)]" />
-        </Button>
+        <Link href={`/${locale}/job-alerts`}>
+          <Button variant="ghost" size="icon" className="relative text-slate-400 hover:text-white hover:bg-white/5">
+            <Bell className="h-5 w-5" />
+            <span className="absolute top-2.5 right-2.5 h-1.5 w-1.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,1)]" />
+          </Button>
+        </Link>
 
         {/* User Profile */}
         <div className="flex items-center gap-3 pl-4 border-l border-white/5">
@@ -63,19 +68,27 @@ export function TopNav({ userName = "User", pageTitle }: TopNavProps) {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell className="mr-2 h-4 w-4" />
-                <span>Notifications</span>
-              </DropdownMenuItem>
+              <Link href={`/${locale}/account`}>
+                <DropdownMenuItem className="cursor-pointer">
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+              </Link>
+              <Link href={`/${locale}/job-alerts`}>
+                <DropdownMenuItem className="cursor-pointer">
+                  <Bell className="mr-2 h-4 w-4" />
+                  <span>Notifications</span>
+                </DropdownMenuItem>
+              </Link>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-rose-400 focus:text-rose-400 focus:bg-rose-400/10">
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
-              </DropdownMenuItem>
+              <form action="/api/auth/signout" method="post">
+                <button type="submit" className="w-full">
+                  <DropdownMenuItem className="text-rose-400 focus:text-rose-400 focus:bg-rose-400/10 cursor-pointer">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </button>
+              </form>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

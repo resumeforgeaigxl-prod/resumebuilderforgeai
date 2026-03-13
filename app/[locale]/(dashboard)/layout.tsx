@@ -23,7 +23,7 @@ export default function DashboardLayout({
             <Sidebar locale={locale} />
             
             <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 ml-64">
-                <TopNav pageTitle={formattedTitle} />
+                <TopNav pageTitle={formattedTitle} locale={locale} />
                 
                 <main className="flex-1 pt-24 pb-12 px-8 overflow-y-auto overflow-x-hidden custom-scrollbar">
                     {children}

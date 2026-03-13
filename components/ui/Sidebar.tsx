@@ -93,10 +93,10 @@ export function Sidebar({ locale }: SidebarProps) {
         {/* Bottom Actions */}
         <div className="mt-auto space-y-1 pt-4 border-t border-white/5">
           <Link
-            href={`/${locale}/dashboard/settings`}
+            href={`/${locale}/account`}
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all",
-              pathname?.includes("settings") ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"
+              pathname?.includes("account") ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"
             )}
           >
             <Settings className="h-5 w-5" />
