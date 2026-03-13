@@ -57,8 +57,8 @@ export async function fetchApify(): Promise<NormalisedJob[]> {
                     is_mnc: isMNC(company)
                 });
             }
-        } catch (err) {
-            console.error(`[Apify] Error fetching ${source.name}:`, err);
+        } catch (_err) {
+            console.error(`[Apify] Error fetching ${source.name}:`, _err);
         }
     }
 

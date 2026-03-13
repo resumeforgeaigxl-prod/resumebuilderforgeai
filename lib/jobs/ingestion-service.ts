@@ -81,3 +81,9 @@ export async function ingestJobs(jobs: NormalisedJob[]) {
         skipped: jobs.length - (data?.length || 0)
     };
 }
+
+export async function manualDeduplicate() {
+    // Deduplication is enforced by the database unique index 'idx_jobs_deduplication'
+    // on (title, company, location). This happens automatically on every upsert.
+    return { success: true };
+}

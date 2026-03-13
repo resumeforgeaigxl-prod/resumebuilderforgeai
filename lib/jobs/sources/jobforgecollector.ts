@@ -1,5 +1,12 @@
 import { NormalisedJob } from '../ingestion-service';
 import { generateJsonGemini } from '@/lib/gemini-service';
+import { createClient } from '@supabase/supabase-js';
+import google from 'googlethis';
+
+const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 interface AIJobOutput {
     title?: string;
@@ -10,18 +17,28 @@ interface AIJobOutput {
     description?: string;
     posted_date?: string;
 }
-import google from 'googlethis';
 
-const TARGET_COMPANIES = ['Google', 'Amazon', 'Microsoft', 'IBM', 'Meta', 'Netflix', 'NVIDIA', 'Apple', 'Oracle'];
-const TARGET_ROLES = ['Software Engineer Intern', 'Backend Developer Intern', 'Fullstack Intern', 'Data Science Intern'];
-
-export async function fetchJobForgeCollector(): Promise<NormalisedJob[]> {
+export async function fetchJobForgeCollector(limit: number = 20): Promise<NormalisedJob[]> {
     const results: NormalisedJob[] = [];
 
-    for (const company of TARGET_COMPANIES) {
-        for (const role of TARGET_ROLES) {
+    // 1. Get Target Companies and Roles from DB
+    const { data: companies } = await supabaseAdmin.from('target_companies').select('name');
+    const { data: roles } = await supabaseAdmin.from('target_roles').select('name');
+
+    if (!companies || !roles) return [];
+
+    // Pick a random subset to avoid hitting rate limits in one go if run frequently
+    // Or just run a limited set if 'limit' is provided
+    const shuffledCompanies = companies.sort(() => 0.5 - Math.random()).slice(0, 5);
+    const shuffledRoles = roles.sort(() => 0.5 - Math.random()).slice(0, 4);
+
+    for (const company of shuffledCompanies) {
+        for (const role of shuffledRoles) {
             try {
-                const query = `${company} ${role} careers openings 2026`;
+                // Search Strategy: company + role + location
+                const query = `${company.name} ${role.name} India careers openings 2026`;
+                console.log(`[JobForgeCollector] Searching: ${query}`);
+                
                 const search = await google.search(query, {
                     page: 0,
                     safe: false,
@@ -39,14 +56,15 @@ export async function fetchJobForgeCollector(): Promise<NormalisedJob[]> {
 
                 if (snippets.length === 0) continue;
 
-                // Use Gemini Flash to extract job details from snippets
+                // Use Gemini Flash for extraction and classification
                 const aiOutput = await generateJsonGemini(
                     `Extract job opportunities for the query "${query}" from these search results:
                     ${JSON.stringify(snippets)}
                     
                     Return a JSON array of objects with fields: title, company, location, job_type, apply_url, description, posted_date.
-                    If results are not actual job postings for ${company}, return an empty array.
-                    Ensure the output matches the company: ${company}.`,
+                    If results are not actual job postings for ${company.name}, return an empty array.
+                    Classify job_type as 'Full-time', 'Internship', or 'Contract'.
+                    Ensure the output matches the company: ${company.name}.`,
                     "You are an expert AI job extractor. Only extract real job opportunities."
                 );
 
@@ -56,23 +74,26 @@ export async function fetchJobForgeCollector(): Promise<NormalisedJob[]> {
                     for (const job of aiJobs) {
                         results.push({
                             external_id: `jfc_${Buffer.from(job.apply_url || '').toString('base64').slice(0, 16)}`,
-                            title: job.title || role,
-                            company: company,
+                            title: job.title || role.name,
+                            company: company.name,
                             location: job.location || 'Remote',
-                            job_type: job.job_type || 'Internship',
-                            platform: 'MNC Careers',
+                            job_type: job.job_type || (role.name.toLowerCase().includes('intern') ? 'Internship' : 'Full-time'),
+                            platform: 'Collector AI',
                             source: 'jobforgecollector',
                             apply_url: job.apply_url || '',
                             description: job.description || '',
                             posted_date: job.posted_date || new Date().toISOString(),
-                            is_mnc: true
+                            is_mnc: true // collector mostly targets high-tier companies
                         });
                     }
                 }
-            } catch (err) {
-                console.error(`[JobForgeCollector] Error for ${company} ${role}:`, err);
+
+                if (results.length >= limit) break;
+            } catch (_err) {
+                console.error(`[JobForgeCollector] Error for ${company.name} ${role.name}:`, _err);
             }
         }
+        if (results.length >= limit) break;
     }
 
     return results;

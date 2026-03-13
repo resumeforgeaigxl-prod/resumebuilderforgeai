@@ -3,7 +3,7 @@
 import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning, Briefcase, FileHeart, Receipt, LifeBuoy, Mic, Compass, TrendingUp, Bell, BookOpen } from 'lucide-react';
+import { Shield, Target, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning, Briefcase, FileHeart, Receipt, LifeBuoy, Mic, Compass, TrendingUp, Bell, BookOpen } from 'lucide-react';
 
 export default function AdminLayoutClient({ children, profile, locale }: { children: ReactNode, profile: { email: string }, locale: string }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -38,6 +38,7 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
         { href: `/${locale}/admin/mock-tests`, label: 'Mock Tests', icon: BrainCircuit },
         { href: `/${locale}/admin/jobs`, label: 'Jobs Monitor', icon: Briefcase },
         { href: `/${locale}/admin/job-sources`, label: 'Job Sources', icon: Shield },
+        { href: `/${locale}/admin/job-collector`, label: 'Job Collector', icon: Target },
         { href: `/${locale}/admin/portfolios`, label: 'Portfolios', icon: Globe },
         { href: `/${locale}/admin/resume-scores`, label: 'Resume Scores', icon: Activity },
         { href: `/${locale}/admin/downloads`, label: 'PDF Downloads', icon: FileText },

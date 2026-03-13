@@ -56,8 +56,8 @@ export async function fetchJSearch(): Promise<NormalisedJob[]> {
                     is_mnc: isMNC(j.employer_name)
                 });
             }
-        } catch (err) {
-            console.error('[JSearch] Fetch Error:', err);
+        } catch (_err) {
+            console.error('[JSearch] Fetch Error:', _err);
         }
     }
 

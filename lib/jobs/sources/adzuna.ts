@@ -48,8 +48,8 @@ export async function fetchAdzuna(): Promise<NormalisedJob[]> {
                     is_mnc: isMNC(company)
                 });
             }
-        } catch (err) {
-            console.error('[Adzuna] Fetch Error:', err);
+        } catch (_err) {
+            console.error('[Adzuna] Fetch Error:', _err);
         }
     }
 
