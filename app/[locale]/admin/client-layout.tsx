@@ -37,6 +37,7 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
         { href: `/${locale}/admin/company-prep`, label: 'Company Prep', icon: Shield },
         { href: `/${locale}/admin/mock-tests`, label: 'Mock Tests', icon: BrainCircuit },
         { href: `/${locale}/admin/jobs`, label: 'Jobs Monitor', icon: Briefcase },
+        { href: `/${locale}/admin/job-sources`, label: 'Job Sources', icon: Shield },
         { href: `/${locale}/admin/portfolios`, label: 'Portfolios', icon: Globe },
         { href: `/${locale}/admin/resume-scores`, label: 'Resume Scores', icon: Activity },
         { href: `/${locale}/admin/downloads`, label: 'PDF Downloads', icon: FileText },
