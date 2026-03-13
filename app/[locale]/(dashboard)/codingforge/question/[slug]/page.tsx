@@ -304,9 +304,9 @@ function splitMarkdownAndCodeBlocks(markdown: string): ExplanationChunk[] {
 }
 
 export default function QuestionDetailPage() {
-    const params = useParams() as { region: string; lang: string; slug: string };
+    const params = useParams() as { locale: string; slug: string };
     const router = useRouter();
-    const { region, lang, slug } = params;
+    const { locale, slug } = params;
 
     const [question, setQuestion] = useState<Question | null>(null);
     const [loading, setLoading] = useState(true);
@@ -381,7 +381,7 @@ export default function QuestionDetailPage() {
                 {/* Navigation & Title */}
                 <div className="mb-8">
                     <button
-                        onClick={() => router.push(`/${region}/${lang}/codingforge/questions`)}
+                        onClick={() => router.push(`/${locale}/codingforge/questions`)}
                         className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-4 group"
                     >
                         <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />

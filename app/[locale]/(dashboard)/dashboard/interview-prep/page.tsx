@@ -35,9 +35,7 @@ interface PrepData {
 import { useParams } from 'next/navigation';
 
 export default function InterviewPrepGenerator() {
-    const params = useParams();
-    const region = params?.region || 'in';
-    const lang = params?.lang || 'en';
+    const { locale } = useParams() as { locale: string };
 
     const [company, setCompany] = useState('');
     const [role, setRole] = useState('');
@@ -239,7 +237,7 @@ export default function InterviewPrepGenerator() {
                                     <p className="text-slate-400 font-medium max-w-xl">
                                         Use our AI mock interview simulator to practice these exact questions in a realistic environment.
                                     </p>
-                                    <Link href={`/${region}/${lang}/company-prep-interview?role=${encodeURIComponent(company + ' - ' + role)}`} className="px-10 py-4 bg-white text-slate-950 font-black rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-2">
+                                    <Link href={`/${locale}/company-prep-interview?role=${encodeURIComponent(company + ' - ' + role)}`} className="px-10 py-4 bg-white text-slate-950 font-black rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-2">
                                         Try Mock Interview <ArrowRight className="w-5 h-5" />
                                     </Link>
                                 </div>

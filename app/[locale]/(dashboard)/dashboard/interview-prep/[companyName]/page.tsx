@@ -28,7 +28,8 @@ interface RoleData {
     rounds: Round[];
 }
 
-export default function CompanyPrepPage({ params }: { params: { companyName: string, region: string, lang: string } }) {
+export default function CompanyPrepPage({ params }: { params: { companyName: string, locale: string } }) {
+    const { locale } = params;
     const [roles, setRoles] = useState<RoleData[]>([]);
     const [selectedRole, setSelectedRole] = useState<RoleData | null>(null);
     const [activeRound, setActiveRound] = useState<Round | null>(null);
@@ -198,7 +199,7 @@ export default function CompanyPrepPage({ params }: { params: { companyName: str
                                                 Confront these exact questions in a realistic interview environment. Get AI-powered feedback on your delivery and content.
                                             </p>
                                         </div>
-                                        <Link href={`/${params.region}/${params.lang}/company-prep-interview?role=${encodeURIComponent(name + ' - ' + (selectedRole?.name || ''))}`} className="group relative px-12 py-7 bg-white text-slate-950 font-black rounded-3xl transition-all shadow-xl hover:shadow-indigo-500/20 active:scale-95 flex items-center gap-3">
+                                        <Link href={`/${locale}/company-prep-interview?role=${encodeURIComponent(name + ' - ' + (selectedRole?.name || ''))}`} className="group relative px-12 py-7 bg-white text-slate-950 font-black rounded-3xl transition-all shadow-xl hover:shadow-indigo-500/20 active:scale-95 flex items-center gap-3">
                                             Start Practice Mode <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                                             <div className="absolute -top-3 -right-3 px-3 py-1.5 bg-indigo-500 text-white text-[10px] uppercase font-black rounded-lg animate-bounce">
                                                 Premium

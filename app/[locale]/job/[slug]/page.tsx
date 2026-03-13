@@ -8,7 +8,7 @@ import ApplyTrackingButton from '@/components/jobs/ApplyTrackingButton';
 
 import TrackJobView from '@/components/jobs/TrackJobView';
 
-export async function generateMetadata({ params }: { params: { region: string; lang: string, slug: string } }) {
+export async function generateMetadata({ params }: { params: { locale: string; slug: string } }) {
     const id = params.slug.split('-').slice(-5).join('-');
     if (!id) return { title: 'Job Not Found' };
 
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: { region: string; l
     };
 }
 
-export default async function JobDetailPage({ params }: { params: { region: string; lang: string, slug: string } }) {
+export default async function JobDetailPage({ params }: { params: { locale: string; slug: string } }) {
     const id = params.slug.split('-').slice(-5).join('-');
     if (!id) notFound();
 
@@ -83,7 +83,7 @@ export default async function JobDetailPage({ params }: { params: { region: stri
             <div className="max-w-4xl mx-auto">
                 {/* Breadcrumbs */}
                 <nav className="flex items-center gap-2 text-sm text-slate-500 mb-8">
-                    <Link href={`/${params.region}/${params.lang}/jobs`} className="hover:text-indigo-400">Jobs</Link>
+                    <Link href={`/${params.locale}/jobs`} className="hover:text-indigo-400">Jobs</Link>
                     <span>/</span>
                     <span className="text-slate-300 truncate">{job.title}</span>
                 </nav>
@@ -127,7 +127,7 @@ export default async function JobDetailPage({ params }: { params: { region: stri
                             apply_url: job.apply_url
                         }} />
                         <Link
-                            href={`/${params.region}/${params.lang}/resume/optimize?jobId=${job.id}`}
+                            href={`/${params.locale}/resume/optimize?jobId=${job.id}`}
                             className="px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black uppercase tracking-widest rounded-2xl flex items-center gap-2 transition-all active:scale-95"
                         >
                             Build AI Resume
@@ -187,7 +187,7 @@ export default async function JobDetailPage({ params }: { params: { region: stri
                                 <h3 className="text-xl font-black mb-2 tracking-tight">Land this job faster</h3>
                                 <p className="text-indigo-100 text-sm mb-6 leading-relaxed">Use our AI to optimize your resume specifically for this {job.title} role at {job.company}.</p>
                                 <Link
-                                    href={`/${params.region}/${params.lang}/resume/optimize?jobId=${job.id}`}
+                                    href={`/${params.locale}/resume/optimize?jobId=${job.id}`}
                                     className="w-full py-4 bg-white text-indigo-600 font-black uppercase text-xs tracking-widest rounded-2xl flex items-center justify-center gap-2 hover:bg-slate-100 transition-all shadow-xl active:scale-95"
                                 >
                                     Get Started <ArrowRight className="w-4 h-4" />

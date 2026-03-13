@@ -9,18 +9,22 @@ interface AIChat {
     created_at: string;
 }
 
-// Bypass RLS for shared viewing
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+export const dynamic = 'force-dynamic';
+
+function getSupabaseAdmin() {
+    return createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+}
 
 export default async function SharedConversationPage({ params }: { params: { conversationId: string } }) {
     let messages: AIChat[] = [];
     let userName = 'Candidate';
 
     // 1. Fetch Conversation with admin client
-    const { data: convo } = await supabaseAdmin
+    const supabase = getSupabaseAdmin();
+    const { data: convo } = await supabase
         .from('conversations')
         .select('user_id, users(display_name)')
         .eq('id', params.conversationId)
@@ -34,7 +38,7 @@ export default async function SharedConversationPage({ params }: { params: { con
     }
 
     // 2. Fetch Messages
-    const { data: msgs } = await supabaseAdmin
+    const { data: msgs } = await supabase
         .from('ai_messages')
         .select('*')
         .eq('conversation_id', params.conversationId)

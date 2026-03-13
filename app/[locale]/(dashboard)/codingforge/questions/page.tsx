@@ -28,8 +28,7 @@ interface Question {
 export default function QuestionsLibraryPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const params = useParams() as { region: string; lang: string };
-    const { region, lang } = params;
+    const { locale } = useParams() as { locale: string };
 
     const initialType = searchParams?.get('type') || '';
     const initialCompany = searchParams?.get('company') || '';
@@ -164,7 +163,7 @@ export default function QuestionsLibraryPage() {
                                 </p>
                                 <p className="text-sm font-black text-white">{initialCompany}</p>
                                 <button
-                                    onClick={() => router.push(`/${region}/${lang}/codingforge/questions`)}
+                                    onClick={() => router.push(`/${locale}/codingforge/questions`)}
                                     className="text-[10px] font-bold text-slate-500 hover:text-white mt-3 uppercase tracking-tighter underline"
                                 >
                                     Clear Company Filter
@@ -192,7 +191,7 @@ export default function QuestionsLibraryPage() {
                                 {questions.map((q) => (
                                     <Link
                                         key={q.id}
-                                        href={`/${region}/${lang}/codingforge/question/${q.slug}`}
+                                        href={`/${locale}/codingforge/question/${q.slug}`}
                                         className="p-6 rounded-3xl bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/[0.08] transition-all flex items-center justify-between group"
                                     >
                                         <div className="flex items-center gap-6">

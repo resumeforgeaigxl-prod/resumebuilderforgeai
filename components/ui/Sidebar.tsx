@@ -15,7 +15,9 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Building2,
+  Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +38,8 @@ export function Sidebar({ locale }: SidebarProps) {
     { name: "StudyForge", icon: BookOpen, href: `/${locale}/studyforge` },
     { name: "CareerForge", icon: Briefcase, href: `/${locale}/careerforge` },
     { name: "JobForge", icon: Search, href: `/${locale}/jobs` },
+    { name: "Company Prep", icon: Building2, href: `/${locale}/company-prep-interview` },
+    { name: "AI Tools", icon: Zap, href: `/${locale}/tools` },
   ];
 
   return (

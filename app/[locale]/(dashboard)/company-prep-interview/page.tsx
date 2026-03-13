@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { Mic, CheckCircle, ArrowRight, RotateCcw, FileText, Target, Calendar, BarChart, TrendingUp, X, Award, Lightbulb, Clock, Layers } from 'lucide-react';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 
 interface IntelligenceReport {
@@ -72,8 +73,8 @@ export default function CompanyPrepInterviewPage() {
 }
 
 function CompanyPrepInterviewContent() {
-  const params = useParams() as { region: string; lang: string };
-  const { region, lang } = params;
+  const params = useParams() as { locale: string };
+  const { locale } = params;
   const searchParams = useSearchParams();
   const initialRole = searchParams?.get('role') || '';
 
@@ -115,7 +116,7 @@ function CompanyPrepInterviewContent() {
         const historyData = await historyRes.json();
 
         if (accessRes.status === 401) {
-          window.location.href = `/${region}/${lang}/login`;
+          window.location.href = `/${locale}/login`;
           return;
         }
 
@@ -138,7 +139,7 @@ function CompanyPrepInterviewContent() {
     };
 
     fetchData();
-  }, [region, lang]);
+  }, [locale]);
 
   const startInterview = async () => {
     if (!setup.role.trim()) {
@@ -447,7 +448,7 @@ function CompanyPrepInterviewContent() {
           <h2 className="text-red-400 font-bold text-lg mb-2">Access Limited</h2>
           <p className="text-slate-400 mb-4">{error}</p>
           <Link
-            href={`/${region}/${lang}/billing`}
+            href={`/${locale}/billing`}
             className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all"
           >
             Upgrade Plan <ArrowRight className="w-4 h-4" />
@@ -956,12 +957,16 @@ function CompanyPrepInterviewContent() {
     return (
       <div className="max-w-5xl mx-auto space-y-10 animate-in zoom-in-95 duration-500 pb-20">
         <div className="text-center relative">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/20 rounded-full blur-[100px] -z-10"></div>
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-green-500/10 border border-green-500/20 mb-6">
-            <CheckCircle className="w-10 h-10 text-green-500" />
-          </div>
-          <h1 className="text-5xl font-black text-white mb-4 tracking-tight">Interview Evaluated</h1>
-          <p className="text-slate-400 text-lg">Detailed analysis of your performance at {intelligenceReport?.company}</p>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] -z-10"></div>
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="inline-flex items-center justify-center w-24 h-24 rounded-[2rem] bg-emerald-500/10 border border-emerald-500/20 mb-8 shadow-lg shadow-emerald-500/10"
+          >
+            <CheckCircle className="w-12 h-12 text-emerald-500" />
+          </motion.div>
+          <h1 className="text-6xl font-black text-white mb-4 tracking-tighter uppercase italic">Mission <span className="text-emerald-400">Complete</span></h1>
+          <p className="text-slate-400 text-xl font-medium max-w-2xl mx-auto">Neural evaluation finished. Detailed performance matrix generated for your {intelligenceReport?.company} application.</p>
         </div>
 
         {report ? (
@@ -970,21 +975,28 @@ function CompanyPrepInterviewContent() {
             <div className="lg:col-span-8 space-y-8">
               <div className="bg-slate-800/40 border border-white/10 rounded-[2.5rem] p-10 backdrop-blur-xl relative overflow-hidden">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-10">
-                  <div className="relative">
-                    <svg className="w-48 h-48 transform -rotate-90">
+                  <motion.div 
+                    initial={{ rotate: -180, opacity: 0 }}
+                    animate={{ rotate: -90, opacity: 1 }}
+                    transition={{ duration: 1.5, ease: "easeOut" }}
+                    className="relative"
+                  >
+                    <svg className="w-48 h-48 transform">
                       <circle cx="96" cy="96" r="88" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-slate-900" />
-                      <circle
+                      <motion.circle
                         cx="96" cy="96" r="88" stroke="currentColor" strokeWidth="12" fill="transparent"
                         strokeDasharray={2 * Math.PI * 88}
-                        strokeDashoffset={2 * Math.PI * 88 * (1 - report.overall_readiness / 100)}
-                        className="text-indigo-500 transition-all duration-1000"
+                        initial={{ strokeDashoffset: 2 * Math.PI * 88 }}
+                        animate={{ strokeDashoffset: 2 * Math.PI * 88 * (1 - report.overall_readiness / 100) }}
+                        transition={{ duration: 2, delay: 0.5, ease: "easeInOut" }}
+                        className="text-indigo-500 transition-all"
                       />
                     </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center transform rotate-90">
                       <span className="text-5xl font-black text-white">{report.overall_readiness}%</span>
                       <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Ready</span>
                     </div>
-                  </div>
+                  </motion.div>
                   <div className="flex-1 space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                       {[
@@ -1043,7 +1055,7 @@ function CompanyPrepInterviewContent() {
                 <h3 className="text-lg font-bold text-white mb-6">Action Items</h3>
                 <div className="space-y-4">
                   <Link
-                    href={`/${region}/${lang}/resumes`}
+                    href={`/${locale}/resumes`}
                     className="w-full py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-2xl flex items-center justify-center gap-3 font-bold transition-all text-sm group"
                   >
                     Optimize Resume <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -1075,21 +1087,26 @@ function CompanyPrepInterviewContent() {
   const isLastQuestion = session.currentQuestionIndex === session.questions.length - 1;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-white mb-4">AI Mock Interview</h1>
-        <div className="text-slate-400">
-          Question {questionNumber} of {session.questions.length}
+    <div className="max-w-4xl mx-auto space-y-12 animate-in slide-in-from-bottom-4 duration-700">
+      <div className="text-center relative">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-indigo-500/10 rounded-full blur-[80px] -z-10"></div>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest mb-4">
+          <Target className="w-3 h-3" /> Live Simulation Mode
+        </div>
+        <h1 className="text-4xl font-black text-white mb-2 tracking-tight uppercase italic underline decoration-indigo-500/30 underline-offset-8">AI Mock Interview</h1>
+        <div className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em]">
+          Ecosystem Signal {questionNumber} / {session.questions.length}
         </div>
       </div>
 
-      <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-8">
-        <div className="bg-slate-900/50 border border-slate-600 rounded-xl p-6 relative group">
-          <p className="text-lg text-slate-200 leading-relaxed pr-12">{currentQuestion}</p>
+      <div className="bg-slate-800/40 border border-white/10 rounded-[2.5rem] p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden group">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+        <div className="bg-slate-900/80 border border-white/5 rounded-2xl p-8 relative group shadow-inner">
+          <p className="text-2xl text-slate-100 font-medium leading-relaxed pr-12 italic tracking-tight">&quot;{currentQuestion}&quot;</p>
           {session.interviewMode === 'voice' && (
             <button
               onClick={() => speak(currentQuestion)}
-              className="absolute top-6 right-6 p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-indigo-400 transition-colors"
+              className="absolute top-8 right-8 p-3 bg-white/5 hover:bg-white/10 rounded-xl text-indigo-400 transition-all active:scale-90"
               title="Speak question again"
             >
               <RotateCcw className="w-5 h-5" />

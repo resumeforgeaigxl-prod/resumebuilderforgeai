@@ -1,6 +1,6 @@
 'use client';
 import { useParams } from 'next/navigation';
-import { Brain, Globe, MessageSquareWarning, Sparkles, Wrench, ArrowRight, Code2 } from 'lucide-react';
+import { Brain, Globe, MessageSquareWarning, Sparkles, Wrench, ArrowRight, Code2, Building2 } from 'lucide-react';
 import Link from 'next/link';
 
 const TOOLS = [
@@ -63,6 +63,18 @@ const TOOLS = [
         border: 'border-blue-500/20',
         hoverBorder: 'hover:border-blue-400/40',
         gradient: 'from-blue-600/15 to-cyan-600/15'
+    },
+    {
+        id: 'companyprep',
+        title: 'AI Company Prep Interview',
+        description: 'Generate intelligence reports for target companies and practice realistic mock interviews.',
+        icon: Building2,
+        href: '/company-prep-interview',
+        color: 'text-indigo-400',
+        bg: 'bg-indigo-500/10',
+        border: 'border-indigo-500/20',
+        hoverBorder: 'hover:border-indigo-400/40',
+        gradient: 'from-indigo-600/15 to-blue-600/15'
     }
 ];
 

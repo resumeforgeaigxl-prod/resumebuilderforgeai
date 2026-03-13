@@ -29,10 +29,7 @@ interface ExecutionResult {
 }
 
 export default function ProblemDetailPage() {
-    const params = useParams();
-    const slug = params?.slug as string;
-    const region = params?.region as string;
-    const lang = params?.lang as string;
+    const { slug, locale } = useParams() as { slug: string, locale: string };
     const [problem, setProblem] = useState<Problem | null>(null);
     const [loading, setLoading] = useState(true);
     const [executionResult, setExecutionResult] = useState<ExecutionResult | null>(null);
@@ -61,7 +58,7 @@ export default function ProblemDetailPage() {
     if (!problem) return (
         <div className="text-white flex flex-col items-center justify-center h-[60vh]">
             <h1 className="text-2xl font-bold mb-4">Problem Not Found</h1>
-            <a href={`/${region}/${lang}/codingforge`} className="text-blue-400 hover:underline">Back to Library</a>
+            <a href={`/${locale}/codingforge`} className="text-blue-400 hover:underline">Back to Library</a>
         </div>
     );
 
