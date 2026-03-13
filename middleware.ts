@@ -115,7 +115,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // ─── Check for locale/region in path ───
+    // ─── Locale Discovery ───
     const pathParts = pathname.split('/').filter(Boolean);
     const firstSegment = pathParts[0] ?? '';
 
@@ -130,6 +130,16 @@ export async function middleware(request: NextRequest) {
 
     const userAgent = request.headers.get('user-agent');
     const isSearchBot = isBot(userAgent);
+
+    // Get current locale and region (from path or defaults/cookies)
+    let currentLocale = getLocale(request);
+    let currentRegion = getRegion(request);
+
+    if (hasFullLocale) {
+        const [lang, region] = firstSegment.split('-');
+        currentLocale = lang;
+        currentRegion = region;
+    }
 
     // List of paths that exist at the root level and should NOT be redirected
     const ROOT_LEVEL_PATHS = [
@@ -158,19 +168,17 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(url);
     }
 
-    // 2. Redirect legacy /in/* or /en/* to default /en-in/*
+    // 2. Redirect legacy /in/* or /en/* to default locale-region/*
     if (!hasFullLocale && !isRootLevelPath && !isApiSubdomain && !isAdminSubdomain) {
         if (!isSearchBot || pathname === '/') {
             const url = new URL(request.url);
-            const lang = getLocale(request);
-            const region = getRegion(request);
-            const targetLocale = `${lang}-${region}`;
+            const targetLocale = `${currentLocale}-${currentRegion}`;
 
             let newPath = pathname;
             if (isLegacyRegion) {
-                newPath = `/${lang}-${firstSegment}${pathname.replace(`/${firstSegment}`, '') || '/'}`;
+                newPath = `/${currentLocale}-${firstSegment}${pathname.replace(`/${firstSegment}`, '') || '/'}`;
             } else if (SUPPORTED_LOCALES.includes(firstSegment)) {
-                newPath = `/${firstSegment}-${region}${pathname.replace(`/${firstSegment}`, '') || '/'}`;
+                newPath = `/${firstSegment}-${currentRegion}${pathname.replace(`/${firstSegment}`, '') || '/'}`;
             } else {
                 newPath = `/${targetLocale}${pathname}`;
             }
@@ -180,15 +188,9 @@ export async function middleware(request: NextRequest) {
         }
     }
 
-    // ─── Strip region and locale for normalized path matching ───
+    // ─── Normalized path for internal logic ───
     let normalizedPath = pathname;
-    let currentLocale = DEFAULT_LOCALE;
-    let currentRegion = 'in';
-
     if (hasFullLocale) {
-        const [lang, region] = firstSegment.split('-');
-        currentRegion = region;
-        currentLocale = lang;
         normalizedPath = '/' + pathParts.slice(1).join('/');
     }
 
@@ -248,24 +250,27 @@ export async function middleware(request: NextRequest) {
             return NextResponse.redirect(new URL(`/${currentLocale}-${currentRegion}/dashboard`, request.url));
         }
 
-        // If the path has a locale prefix, strip it for internal routing on admin subdomain
-        let targetPath = pathname;
-        if (hasFullLocale) {
-            targetPath = '/' + pathParts.slice(1).join('/');
-        } else if (isLegacyRegion || (SUPPORTED_LOCALES.includes(firstSegment))) {
-            targetPath = '/' + pathParts.slice(1).join('/');
+        // If on admin subdomain and the path has a locale, we should redirect to clean URL
+        // or just rewrite it to the internal localized path.
+        // For subdomains, we usually want clean URLs in the browser.
+        
+        // 1. Get the path without locale
+        let subRoute = pathname;
+        if (hasFullLocale || isLegacyRegion || SUPPORTED_LOCALES.includes(firstSegment)) {
+            subRoute = '/' + pathParts.slice(1).join('/');
         }
 
-        // Avoid double /admin prefix
-        let finalPath = targetPath;
-        if (!targetPath.startsWith('/admin')) {
-            finalPath = `/admin${targetPath === '/' ? '' : targetPath}`;
+        // 2. Strip leading /admin to get the sub-route relative to admin dashboard
+        // This handles cases like /admin/resumes
+        let internalSubPath = subRoute;
+        if (internalSubPath.startsWith('/admin')) {
+            internalSubPath = internalSubPath.replace('/admin', '') || '/';
         }
 
-        // Clean double slashes
-        finalPath = finalPath.replace(/\/+/g, '/');
+        // 3. Reconstruct internal rewrite: /[locale]/admin/[sub-route]
+        const internalRewritePath = `/${currentLocale}-${currentRegion}/admin${internalSubPath === '/' ? '' : internalSubPath}`.replace(/\/+/g, '/');
 
-        return NextResponse.rewrite(new URL(finalPath, request.url));
+        return NextResponse.rewrite(new URL(internalRewritePath, request.url));
     }
 
     // ─── App subdomain ────────────────────────────────────────────────────────
