@@ -62,6 +62,10 @@ export async function POST(req: Request) {
         // Step 4: Consume credit
         await consumeCredit(user.userId);
 
+        // Step 5: Record Activity for Streak
+        const { recordUserActivity } = await import('@/lib/streak-service');
+        await recordUserActivity(user.userId);
+
         return NextResponse.json({
             success: true,
             projectId: output.id,

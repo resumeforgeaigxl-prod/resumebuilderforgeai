@@ -388,3 +388,26 @@ export async function sendResumeCreatedEmail(
   });
 }
 
+// ── 8. Student Verification OTP Email ──────────────────────────────────────────
+
+export async function sendVerificationOTPEmail(to: string, code: string): Promise<void> {
+  const html = emailWrapper(`
+      ${headingAndSub('Verify Your Student Status 🎓', 'One step away from your verified student badge.')}
+      <p style="color:#cbd5e1;font-size:14px;line-height:1.7;margin:0 0 20px;">
+        Hi, use the following code to verify your university email and unlock your 
+        <strong style="color:#a78bfa;">Verified Student</strong> badge.
+      </p>
+      <div style="background:#0d0d1c;border:1px dashed #1e1b4b;padding:24px;text-align:center;border-radius:12px;margin-bottom:24px;">
+        <span style="font-size:32px;font-weight:800;color:#fff;letter-spacing:8px;font-family:monospace;">${code}</span>
+      </div>
+      <p style="text-align:center;color:#64748b;font-size:12px;margin:0;">
+        This code expires in 5 minutes. If you didn't request this, please ignore this email.
+      </p>
+    `);
+
+  await sendEmail({
+    to: [{ email: to }],
+    subject: `🎓 Verification Code: ${code} | ResumeForgeAI`,
+    html,
+  });
+}

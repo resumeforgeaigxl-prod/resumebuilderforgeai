@@ -70,6 +70,18 @@ ${context ? `Problem Context: ${context}` : ''}
         const data = await response.json();
         const explanation = data.choices[0].message.content;
 
+        // Record Activity for Streak
+        try {
+            const { getSession } = await import('@/lib/auth/jwt');
+            const session = await getSession();
+            if (session?.userId) {
+                const { recordUserActivity } = await import('@/lib/streak-service');
+                await recordUserActivity(session.userId);
+            }
+        } catch (e) {
+            console.error('[Streak] Error recording CodingForge activity:', e);
+        }
+
         return NextResponse.json({ explanation });
 
     } catch (e) {

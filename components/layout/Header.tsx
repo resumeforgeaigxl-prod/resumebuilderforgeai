@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Sparkles, LogOut } from 'lucide-react';
 import { getSession } from '@/lib/auth/jwt';
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
@@ -15,7 +16,7 @@ export default async function Header({ lang = 'en', region = 'in' }: { lang?: st
             <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
                 <div className="flex items-center gap-2">
                     <Link href={`/${locale}`} className="flex items-center">
-                        <img src="/logo/resumeforge-logo.svg" className="w-40 md:w-[200px] h-auto object-contain" alt="ResumeForgeAI" />
+                        <Image src="/logo/resumeforge-logo.svg" width={200} height={50} className="w-40 md:w-[200px] h-auto object-contain" alt="ResumeForgeAI" priority />
                     </Link>
                 </div>
                 <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">

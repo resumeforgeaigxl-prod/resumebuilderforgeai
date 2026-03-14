@@ -1,7 +1,7 @@
 import {
     Sparkles, FileText,
     Briefcase, Zap, ArrowRight, Activity, Calendar,
-    Layout, BrainCircuit, TrendingUp, Compass, Clock
+    Layout, BrainCircuit, TrendingUp, Compass, Clock, ShieldCheck, Crown
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getSession } from '@/lib/auth/jwt'
@@ -10,6 +10,7 @@ import { PaymentSuccessBanner } from '@/components/dashboard/payment-success-ban
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
+import StreakCard from '@/components/dashboard/StreakCard'
 
 export default async function DashboardPage({ params }: { params: { locale: string } }) {
     const { locale } = params;
@@ -91,7 +92,7 @@ export default async function DashboardPage({ params }: { params: { locale: stri
                     <div className="lg:col-span-2 space-y-6">
                         <div className="flex items-center justify-between border-b border-white/5 pb-4">
                             <h2 className="text-xl font-bold text-white tracking-tight">Forge Ecosystem</h2>
-                            <Badge variant="secondary" className="bg-white/5 text-slate-400 px-3 py-1 font-bold">7 ACTIVE MODULES</Badge>
+                            <Badge variant="secondary" className="bg-white/5 text-slate-400 px-3 py-1 font-bold">8 ACTIVE MODULES</Badge>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <ModuleCard 
@@ -102,24 +103,24 @@ export default async function DashboardPage({ params }: { params: { locale: stri
                                 color="indigo"
                             />
                             <ModuleCard 
+                                title="LearnForge" 
+                                desc="AI-powered video learning and roadmap insights." 
+                                href={`/${locale}/learnforge`} 
+                                icon={<BrainCircuit />} 
+                                color="blue"
+                            />
+                            <ModuleCard 
                                 title="CodingForge" 
                                 desc="AI-driven IDE with precision problem sets." 
                                 href={`/${locale}/codingforge`} 
                                 icon={<Zap />} 
-                                color="blue"
+                                color="pink"
                             />
                             <ModuleCard 
                                 title="ProjectForge" 
                                 desc="Architecture blueprints and cloud deployment." 
                                 href={`/${locale}/projectforge`} 
                                 icon={<Layout />} 
-                                color="pink"
-                            />
-                            <ModuleCard 
-                                title="InterviewForge" 
-                                desc="High-fidelity behavioral coaching simulations." 
-                                href={`/${locale}/mock-interview`} 
-                                icon={<BrainCircuit />} 
                                 color="orange"
                             />
                         </div>
@@ -127,6 +128,7 @@ export default async function DashboardPage({ params }: { params: { locale: stri
 
                     {/* Secondary Panel */}
                     <div className="space-y-6">
+                         <StreakCard />
                          <div className="flex items-center justify-between border-b border-white/5 pb-4">
                             <h2 className="text-xl font-bold text-white tracking-tight">System Intel</h2>
                         </div>
@@ -260,15 +262,3 @@ function StatusItem({ label, status, color }: { label: string, status: string, c
         </div>
     );
 }
-
-const Crown = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-    </svg>
-);
-
-const ShieldCheck = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-    </svg>
-);

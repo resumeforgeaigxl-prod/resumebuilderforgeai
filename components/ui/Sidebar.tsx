@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, 
@@ -16,7 +17,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Building2,
-  Zap
+  Zap,
+  Sparkles,
+  PlayCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +37,8 @@ export function Sidebar({ locale }: SidebarProps) {
     { name: "CodingForge", icon: Code, href: `/${locale}/codingforge` },
     { name: "ProjectForge", icon: Projector, href: `/${locale}/projectforge` },
     { name: "InterviewForge", icon: MessageSquare, href: `/${locale}/mock-interview` },
+    { name: "LearnForge", icon: PlayCircle, href: `/${locale}/learnforge` },
+    { name: "ExplainForge", icon: Sparkles, href: `/${locale}/explainforge` },
     { name: "StudyForge", icon: BookOpen, href: `/${locale}/studyforge` },
     { name: "CareerForge", icon: Briefcase, href: `/${locale}/careerforge` },
     { name: "JobForge", icon: Search, href: `/${locale}/jobs` },
@@ -52,16 +57,22 @@ export function Sidebar({ locale }: SidebarProps) {
         {/* Logo */}
         <div className="mb-8 flex items-center justify-center min-h-[48px] px-2">
           {!collapsed ? (
-            <img 
+            <Image 
               src="/logo/resumeforge-logo.svg" 
+              width={180}
+              height={40}
               className="w-[180px] h-auto object-contain transition-all" 
               alt="ResumeForgeAI" 
+              priority
             />
           ) : (
-            <img 
+            <Image 
               src="/logo/resumeforge-icon.svg" 
+              width={40}
+              height={40}
               className="w-10 h-10 object-contain transition-all" 
               alt="RF" 
+              priority
             />
           )}
         </div>

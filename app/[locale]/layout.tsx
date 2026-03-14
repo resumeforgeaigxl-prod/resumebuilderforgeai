@@ -57,10 +57,17 @@ export async function generateMetadata({ params }: { params: { locale: string } 
             canonical: `${BASE_URL}/${locale}`,
             languages: hreflangs,
         },
+        manifest: '/manifest.json',
+        appleWebApp: {
+            capable: true,
+            statusBarStyle: 'default',
+            title: 'ResumeForgeAI',
+        },
     };
 }
 
 import FooterWrapper from "@/components/layout/FooterWrapper";
+import InstallBanner from "@/components/pwa/InstallBanner";
 
 export default async function LocaleLayout({
     children,
@@ -85,6 +92,19 @@ export default async function LocaleLayout({
                     <Footer />
                 </FooterWrapper>
                 <CookieBanner />
+                <InstallBanner />
+                
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                        if ('serviceWorker' in navigator) {
+                            window.addEventListener('load', function() {
+                                navigator.serviceWorker.register('/sw.js');
+                            });
+                        }
+                        `,
+                    }}
+                />
             </div>
         </I18nProvider>
     );

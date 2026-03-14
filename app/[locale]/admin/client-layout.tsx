@@ -4,6 +4,7 @@ import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Shield, Target, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning, Briefcase, FileHeart, Receipt, LifeBuoy, Mic, Compass, TrendingUp, Bell, BookOpen, Sparkles } from 'lucide-react';
+import Image from 'next/image';
 
 export default function AdminLayoutClient({ children, profile, locale }: { children: ReactNode, profile: { email: string }, locale: string }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -51,6 +52,7 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
         { href: `/${locale}/admin/studyforge`, label: 'StudyForge AI', icon: BookOpen },
         { href: `/${locale}/admin/explainforge`, label: 'ExplainForge AI', icon: Sparkles },
         { href: `/${locale}/admin/ai-monitoring`, label: 'AI Neural Monitor', icon: MessageSquareWarning },
+        { href: `/${locale}/admin/learnforge`, label: 'LearnForge Library', icon: BookOpen },
         { href: `/${locale}/admin/logs`, label: 'Audit Logs', icon: ScrollText },
     ];
 
@@ -76,16 +78,22 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                 {/* Sidebar Header */}
                 <div className={`h-16 flex items-center border-b border-white/5 overflow-hidden shrink-0 ${isCollapsed ? 'md:px-0 md:justify-center px-4' : 'px-6'}`}>
                     {!isCollapsed ? (
-                        <img 
+                        <Image 
                             src="/logo/resumeforge-logo.svg" 
+                            width={160}
+                            height={40}
                             className="w-[160px] h-auto object-contain transition-all" 
                             alt="ResumeForgeAI" 
+                            priority
                         />
                     ) : (
-                        <img 
+                        <Image 
                             src="/logo/resumeforge-icon.svg" 
+                            width={40}
+                            height={40}
                             className="w-10 h-10 object-contain transition-all" 
                             alt="RF" 
+                            priority
                         />
                     )}
                 </div>
