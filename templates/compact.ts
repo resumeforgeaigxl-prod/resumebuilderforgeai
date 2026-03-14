@@ -1,6 +1,6 @@
 /** Template 4: Compact Engineer — Calibri, tightest spacing, maximises SDE content per page */
 import { ResumeData } from '@/types/resume';
-import { esc, enforceOnePage, buildContactLine, buildSkillRows, buildCertSection } from './utils';
+import { esc, enforceOnePage, buildLocationLine, buildContactLine, buildSkillRows, buildCertSection } from './utils';
 
 export function generateCompactHtml(rawResume: ResumeData): string {
   const r = enforceOnePage(rawResume);
@@ -27,7 +27,10 @@ ul li{margin-bottom:1px;font-size:9.6pt;}
 .summary{font-size:9.5pt;}
 </style></head><body>
 <div class="name-hd">${esc(r.name)}</div>
-<div class="contact">${buildContactLine(r, ' | ')}</div>
+<div class="contact">
+    ${buildLocationLine(r) ? `${buildLocationLine(r)}<br>` : ''}
+    ${buildContactLine(r, ' | ')}
+</div>
 ${r.summary ? `<div class="section"><div class="sec-title">Objective</div><p class="summary">${esc(r.summary)}</p></div>` : ''}
 ${buildSkillRows(r, 'sk-b', '') ? `<div class="section"><div class="sec-title">Technical Skills</div>${buildSkillRows(r, 'sk-b', '')}</div>` : ''}
 ${r.experience.length ? `<div class="section"><div class="sec-title">Work Experience</div>${r.experience.map(e => `<div class="entry"><div class="erow"><span class="etitle">${esc(e.role)} &mdash; ${esc(e.company)}</span><span class="edate">${esc(e.duration)}</span></div><ul>${e.points.filter(Boolean).map(p => `<li>${esc(p)}</li>`).join('')}</ul></div>`).join('')}</div>` : ''}

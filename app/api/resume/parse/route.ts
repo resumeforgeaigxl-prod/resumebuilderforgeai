@@ -78,6 +78,8 @@ JSON SCHEMA:
   "name": "",
   "email": "",
   "phone": "",
+  "location": "",
+  "country": "",
   "linkedin": "",
   "github": "",
   "professional_summary": "",
@@ -140,6 +142,8 @@ ${rawText}
         name: String(rawParsed.name || ''),
         email: String(rawParsed.email || ''),
         phone: String(rawParsed.phone || ''),
+        location: String(rawParsed.location || ''),
+        country: String(rawParsed.country || 'India'),
         linkedin: String(rawParsed.linkedin || ''),
         github: String(rawParsed.github || ''),
         summary: String(rawParsed.professional_summary || ''), // Map summary properly

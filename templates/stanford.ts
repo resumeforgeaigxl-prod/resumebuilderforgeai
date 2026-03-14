@@ -1,6 +1,6 @@
 /** Template 2: Stanford Clean — Georgia serif, LEFT-aligned name, subtle underline headers */
 import { ResumeData } from '@/types/resume';
-import { esc, enforceOnePage, buildContactLine, buildSkillRows, buildCertSection } from './utils';
+import { esc, enforceOnePage, buildLocationLine, buildContactLine, buildSkillRows, buildCertSection } from './utils';
 
 export function generateStanfordHtml(rawResume: ResumeData): string {
     const r = enforceOnePage(rawResume);
@@ -28,7 +28,10 @@ ul li{margin-bottom:2px;font-size:10.5pt;}
 .summary{font-size:10.5pt;line-height:1.3;}
 </style></head><body>
 <div class="name-hd">${esc(r.name)}</div>
-<div class="contact">${buildContactLine(r, ' &nbsp;|&nbsp; ')}</div>
+<div class="contact">
+    ${buildLocationLine(r) ? `${buildLocationLine(r)}<br>` : ''}
+    ${buildContactLine(r, ' &nbsp;|&nbsp; ')}
+</div>
 ${r.summary ? `<div class="section"><div class="sec-title">Professional Summary</div><hr class="sec-rule"><p class="summary">${esc(r.summary)}</p></div>` : ''}
 ${buildSkillRows(r, 'sk-b', '') ? `<div class="section"><div class="sec-title">Technical Skills</div><hr class="sec-rule">${buildSkillRows(r, 'sk-b', '')}</div>` : ''}
 ${r.experience.length ? `<div class="section"><div class="sec-title">Work Experience</div><hr class="sec-rule">${r.experience.map(e => `<div class="entry"><div class="erow"><span class="etitle">${esc(e.role)}</span><span class="edate">${esc(e.duration)}</span></div><div class="esub">${esc(e.company)}</div><ul>${e.points.filter(Boolean).map(p => `<li>${esc(p)}</li>`).join('')}</ul></div>`).join('')}</div>` : ''}

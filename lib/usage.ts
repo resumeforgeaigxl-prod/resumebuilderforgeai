@@ -7,15 +7,17 @@ export const USAGE_LIMITS = {
         RESUME_GENERATIONS: 2,
         AI_BULLET_ENHANCE: 3,
         PORTFOLIO_GENERATION: 1, // Let's say 1 per day for free users
+        EXPLAIN_PROJECT: 1,
     },
     PRO: {
         RESUME_GENERATIONS: 9999, // practically unlimited
         AI_BULLET_ENHANCE: 9999,
         PORTFOLIO_GENERATION: 9999,
+        EXPLAIN_PROJECT: 9999,
     },
 } as const;
 
-export type UsageAction = 'generate_resume' | 'ai_enhance' | 'generate_portfolio';
+export type UsageAction = 'generate_resume' | 'ai_enhance' | 'generate_portfolio' | 'explain_project';
 
 /**
  * Logs an action to the `usage_logs` table.
@@ -56,7 +58,8 @@ export async function checkDailyLimit(userId: string, action: UsageAction): Prom
 
     const limitKey = action === 'generate_resume' ? 'RESUME_GENERATIONS' :
         action === 'ai_enhance' ? 'AI_BULLET_ENHANCE' :
-            'PORTFOLIO_GENERATION';
+            action === 'generate_portfolio' ? 'PORTFOLIO_GENERATION' :
+                'EXPLAIN_PROJECT';
 
     const maxAllowed = isPro ? USAGE_LIMITS.PRO[limitKey] : USAGE_LIMITS.FREE[limitKey];
 

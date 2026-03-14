@@ -1,6 +1,6 @@
 /** Template 8: Ultra ATS Light — Courier/monospace structure, maximum plain-text ATS parsing */
 import { ResumeData } from '@/types/resume';
-import { esc, enforceOnePage, buildContactLine, buildSkillRows, buildCertSection } from './utils';
+import { esc, enforceOnePage, buildLocationLine, buildContactLine, buildSkillRows, buildCertSection } from './utils';
 
 export function generateAtsLightHtml(rawResume: ResumeData): string {
     const r = enforceOnePage(rawResume);
@@ -28,7 +28,10 @@ ul li{margin-bottom:1px;font-size:9.5pt;}
 .summary{font-size:9.5pt;line-height:1.28;}
 </style></head><body>
 <div class="name-hd">${esc(r.name)}</div>
-<div class="contact">${buildContactLine(r, ' | ')}</div>
+<div class="contact">
+    ${buildLocationLine(r) ? `${buildLocationLine(r)}<br>` : ''}
+    ${buildContactLine(r, ' | ')}
+</div>
 ${r.summary ? `<div class="section"><div class="sec-title">SUMMARY</div><hr class="sec-rule"><p class="summary">${esc(r.summary)}</p></div>` : ''}
 ${buildSkillRows(r, 'sk-b', '') ? `<div class="section"><div class="sec-title">TECHNICAL SKILLS</div><hr class="sec-rule">${buildSkillRows(r, 'sk-b', '')}</div>` : ''}
 ${r.experience.length ? `<div class="section"><div class="sec-title">EXPERIENCE</div><hr class="sec-rule">${r.experience.map(e => `<div class="entry"><div class="erow"><span class="etitle">${esc(e.role)} @ ${esc(e.company)}</span><span class="edate">${esc(e.duration)}</span></div><ul>${e.points.filter(Boolean).map(p => `<li>> ${esc(p)}</li>`).join('')}</ul></div>`).join('')}</div>` : ''}

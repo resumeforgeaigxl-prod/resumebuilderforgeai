@@ -15,7 +15,6 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
   Building2,
   Zap
 } from "lucide-react";
@@ -51,14 +50,19 @@ export function Sidebar({ locale }: SidebarProps) {
     >
       <div className="flex h-full flex-col p-4">
         {/* Logo */}
-        <div className="mb-8 flex items-center gap-3 px-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-[0_0_15px_rgba(255,255,255,0.2)] shrink-0">
-            <Sparkles className="h-5 w-5 text-black" />
-          </div>
-          {!collapsed && (
-            <span className="text-lg font-bold tracking-tight text-white whitespace-nowrap">
-              ResumeForge<span className="text-indigo-400">AI</span>
-            </span>
+        <div className="mb-8 flex items-center justify-center min-h-[48px] px-2">
+          {!collapsed ? (
+            <img 
+              src="/logo/resumeforge-logo.svg" 
+              className="w-[180px] h-auto object-contain transition-all" 
+              alt="ResumeForgeAI" 
+            />
+          ) : (
+            <img 
+              src="/logo/resumeforge-icon.svg" 
+              className="w-10 h-10 object-contain transition-all" 
+              alt="RF" 
+            />
           )}
         </div>
 

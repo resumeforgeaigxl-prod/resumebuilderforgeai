@@ -24,6 +24,7 @@ const SKILL_CATEGORIES: string[] = ['Languages', 'Frontend', 'Backend', 'Databas
 
 import posthog from '@/lib/posthog';
 import { CoverLetterModal } from '@/components/builder/cover-letter-modal';
+import { ResumeIntelligence } from '@/components/builder/ResumeIntelligence';
 
 type Step = 'edit' | 'template' | 'optimize' | 'download';
 
@@ -38,7 +39,10 @@ export default function BuilderPage() {
     const [saving, setSaving] = useState(false);
     const [optimizing, setOptimizing] = useState(false);
     const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
-    const [pendingOptimizedData, setPendingOptimizedData] = useState<ResumeData | null>(null);
+    const [originalResumeData, setOriginalResumeData] = useState<ResumeData | null>(null);
+    const [optimizedResumeData, setOptimizedResumeData] = useState<ResumeData | null>(null);
+    const [isReviewing, setIsReviewing] = useState(false);
+    const [optimizationSuccess, setOptimizationSuccess] = useState(false);
     const [downloading, setDownloading] = useState(false);
     const [resumeData, setResumeData] = useState<ResumeData | null>(null);
     const [initialData, setInitialData] = useState('');
@@ -178,6 +182,7 @@ export default function BuilderPage() {
     async function handleOptimize() {
         if (!resumeData || !jobDescription) return;
         setOptimizing(true);
+        setOptimizationSuccess(false);
         try {
             posthog.capture('resume_optimized_with_ai', { resume_id: id });
         } catch (e) { console.error('[PostHog] Event error:', e); }
@@ -199,7 +204,9 @@ export default function BuilderPage() {
                     skills: Array.isArray(raw.skills) ? raw.skills : (resumeData.skills || []),
                     skillCategories: Array.isArray(raw.skillCategories) ? raw.skillCategories : (resumeData.skillCategories || []),
                 };
-                setPendingOptimizedData(normalized);
+                setOriginalResumeData(JSON.parse(JSON.stringify(resumeData)));
+                setOptimizedResumeData(normalized);
+                setOptimizationSuccess(true);
             } else {
                 alert('Optimization failed: ' + (result.error || 'Unknown error'));
             }
@@ -209,12 +216,45 @@ export default function BuilderPage() {
         } finally { setOptimizing(false); }
     }
 
-    function applyOptimization() {
-        if (pendingOptimizedData) {
-            setResumeData(pendingOptimizedData);
-            setPendingOptimizedData(null);
+    function handleEditOptimized() {
+        if (optimizedResumeData) {
+            setResumeData(optimizedResumeData);
+            setIsReviewing(true);
             setShowOptimizer(false);
+            setStep('edit');
+        }
+    }
+
+    async function handleAcceptOptimized() {
+        // If modal is open, use the fresh AI data. If in review mode (banner), use current editor state.
+        const finalData = showOptimizer ? optimizedResumeData : resumeData;
+        if (finalData) {
+            setSaving(true);
+            setResumeData(finalData);
+            await supabase.from('resumes').update({ 
+                resume_json: finalData, 
+                title, 
+                updated_at: new Date().toISOString() 
+            }).eq('id', id);
+            setInitialData(JSON.stringify(finalData));
+            setOptimizedResumeData(null);
+            setOriginalResumeData(null);
+            setIsReviewing(false);
+            setOptimizationSuccess(false);
+            setShowOptimizer(false);
+            setSaving(false);
             setStep('download');
+        }
+    }
+
+    function handleRevertToOriginal() {
+        if (originalResumeData) {
+            setResumeData(originalResumeData);
+            setOptimizedResumeData(null);
+            setOriginalResumeData(null);
+            setIsReviewing(false);
+            setOptimizationSuccess(false);
+            setShowOptimizer(false);
         }
     }
 
@@ -306,6 +346,7 @@ export default function BuilderPage() {
                             className="bg-transparent border-none text-base sm:text-lg font-bold focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 w-full sm:w-64" />
                     </div>
                     <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 w-full sm:w-auto">
+                        <ResumeIntelligence resumeId={id} resumeData={resumeData} />
                         <button onClick={() => setShowOptimizer(true)} disabled={isResumeEmpty}
                             className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-700 to-blue-700 hover:from-purple-600 hover:to-blue-600 text-white rounded-lg text-sm font-medium disabled:opacity-50">
                             <Sparkles className="w-4 h-4" /> AI Optimize
@@ -346,12 +387,16 @@ export default function BuilderPage() {
                         const idx = ['edit', 'template', 'optimize', 'download'].indexOf(step);
                         const isActive = s === step, isDone = idx > i;
                         return (
-                            <div key={s} className="flex items-center gap-1.5 shrink-0">
+                            <button 
+                                key={s} 
+                                onClick={() => setStep(s)}
+                                className="flex items-center gap-1.5 shrink-0 hover:bg-white/5 rounded-full transition-all px-1 py-0.5"
+                            >
                                 <span className={`px-2.5 py-1 rounded-full font-medium whitespace-nowrap ${isActive ? 'bg-blue-600 text-white' : isDone ? 'bg-emerald-700/40 text-emerald-400' : 'text-slate-600'}`}>
                                     {isDone ? '✓ ' : ''}{labels[i]}
                                 </span>
                                 {i < 3 && <ChevronRight className="w-3 h-3 text-slate-700" />}
-                            </div>
+                            </button>
                         );
                     })}
                 </div>
@@ -385,6 +430,27 @@ export default function BuilderPage() {
             {step !== 'template' && (
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
                     <div className="lg:col-span-8 space-y-6 pb-24 w-full overflow-hidden">
+                        {isReviewing && (
+                            <div className="p-4 bg-blue-600/10 border border-blue-500/30 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+                                        <Sparkles className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-white">Reviewing AI Changes</p>
+                                        <p className="text-xs text-blue-300">Manually edit the optimized content or apply it to save.</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2 w-full sm:w-auto">
+                                    <button onClick={handleRevertToOriginal} className="flex-1 sm:flex-none px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-xs font-bold rounded-xl border border-white/10 transition-all">
+                                        Revert
+                                    </button>
+                                    <button onClick={handleAcceptOptimized} className="flex-1 sm:flex-none px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-blue-600/20">
+                                        Accept & Save
+                                    </button>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Upload */}
                         <ResumeUpload
@@ -414,6 +480,8 @@ export default function BuilderPage() {
                                 <FInput label="Full Name" value={rd.name} onChange={v => setResumeData({ ...rd, name: v })} />
                                 <FInput label="Email" value={rd.email} onChange={v => setResumeData({ ...rd, email: v })} />
                                 <FInput label="Phone" value={rd.phone} onChange={v => setResumeData({ ...rd, phone: v })} />
+                                <FInput label="Location (City, State)" value={rd.location ?? ''} onChange={v => setResumeData({ ...rd, location: v })} />
+                                <FInput label="Country" value={rd.country ?? ''} onChange={v => setResumeData({ ...rd, country: v })} />
                                 <FInput label="LinkedIn URL" value={rd.linkedin} onChange={v => setResumeData({ ...rd, linkedin: v })} />
                                 <FInput label="GitHub URL" value={rd.github} onChange={v => setResumeData({ ...rd, github: v })} />
                             </div>
@@ -572,25 +640,46 @@ export default function BuilderPage() {
                         <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
                             <h3 className="font-bold mb-3 flex items-center gap-2 text-sm"><Sparkles className="w-4 h-4 text-purple-400" />AI Optimization</h3>
 
-                            <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg border border-white/5 mb-4">
-                                <div>
-                                    <p className="text-sm font-bold text-slate-200">FAANG Mode</p>
-                                    <p className="text-xs text-slate-400">Optimize bullets for top tech</p>
+                            {optimizationSuccess && !isReviewing ? (
+                                <div className="space-y-3 mb-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                                    <p className="text-xs text-emerald-400 font-medium bg-emerald-400/10 p-2 rounded-lg border border-emerald-400/20">✓ AI Optimization Ready!</p>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <button onClick={handleEditOptimized} className="py-2 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 font-bold rounded-xl transition-all border border-blue-500/30 text-xs">Edit & Review</button>
+                                        <button onClick={handleAcceptOptimized} className="py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all text-xs">Accept All</button>
+                                    </div>
+                                    <button onClick={handleRevertToOriginal} className="w-full py-2 bg-white/5 hover:bg-white/10 text-slate-400 font-medium rounded-xl transition-all border border-white/10 text-[10px] uppercase tracking-wider">Discard Changes</button>
                                 </div>
-                                <button
-                                    onClick={() => setFaangMode(!faangMode)}
-                                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors focus:outline-none ${faangMode ? 'bg-purple-600' : 'bg-white/10'}`}
-                                >
-                                    <span className="sr-only">Use setting</span>
-                                    <span className={`pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${faangMode ? 'translate-x-4' : 'translate-x-0'}`} />
-                                </button>
-                            </div>
+                            ) : (
+                                <>
+                                    <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg border border-white/5 mb-4">
+                                        <div>
+                                            <p className="text-sm font-bold text-slate-200">FAANG Mode</p>
+                                            <p className="text-xs text-slate-400">Optimize bullets for top tech</p>
+                                        </div>
+                                        <button
+                                            onClick={() => setFaangMode(!faangMode)}
+                                            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors focus:outline-none ${faangMode ? 'bg-purple-600' : 'bg-white/10'}`}
+                                        >
+                                            <span className="sr-only">Use setting</span>
+                                            <span className={`pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${faangMode ? 'translate-x-4' : 'translate-x-0'}`} />
+                                        </button>
+                                    </div>
 
-                            <p className="text-xs text-slate-400 mb-3">Or use the legacy full resume optimizer.</p>
-                            <button onClick={() => setShowOptimizer(true)} className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all text-sm mb-3">Open Optimizer</button>
+                                    <p className="text-xs text-slate-400 mb-3">{step === 'download' ? 'Retweak your resume for this JD anytime.' : 'Or use the legacy full resume optimizer.'}</p>
+                                    <button onClick={() => setShowOptimizer(true)} className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all text-sm mb-3">
+                                        {optimizationSuccess ? 'Open Results' : 'Open Optimizer'}
+                                    </button>
+                                </>
+                            )}
+                            
                             <button onClick={() => setShowCoverLetter(true)} className="w-full py-2 bg-purple-600 hover:bg-purple-500 rounded-xl transition-all text-sm font-bold shadow-lg shadow-purple-900/20 flex items-center justify-center gap-2">
                                 <Sparkles className="w-3.5 h-3.5" /> Generate Cover Letter
                             </button>
+                            {step === 'download' && (
+                                <button onClick={() => setStep('edit')} className="w-full py-2 mt-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all text-xs text-slate-500 font-medium">
+                                    ← Edit Resume Details
+                                </button>
+                            )}
                         </div>
 
                         {/* Health & JD */}
@@ -654,7 +743,7 @@ export default function BuilderPage() {
                     <div className="bg-slate-900 border border-white/10 w-full max-w-2xl rounded-3xl p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
                         <button onClick={() => setShowOptimizer(false)} className="absolute top-5 right-5 p-2 hover:bg-white/5 rounded-full"><X className="w-5 h-5" /></button>
 
-                        {!pendingOptimizedData ? (
+                        {!optimizationSuccess ? (
                             <>
                                 <h2 className="text-xl font-bold mb-2 flex items-center gap-2"><Sparkles className="w-5 h-5 text-blue-400" />AI Job Optimizer</h2>
                                 <p className="text-slate-400 mb-5 text-sm">Paste the Job Description to align your resume experience and projects.</p>
@@ -679,35 +768,41 @@ export default function BuilderPage() {
                                     <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <CheckCircle className="w-8 h-8 text-emerald-400" />
                                     </div>
-                                    <h2 className="text-2xl font-bold mb-1 text-white">Optimization Ready!</h2>
-                                    <p className="text-slate-400 text-sm">AI has improved your experience and projects based on the JD.</p>
+                                    <h2 className="text-2xl font-bold mb-1 text-white">AI optimization complete.</h2>
+                                    <p className="text-slate-400 text-sm">Review and edit before applying.</p>
                                 </div>
 
                                 <div className="bg-black/40 border border-white/5 rounded-2xl p-5 mb-6">
-                                    <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Preview Snapshot</h3>
+                                    <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Optimization Preview</h3>
                                     <div className="space-y-4">
-                                        {pendingOptimizedData.summary && (
+                                        {optimizedResumeData?.summary && (
                                             <div>
                                                 <p className="text-[10px] font-bold text-blue-400 mb-1">REWRITTEN SUMMARY</p>
-                                                <p className="text-xs text-slate-300 line-clamp-3 italic">&quot;{pendingOptimizedData.summary}&quot;</p>
+                                                <p className="text-xs text-slate-300 line-clamp-3 italic">&quot;{optimizedResumeData.summary}&quot;</p>
                                             </div>
                                         )}
-                                        <p className="text-[10px] text-slate-500">All experience bullets and project descriptions have been optimized for ATS.</p>
+                                        <p className="text-[10px] text-slate-500">All experience bullets and project descriptions have been optimized for ATS compatibility with the provided JD.</p>
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col sm:flex-row gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     <button
-                                        onClick={() => setPendingOptimizedData(null)}
-                                        className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-medium rounded-2xl transition-all border border-white/10 text-sm"
+                                        onClick={handleRevertToOriginal}
+                                        className="py-3 bg-white/5 hover:bg-white/10 text-white font-medium rounded-2xl transition-all border border-white/10 text-sm order-3 sm:order-1"
                                     >
-                                        Back / Discard
+                                        Revert to Original
                                     </button>
                                     <button
-                                        onClick={applyOptimization}
-                                        className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-emerald-600/20 text-sm"
+                                        onClick={handleEditOptimized}
+                                        className="py-3 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 font-bold rounded-2xl transition-all border border-blue-500/30 text-sm order-1 sm:order-2"
                                     >
-                                        Apply to Resume
+                                        Edit Resume
+                                    </button>
+                                    <button
+                                        onClick={handleAcceptOptimized}
+                                        className="py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-emerald-600/20 text-sm order-2 sm:order-3"
+                                    >
+                                        Accept Changes
                                     </button>
                                 </div>
                             </>

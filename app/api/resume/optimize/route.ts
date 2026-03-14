@@ -35,7 +35,7 @@ Rules:
 2. Compare them with the candidate's resume.
 3. Enhance ONLY matching sections (Experience points and Project descriptions) to highlight relevant skills.
 4. Insert missing relevant keywords NATURALLY where they fit the candidate's actual work.
-5. PRESERVE authenticity: Do NOT rewrite the entire resume or invent personal info (name, email, phone).
+5. PRESERVE authenticity: Do NOT rewrite the entire resume or invent personal info (name, email, phone, location, country).
 6. DO NOT invent new companies, schools, or entire projects. ONLY improve existing descriptions.
 7. Tone: Realistic and technical. No corporate fluff.
 8. If the input resume is mostly empty, DO NOT generate a sample resume. Keep it empty.
@@ -57,7 +57,7 @@ Rules:
         3. Inject keywords naturally while improving clarity.
         4. Focus on matching tech stacks.
         
-        CRITICAL: Do NOT change the candidate's name, email, phone, or LinkedIn. 
+        CRITICAL: Do NOT change the candidate's name, email, phone, location, country, or LinkedIn. 
         If these fields are provided as empty strings, KEEP them as empty strings. 
         Do NOT invent "John Doe" or any placeholder details.
 

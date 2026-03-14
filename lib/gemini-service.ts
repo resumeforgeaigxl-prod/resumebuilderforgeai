@@ -41,7 +41,7 @@ export async function generateContentGemini(prompt: string, systemInstruction?: 
         const client = getGeminiClient();
         if (client) {
             const model = client.getGenerativeModel({
-                model: "gemini-1.5-flash",
+                model: "gemini-2.0-flash",
                 systemInstruction: systemInstruction,
             });
 
@@ -68,7 +68,7 @@ export async function generateJsonGemini(prompt: string, systemInstruction?: str
         const client = getGeminiClient();
         if (client) {
             const model = client.getGenerativeModel({
-                model: "gemini-1.5-flash",
+                model: "gemini-2.0-flash",
                 systemInstruction: systemInstruction,
                 generationConfig: {
                     responseMimeType: "application/json",
@@ -98,5 +98,34 @@ export async function generateJsonGemini(prompt: string, systemInstruction?: str
             console.error("OpenRouter fallback for Gemini JSON failed:", fallbackError);
             throw new Error("AI service unavailable");
         }
+    }
+}
+
+/**
+ * Performs a grounded search using Gemini 2.0 Google Search tool
+ */
+export async function generateGroundedJobSearch(query: string) {
+    try {
+        const client = getGeminiClient();
+        if (!client) throw new Error("No Gemini client available");
+
+        const model = client.getGenerativeModel({
+            model: "gemini-2.0-flash",
+            tools: [{ googleSearchRetrieval: {} }]
+        });
+
+        const prompt = `Search for specific job openings for: ${query}. 
+        Return a JSON array of objects with: title, company, location, job_type, apply_url, description.
+        Only include real, active job postings with direct or platform apply URLs. 
+        If no specific jobs are found, return an array [].`;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        
+        return JSON.parse(extractJson(text));
+    } catch (error) {
+        console.error("Gemini Grounded Search Error:", error);
+        return [];
     }
 }

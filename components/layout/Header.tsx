@@ -14,11 +14,8 @@ export default async function Header({ lang = 'en', region = 'in' }: { lang?: st
         <nav className="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-white/[0.05]">
             <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
                 <div className="flex items-center gap-2">
-                    <Link href={`/${locale}`} className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-                            <Sparkles className="w-5 h-5 text-black" />
-                        </div>
-                        <span className="text-xl font-bold tracking-tight text-white">ResumeForge<span className="text-indigo-400">AI</span></span>
+                    <Link href={`/${locale}`} className="flex items-center">
+                        <img src="/logo/resumeforge-logo.svg" className="w-40 md:w-[200px] h-auto object-contain" alt="ResumeForgeAI" />
                     </Link>
                 </div>
                 <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">

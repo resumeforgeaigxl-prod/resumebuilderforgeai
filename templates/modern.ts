@@ -1,6 +1,6 @@
 /** Template 3: Modern Minimal — Arial sans, thin ruled dividers, right-aligned dates */
 import { ResumeData } from '@/types/resume';
-import { esc, enforceOnePage, buildContactLine, buildSkillRows, buildCertSection } from './utils';
+import { esc, enforceOnePage, buildLocationLine, buildContactLine, buildSkillRows, buildCertSection } from './utils';
 
 export function generateModernHtml(rawResume: ResumeData): string {
   const r = enforceOnePage(rawResume);
@@ -28,7 +28,10 @@ ul li{margin-bottom:2px;font-size:10pt;}
 .summary{font-size:10pt;line-height:1.3;}
 </style></head><body>
 <div class="name-hd">${esc(r.name)}</div>
-<div class="contact">${buildContactLine(r, ' &middot; ')}</div>
+<div class="contact">
+    ${buildLocationLine(r) ? `${buildLocationLine(r)}<br>` : ''}
+    ${buildContactLine(r, ' &middot; ')}
+</div>
 ${r.summary ? `<div class="section"><div class="sec-title">Profile</div><hr>${'<p class="summary">' + esc(r.summary) + '</p>'}</div>` : ''}
 ${buildSkillRows(r, 'sk-b', '') ? `<div class="section"><div class="sec-title">Technical Skills</div><hr>${buildSkillRows(r, 'sk-b', '')}</div>` : ''}
 ${r.experience.length ? `<div class="section"><div class="sec-title">Experience</div><hr>${r.experience.map(e => `<div class="entry"><div class="erow"><span class="etitle">${esc(e.role)}</span><span class="edate">${esc(e.duration)}</span></div><div class="esub">${esc(e.company)}</div><ul>${e.points.filter(Boolean).map(p => `<li>${esc(p)}</li>`).join('')}</ul></div>`).join('')}</div>` : ''}

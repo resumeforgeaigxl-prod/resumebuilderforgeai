@@ -3,6 +3,7 @@
 import { Sidebar } from "@/components/ui/Sidebar";
 import { TopNav } from "@/components/ui/TopNav";
 import { usePathname } from "next/navigation";
+import { ForgeAssistant } from "@/components/shared/ForgeAssistant";
 
 export default function DashboardLayout({
     children,
@@ -19,7 +20,7 @@ export default function DashboardLayout({
     const formattedTitle = pageTitle.charAt(0).toUpperCase() + pageTitle.slice(1);
 
     return (
-        <div className="min-h-screen bg-[#070710] flex overflow-hidden">
+        <div className="min-h-screen bg-[#070710] flex overflow-hidden relative">
             <Sidebar locale={locale} />
             
             <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 ml-64">
@@ -29,6 +30,8 @@ export default function DashboardLayout({
                     {children}
                 </main>
             </div>
+
+            <ForgeAssistant locale={locale} />
         </div>
     );
 }

@@ -75,6 +75,18 @@ const TOOLS = [
         border: 'border-indigo-500/20',
         hoverBorder: 'hover:border-indigo-400/40',
         gradient: 'from-indigo-600/15 to-blue-600/15'
+    },
+    {
+        id: 'explainforge',
+        title: 'ExplainForge AI',
+        description: 'Human-style project explanation engine & professional documentation generator.',
+        icon: Sparkles,
+        href: '/explainforge',
+        color: 'text-emerald-500',
+        bg: 'bg-emerald-500/10',
+        border: 'border-emerald-500/20',
+        hoverBorder: 'hover:border-emerald-400/40',
+        gradient: 'from-emerald-600/15 to-teal-600/15'
     }
 ];
 

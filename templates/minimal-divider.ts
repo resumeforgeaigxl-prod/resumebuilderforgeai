@@ -1,6 +1,6 @@
 /** Template 6: Minimal Divider — Inter/Helvetica, NO lines, pure whitespace hierarchy, ultra-clean */
 import { ResumeData } from '@/types/resume';
-import { esc, enforceOnePage, buildContactLine, buildSkillRows, buildCertSection } from './utils';
+import { esc, enforceOnePage, buildLocationLine, buildContactLine, buildSkillRows, buildCertSection } from './utils';
 
 export function generateMinimalDividerHtml(rawResume: ResumeData): string {
     const r = enforceOnePage(rawResume);
@@ -28,7 +28,10 @@ ul li::before{content:"– ";font-size:9.5pt;}
 .summary{font-size:10pt;line-height:1.35;color:#111;}
 </style></head><body>
 <div class="name-hd">${esc(r.name)}</div>
-<div class="contact">${buildContactLine(r, ' &nbsp; &middot; &nbsp; ')}</div>
+<div class="contact">
+    ${buildLocationLine(r) ? `${buildLocationLine(r)}<br>` : ''}
+    ${buildContactLine(r, ' &nbsp; &middot; &nbsp; ')}
+</div>
 ${r.summary ? `<div class="section"><div class="sec-title">Profile</div><p class="summary">${esc(r.summary)}</p></div>` : ''}
 ${buildSkillRows(r, 'sk-b', '') ? `<div class="section"><div class="sec-title">Skills</div>${buildSkillRows(r, 'sk-b', '')}</div>` : ''}
 ${r.experience.length ? `<div class="section"><div class="sec-title">Experience</div>${r.experience.map(e => `<div class="entry"><div class="erow"><span class="etitle">${esc(e.role)}</span><span class="edate">${esc(e.duration)}</span></div><div class="esub">${esc(e.company)}</div><ul>${e.points.filter(Boolean).map(p => `<li>${esc(p)}</li>`).join('')}</ul></div>`).join('')}</div>` : ''}

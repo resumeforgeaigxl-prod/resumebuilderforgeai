@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { PaymentSuccessBanner } from '@/components/dashboard/payment-success-banner';
+import { JobApplicationTracker } from '@/components/jobs/JobApplicationTracker';
 
 interface Job {
     id: string;
@@ -369,8 +370,9 @@ function JobCard({ job }: { job: Job }) {
                     }}
                     className="flex-1 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
                 >
-                    Apply on <ArrowRight className="w-4 h-4" />
+                    Apply Now <ArrowRight className="w-4 h-4" />
                 </button>
+                <JobApplicationTracker jobId={job.id} />
             </div>
 
             <div className="flex items-center justify-between mt-6 pt-6 border-t border-white/5">

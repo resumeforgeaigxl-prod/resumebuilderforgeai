@@ -1,6 +1,6 @@
 /** Template 7: Academic Structured — Times New Roman, indented entries, academic reference style */
 import { ResumeData } from '@/types/resume';
-import { esc, enforceOnePage, buildContactLine, buildSkillRows, buildCertSection } from './utils';
+import { esc, enforceOnePage, buildLocationLine, buildContactLine, buildSkillRows, buildCertSection } from './utils';
 
 export function generateAcademicHtml(rawResume: ResumeData): string {
     const r = enforceOnePage(rawResume);
@@ -28,7 +28,10 @@ ul li{margin-bottom:2px;font-size:10.5pt;}
 .summary{font-size:10.5pt;line-height:1.33;margin-left:12px;}
 </style></head><body>
 <div class="name-hd">${esc(r.name)}</div>
-<div class="contact">${buildContactLine(r, ' &bull; ')}</div>
+<div class="contact">
+    ${buildLocationLine(r) ? `${buildLocationLine(r)}<br>` : ''}
+    ${buildContactLine(r, ' &bull; ')}
+</div>
 <hr class="center-rule">
 ${r.summary ? `<div class="section"><div class="sec-title">Research & Professional Focus</div><p class="summary">${esc(r.summary)}</p></div>` : ''}
 ${buildSkillRows(r, 'sk-b', '') ? `<div class="section"><div class="sec-title">Technical Competencies</div>${buildSkillRows(r, 'sk-b', '')}</div>` : ''}

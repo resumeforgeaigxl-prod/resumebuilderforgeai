@@ -1,13 +1,8 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import Link from 'next/link';
-import { Users, FileText, Activity, CreditCard, ShieldCheck, Zap, BarChart3, Clock, ArrowRight } from 'lucide-react';
+import { Users, FileText, Activity, CreditCard, ShieldCheck, Zap, Clock, ArrowRight, MessageSquare, Briefcase } from 'lucide-react';
 import { startOfDay, endOfDay } from 'date-fns';
 import LiveAIMonitor, { type AIUsageLog } from './LiveAIMonitor';
-
-interface UserProfileRow {
-  id: string;
-  is_blocked: boolean | null;
-}
 
 export default async function AdminDashboard({ params }: { params: { locale: string } }) {
   const { locale } = params;
@@ -22,32 +17,50 @@ export default async function AdminDashboard({ params }: { params: { locale: str
     subsRes,
     usageRes,
     roadmapsRes,
-    jobAlertsRes,
-    interviewScoresRes,
-    recentUsageRes
+    recentUsageRes,
+    chatSessionsRes,
+    resumeAnalysisRes,
+    jobAppsRes,
+    jobStatsRes
   ] = await Promise.all([
-    supabase.from('users').select('id, is_blocked', { count: 'exact' }),
+    supabase.from('users').select('id', { count: 'exact' }),
     supabase.from('resumes').select('id', { count: 'exact' }),
     supabase.from('admin_logs').select('id', { count: 'exact' }),
     supabase.from('subscriptions').select('plan', { count: 'exact' }).eq('status', 'active'),
     supabase.from('ai_usage_logs').select('id', { count: 'exact' }).gte('created_at', todayStart).lte('created_at', todayEnd),
     supabase.from('roadmaps').select('id', { count: 'exact' }),
-    supabase.from('job_alerts').select('id', { count: 'exact' }),
-    supabase.from('interview_scores').select('id', { count: 'exact' }),
-    supabase.from('ai_usage_logs').select('*, users(email)').order('created_at', { ascending: false }).limit(5)
+    supabase.from('ai_usage_logs').select('*, users(email)').order('created_at', { ascending: false }).limit(5),
+    supabase.from('chat_sessions').select('id', { count: 'exact' }).gte('started_at', todayStart).lte('started_at', todayEnd),
+    supabase.from('resume_analysis').select('id', { count: 'exact' }),
+    supabase.from('job_applications').select('id', { count: 'exact' }),
+    supabase.from('admin_job_stats_view').select('company_name').order('created_at', { ascending: false }).limit(20)
   ]);
 
-  const profileRows = (profilesRes.data ?? []) as UserProfileRow[];
   const totalUsers = profilesRes.count ?? 0;
-  const blockedUsers = profileRows.filter((profile) => Boolean(profile.is_blocked)).length;
   const totalResumes = resumesRes.count ?? 0;
   const totalLogs = logsRes.count ?? 0;
   const activeSubs = subsRes.count ?? 0;
   const aiUsageToday = usageRes.count ?? 0;
   const totalRoadmaps = roadmapsRes.count ?? 0;
-  const totalJobAlerts = jobAlertsRes.count ?? 0;
-  const totalInterviewScores = interviewScoresRes.count ?? 0;
   const recentUsage = (recentUsageRes.data ?? []) as AIUsageLog[];
+  const chatSessionsToday = chatSessionsRes.count ?? 0;
+  const totalResumeAnalyses = resumeAnalysisRes.count ?? 0;
+  const totalJobApps = jobAppsRes.count ?? 0;
+  const recentJobStats = (jobStatsRes.data ?? []) as Array<{ company_name: string | null }>;
+
+  // Calculate top companies
+  const companyCounts = recentJobStats.reduce<Record<string, number>>((acc, curr) => {
+    if (!curr.company_name) {
+      return acc;
+    }
+
+    acc[curr.company_name] = (acc[curr.company_name] || 0) + 1;
+    return acc;
+  }, {});
+  const topCompanies = Object.entries(companyCounts)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 3)
+    .map(([name]) => name);
 
   const stats = [
     { label: 'Total Base Users', value: totalUsers, icon: Users, color: 'text-blue-400', bg: 'bg-blue-500/10' },
@@ -58,9 +71,9 @@ export default async function AdminDashboard({ params }: { params: { locale: str
 
   const secondaryStats = [
     { label: 'Intelligence Calls Today', value: aiUsageToday, icon: Activity, color: 'text-indigo-400' },
-    { label: 'Interview Intelligence', value: totalInterviewScores, icon: ShieldCheck, color: 'text-cyan-400' },
-    { label: 'Active Job Alerts', value: totalJobAlerts, icon: BarChart3, color: 'text-pink-400' },
-    { label: 'Restricted Access', value: blockedUsers, icon: Users, color: 'text-red-400' }
+    { label: 'Resume Analyses', value: totalResumeAnalyses, icon: Zap, color: 'text-purple-400' },
+    { label: 'Recent Applications', value: totalJobApps, icon: Briefcase, color: 'text-emerald-400' },
+    { label: 'AI Chat Sessions', value: chatSessionsToday, icon: MessageSquare, color: 'text-blue-400' },
   ];
 
   return (
@@ -92,7 +105,7 @@ export default async function AdminDashboard({ params }: { params: { locale: str
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-xl font-bold text-white flex items-center gap-3">
               <Activity className="w-5 h-5 text-indigo-400" />
-              JobForgeAI Live Monitor
+              AI Neural Engine Monitor
             </h2>
             <Link href={`/${locale}/admin/ai-monitoring`} className="text-xs font-bold text-indigo-400 hover:text-white transition-colors bg-indigo-500/10 px-3 py-1.5 rounded-lg flex items-center gap-2">
               Command Center <ArrowRight className="w-3 h-3" />
@@ -136,6 +149,19 @@ export default async function AdminDashboard({ params }: { params: { locale: str
                   <span className="text-xs font-mono text-emerald-500 uppercase">Production Stable</span>
                 </div>
               </div>
+              {topCompanies.length > 0 && (
+                <div className="pt-4 border-t border-white/5">
+                  <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-3">Top Applied Companies</div>
+                  <div className="space-y-2">
+                    {topCompanies.map((name, i) => (
+                      <div key={i} className="flex items-center gap-2 text-xs text-slate-300">
+                        <span className="text-indigo-400 font-bold">#{i+1}</span>
+                        {name}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

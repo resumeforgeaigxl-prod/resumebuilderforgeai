@@ -3,6 +3,7 @@ import { ingestJobs } from '@/lib/jobs/ingestion-service';
 import { fetchJSearch } from '@/lib/jobs/sources/jsearch';
 import { fetchAdzuna } from '@/lib/jobs/sources/adzuna';
 import { fetchApify } from '@/lib/jobs/sources/apify';
+import { fetchJobForgeCollector } from '@/lib/jobs/sources/jobforgecollector';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +30,10 @@ export async function GET(req: Request) {
         // 3. Apify
         const apJobs = await fetchApify();
         summary.apify = await ingestJobs(apJobs);
+
+        // 4. JobForgeCollector
+        const jfJobs = await fetchJobForgeCollector();
+        summary.jobforgecollector = await ingestJobs(jfJobs);
 
         return NextResponse.json({
             success: true,

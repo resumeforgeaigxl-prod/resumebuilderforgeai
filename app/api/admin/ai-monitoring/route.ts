@@ -3,6 +3,28 @@ import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+interface UsageUser {
+    email: string | null;
+    display_name: string | null;
+}
+
+interface UsageRow {
+    user_id: string;
+    tokens: number | null;
+    created_at: string;
+    users: UsageUser | UsageUser[] | null;
+}
+
+interface AggregatedUserStats {
+    user_id: string;
+    email: string;
+    name: string;
+    calls: number;
+    tokens: number;
+    lastActive: string;
+}
 
 async function checkAdmin() {
     const session = await getSession();
@@ -21,54 +43,47 @@ export async function GET(request: Request) {
         const url = new URL(request.url);
         const action = url.searchParams.get('action');
         const userId = url.searchParams.get('userId');
-        const conversationId = url.searchParams.get('conversationId');
 
-        // New Detailed Chat View
-        if (action === 'chat-history' && (userId || conversationId)) {
-            let query = supabase.from('ai_messages').select('*');
-            if (conversationId) {
-                query = query.eq('conversation_id', conversationId);
-            } else if (userId) {
-                // Fetch latest conversation if only userId
-                const { data: latestConvo } = await supabase
-                    .from('conversations')
-                    .select('id')
-                    .eq('user_id', userId)
-                    .order('updated_at', { ascending: false })
-                    .limit(1)
-                    .single();
-
-                if (latestConvo) {
-                    query = query.eq('conversation_id', latestConvo.id);
-                } else {
-                    return NextResponse.json({ chats: [] });
-                }
-            }
-
-            const { data } = await query.order('created_at', { ascending: true });
+        // Detailed Chat View
+        if (action === 'chat-history' && userId) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { data } = await (supabase as any)
+                .from('chat_messages')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: true });
+            
             return NextResponse.json({ chats: data || [] });
         }
 
-        // Production Dashboard Stats
+        // Live Sessions View
+        if (action === 'live-sessions') {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { data } = await (supabase as any)
+                .from('chat_sessions')
+                .select('*, users(email, display_name)')
+                .order('last_active', { ascending: false })
+                .limit(50);
+            
+            return NextResponse.json({ sessions: data || [] });
+        }
 
+        // Dashboard Stats & User List
         const [
             { data: statsView },
-            { data: usageRaw },
-            { data: violationsRaw }
+            { data: usageRaw }
         ] = await Promise.all([
-            // Use the view for summary stats
-            supabase.from('ai_admin_stats_view').select('*').single(),
-            // Fetch usage summary by user
-            supabase.from('ai_usage_logs')
-                .select('user_id, tokens_used, created_at, users(email, display_name)'),
-            // Fetch violations summary
-            supabase.from('ai_violations').select('user_id, violation_type')
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (supabase as any).from('ai_admin_stats_view').select('*').single(),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (supabase as any).from('ai_usage_logs')
+                .select('user_id, tokens, created_at, users(email, display_name)')
+                .order('created_at', { ascending: false })
         ]);
 
-        // Process aggregating users (This should ideally be a DB view, but processing in TS for flexibility now)
-        const userMap = new Map();
-
-        (usageRaw || []).forEach(u => {
+        // Aggregate users
+        const userMap = new Map<string, AggregatedUserStats>();
+        (usageRaw || []).forEach((u: UsageRow) => {
             const userObj = (Array.isArray(u.users) ? u.users[0] : u.users) as { email: string; display_name: string } | null;
             if (!userMap.has(u.user_id)) {
                 userMap.set(u.user_id, {
@@ -77,22 +92,17 @@ export async function GET(request: Request) {
                     name: userObj?.display_name || 'User',
                     calls: 0,
                     tokens: 0,
-                    violations: 0,
                     lastActive: u.created_at
                 });
             }
             const record = userMap.get(u.user_id);
+            if (!record) {
+                return;
+            }
             record.calls++;
-            record.tokens += u.tokens_used;
+            record.tokens += (u.tokens || 0);
             if (new Date(u.created_at) > new Date(record.lastActive)) {
                 record.lastActive = u.created_at;
-            }
-        });
-
-        // Add violations to map
-        (violationsRaw || []).forEach(v => {
-            if (userMap.has(v.user_id)) {
-                userMap.get(v.user_id).violations++;
             }
         });
 
@@ -103,7 +113,7 @@ export async function GET(request: Request) {
                 totalCallsToday: statsView?.calls_today || 0,
                 activeUsersToday: statsView?.active_users_today || 0,
                 totalTokensToday: statsView?.tokens_today || 0,
-                totalViolations: statsView?.total_violations || 0
+                newSessionsToday: statsView?.new_sessions_today || 0
             },
             usersList
         });
@@ -111,26 +121,5 @@ export async function GET(request: Request) {
     } catch (error: unknown) {
         console.error('[Admin AI] GET Error:', error);
         return NextResponse.json({ error: 'Failed to fetch monitoring data' }, { status: 500 });
-    }
-}
-
-export async function POST(request: Request) {
-    try {
-        const supabase = await checkAdmin();
-        if (!supabase) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-        const body = await request.json();
-
-        if (body.action === 'reset_violations' && body.userId) {
-            await supabase.from('ai_violations').delete().eq('user_id', body.userId);
-            return NextResponse.json({ success: true });
-        }
-
-        return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
-
-    } catch (error: unknown) {
-        console.error('[Admin AI] POST Error:', error);
-        const message = error instanceof Error ? error.message : String(error);
-        return NextResponse.json({ error: message }, { status: 500 });
     }
 }

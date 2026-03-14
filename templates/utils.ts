@@ -54,6 +54,11 @@ export function enforceOnePage(r: ResumeData): ResumeData {
     return d;
 }
 
+export function buildLocationLine(r: ResumeData): string {
+    const parts = [r.location, r.country].filter(Boolean);
+    return parts.map(esc).join(', ');
+}
+
 export function buildContactLine(r: ResumeData, sep = ' &bull; '): string {
     const parts: string[] = [];
     if (r.phone) parts.push(esc(r.phone));

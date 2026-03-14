@@ -1,6 +1,6 @@
 /** Template 1: Harvard Classic — Georgia serif, centered name, bottom-border section headers */
 import { ResumeData } from '@/types/resume';
-import { esc, enforceOnePage, buildContactLine, buildSkillRows, buildCertSection } from './utils';
+import { esc, enforceOnePage, buildLocationLine, buildContactLine, buildSkillRows, buildCertSection } from './utils';
 
 export function generateHarvardHtml(rawResume: ResumeData): string {
     const r = enforceOnePage(rawResume);
@@ -27,7 +27,10 @@ ul li{margin-bottom:2px;font-size:10.5pt;}
 .summary{font-size:10.5pt;line-height:1.3;}
 </style></head><body>
 <div class="name-hd">${esc(r.name)}</div>
-<div class="contact">${buildContactLine(r, ' &bull; ')}</div>
+<div class="contact">
+    ${buildLocationLine(r) ? `${buildLocationLine(r)}<br>` : ''}
+    ${buildContactLine(r, ' &bull; ')}
+</div>
 ${r.summary ? `<div class="section"><div class="sec-title">Summary</div><p class="summary">${esc(r.summary)}</p></div>` : ''}
 ${buildSkillRows(r, 'sk-bold', '') ? `<div class="section"><div class="sec-title">Technical Skills</div>${buildSkillRows(r, 'sk-bold', '')}</div>` : ''}
 ${r.experience.length ? `<div class="section"><div class="sec-title">Experience</div>${r.experience.map(e => `<div class="entry"><div class="erow"><span class="etitle">${esc(e.role)}, ${esc(e.company)}</span><span class="edate">${esc(e.duration)}</span></div><ul>${e.points.filter(Boolean).map(p => `<li>${esc(p)}</li>`).join('')}</ul></div>`).join('')}</div>` : ''}

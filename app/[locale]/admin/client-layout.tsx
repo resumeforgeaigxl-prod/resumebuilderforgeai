@@ -3,7 +3,7 @@
 import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, Target, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning, Briefcase, FileHeart, Receipt, LifeBuoy, Mic, Compass, TrendingUp, Bell, BookOpen } from 'lucide-react';
+import { Shield, Target, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning, Briefcase, FileHeart, Receipt, LifeBuoy, Mic, Compass, TrendingUp, Bell, BookOpen, Sparkles } from 'lucide-react';
 
 export default function AdminLayoutClient({ children, profile, locale }: { children: ReactNode, profile: { email: string }, locale: string }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -49,7 +49,8 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
         { href: `/${locale}/admin/coupons`, label: 'Coupons', icon: Ticket },
         { href: `/${locale}/admin/codingforge`, label: 'CodingForge AI', icon: BrainCircuit },
         { href: `/${locale}/admin/studyforge`, label: 'StudyForge AI', icon: BookOpen },
-        { href: `/${locale}/admin/ai-monitoring`, label: 'JobForgeAI Monitor', icon: MessageSquareWarning },
+        { href: `/${locale}/admin/explainforge`, label: 'ExplainForge AI', icon: Sparkles },
+        { href: `/${locale}/admin/ai-monitoring`, label: 'AI Neural Monitor', icon: MessageSquareWarning },
         { href: `/${locale}/admin/logs`, label: 'Audit Logs', icon: ScrollText },
     ];
 
@@ -73,15 +74,20 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                 `}
             >
                 {/* Sidebar Header */}
-                <div className={`h-16 flex items-center border-b border-white/5 overflow-hidden shrink-0 ${isCollapsed ? 'md:px-0 md:justify-center px-6' : 'px-6'}`}>
-                    <div className={`flex items-center ${isCollapsed ? 'md:gap-0' : 'gap-3'}`}>
-                        <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0">
-                            <Shield className="w-5 h-5 text-white" />
-                        </div>
-                        <span className={`font-bold text-white tracking-tight text-lg transition-all duration-300 overflow-hidden whitespace-nowrap ${isCollapsed ? 'md:w-0 md:opacity-0' : 'opacity-100'}`}>
-                            ResumeForge
-                        </span>
-                    </div>
+                <div className={`h-16 flex items-center border-b border-white/5 overflow-hidden shrink-0 ${isCollapsed ? 'md:px-0 md:justify-center px-4' : 'px-6'}`}>
+                    {!isCollapsed ? (
+                        <img 
+                            src="/logo/resumeforge-logo.svg" 
+                            className="w-[160px] h-auto object-contain transition-all" 
+                            alt="ResumeForgeAI" 
+                        />
+                    ) : (
+                        <img 
+                            src="/logo/resumeforge-icon.svg" 
+                            className="w-10 h-10 object-contain transition-all" 
+                            alt="RF" 
+                        />
+                    )}
                 </div>
 
                 {/* Navigation */}

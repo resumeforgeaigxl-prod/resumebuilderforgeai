@@ -1,6 +1,6 @@
 /** Template 5: Executive Professional — Georgia serif, BOLD heavy section headers, authoritative weight */
 import { ResumeData } from '@/types/resume';
-import { esc, enforceOnePage, buildContactLine, buildSkillRows, buildCertSection } from './utils';
+import { esc, enforceOnePage, buildLocationLine, buildContactLine, buildSkillRows, buildCertSection } from './utils';
 
 export function generateExecutiveHtml(rawResume: ResumeData): string {
     const r = enforceOnePage(rawResume);
@@ -29,7 +29,10 @@ ul li{margin-bottom:2px;font-size:10.5pt;}
 </style></head><body>
 <div class="header-block">
   <div class="name-hd">${esc(r.name)}</div>
-  <div class="contact">${buildContactLine(r, ' &nbsp;|&nbsp; ')}</div>
+  <div class="contact">
+      ${buildLocationLine(r) ? `${buildLocationLine(r)}<br>` : ''}
+      ${buildContactLine(r, ' &nbsp;|&nbsp; ')}
+  </div>
 </div>
 ${r.summary ? `<div class="section"><div class="sec-title">&#9632; Executive Summary</div><p class="summary">${esc(r.summary)}</p></div>` : ''}
 ${buildSkillRows(r, 'sk-b', '') ? `<div class="section"><div class="sec-title">&#9632; Technical Skills</div>${buildSkillRows(r, 'sk-b', '')}</div>` : ''}
