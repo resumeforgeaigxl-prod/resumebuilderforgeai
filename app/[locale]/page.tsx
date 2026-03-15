@@ -4,19 +4,21 @@ import GeoSuggestionBanner from '@/components/geo/GeoSuggestionBanner';
 import { useTranslation } from '@/lib/i18n/I18nProvider';
 import dynamic from 'next/dynamic';
 
-import HeroSection from '@/components/landing/HeroSection';
-import ProblemSection from '@/components/landing/ProblemSection';
-import EcosystemSection from '@/components/landing/EcosystemSection';
-import WorkflowSection from '@/components/landing/WorkflowSection';
-import FeatureDeepDive from '@/components/landing/FeatureDeepDive';
-import ForgeModules from '@/components/landing/ForgeModules';
-import CareerPaths from '@/components/landing/CareerPaths';
-import CapabilitiesSection from '@/components/landing/CapabilitiesSection';
-import ProductExperience from '@/components/landing/ProductExperience';
-import FAQSection from '@/components/landing/FAQSection';
-import FinalCTA from '@/components/landing/FinalCTA';
-import PhilosophySection from '@/components/landing/PhilosophySection';
-import SecurityPrivacy from '@/components/landing/SecurityPrivacy';
+import {
+  HeroSection,
+  ProblemSection,
+  EcosystemSection,
+  WorkflowSection,
+  FeatureDeepDive,
+  ForgeModules,
+  CareerPaths,
+  CapabilitiesSection,
+  ProductExperience,
+  FAQSection,
+  FinalCTA,
+  PhilosophySection,
+  SecurityPrivacy
+} from '@/components/landing';
 import Link from 'next/link';
 
 const PricingSection = dynamic(() => import('@/components/landing/PricingSection'), {
