@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+    --card: 222 34% 9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 34% 9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 199 89% 60%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 25% 18%;
+    --muted-foreground: 215 20% 68%;
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62% 46%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 23% 18%;
+    --input: 217 23% 18%;
+    --ring: 199 89% 60%;
+    --radius: 1rem;
+    --page-bg: #050816;
+    --page-elevated: rgba(255, 255, 255, 0.05);
+    --page-border: rgba(255, 255, 255, 0.1);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --sidebar-width: 260px;
+    --header-height: 64px;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-[var(--page-bg)] text-foreground antialiased;
+    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background-image:
+      radial-gradient(circle at top, rgba(56, 189, 248, 0.1), transparent 28%),
+      radial-gradient(circle at 85% 15%, rgba(245, 158, 11, 0.08), transparent 22%);
+  }
+
+  a {
+    @apply outline-none;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply border border-white/10 bg-white/[0.05] backdrop-blur-xl transition-all duration-300;
+    box-shadow: 0 22px 80px -48px rgba(8, 15, 30, 0.95);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 rounded-2xl border border-sky-300/30 bg-[linear-gradient(135deg,rgba(240,249,255,1),rgba(224,242,254,1))] px-6 py-3 text-slate-950 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_48px_-24px_rgba(56,189,248,0.55)];
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 rounded-2xl border border-white/[0.12] bg-white/[0.05] px-6 py-3 text-white transition-all duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.09];
+  }
+
+  .section-kicker {
+    @apply inline-flex rounded-full border border-sky-300/[0.12] bg-sky-300/[0.08] px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-sky-100/75;
+  }
+
+  .section-title {
+    @apply text-4xl font-semibold tracking-[-0.04em] text-white sm:text-5xl;
+  }
+
+  .section-copy {
+    @apply text-base leading-8 text-slate-300 sm:text-lg;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-white via-sky-100 to-slate-300 bg-clip-text text-transparent;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.34);
+}
