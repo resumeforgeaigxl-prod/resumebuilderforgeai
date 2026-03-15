@@ -232,28 +232,46 @@ export default function LearnForge() {
                         <div className="space-y-3">
                             {technicalVideos.length === 0 ? (
                                 <div className="p-6 rounded-2xl bg-white/5 border border-white/5 border-dashed text-center">
-                                    <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">No matching videos found</p>
+                                    <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest pt-2">
+                                        No learning videos available for this roadmap yet.
+                                    </p>
                                 </div>
                             ) : (
                                 technicalVideos.map(video => (
-                                    <button
-                                        key={video.id}
-                                        onClick={() => handleVideoSelect(video)}
-                                        className={`w-full p-4 rounded-2xl border transition-all text-left flex items-start gap-4 group ${selectedVideo?.id === video.id ? 'bg-indigo-600 border-indigo-500 shadow-xl shadow-indigo-600/20' : 'bg-white/5 border-white/5 hover:border-white/10'}`}
-                                    >
-                                        <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${selectedVideo?.id === video.id ? 'bg-white/20' : 'bg-indigo-500/10'}`}>
-                                            <Play className={`w-4 h-4 ${selectedVideo?.id === video.id ? 'text-white' : 'text-indigo-400'}`} />
-                                        </div>
-                                        <div className="flex-1 min-w-0 space-y-1">
-                                            <p className={`text-xs font-black uppercase tracking-tight truncate ${selectedVideo?.id === video.id ? 'text-white' : 'text-slate-200 group-hover:text-indigo-400 transition-colors'}`}>
-                                                {video.title}
-                                            </p>
-                                            <div className="flex items-center gap-2">
-                                                <Clock className={`w-3 h-3 ${selectedVideo?.id === video.id ? 'text-white/60' : 'text-slate-500'}`} />
-                                                <span className={`text-[10px] font-bold ${selectedVideo?.id === video.id ? 'text-white/60' : 'text-slate-500'}`}>10:24</span>
+                                    <div key={video.id} className="group relative">
+                                        <button
+                                            onClick={() => handleVideoSelect(video)}
+                                            className={`w-full p-4 rounded-2xl border transition-all text-left flex items-start gap-4 ${selectedVideo?.id === video.id ? 'bg-indigo-600 border-indigo-500 shadow-xl shadow-indigo-600/20' : 'bg-white/5 border-white/5 hover:border-white/10'}`}
+                                        >
+                                            <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${selectedVideo?.id === video.id ? 'bg-white/20' : 'bg-indigo-500/10'}`}>
+                                                <Play className={`w-4 h-4 ${selectedVideo?.id === video.id ? 'text-white' : 'text-indigo-400'}`} />
                                             </div>
-                                        </div>
-                                    </button>
+                                            <div className="flex-1 min-w-0 space-y-1">
+                                                <div className="flex items-center gap-2">
+                                                    <p className={`text-xs font-black uppercase tracking-tight truncate ${selectedVideo?.id === video.id ? 'text-white' : 'text-slate-200 group-hover:text-indigo-400 transition-colors'}`}>
+                                                        {video.title}
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md border ${selectedVideo?.id === video.id ? 'bg-white/10 border-white/20 text-white/80' : 'bg-indigo-500/5 border-indigo-500/10 text-indigo-400/70'}`}>
+                                                        {video.career_path}
+                                                    </span>
+                                                    <div className="w-1 h-1 rounded-full bg-slate-700" />
+                                                    <Clock className={`w-3 h-3 ${selectedVideo?.id === video.id ? 'text-white/60' : 'text-slate-500'}`} />
+                                                    <span className={`text-[10px] font-bold ${selectedVideo?.id === video.id ? 'text-white/60' : 'text-slate-500'}`}>10:24</span>
+                                                </div>
+                                            </div>
+                                        </button>
+                                        <a 
+                                            href={video.video_url} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all opacity-0 group-hover:opacity-100 ${selectedVideo?.id === video.id ? 'hover:bg-white/20 text-white' : 'hover:bg-white/10 text-slate-500 hover:text-white'}`}
+                                            title="View on YouTube"
+                                        >
+                                            <Globe className="w-3.5 h-3.5" />
+                                        </a>
+                                    </div>
                                 ))
                             )}
                         </div>
@@ -267,23 +285,35 @@ export default function LearnForge() {
                         </div>
                         <div className="space-y-3">
                             {professionalVideos.map(video => (
-                                <button
-                                    key={video.id}
-                                    onClick={() => handleVideoSelect(video)}
-                                    className={`w-full p-4 rounded-2xl border transition-all text-left flex items-start gap-4 group ${selectedVideo?.id === video.id ? 'bg-emerald-600 border-emerald-500 shadow-xl shadow-emerald-600/20' : 'bg-white/5 border-white/5 hover:border-white/10'}`}
-                                >
-                                    <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${selectedVideo?.id === video.id ? 'bg-white/20' : 'bg-emerald-500/10'}`}>
-                                        <Play className={`w-4 h-4 ${selectedVideo?.id === video.id ? 'text-white' : 'text-emerald-400'}`} />
-                                    </div>
-                                    <div className="flex-1 min-w-0 space-y-1">
-                                        <p className={`text-xs font-black uppercase tracking-tight truncate ${selectedVideo?.id === video.id ? 'text-white' : 'text-slate-200 group-hover:text-emerald-400 transition-colors'}`}>
-                                            {video.title}
-                                        </p>
-                                        <div className="flex items-center gap-2">
-                                            <span className={`text-[10px] font-black uppercase tracking-widest ${selectedVideo?.id === video.id ? 'text-white/60' : 'text-slate-500'}`}>{video.category}</span>
+                                <div key={video.id} className="group relative">
+                                    <button
+                                        onClick={() => handleVideoSelect(video)}
+                                        className={`w-full p-4 rounded-2xl border transition-all text-left flex items-start gap-4 ${selectedVideo?.id === video.id ? 'bg-emerald-600 border-emerald-500 shadow-xl shadow-emerald-600/20' : 'bg-white/5 border-white/5 hover:border-white/10'}`}
+                                    >
+                                        <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${selectedVideo?.id === video.id ? 'bg-white/20' : 'bg-emerald-500/10'}`}>
+                                            <Play className={`w-4 h-4 ${selectedVideo?.id === video.id ? 'text-white' : 'text-emerald-400'}`} />
                                         </div>
-                                    </div>
-                                </button>
+                                        <div className="flex-1 min-w-0 space-y-1">
+                                            <p className={`text-xs font-black uppercase tracking-tight truncate ${selectedVideo?.id === video.id ? 'text-white' : 'text-slate-200 group-hover:text-emerald-400 transition-colors'}`}>
+                                                {video.title}
+                                            </p>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md border ${selectedVideo?.id === video.id ? 'bg-white/10 border-white/20 text-white/80' : 'bg-emerald-500/5 border-emerald-500/10 text-emerald-400/70'}`}>
+                                                    {video.category}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </button>
+                                    <a 
+                                        href={video.video_url} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all opacity-0 group-hover:opacity-100 ${selectedVideo?.id === video.id ? 'hover:bg-white/20 text-white' : 'hover:bg-white/10 text-slate-500 hover:text-white'}`}
+                                        title="View on YouTube"
+                                    >
+                                        <Globe className="w-3.5 h-3.5" />
+                                    </a>
+                                </div>
                             ))}
                         </div>
                     </div>

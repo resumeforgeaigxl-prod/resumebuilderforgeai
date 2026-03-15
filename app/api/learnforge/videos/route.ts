@@ -18,20 +18,21 @@ export async function GET() {
             .limit(1)
             .single();
 
-        const roadmapName = roadmap?.target_role || '';
+        const roadmapName = (roadmap?.target_role || '').trim();
 
-        // 2. Fetch technical videos matching roadmap
+        // 2. Fetch technical videos matching roadmap (normalized and case-insensitive)
         const { data: technicalVideos } = await supabase
             .from('learnforge_videos')
             .select('*')
             .eq('video_type', 'technical')
-            .eq('career_path', roadmapName);
+            .ilike('career_path', `%${roadmapName}%`);
 
         // 3. Fetch professional videos
         const { data: professionalVideos } = await supabase
             .from('learnforge_videos')
             .select('*')
-            .eq('video_type', 'professional');
+            .eq('video_type', 'professional')
+            .order('created_at', { ascending: false });
 
         return NextResponse.json({
             success: true,

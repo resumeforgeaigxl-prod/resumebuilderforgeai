@@ -45,11 +45,16 @@ export default function LearnForgeAdmin() {
 
     const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();
+        const payload = {
+            ...newVideo,
+            career_path: newVideo.career_path?.trim(),
+            category: newVideo.category?.trim()
+        };
         try {
             const res = await fetch('/api/admin/learnforge', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newVideo)
+                body: JSON.stringify(payload)
             });
             const data = await res.json();
             if (data.success) {
