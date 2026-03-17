@@ -310,7 +310,7 @@ export default function ExplainForgePage() {
                             <textarea 
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
-                                placeholder="Paste your project details, features, and core logic here..."
+                                placeholder="Describe your project, features, and core logic. Short descriptions are fine if you upload code or provide a GitHub link."
                                 className="w-full h-48 bg-white/5 border border-white/10 rounded-[2rem] p-6 text-slate-300 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all resize-none font-medium"
                             />
                         </div>
@@ -339,7 +339,7 @@ export default function ExplainForgePage() {
                                 >
                                     <FileUp className="w-4 h-4 text-emerald-400" />
                                     <span className="text-xs font-bold text-slate-400">
-                                        {files.length > 0 ? `${files.length} Files Selected` : 'Upload docs/code'}
+                                        {files.length > 0 ? `${files.length} Files Selected` : 'Upload docs/code (ZIP supported)'}
                                     </span>
                                 </div>
                                 <input 

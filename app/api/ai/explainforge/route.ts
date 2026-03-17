@@ -3,6 +3,7 @@ import { generateJsonGemini } from '@/lib/gemini-service';
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
 import { logUsage } from '@/lib/usage';
+import JSZip from 'jszip';
 
 export const runtime = 'nodejs';
 
@@ -35,7 +36,63 @@ Guidelines:
 - Avoid generic AI phrases like "In summary" or "This project aims to".
 - For diagrams, return VALID Mermaid.js code strings.
 - Be technical but accessible.
-- If a GitHub URL or file names are provided, incorporate them into the analysis.`;
+- If a GitHub URL or file names are provided, incorporate them into the analysis.
+- If code snippets are provided, perform a thorough code review and logic analysis.`;
+
+async function fetchAndExtractContent(urls: string[], names: string[]) {
+    let combinedContent = "";
+    let totalLength = 0;
+    const MAX_LENGTH = 100000; // 100k chars limit for better context
+
+    for (let i = 0; i < urls.length; i++) {
+        if (totalLength >= MAX_LENGTH) break;
+
+        try {
+            const res = await fetch(urls[i]);
+            if (!res.ok) continue;
+            const buffer = await res.arrayBuffer();
+            const name = names[i].toLowerCase();
+
+            if (name.endsWith('.zip')) {
+                const zip = await JSZip.loadAsync(buffer);
+                const files = Object.keys(zip.files);
+                
+                for (const filename of files) {
+                    if (totalLength >= MAX_LENGTH) break;
+                    const file = zip.files[filename];
+                    if (file.dir) continue;
+
+                    // Skip common large/binary/unwanted folders
+                    if (filename.includes('node_modules') || filename.includes('.git') || filename.includes('.next') || filename.includes('dist') || filename.includes('build')) continue;
+
+                    const ext = filename.split('.').pop()?.toLowerCase();
+                    const textExtensions = ['ts', 'tsx', 'js', 'jsx', 'py', 'java', 'cpp', 'c', 'h', 'cs', 'go', 'rs', 'php', 'sql', 'html', 'css', 'txt', 'md', 'json', 'yaml', 'yml', 'xml', 'env'];
+                    
+                    if (ext && textExtensions.includes(ext)) {
+                        const content = await file.async('string');
+                        const snippet = `\n--- File: ${filename} ---\n${content}\n`;
+                        combinedContent += snippet;
+                        totalLength += snippet.length;
+                    }
+                }
+            } else {
+                const ext = name.split('.').pop()?.toLowerCase();
+                const textExtensions = ['ts', 'tsx', 'js', 'jsx', 'py', 'java', 'cpp', 'c', 'h', 'cs', 'go', 'rs', 'php', 'sql', 'html', 'css', 'txt', 'md', 'json', 'yaml', 'yml', 'xml', 'env'];
+                
+                if (ext && textExtensions.includes(ext)) {
+                    const content = new TextDecoder().decode(buffer);
+                    const snippet = `\n--- File: ${names[i]} ---\n${content}\n`;
+                    combinedContent += snippet;
+                    totalLength += snippet.length;
+                }
+            }
+        } catch (err) {
+            console.warn(`[ExplainForge] Failed to process file ${names[i]}:`, err);
+        }
+    }
+
+    return combinedContent;
+}
 
 export async function POST(req: Request) {
     try {
@@ -77,12 +134,20 @@ export async function POST(req: Request) {
                 })));
         }
 
-        // 3. Run AI analysis
+        // 3. Extract content for AI
+        console.log('[ExplainForge] Extracting file contents...');
+        const codeContext = (fileUrls && fileUrls.length > 0) 
+            ? await fetchAndExtractContent(fileUrls, fileNames)
+            : "";
+
+        // 4. Run AI analysis
         console.log('[ExplainForge] Starting AI analysis...');
         const prompt = `Project Analysis Input:
 Description: ${description || 'No description provided'}
 GitHub: ${githubUrl || 'N/A'}
 Files Provided: ${fileCount} (${fileNames?.join(', ') || 'None'})
+
+${codeContext ? `PROJECT SOURCE CODE CONTEXT:\n${codeContext}\n` : ""}
 
 Perform a deep analysis and generate the requested explanations, report, diagrams, and questions.`;
 
@@ -141,13 +206,22 @@ Perform a deep analysis and generate the requested explanations, report, diagram
             data: response,
             requestId: request.id
         });
-    } catch (error) {
+    } catch (error: unknown) {
         console.error('[ExplainForge API] Global Error:', error);
+        
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const err = error as any;
+        let errorMessage = "Failed to materialize the project logic.";
+        if (err.message?.includes('AI Analysis failed')) {
+            errorMessage = "The AI struggled to analyze this project. Try adding more description or source code.";
+        } else if (err.message) {
+            errorMessage = err.message;
+        }
+
         return NextResponse.json({
             success: false,
-            message: "Failed to materialize the project logic. Please try a more detailed description.",
-            debug: error instanceof Error ? error.message : "Unknown Error",
-            stack: error instanceof Error ? error.stack : undefined
+            message: errorMessage,
+            debug: err.message || "Unknown Error"
         }, { status: 500 });
     }
 }
@@ -188,7 +262,8 @@ export async function GET(req: Request) {
             if (error) throw error;
             return NextResponse.json({ success: true, history: data });
         }
-    } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
         console.error('[ExplainForge GET] Error:', error);
         return NextResponse.json({ success: false, message: "Failed to fetch history" }, { status: 500 });
     }

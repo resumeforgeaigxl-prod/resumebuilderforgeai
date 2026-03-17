@@ -24,14 +24,12 @@ $args
  
 Failed to compile.
 
-./app/api/interview-prep/hist
-ory/route.ts
-34:14  Error: '_e' is 
-defined but never used.  @typ
-escript-eslint/no-unused-vars
-59:14  Error: '_e' is 
-defined but never used.  @typ
-escript-eslint/no-unused-vars
+./app/api/ai/explainforge/rou
+te.ts
+209:21  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-
+explicit-any
 
 info  - Need to disable some 
 ESLint rules? Learn more 
