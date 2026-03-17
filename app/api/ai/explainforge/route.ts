@@ -37,15 +37,36 @@ Guidelines:
 - For diagrams, return VALID Mermaid.js code strings.
 - Be technical but accessible.
 - If a GitHub URL or file names are provided, incorporate them into the analysis.
-- If code snippets are provided, perform a thorough code review and logic analysis.`;
+- If code snippets are provided, perform a thorough code review and logic analysis.
+- OUTPUT ONLY VALID JSON.`;
 
-async function fetchAndExtractContent(urls: string[], names: string[]) {
-    let combinedContent = "";
-    let totalLength = 0;
-    const MAX_LENGTH = 100000; // 100k chars limit for better context
+const SUMMARY_SYSTEM_PROMPT = `You are a technical code analyzer. 
+Analyze the provided file content and generate a concise summary.
+Return JSON ONLY:
+{
+  "fileName": "string",
+  "purpose": "Primary role of this file in the project",
+  "logicSummary": "Concise breakdown of core logic, functions, or algorithms used"
+}`;
+
+interface FileObject {
+    name: string;
+    content: string;
+}
+
+interface FileSummary {
+    fileName: string;
+    purpose: string;
+    logicSummary: string;
+}
+
+async function fetchFileObjects(urls: string[], names: string[]): Promise<FileObject[]> {
+    const fileObjects: FileObject[] = [];
+    const MAX_FILES = 20; // Limit for performance
+    let processedCount = 0;
 
     for (let i = 0; i < urls.length; i++) {
-        if (totalLength >= MAX_LENGTH) break;
+        if (processedCount >= MAX_FILES) break;
 
         try {
             const res = await fetch(urls[i]);
@@ -58,11 +79,10 @@ async function fetchAndExtractContent(urls: string[], names: string[]) {
                 const files = Object.keys(zip.files);
                 
                 for (const filename of files) {
-                    if (totalLength >= MAX_LENGTH) break;
+                    if (processedCount >= MAX_FILES) break;
                     const file = zip.files[filename];
                     if (file.dir) continue;
 
-                    // Skip common large/binary/unwanted folders
                     if (filename.includes('node_modules') || filename.includes('.git') || filename.includes('.next') || filename.includes('dist') || filename.includes('build')) continue;
 
                     const ext = filename.split('.').pop()?.toLowerCase();
@@ -70,9 +90,8 @@ async function fetchAndExtractContent(urls: string[], names: string[]) {
                     
                     if (ext && textExtensions.includes(ext)) {
                         const content = await file.async('string');
-                        const snippet = `\n--- File: ${filename} ---\n${content}\n`;
-                        combinedContent += snippet;
-                        totalLength += snippet.length;
+                        fileObjects.push({ name: filename, content: content.slice(0, 10000) }); // Limit individual file size
+                        processedCount++;
                     }
                 }
             } else {
@@ -81,9 +100,8 @@ async function fetchAndExtractContent(urls: string[], names: string[]) {
                 
                 if (ext && textExtensions.includes(ext)) {
                     const content = new TextDecoder().decode(buffer);
-                    const snippet = `\n--- File: ${names[i]} ---\n${content}\n`;
-                    combinedContent += snippet;
-                    totalLength += snippet.length;
+                    fileObjects.push({ name: names[i], content: content.slice(0, 10000) });
+                    processedCount++;
                 }
             }
         } catch (err) {
@@ -91,7 +109,32 @@ async function fetchAndExtractContent(urls: string[], names: string[]) {
         }
     }
 
-    return combinedContent;
+    return fileObjects;
+}
+
+async function summarizeFiles(files: FileObject[]): Promise<FileSummary[]> {
+    const summaries: FileSummary[] = [];
+    
+    // Process in batches of 5 to avoid overloading
+    const batchSize = 5;
+    for (let i = 0; i < files.length; i += batchSize) {
+        const batch = files.slice(i, i + batchSize);
+        const batchPromises = batch.map(async (file) => {
+            try {
+                const prompt = `FILE NAME: ${file.name}\nCONTENT:\n${file.content}`;
+                const result = await generateJsonGemini(prompt, SUMMARY_SYSTEM_PROMPT);
+                return result as FileSummary;
+            } catch (err) {
+                console.error(`[ExplainForge] Error summarizing ${file.name}:`, err);
+                return { fileName: file.name, purpose: "Error analyzing file", logicSummary: "N/A" };
+            }
+        });
+        
+        const results = await Promise.all(batchPromises);
+        summaries.push(...results);
+    }
+    
+    return summaries;
 }
 
 export async function POST(req: Request) {
@@ -134,30 +177,56 @@ export async function POST(req: Request) {
                 })));
         }
 
-        // 3. Extract content for AI
+        // 3. Chunk-based Metadata Extraction
         console.log('[ExplainForge] Extracting file contents...');
-        const codeContext = (fileUrls && fileUrls.length > 0) 
-            ? await fetchAndExtractContent(fileUrls, fileNames)
-            : "";
+        const fileObjects = (fileUrls && fileUrls.length > 0) 
+            ? await fetchFileObjects(fileUrls, fileNames)
+            : [];
 
-        // 4. Run AI analysis
-        console.log('[ExplainForge] Starting AI analysis...');
-        const prompt = `Project Analysis Input:
+        let aggregatedSummaries = "";
+        if (fileObjects.length > 0) {
+            console.log(`[ExplainForge] Summarizing ${fileObjects.length} files...`);
+            const summaries = await summarizeFiles(fileObjects);
+            aggregatedSummaries = summaries.map(s => 
+                `File: ${s.fileName}\nPurpose: ${s.purpose}\nLogic: ${s.logicSummary}\n---`
+            ).join('\n');
+        }
+
+        // 4. Run Final AI Synthesis
+        console.log('[ExplainForge] Starting Final AI Synthesis...');
+        const prompt = `Project Analysis Request:
 Description: ${description || 'No description provided'}
 GitHub: ${githubUrl || 'N/A'}
-Files Provided: ${fileCount} (${fileNames?.join(', ') || 'None'})
+Files Analyzed: ${fileObjects.length}
 
-${codeContext ? `PROJECT SOURCE CODE CONTEXT:\n${codeContext}\n` : ""}
+${aggregatedSummaries ? `PROJECT COMPONENT SUMMARIES:\n${aggregatedSummaries}\n` : ""}
 
-Perform a deep analysis and generate the requested explanations, report, diagrams, and questions.`;
+Task: Use the component summaries (and description) to generate a high-level system overview, comprehensive report, Mermaid diagrams, and interview prep.`;
 
         let response;
         try {
             response = await generateJsonGemini(prompt, SYSTEM_PROMPT);
         } catch (aiError: unknown) {
-            console.error('[ExplainForge] AI Analysis Error:', aiError);
+            console.error('[ExplainForge] AI Synthesis Error:', aiError);
             const message = aiError instanceof Error ? aiError.message : 'Unknown error';
-            throw new Error(`AI Analysis failed: ${message}`);
+            
+            // Fallback: Return partial results if synthesis fails but aggregated info exists
+            if (aggregatedSummaries) {
+                return NextResponse.json({
+                    success: true,
+                    requestId: request.id,
+                    data: {
+                        humanExplanation: "I analyzed your project files but encountered an error generating the final report. However, I identified the key components.",
+                        interviewExplanation: "Analysis interrupted during synthesis.",
+                        vivaExplanation: "Analysis interrupted during synthesis.",
+                        fullReport: { Abstract: "Analysis partial.", Technologies: "Processing..." },
+                        diagrams: { architecture: "graph TD\n  A[Incomplete Analysis] --> B[Check files]" },
+                        algorithms: [],
+                        questions: []
+                    }
+                });
+            }
+            throw new Error(`AI Synthesis failed: ${message}`);
         }
 
         if (!response || !response.humanExplanation) {
