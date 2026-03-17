@@ -46,5 +46,5 @@ export default async function PublicProfilePage({ params }: Props) {
   // Fetch public forge data (simplified)
   const { data: resumes } = await supabase.from('resumes').select('title, summary, skills').eq('user_id', user.id).limit(1);
 
-  return <PublicProfileUI user={user} resume={resumes?.[0]} locale={params.locale} />;
+  return <PublicProfileUI user={user} resume={resumes?.[0]} />;
 }

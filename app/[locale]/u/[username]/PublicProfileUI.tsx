@@ -1,11 +1,21 @@
 'use client';
 
-import { User, MapPin, Link as LinkIcon, Briefcase, Code, GraduationCap, Download, Share2 } from 'lucide-react';
+import { MapPin, Link as LinkIcon, Briefcase, Code, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 
-export default function PublicProfileUI({ user, resume, locale }: { user: any, resume: any, locale: string }) {
+interface UserProfile {
+  username: string;
+  full_name?: string;
+}
+
+interface UserResume {
+  summary?: string;
+  skills?: string | string[];
+}
+
+export default function PublicProfileUI({ user, resume }: { user: UserProfile, resume?: UserResume | null }) {
   const skills = Array.isArray(resume?.skills) ? resume.skills : (resume?.skills as string)?.split(',') || [];
 
   return (

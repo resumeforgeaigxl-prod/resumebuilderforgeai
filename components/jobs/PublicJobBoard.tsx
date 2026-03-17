@@ -70,7 +70,7 @@ export default function PublicJobBoard({
         } finally {
             setLoading(false);
         }
-    }, [searchInput, locationInput, page, selectedTier]);
+    }, [searchInput, locationInput, page, selectedTier, initialCompany]); // Added initialCompany
 
     useEffect(() => {
         fetchJobs();

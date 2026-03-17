@@ -6,7 +6,7 @@ const supabase = createClient(
 );
 
 export async function checkMentorPermission(userId: string, forgeName: string) {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('mentor_permissions')
     .select('permission_granted')
     .eq('user_id', userId)
@@ -31,7 +31,7 @@ export async function grantMentorPermission(userId: string, forgeName: string) {
 
 export async function trackAIUsage(userId: string, module: string, tokens: { input: number, output: number }, modelUsed: string) {
   // 1. Update daily quota
-  const { data: usage, error: uError } = await supabase
+  const { data: usage } = await supabase
     .from('ai_usage')
     .select('*')
     .eq('user_id', userId)
@@ -49,7 +49,7 @@ export async function trackAIUsage(userId: string, module: string, tokens: { inp
     await supabase.from('ai_usage')
       .update({
         requests_count: usage.requests_count + 1,
-        tokens_used: usage.tokens_used + tokens.input + tokens.output,
+        tokens_used: (usage.tokens_used as number) + tokens.input + tokens.output,
         updated_at: new Date().toISOString()
       })
       .eq('id', usage.id);
@@ -80,7 +80,7 @@ export async function isUnderQuota(userId: string, module: string, limit: number
   // Bypassing quota for MentorForge during system upgrade
   if (module === 'MentorForge') return true;
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('ai_usage')
     .select('requests_count')
     .eq('user_id', userId)
@@ -88,7 +88,7 @@ export async function isUnderQuota(userId: string, module: string, limit: number
     .maybeSingle();
 
   if (!data) return true;
-  return data.requests_count < limit;
+  return (data.requests_count as number) < limit;
 }
 
 export async function updateMentorMemory(userId: string, insights: { goals?: string[], weaknesses?: string[], improvements?: string[] }) {

@@ -75,7 +75,7 @@ export async function POST(req: Request) {
         }
 
         // 3. Fetch Light Context
-        const userContext: any = { resumes: 0, roadmaps: 0, submissions: 0 };
+        const userContext: Record<string, number> = { resumes: 0, roadmaps: 0, submissions: 0 };
         if (userId) {
             const [rCount, rmCount, sCount] = await Promise.all([
                 supabase.from('resumes').select('id', { count: 'exact', head: true }).eq('user_id', userId),

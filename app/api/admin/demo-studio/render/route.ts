@@ -54,8 +54,9 @@ export async function POST(req: NextRequest) {
       message: 'Rendering started. In production, this would trigger Remotion.',
       projectId: projectId 
     });
-  } catch (error: any) {
-    console.error('Video rendering error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Video rendering error:', msg);
+    return NextResponse.json({ error: msg || 'Internal Server Error' }, { status: 500 });
   }
 }

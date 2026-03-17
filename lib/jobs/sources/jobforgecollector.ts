@@ -88,9 +88,6 @@ export async function fetchJobForgeCollector(requestedLimit: number = 80): Promi
     stats.queries_generated = queryQueue.length;
 
     // Helpers
-    const normalizeForDupCheck = (text: string) => 
-        (text || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-
     const getPlatformFromUrl = (url: string): string => {
         const lower = url.toLowerCase();
         if (lower.includes('linkedin.com')) return 'LinkedIn';

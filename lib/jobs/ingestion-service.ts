@@ -160,8 +160,8 @@ export async function ingestJobs(jobs: Partial<NormalisedJob>[]) {
     }
 
     // LAYER 5: STORAGE (Split into batches to handle different unique constraints)
-    const jobsWithUrl = finalDbJobs.filter(j => j.apply_url) as Record<string, any>[];
-    const jobsWithoutUrl = finalDbJobs.filter(j => !j.apply_url) as Record<string, any>[];
+    const jobsWithUrl = finalDbJobs.filter(j => j.apply_url) as Record<string, unknown>[];
+    const jobsWithoutUrl = finalDbJobs.filter(j => !j.apply_url) as Record<string, unknown>[];
 
     // Case 1: Jobs with apply_url (Conflict target: apply_url)
     if (jobsWithUrl.length > 0) {

@@ -79,7 +79,7 @@ export async function generateVoice(text: string, moduleName: string = 'General'
 }
 
 export async function uploadVoiceToSupabase(buffer: Buffer, filename: string) {
-  const { data, error } = await supabase.storage
+  const { error } = await supabase.storage
     .from('voice-assets')
     .upload(filename, buffer, {
       contentType: 'audio/mpeg',

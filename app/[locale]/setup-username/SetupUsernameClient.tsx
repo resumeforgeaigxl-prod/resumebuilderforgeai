@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, CheckCircle2, AlertCircle, Rocket } from 'lucide-react';
+import { User, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
@@ -34,7 +34,7 @@ export default function SetupUsernameClient({ locale }: { locale: string }) {
         toast({ title: "Username set!", description: "You are being redirected to your dashboard." });
         router.push(`/${locale}/dashboard`);
       }
-    } catch (err) {
+    } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setIsChecking(false);

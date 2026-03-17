@@ -5,9 +5,23 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+interface GapReport {
+  strengths: string[];
+  moderate: string[];
+  weak: string[];
+  missing: string[];
+  recommendations: string[];
+}
+
+interface SkillRequirement {
+  skills: {
+    name: string;
+  };
+}
+
 export async function calculateSkillScores(userId: string) {
   // Fetch data from various sources
-  const [resumeData, codingData, interviewData] = await Promise.all([
+  const [resumeData, codingData] = await Promise.all([
     supabase.from('resumes').select('skills').eq('user_id', userId),
     supabase.from('coding_progress').select('score, difficulty').eq('user_id', userId),
     supabase.from('mock_interviews').select('overall_score').eq('user_id', userId)
@@ -44,12 +58,14 @@ export async function generateGapReport(userId: string, targetRole: string) {
   const userScores = await calculateSkillScores(userId);
   
   // Fetch requirements for the role
-  const { data: requirements } = await supabase
+  const { data } = await supabase
     .from('role_skill_requirements')
     .select('*, skills(name)')
     .eq('role_name', targetRole);
 
-  const report: any = {
+  const requirements = data as unknown as SkillRequirement[] | null;
+
+  const report: GapReport = {
     strengths: [],
     moderate: [],
     weak: [],
@@ -57,7 +73,7 @@ export async function generateGapReport(userId: string, targetRole: string) {
     recommendations: []
   };
 
-  (requirements || []).forEach((req: any) => {
+  (requirements || []).forEach((req) => {
     const skillName = req.skills.name.toLowerCase();
     const score = userScores[skillName] || 0;
 

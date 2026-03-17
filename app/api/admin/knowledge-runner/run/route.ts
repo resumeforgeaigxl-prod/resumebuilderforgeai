@@ -87,23 +87,24 @@ export async function POST(req: NextRequest) {
 
     if (finalResult.examples?.length > 0) {
       await supabase.from('knowledge_examples').insert(
-        finalResult.examples.map((ex: any) => ({ ...ex, lesson_id: lesson.id }))
+        finalResult.examples.map((ex: Record<string, unknown>) => ({ ...ex, lesson_id: (lesson as { id: string }).id }))
       );
     }
 
     if (finalResult.questions?.length > 0) {
       await supabase.from('knowledge_questions').insert(
-        finalResult.questions.map((q: any) => ({ ...q, lesson_id: lesson.id }))
+        finalResult.questions.map((q: Record<string, unknown>) => ({ ...q, lesson_id: (lesson as { id: string }).id }))
       );
     }
 
-    return NextResponse.json({ success: true, lessonId: lesson.id });
-  } catch (error: any) {
-    console.error('Knowledge Runner Fatal Error:', error);
+    return NextResponse.json({ success: true, lessonId: (lesson as { id: string }).id });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Knowledge Runner Fatal Error:', msg);
     // Even on fatal errors, return a 200 with error info to avoid 500 crashes in UI
     return NextResponse.json({ 
       success: false, 
-      error: error.message || 'An unexpected error occurred' 
+      error: msg || 'An unexpected error occurred' 
     }, { status: 200 });
   }
 }

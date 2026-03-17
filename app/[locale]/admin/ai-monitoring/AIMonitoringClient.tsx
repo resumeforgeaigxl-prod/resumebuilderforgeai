@@ -1,13 +1,35 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Activity, Zap, Cpu, ShieldAlert, BarChart3, Clock, DollarSign, Database, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Activity, Zap, Cpu, ShieldAlert, DollarSign, Database, TrendingUp, AlertTriangle } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 
-export default function AIMonitoringClient({ locale }: { locale: string }) {
-  const [stats, setStats] = useState<any>(null);
-  const [logs, setLogs] = useState<any[]>([]);
+interface ModelStat {
+  name: string;
+  usage: string;
+}
+
+interface Stats {
+  totalTokens: number;
+  estimatedCost: number;
+  activeUsers: number;
+  errorRate: string;
+  models: ModelStat[];
+}
+
+interface LogEntry {
+  id: number;
+  user: string;
+  module: string;
+  tokens: number;
+  status: 'success' | 'error';
+  time: string;
+}
+
+export default function AIMonitoringClient() {
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
 
   useEffect(() => {
     // In production, fetch from /api/admin/ai-monitoring/stats
@@ -92,7 +114,7 @@ export default function AIMonitoringClient({ locale }: { locale: string }) {
             <TrendingUp className="w-5 h-5 text-indigo-400" /> Model Efficiency
           </h2>
           <div className="space-y-4">
-            {stats?.models.map((m: any) => (
+            {stats?.models.map((m) => (
               <div key={m.name} className="space-y-2">
                 <div className="flex justify-between text-xs font-bold uppercase tracking-widest">
                   <span className="text-slate-400">{m.name}</span>

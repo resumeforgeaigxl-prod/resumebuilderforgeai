@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { getBlogPostBySlug } from '@/lib/seo-service';
 import ReactMarkdown from 'react-markdown';
@@ -9,8 +10,17 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Calendar, User, ArrowLeft, Share2 } from 'lucide-react';
 import { format } from 'date-fns';
 
+interface BlogPost {
+  title: string;
+  content: string;
+  author: string;
+  published_at: string;
+  cover_image?: string;
+  seo_description?: string;
+}
+
 export async function generateMetadata({ params }: { params: { locale: string, slug: string } }): Promise<Metadata> {
-  const post = await getBlogPostBySlug(params.slug, params.locale.split('-')[0]);
+  const post = await getBlogPostBySlug(params.slug, params.locale.split('-')[0]) as BlogPost | null;
   if (!post) return {};
 
   return {
@@ -35,7 +45,7 @@ export async function generateMetadata({ params }: { params: { locale: string, s
 
 export default async function BlogPostPage({ params }: { params: { locale: string, slug: string } }) {
   const { locale, slug } = params;
-  const post = await getBlogPostBySlug(slug, locale.split('-')[0]);
+  const post = await getBlogPostBySlug(slug, locale.split('-')[0]) as BlogPost | null;
   
   if (!post) notFound();
 
@@ -64,8 +74,14 @@ export default async function BlogPostPage({ params }: { params: { locale: strin
            </h1>
 
            {post.cover_image && (
-             <div className="rounded-2xl overflow-hidden glass-card mb-12 border-white/10">
-                <img src={post.cover_image} alt={post.title} className="w-full h-auto object-cover max-h-[500px]" />
+             <div className="rounded-2xl overflow-hidden glass-card mb-12 border-white/10 relative h-[500px]">
+                <Image 
+                  src={post.cover_image} 
+                  alt={post.title} 
+                  fill
+                  priority
+                  className="w-full h-full object-cover" 
+                />
              </div>
            )}
         </header>
@@ -74,22 +90,26 @@ export default async function BlogPostPage({ params }: { params: { locale: strin
           <ReactMarkdown 
             remarkPlugins={[remarkGfm]}
             components={{
-              code({ node, className, children, ...props }: any) {
+              code({ className, children, ...props }) {
                 const match = /language-(\w+)/.exec(className || '');
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+                const { node: _node, ref: _ref, ...cleanProps } = props as any;
+
                 return match ? (
                   <div className="my-6 rounded-xl overflow-hidden glass-card">
                     <SyntaxHighlighter
-                      style={vscDarkPlus}
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      style={vscDarkPlus as any}
                       language={match[1]}
                       PreTag="div"
-                      {...props}
+                      {...cleanProps}
                       customStyle={{ margin: 0, background: 'transparent', padding: '1.5rem' }}
                     >
                       {String(children).replace(/\n$/, '')}
                     </SyntaxHighlighter>
                   </div>
                 ) : (
-                  <code className="bg-white/10 px-1.5 py-0.5 rounded text-indigo-300 font-mono text-sm" {...props}>
+                  <code className="bg-white/10 px-1.5 py-0.5 rounded text-indigo-300 font-mono text-sm" {...cleanProps}>
                     {children}
                   </code>
                 );

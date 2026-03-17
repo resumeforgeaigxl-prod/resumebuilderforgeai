@@ -23,7 +23,7 @@ interface RenderedVideo {
   created_at: string;
 }
 
-export default function DemoStudioClient({ locale }: { locale: string }) {
+export default function DemoStudioClient() {
   const [scenes, setScenes] = useState<Scene[]>([]);
   const [projectName, setProjectName] = useState('');
   const [isRecording, setIsRecording] = useState(false);
@@ -102,7 +102,7 @@ export default function DemoStudioClient({ locale }: { locale: string }) {
         setScenes(data.scenes);
         toast({ title: "AI Script Generated!", description: "Review and edit the scenes below." });
       }
-    } catch (err) {
+    } catch {
       toast({ variant: "destructive", title: "AI Generation failed" });
     } finally {
       setIsGenerating(false);
@@ -126,7 +126,7 @@ export default function DemoStudioClient({ locale }: { locale: string }) {
         toast({ title: "Project Saved", description: "Your demo configuration has been recorded." });
         fetchRecentRenders();
       }
-    } catch (err) {
+    } catch {
       toast({ variant: "destructive", title: "Save failed" });
     } finally {
       setIsSaving(false);
@@ -150,7 +150,7 @@ export default function DemoStudioClient({ locale }: { locale: string }) {
         toast({ title: "Export Started", description: "Rendering complex video. We'll notify you on completion." });
         fetchRecentRenders();
       }
-    } catch (err) {
+    } catch {
       toast({ variant: "destructive", title: "Export failed" });
     } finally {
       setIsExporting(false);
@@ -184,8 +184,9 @@ export default function DemoStudioClient({ locale }: { locale: string }) {
       } else {
         throw new Error(data.error);
       }
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Voiceover failed", description: err.message });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast({ variant: "destructive", title: "Voiceover failed", description: msg });
     } finally {
       setGeneratingVoiceIndex(null);
     }
@@ -199,9 +200,9 @@ export default function DemoStudioClient({ locale }: { locale: string }) {
     setScenes(scenes.filter((_, i) => i !== index));
   };
 
-  const updateScene = (index: number, field: keyof Scene, value: string | number) => {
+  const updateScene = <K extends keyof Scene>(index: number, field: K, value: Scene[K]) => {
     const newScenes = [...scenes];
-    (newScenes[index] as any)[field] = value;
+    newScenes[index] = { ...newScenes[index], [field]: value };
     setScenes(newScenes);
   };
   

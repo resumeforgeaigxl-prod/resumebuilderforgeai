@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getBlogPosts } from '@/lib/seo-service';
 import { Calendar, User, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
@@ -30,10 +31,11 @@ export default async function BlogHome({ params }: { params: { locale: string } 
         {posts.map((post) => (
           <article key={post.id} className="glass-card overflow-hidden flex flex-col group">
             {post.cover_image && (
-              <div className="aspect-video overflow-hidden">
-                <img 
+              <div className="aspect-video overflow-hidden relative">
+                <Image 
                   src={post.cover_image} 
                   alt={post.title} 
+                  fill
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               </div>

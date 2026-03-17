@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateJsonGemini } from '@/lib/gemini-service';
 import { createClient } from '@supabase/supabase-js';
-import { buildUserContext } from '@/lib/ai/mentor-context';
+import { buildUserContext, type UserContext } from '@/lib/ai/mentor-context';
 import { getSession } from '@/lib/auth/jwt';
-import { trackAIUsage, logAIChat, isUnderQuota, updateMentorMemory, getMentorMemory } from '@/lib/ai/governance-service';
+import { trackAIUsage, logAIChat, updateMentorMemory, getMentorMemory } from '@/lib/ai/governance-service';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     };
 
     const [userContext, memory] = await Promise.all([
-      buildUserContext(userId).catch(() => ({})),
+      buildUserContext(userId).catch(() => ({} as UserContext)),
       getMentorMemory(userId).catch(() => ({}))
     ]);
 
@@ -87,13 +87,7 @@ export async function POST(req: NextRequest) {
     await trackAIUsage(userId, 'MentorForge', { input: 1200, output: 600 }, 'gemini-2.0-flash');
     await logAIChat(userId, 'MentorForge', message, result.reply, 1800);
 
-    // PERSISTENCE: Save to mentor_chats
-    const supabaseClient = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-    
-    await supabaseClient.from('mentor_chats').insert([
+    await supabase.from('mentor_chats').insert([
         { user_id: userId, role: 'user', content: message },
         { user_id: userId, role: 'assistant', content: result.reply, metadata: { suggestedAction: result.suggestedAction } }
     ]);

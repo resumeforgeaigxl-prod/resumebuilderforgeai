@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateJsonGemini } from '@/lib/gemini-service';
-import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = createAdminClient();
-    
     // Check if user is admin
     const session = await getSession();
     if (!session || (session.role !== 'admin' && session.role !== 'super_admin')) {
@@ -39,8 +36,9 @@ export async function POST(req: NextRequest) {
     const result = await generateJsonGemini(prompt, systemInstruction);
 
     return NextResponse.json(result);
-  } catch (error: any) {
-    console.error('Demo script generation error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Demo script generation error:', msg);
+    return NextResponse.json({ error: msg || 'Internal Server Error' }, { status: 500 });
   }
 }

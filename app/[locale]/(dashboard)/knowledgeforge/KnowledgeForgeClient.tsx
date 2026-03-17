@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BookOpen, Search, Star, MessageSquare, Code, Download, ChevronRight, GraduationCap, Sparkles } from 'lucide-react';
+import { BookOpen, MessageSquare, Code, Download, ChevronRight, GraduationCap, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
 import { useToast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import ReactMarkdown from 'react-markdown';
@@ -19,10 +18,17 @@ interface Topic {
   description: string;
 }
 
+interface Lesson {
+  title: string;
+  content: string;
+  examples?: { language: string; code_snippet: string; id?: string }[];
+  questions?: { question: string; answer: string; id?: string }[];
+}
+
 export default function KnowledgeForgeClient({ locale }: { locale: string }) {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
-  const [lesson, setLesson] = useState<any>(null);
+  const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
@@ -49,7 +55,7 @@ export default function KnowledgeForgeClient({ locale }: { locale: string }) {
         toast({ variant: "destructive", title: "No content found", description: "The AI is still generating content for this topic. Please try again in a moment." });
       }
       setLesson(data.lesson);
-    } catch (err) {
+    } catch {
       toast({ variant: "destructive", title: "Loading Error", description: "Could not fetch topic content." });
     } finally {
       setLoading(false);
@@ -57,6 +63,7 @@ export default function KnowledgeForgeClient({ locale }: { locale: string }) {
   };
 
   const downloadPDF = async () => {
+    if (!selectedTopic) return;
     toast({ title: "Generating PDF...", description: "Adding your custom watermark." });
     window.open(`/api/knowledgeforge/generate-pdf?topicId=${selectedTopic}`, '_blank');
   };
@@ -119,23 +126,29 @@ export default function KnowledgeForgeClient({ locale }: { locale: string }) {
                     <ReactMarkdown 
                       remarkPlugins={[remarkGfm]}
                       components={{
-                        code({ node, inline, className, children, ...props }: any) {
+                        code({ className, children, ...props }) {
                           const match = /language-(\w+)/.exec(className || '');
-                          return !inline && match ? (
+                          
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+                          const { node: _node, ref: _ref, ...cleanProps } = props as any;
+                          
+                          return match ? (
                             <SyntaxHighlighter
-                              style={atomDark}
+                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                              style={atomDark as any}
                               language={match[1]}
                               PreTag="div"
-                              {...props}
+                              {...cleanProps}
+                              customStyle={{ margin: 0, background: 'transparent', padding: '1.5rem' }}
                             >
                               {String(children).replace(/\n$/, '')}
                             </SyntaxHighlighter>
                           ) : (
-                            <code className={className} {...props}>
+                            <code className={className} {...cleanProps}>
                               {children}
                             </code>
                           );
-                        }
+                        },
                       }}
                     >
                       {lesson.content.trim().startsWith('[') || lesson.content.trim().startsWith('{') 
@@ -151,8 +164,8 @@ export default function KnowledgeForgeClient({ locale }: { locale: string }) {
                     <TabsTrigger value="questions" className="rounded-lg">Interview Q&A</TabsTrigger>
                   </TabsList>
                   <TabsContent value="examples" className="mt-6 space-y-6">
-                    {lesson.examples?.map((ex: any, i: number) => (
-                      <Card key={i} className="bg-black border-white/5 overflow-hidden">
+                    {lesson.examples?.map((ex, i) => (
+                      <Card key={ex.id || i} className="bg-black border-white/5 overflow-hidden">
                         <div className="p-4 border-b border-white/5 bg-white/[0.02] flex justify-between items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                           {ex.language}
                         </div>
@@ -163,8 +176,8 @@ export default function KnowledgeForgeClient({ locale }: { locale: string }) {
                     ))}
                   </TabsContent>
                   <TabsContent value="questions" className="mt-6 space-y-4">
-                    {lesson.questions?.map((q: any, i: number) => (
-                      <Card key={i} className="p-6 bg-white/[0.01] border-white/5 space-y-4">
+                    {lesson.questions?.map((q, i) => (
+                      <Card key={q.id || i} className="p-6 bg-white/[0.01] border-white/5 space-y-4">
                         <div className="flex gap-4">
                           <div className="w-6 h-6 rounded bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold shrink-0">Q</div>
                           <p className="font-bold text-white text-sm">{q.question}</p>

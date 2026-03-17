@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 
 export default async function AdminPosts() {
   const supabase = createAdminClient();
-  const { data: posts, error } = await supabase
+  const { data: posts } = await supabase
     .from('blog_posts')
     .select('*')
     .order('created_at', { ascending: false });

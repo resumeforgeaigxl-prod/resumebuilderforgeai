@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
     FileUp,
@@ -39,20 +39,21 @@ export default function StudyForgePage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [uploadError, setUploadError] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (!searchParams) return;
-        const source = searchParams.get('source');
-        const topic = searchParams.get('topic');
-        const content = searchParams.get('content');
-
-        if (source === 'knowledge' && topic && content) {
-            handleVirtualUpload(topic, content);
-        } else {
-            fetchDocuments();
+    const fetchDocuments = useCallback(async () => {
+        try {
+            const res = await fetch('/api/studyforge/documents', { cache: 'no-store' });
+            const data = await res.json();
+            if (data.documents) {
+                setDocuments(data.documents);
+            }
+        } catch (error) {
+            console.error('Fetch error:', error);
+        } finally {
+            setIsLoading(false);
         }
-    }, [searchParams]);
+    }, []);
 
-    const handleVirtualUpload = async (topic: string, content: string) => {
+    const handleVirtualUpload = useCallback(async (topic: string, content: string) => {
         setIsUploading(true);
         setUploadStage('preparing');
         try {
@@ -74,21 +75,20 @@ export default function StudyForgePage() {
             setIsUploading(false);
             setUploadStage('idle');
         }
-    };
+    }, [locale, router, fetchDocuments]);
 
-    const fetchDocuments = async () => {
-        try {
-            const res = await fetch('/api/studyforge/documents', { cache: 'no-store' });
-            const data = await res.json();
-            if (data.documents) {
-                setDocuments(data.documents);
-            }
-        } catch (error) {
-            console.error('Fetch error:', error);
-        } finally {
-            setIsLoading(false);
+    useEffect(() => {
+        if (!searchParams) return;
+        const source = searchParams.get('source');
+        const topic = searchParams.get('topic');
+        const content = searchParams.get('content');
+
+        if (source === 'knowledge' && topic && content) {
+            handleVirtualUpload(topic, content);
+        } else {
+            fetchDocuments();
         }
-    };
+    }, [searchParams, handleVirtualUpload, fetchDocuments]);
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];

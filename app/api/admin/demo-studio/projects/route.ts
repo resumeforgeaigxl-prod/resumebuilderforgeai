@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getSession();
     if (!session || (session.role !== 'admin' && session.role !== 'super_admin')) {
@@ -23,8 +23,9 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json(projects || []);
-  } catch (error: any) {
-    console.error('Fetch video projects error:', error);
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Fetch video projects error:', msg);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

@@ -3,6 +3,16 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { jsPDF } from 'jspdf';
 import { getSession } from '@/lib/auth/jwt';
 
+interface TopicInfo {
+  name: string;
+}
+
+interface LessonData {
+  title: string;
+  content: string;
+  knowledge_topics: TopicInfo | null;
+}
+
 // Since jspdf/react-pdf is complex for direct server-side generation without specific local setup,
 // we'll implement a stub that demonstrates the watermark logic.
 export async function GET(req: NextRequest) {
@@ -24,13 +34,15 @@ export async function GET(req: NextRequest) {
     const userName = profile?.full_name || 'User';
 
     // 1. Fetch latest lesson content
-    const { data: lesson } = await supabase
+    const { data } = await supabase
       .from('knowledge_lessons')
       .select('*, knowledge_topics(name)')
       .eq('topic_id', topicId)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
+
+    const lesson = data as unknown as LessonData | null;
 
     if (!lesson) {
       return NextResponse.json({ error: 'Lesson content not found' }, { status: 404 });
@@ -109,22 +121,28 @@ export async function GET(req: NextRequest) {
       },
     });
 
-  } catch (error: any) {
-    console.error('PDF Generation Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('PDF Generation Error:', msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
 
 function addWatermark(doc: jsPDF, userName: string, pageWidth: number, pageHeight: number) {
-  doc.saveGraphicsState();
-  doc.setGState(new (doc as any).GState({ opacity: 0.1 }));
+  // Use any for plugin-based methods to satisfy compiler
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const d = doc as any;
+  if (d.saveGraphicsState) d.saveGraphicsState();
+  if (d.GState) {
+    d.setGState(new d.GState({ opacity: 0.1 }));
+  }
   doc.setFontSize(40);
   doc.setTextColor(150);
   doc.text(`${userName} • ResumeForgeAI`, pageWidth / 2, pageHeight / 2, {
     angle: 45,
     align: 'center'
   });
-  doc.restoreGraphicsState();
+  if (d.restoreGraphicsState) d.restoreGraphicsState();
 }
 
 function addBrandingHeader(doc: jsPDF, pageWidth: number) {

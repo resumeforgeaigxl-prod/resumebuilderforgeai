@@ -1,5 +1,3 @@
-import * as React from "react"
-
 export interface ToastProps {
   title?: string
   description?: string

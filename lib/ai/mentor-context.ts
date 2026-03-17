@@ -6,8 +6,27 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+interface ForgeData {
+  count?: number;
+  avg_score?: number;
+  total?: number;
+  passed?: number;
+  accuracy?: number;
+  avg_performance?: number;
+  applied?: number;
+  active?: number;
+  permission_denied?: boolean;
+  message?: string;
+  learn?: unknown[];
+}
+
+export interface UserContext {
+  [key: string]: ForgeData | { readinessScore: number; strengths: string[]; weaknesses: string[]; recommendations: string[] } | undefined | null;
+  analysis?: { readinessScore: number; strengths: string[]; weaknesses: string[]; recommendations: string[] } | null;
+}
+
 export async function buildUserContext(userId: string) {
-  const context: any = {};
+  const context: UserContext = {};
   const forges = ['ResumeForge', 'CodingForge', 'InterviewForge', 'CareerForge', 'LearnForge', 'ExplainForge', 'JobForge'];
 
   for (const forge of forges) {
@@ -28,12 +47,12 @@ export async function buildUserContext(userId: string) {
 /**
  * Weighted Career Readiness Score logic
  */
-function calculateReadinessScore(data: any) {
+function calculateReadinessScore(data: UserContext) {
     const weights = { resume: 0.3, coding: 0.3, interview: 0.25, projects: 0.15 };
     
-    const resumeScore = data.ResumeForge?.avg_score || 0;
-    const codingScore = data.CodingForge?.accuracy || 0;
-    const interviewScore = data.InterviewForge?.avg_performance || 0;
+    const resumeScore = (data.ResumeForge as ForgeData)?.avg_score || 0;
+    const codingScore = (data.CodingForge as ForgeData)?.accuracy || 0;
+    const interviewScore = (data.InterviewForge as ForgeData)?.avg_performance || 0;
     const projectScore = 50; // Manual projects baseline
 
     const total = 
@@ -45,17 +64,19 @@ function calculateReadinessScore(data: any) {
     return Math.round(total);
 }
 
-async function analyzeUserProfile(userId: string, context: any) {
+async function analyzeUserProfile(_userId: string, context: UserContext) {
     const readinessScore = calculateReadinessScore(context);
     
-    const strengths = [];
-    const weaknesses = [];
+    const strengths: string[] = [];
+    const weaknesses: string[] = [];
     
-    if ((context.ResumeForge?.avg_score || 0) > 70) strengths.push("Resume Quality");
-    else if ((context.ResumeForge?.avg_score || 0) > 0) weaknesses.push("Resume Impact");
+    const resumeAvgScore = (context.ResumeForge as ForgeData)?.avg_score || 0;
+    if (resumeAvgScore > 70) strengths.push("Resume Quality");
+    else if (resumeAvgScore > 0) weaknesses.push("Resume Impact");
 
-    if ((context.CodingForge?.accuracy || 0) > 60) strengths.push("Logic & Coding");
-    else if ((context.CodingForge?.accuracy || 0) > 0) weaknesses.push("Technical Foundations");
+    const codingAccuracy = (context.CodingForge as ForgeData)?.accuracy || 0;
+    if (codingAccuracy > 60) strengths.push("Logic & Coding");
+    else if (codingAccuracy > 0) weaknesses.push("Technical Foundations");
 
     return {
         readinessScore,
@@ -63,12 +84,12 @@ async function analyzeUserProfile(userId: string, context: any) {
         weaknesses,
         recommendations: [
             readinessScore < 60 ? "Improve coding speed in CodingForge" : "Practice interviews",
-            context.ResumeForge?.count === 0 ? "Generate your first resume" : null
-        ].filter(Boolean)
+            (context.ResumeForge as ForgeData)?.count === 0 ? "Generate your first resume" : null
+        ].filter((item): item is string => item !== null)
     };
 }
 
-async function fetchForgeData(userId: string, forge: string) {
+async function fetchForgeData(userId: string, forge: string): Promise<ForgeData | null> {
   switch (forge) {
     case 'ResumeForge':
       const { data: resumes } = await supabase.from('resumes').select('id, title, score, updated_at').eq('user_id', userId);
@@ -87,7 +108,7 @@ async function fetchForgeData(userId: string, forge: string) {
       return { applied: jobs?.length || 0, active: jobs?.filter(j => j.status === 'applied').length || 0 };
     case 'LearnForge':
       const { data: learn } = await supabase.from('user_learning_progress').select('*').eq('user_id', userId);
-      return { learn };
+      return { learn: learn || [] };
     // Add other forges as needed
     default:
       return null;

@@ -19,7 +19,7 @@ const GEMINI_KEYS = [
 function safeJsonParse(text: string) {
   try {
     return JSON.parse(text);
-  } catch (_err) {
+  } catch {
     console.log("JSON parse failed. Cleaning response...");
 
     // Use the improved extractJson logic to find the JSON block inside text
@@ -27,7 +27,7 @@ function safeJsonParse(text: string) {
 
     try {
       return JSON.parse(extracted);
-    } catch (_err2) {
+    } catch {
       console.log("Still invalid JSON. Returning content wrapped in 'reply' to prevent crash.");
       
       // Clean up stringified newlines and quotes if they exist in the raw text
@@ -122,8 +122,9 @@ export async function generateJsonGemini(prompt: string, systemInstruction?: str
             (systemInstruction || "") + " You must output valid JSON."
         );
         return safeJsonParse(extractJson(text));
-  } catch (error: any) {
-    console.error("Native Gemini JSON Error:", error?.message || error);
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error("Native Gemini JSON Error:", msg);
 
         try {
             const text = await fallbackViaOpenRouter(

@@ -6,14 +6,42 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { ArrowLeft, BookOpen, Code, HelpCircle, Link as LinkIcon, Share2 } from 'lucide-react';
+import { BookOpen, Code, HelpCircle, Link as LinkIcon, Share2 } from 'lucide-react';
+
+interface KnowledgeExample {
+  id: string;
+  description: string;
+  language: string;
+  code_snippet: string;
+}
+
+interface KnowledgeQuestion {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+interface KnowledgeLesson {
+  id: string;
+  title: string;
+  content: string;
+  knowledge_examples: KnowledgeExample[];
+  knowledge_questions: KnowledgeQuestion[];
+}
+
+interface KnowledgeTopic {
+  name: string;
+  description: string;
+  knowledge_lessons: KnowledgeLesson[];
+  related_topics: string[];
+}
 
 export async function generateMetadata({ params }: { params: { locale: string, category: string, topic: string } }): Promise<Metadata> {
   const data = await getKnowledgeTopicBySlug(params.category, params.topic);
   if (!data) return {};
 
-  const topicName = data.name;
-  const description = data.meta_description || `Learn ${topicName} with examples, explanations, and interview questions on ResumeForgeAI.`;
+  const topicName = (data as { name: string }).name;
+  const description = (data as { meta_description?: string }).meta_description || `Learn ${topicName} with examples, explanations, and interview questions on ResumeForgeAI.`;
 
   return {
     title: `${topicName} Guide | ResumeForgeAI`,
@@ -22,12 +50,6 @@ export async function generateMetadata({ params }: { params: { locale: string, c
       title: `${topicName} Guide | ResumeForgeAI`,
       description,
       type: 'article',
-      images: ['/og-knowledge.png'],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: `${topicName} Guide | ResumeForgeAI`,
-      description,
     }
   };
 }
@@ -35,7 +57,7 @@ export async function generateMetadata({ params }: { params: { locale: string, c
 export default async function TopicPage({ params }: { params: { locale: string, category: string, topic: string } }) {
   const { locale, category: categorySlug, topic: topicSlug } = params;
   
-  const topic = await getKnowledgeTopicBySlug(categorySlug, topicSlug);
+  const topic = await getKnowledgeTopicBySlug(categorySlug, topicSlug) as unknown as KnowledgeTopic | null;
   if (!topic) notFound();
 
   return (
@@ -60,7 +82,7 @@ export default async function TopicPage({ params }: { params: { locale: string, 
 
         {/* Dynamic Content from Lessons */}
         <div className="space-y-16">
-          {topic.knowledge_lessons?.map((lesson: any) => (
+          {topic.knowledge_lessons?.map((lesson: KnowledgeLesson) => (
             <section key={lesson.id} className="scroll-mt-20">
               <h2 className="text-3xl font-bold mb-6 border-b border-white/10 pb-2 flex items-center gap-3">
                 <BookOpen className="text-indigo-400" /> {lesson.title}
@@ -75,7 +97,7 @@ export default async function TopicPage({ params }: { params: { locale: string, 
               {/* Examples for this lesson */}
               {lesson.knowledge_examples?.length > 0 && (
                 <div className="space-y-6 my-8">
-                  {lesson.knowledge_examples.map((ex: any) => (
+                  {lesson.knowledge_examples.map((ex: KnowledgeExample) => (
                     <div key={ex.id} className="glass-card overflow-hidden">
                       <div className="bg-white/5 px-4 py-2 border-b border-white/10 flex items-center justify-between">
                          <span className="text-xs font-mono text-muted-foreground flex items-center gap-2">
@@ -104,7 +126,7 @@ export default async function TopicPage({ params }: { params: { locale: string, 
                       <HelpCircle className="text-emerald-400" /> Interview Prep: {lesson.title}
                    </h3>
                    <div className="grid gap-4">
-                      {lesson.knowledge_questions.map((q: any) => (
+                      {lesson.knowledge_questions.map((q: KnowledgeQuestion) => (
                         <div key={q.id} className="p-6 glass-card border-l-4 border-emerald-500/50">
                            <p className="font-bold text-lg mb-3">Q: {q.question}</p>
                            <div className="text-muted-foreground bg-white/5 p-4 rounded-lg">

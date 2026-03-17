@@ -1,10 +1,9 @@
-import { Suspense } from 'react';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { getKnowledgeCategories } from '@/lib/seo-service';
-import { ChevronRight, BookOpen, GraduationCap, Code, Rocket } from 'lucide-react';
+import { ChevronRight, BookOpen, GraduationCap, Code } from 'lucide-react';
 
-export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
+export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Knowledge Base | ResumeForgeAI",
     description: "Explore structured knowledge on programming, data structures, algorithms, and system design to excel in your tech career.",

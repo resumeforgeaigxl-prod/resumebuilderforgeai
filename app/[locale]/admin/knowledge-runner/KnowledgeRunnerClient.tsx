@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BookOpen, Plus, Play, Trash2, FileText, Globe, GraduationCap, Search, CheckCircle2, Clock } from 'lucide-react';
+import { BookOpen, Plus, Play, Trash2, FileText, GraduationCap, Search, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
@@ -14,7 +14,7 @@ interface Topic {
   created_at: string;
 }
 
-export default function KnowledgeRunnerClient({ locale }: { locale: string }) {
+export default function KnowledgeRunnerClient() {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [newTopic, setNewTopic] = useState({ name: '', description: '' });
   const [isRunning, setIsRunning] = useState<string | null>(null);
@@ -43,7 +43,7 @@ export default function KnowledgeRunnerClient({ locale }: { locale: string }) {
         fetchTopics();
         toast({ title: "Topic Added", description: "You can now run the knowledge runner for this topic." });
       }
-    } catch (err) {
+    } catch {
       toast({ variant: "destructive", title: "Failed to add topic" });
     }
   };
@@ -62,7 +62,7 @@ export default function KnowledgeRunnerClient({ locale }: { locale: string }) {
       } else {
         toast({ variant: "destructive", title: "Partial Failure", description: data.error || "The AI response was malformed. Some content may be missing." });
       }
-    } catch (err) {
+    } catch {
       toast({ variant: "destructive", title: "Failed to run knowledge runner" });
     } finally {
       setIsRunning(null);

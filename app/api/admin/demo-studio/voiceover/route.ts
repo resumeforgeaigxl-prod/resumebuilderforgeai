@@ -30,10 +30,11 @@ export async function POST(req: NextRequest) {
       audioUrl: publicUrl,
       filename: filename
     });
-  } catch (error: any) {
-    console.error('Voiceover generation error:', error);
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('Voiceover generation error:', msg);
     return NextResponse.json({ 
-      error: error.message || 'Internal Server Error' 
+      error: msg || 'Internal Server Error' 
     }, { status: 500 });
   }
 }

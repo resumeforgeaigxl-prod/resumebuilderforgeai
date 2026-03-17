@@ -13,6 +13,14 @@ interface ApifyJobItem {
     jobUrl?: string;
     description?: string;
     postedAt?: string;
+    employerName?: string;
+    jobTitle?: string;
+    applyLink?: string;
+    city?: string;
+    employmentType?: string;
+    platform?: string;
+    jobDescription?: string;
+    postedDate?: string;
 }
 
 export async function fetchApify(targetUrl?: string): Promise<NormalisedJob[]> {
@@ -55,23 +63,23 @@ export async function fetchApify(targetUrl?: string): Promise<NormalisedJob[]> {
             const items = await res.json() as ApifyJobItem[];
             for (const item of items) {
                 // Expanded mapping for various Apify job actors
-                const company = item.companyName || item.company || (item as any).employerName || 'Unknown';
-                const title = item.positionName || item.title || (item as any).jobTitle || '';
-                const applyUrl = item.url || item.jobUrl || (item as any).applyLink || '';
+                const company = item.companyName || item.company || item.employerName || 'Unknown';
+                const title = item.positionName || item.title || item.jobTitle || '';
+                const applyUrl = item.url || item.jobUrl || item.applyLink || '';
                 
                 if (!title || !applyUrl) continue;
 
                 results.push({
-                    external_id: `apify_${item.id || item.jobId || (item as any).id || Math.random().toString(36).slice(2)}`,
+                    external_id: `apify_${item.id || item.jobId || Math.random().toString(36).slice(2)}`,
                     title,
                     company,
-                    location: item.location || (item as any).city || 'Remote',
-                    job_type: item.type || (item as any).employmentType || 'FULLTIME',
-                    platform: (item as any).platform || source.name,
+                    location: item.location || item.city || 'Remote',
+                    job_type: item.type || item.employmentType || 'FULLTIME',
+                    platform: item.platform || source.name,
                     source: 'apify',
                     apply_url: applyUrl,
-                    description: item.description || (item as any).jobDescription || '',
-                    posted_date: item.postedAt || (item as any).postedDate || new Date().toISOString(),
+                    description: item.description || item.jobDescription || '',
+                    posted_date: item.postedAt || item.postedDate || new Date().toISOString(),
                     is_mnc: isMNC(company)
                 });
             }

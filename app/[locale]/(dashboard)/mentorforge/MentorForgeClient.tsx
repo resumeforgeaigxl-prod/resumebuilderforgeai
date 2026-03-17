@@ -2,11 +2,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Bot, User, Rocket, MessageSquare, Sparkles, Code, GraduationCap, BrainCircuit, Terminal, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
 import { ScrollArea } from '@/components/ui/ScrollArea';
 import { useToast } from '@/components/ui/use-toast';
-import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from '@/lib/utils';
@@ -38,14 +35,12 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [usage, setUsage] = useState({ count: 0, limit: 10 });
   const [activeMode, setActiveMode] = useState('General');
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
-    fetchUsage();
     fetchHistory();
   }, []);
 
@@ -55,12 +50,6 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
     }
   }, [messages, isLoading]);
 
-  const fetchUsage = async () => {
-    const response = await fetch('/api/mentorforge/usage');
-    const data: { count: number; limit: number } = await response.json();
-    setUsage(data);
-  };
-
   const fetchHistory = async () => {
     try {
       const res = await fetch('/api/mentorforge/history');
@@ -68,7 +57,6 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
       if (data.history?.length > 0) {
         setMessages(data.history);
       } else {
-        // If no history, show the initial welcome message
         setMessages([
           {
             role: 'assistant',
@@ -76,9 +64,7 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
           }
         ]);
       }
-    } catch (err) {
-      console.error('History load fail:', err);
-      // Even if history fails to load, show the welcome message
+    } catch {
       setMessages([
         {
           role: 'assistant',
@@ -116,30 +102,12 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
             suggestedAction: data.suggestedAction,
             analysis: data.analysis
         }]);
-        setUsage(prev => ({ ...prev, count: prev.count + 1 }));
       }
-    } catch (err) {
+    } catch {
       toast({ variant: "destructive", title: "AI Error", description: "Failed to connect to MentorForge." });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const grantPermission = async (forge: string) => {
-      try {
-          const res = await fetch('/api/mentorforge/permissions', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ forgeName: forge })
-          });
-          if (res.ok) {
-              toast({ title: "Permission Granted", description: `I now have access to your ${forge} data.` });
-              // Refresh last message or just tell the user
-              sendMessage(`I've granted you permission for ${forge}. Please analyze my data now.`);
-          }
-      } catch (err) {
-          toast({ variant: "destructive", title: "Action Failed", description: "Could not grant permission." });
-      }
   };
 
   const navigateToForge = (forge: string) => {
@@ -228,11 +196,9 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
             </div>
           </ScrollArea>
 
-          {/* Fixed Floating Input Area - More ChatGPT Style */}
           <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 bg-gradient-to-t from-[#050510] via-[#050510]/95 to-transparent pointer-events-none">
               <div className="max-w-3xl mx-auto space-y-6 pointer-events-auto">
                   
-                  {/* Suggestions Grid - Only show on start or empty chat */}
                   {messages.length < 2 && !isLoading && (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-2 animate-in fade-in slide-in-from-bottom-10 duration-1000">
                         {SUGGESTIONS.map(s => (
@@ -253,7 +219,6 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
                       </div>
                   )}
 
-                  {/* Mode Selector - Compact */}
                   <div className="flex items-center justify-center flex-wrap gap-1.5 px-2">
                       {MODES.map(mode => (
                           <button
