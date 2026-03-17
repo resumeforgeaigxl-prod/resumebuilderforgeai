@@ -113,7 +113,7 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
               className="mt-14 flex justify-center sm:justify-start"
             >
               <a
-                href="https://peerlist.io/resumeforgeai"
+                href="https://peerlist.io/saivarshith8284/project/resumeforgeai"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group relative flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-1.5 pr-6 transition-all duration-300 hover:border-sky-500/30 hover:bg-white/[0.06] hover:shadow-[0_0_40px_rgba(56,189,248,0.2)] hover:scale-[1.05]"
