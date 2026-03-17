@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
     FileUp,
     FileText,
@@ -29,6 +29,7 @@ interface Document {
 
 export default function StudyForgePage() {
     const params = useParams() as { locale: string };
+    const searchParams = useSearchParams();
     const locale = params.locale || 'en-IN';
     const router = useRouter();
     const [documents, setDocuments] = useState<Document[]>([]);
@@ -39,8 +40,41 @@ export default function StudyForgePage() {
     const [uploadError, setUploadError] = useState<string | null>(null);
 
     useEffect(() => {
-        fetchDocuments();
-    }, []);
+        if (!searchParams) return;
+        const source = searchParams.get('source');
+        const topic = searchParams.get('topic');
+        const content = searchParams.get('content');
+
+        if (source === 'knowledge' && topic && content) {
+            handleVirtualUpload(topic, content);
+        } else {
+            fetchDocuments();
+        }
+    }, [searchParams]);
+
+    const handleVirtualUpload = async (topic: string, content: string) => {
+        setIsUploading(true);
+        setUploadStage('preparing');
+        try {
+            const res = await fetch('/api/studyforge/upload/virtual', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: topic, content }),
+            });
+            const data = await res.json();
+            if (data.success && data.document?.id) {
+                router.push(`/${locale}/studyforge/document/${data.document.id}`);
+            } else {
+                fetchDocuments(); // Fallback if virtual upload fails
+            }
+        } catch (error) {
+            console.error('Virtual upload error:', error);
+            fetchDocuments();
+        } finally {
+            setIsUploading(false);
+            setUploadStage('idle');
+        }
+    };
 
     const fetchDocuments = async () => {
         try {

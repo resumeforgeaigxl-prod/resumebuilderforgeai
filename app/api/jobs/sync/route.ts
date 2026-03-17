@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server';
 import { ingestJobs } from '@/lib/jobs/ingestion-service';
-import { fetchJSearch } from '@/lib/jobs/sources/jsearch';
-import { fetchAdzuna } from '@/lib/jobs/sources/adzuna';
-import { fetchApify } from '@/lib/jobs/sources/apify';
 import { fetchJobForgeCollector } from '@/lib/jobs/sources/jobforgecollector';
 
 export const dynamic = 'force-dynamic';
@@ -18,26 +15,15 @@ export async function GET(req: Request) {
         }
 
         const summary: Record<string, unknown> = {};
+        console.log('[JobSyncAPI] Starting global unified sync (via JobForgeCollector)...');
 
-        // 1. JSearch
-        const jJobs = await fetchJSearch();
-        summary.jsearch = await ingestJobs(jJobs);
-
-        // 2. Adzuna
-        const aJobs = await fetchAdzuna();
-        summary.adzuna = await ingestJobs(aJobs);
-
-        // 3. Apify
-        const apJobs = await fetchApify();
-        summary.apify = await ingestJobs(apJobs);
-
-        // 4. JobForgeCollector
-        const jfJobs = await fetchJobForgeCollector();
-        summary.jobforgecollector = await ingestJobs(jfJobs);
+        // fetchJobForgeCollector now integrates searches + all external APIs (JSearch, Adzuna, etc.)
+        const jobs = await fetchJobForgeCollector(200);
+        summary['unified_collector'] = await ingestJobs(jobs);
 
         return NextResponse.json({
             success: true,
-            message: 'Daily sync completed',
+            message: 'Global sync completed',
             summary
         });
 

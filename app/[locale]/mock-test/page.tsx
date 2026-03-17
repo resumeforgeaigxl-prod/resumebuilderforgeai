@@ -16,6 +16,7 @@ export default function MockTestSetupPage() {
     const { locale, region } = useTranslation();
     const router = useRouter();
     const [jobTitle, setJobTitle] = useState('');
+    const [skillLevel, setSkillLevel] = useState('Intermediate');
     const [jobDescription, setJobDescription] = useState('');
     const [resumeText, setResumeText] = useState('');
     const [loading, setLoading] = useState(false);
@@ -32,7 +33,7 @@ export default function MockTestSetupPage() {
             const res = await fetch('/api/mock-test/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ jobTitle, jobDescription, resumeText }),
+                body: JSON.stringify({ jobTitle, jobDescription, resumeText, skillLevel }),
             });
             const data = await res.json();
             if (res.ok && data.success) {
@@ -41,7 +42,7 @@ export default function MockTestSetupPage() {
                     posthog.capture('mock_test_started', {
                         job_title: jobTitle
                     });
-                } catch (err) { console.error('[PostHog] Event error:', err); }
+                } catch (_err) { console.error('[PostHog] Event error:', _err); }
                 router.push(`/${locale}-${region}/mock-test/${data.testId}`);
             } else {
                 setError(data.error || 'Failed to generate test. Please try again.');
@@ -82,16 +83,32 @@ export default function MockTestSetupPage() {
                 {/* Form */}
                 <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-8 space-y-6 backdrop-blur-sm">
                     {/* Job Title */}
-                    <div>
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2 mb-2">
-                            <Briefcase className="w-3.5 h-3.5" /> Job Title (optional)
-                        </label>
-                        <input
-                            value={jobTitle}
-                            onChange={e => setJobTitle(e.target.value)}
-                            placeholder="e.g. Senior Frontend Engineer"
-                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                        />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2 mb-2">
+                                <Briefcase className="w-3.5 h-3.5" /> Job Title
+                            </label>
+                            <input
+                                value={jobTitle}
+                                onChange={e => setJobTitle(e.target.value)}
+                                placeholder="e.g. Senior Frontend Engineer"
+                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2 mb-2">
+                                <Zap className="w-3.5 h-3.5" /> Skill Level
+                            </label>
+                            <select
+                                value={skillLevel}
+                                onChange={e => setSkillLevel(e.target.value)}
+                                className="w-full px-4 py-3 bg-[#0a0a20] border border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                            >
+                                <option value="Beginner">Beginner / Fresher</option>
+                                <option value="Intermediate">Intermediate (2-5 years)</option>
+                                <option value="Advanced">Advanced / Senior (5+ years)</option>
+                            </select>
+                        </div>
                     </div>
 
                     {/* Job Description */}

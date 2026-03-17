@@ -50,6 +50,8 @@ export async function GET(req: Request) {
 
         const jobType = searchParams.get('job_type'); // Full-time, Contract, etc.
         const country = searchParams.get('country') || defaultCountryFilter;
+        const tier = searchParams.get('tier'); // 1, 2, 3, 4
+        const companyParam = searchParams.get('company');
 
         const page = parseInt(searchParams.get('page') || '1');
         const limitParam = parseInt(searchParams.get('limit') || '20');
@@ -88,8 +90,16 @@ export async function GET(req: Request) {
             query = query.or(`title.ilike.%${search}%,company.ilike.%${search}%`);
         }
 
+        if (companyParam) {
+            query = query.ilike('company', `%${companyParam}%`);
+        }
+
         if (remote) {
             query = query.ilike('location', '%remote%');
+        }
+
+        if (tier) {
+            query = query.eq('tier', parseInt(tier));
         }
 
         // Priority: If country is explicitly set, use it.
@@ -122,6 +132,7 @@ export async function GET(req: Request) {
 
         const { data: allJobs, error, count } = await query
             .order('created_at', { ascending: false })
+            .order('priority_score', { ascending: false })
             .range(from, to);
 
         if (error) throw error;

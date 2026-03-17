@@ -360,6 +360,8 @@ export async function middleware(request: NextRequest) {
         normalizedPath.startsWith('/job-interview-ai-coach') ||
         normalizedPath.startsWith('/jobforgeai') ||
         normalizedPath.startsWith('/sitemap') ||
+        normalizedPath.startsWith('/knowledge') ||
+        normalizedPath.startsWith('/posts') ||
         normalizedPath.startsWith('/jobs') ||
         normalizedPath.startsWith('/job/') ||
         normalizedPath.startsWith('/companies/') ||

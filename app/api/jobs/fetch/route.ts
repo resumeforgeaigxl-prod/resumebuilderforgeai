@@ -35,9 +35,9 @@ export async function GET(req: Request) {
             summary.adzuna = result;
         }
 
-        if (sourceParam === 'apify' || (sourceParam === 'all' && !sourceParam)) {
-             // For cron 'all' we might only do fast ones. Let's specify for now.
-             const jobs = await fetchApify();
+        if (sourceParam === 'apify' || sourceParam === 'all') {
+             const url = searchParams.get('url') || undefined;
+             const jobs = await fetchApify(url);
              const result = await ingestJobs(jobs);
              summary.apify = result;
         }

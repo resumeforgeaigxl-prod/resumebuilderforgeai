@@ -28,17 +28,24 @@ interface Job {
 interface PublicJobBoardProps {
     initialRole?: string;
     initialLocation?: string;
+    initialCompany?: string;
     locale?: string;
 }
 
-export default function PublicJobBoard({ initialRole = '', initialLocation = '', locale = 'en-in' }: PublicJobBoardProps) {
+export default function PublicJobBoard({ 
+    initialRole = '', 
+    initialLocation = '', 
+    initialCompany = '',
+    locale = 'en-in' 
+}: PublicJobBoardProps) {
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
-    const [searchInput, setSearchInput] = useState(initialRole);
+    const [searchInput, setSearchInput] = useState(initialRole || initialCompany);
     const [locationInput, setLocationInput] = useState(initialLocation);
+    const [selectedTier, setSelectedTier] = useState<string | null>(null);
 
     const fetchJobs = useCallback(async () => {
         setLoading(true);
@@ -49,19 +56,21 @@ export default function PublicJobBoard({ initialRole = '', initialLocation = '',
                 page: page.toString(),
                 limit: '20'
             });
+            if (selectedTier) params.append('tier', selectedTier);
+            if (initialCompany) params.append('company', initialCompany);
+            
             const res = await fetch(`/api/jobs/list?${params.toString()}`);
             const data = await res.json();
             if (data.success) {
                 setJobs(data.jobs);
                 setTotalPages(data.totalPages);
-
             }
         } catch (err) {
             console.error('Fetch error:', err);
         } finally {
             setLoading(false);
         }
-    }, [searchInput, locationInput, page]);
+    }, [searchInput, locationInput, page, selectedTier]);
 
     useEffect(() => {
         fetchJobs();
@@ -72,6 +81,13 @@ export default function PublicJobBoard({ initialRole = '', initialLocation = '',
         setPage(1);
         fetchJobs();
     };
+
+    const tiers = [
+        { id: '1', name: 'Top Product', color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
+        { id: '2', name: 'Startups', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+        { id: '4', name: 'Global MNCs', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
+        { id: '3', name: 'Service', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+    ];
 
     return (
         <div className="space-y-8 max-w-7xl mx-auto px-4 py-12">
@@ -87,33 +103,54 @@ export default function PublicJobBoard({ initialRole = '', initialLocation = '',
             </div>
 
             {/* Filters Bar */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-slate-900/40 p-6 rounded-[2.5rem] border border-white/5 backdrop-blur-md shadow-2xl">
-                <form onSubmit={handleSearch} className="relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                    <input
-                        value={searchInput}
-                        onChange={e => setSearchInput(e.target.value)}
-                        placeholder="Job title or skills..."
-                        className="w-full pl-12 pr-4 py-4 bg-slate-900/50 border border-white/10 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-white"
-                    />
-                </form>
+            <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-slate-900/40 p-6 rounded-[2.5rem] border border-white/5 backdrop-blur-md shadow-2xl">
+                    <form onSubmit={handleSearch} className="relative">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                        <input
+                            value={searchInput}
+                            onChange={e => setSearchInput(e.target.value)}
+                            placeholder="Job title or skills..."
+                            className="w-full pl-12 pr-4 py-4 bg-slate-900/50 border border-white/10 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-white"
+                        />
+                    </form>
 
-                <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none" />
-                    <input
-                        value={locationInput}
-                        onChange={e => setLocationInput(e.target.value)}
-                        placeholder="City or Remote..."
-                        className="w-full pl-12 pr-4 py-4 bg-slate-900/50 border border-white/10 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-white"
-                    />
+                    <div className="relative">
+                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none" />
+                        <input
+                            value={locationInput}
+                            onChange={e => setLocationInput(e.target.value)}
+                            placeholder="City or Remote..."
+                            className="w-full pl-12 pr-4 py-4 bg-slate-900/50 border border-white/10 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-white"
+                        />
+                    </div>
+
+                    <button
+                        onClick={handleSearch}
+                        className="py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase tracking-widest rounded-2xl transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
+                    >
+                        Search Jobs
+                    </button>
                 </div>
 
-                <button
-                    onClick={handleSearch}
-                    className="py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase tracking-widest rounded-2xl transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
-                >
-                    Search Jobs
-                </button>
+                {/* Tier Quick Filters */}
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                    <button
+                        onClick={() => { setSelectedTier(null); setPage(1); }}
+                        className={`px-6 py-2 rounded-full text-xs font-bold transition-all border ${!selectedTier ? 'bg-white/10 text-white border-white/20' : 'bg-transparent text-slate-500 border-white/5 hover:border-white/10'}`}
+                    >
+                        All Companies
+                    </button>
+                    {tiers.map(t => (
+                        <button
+                            key={t.id}
+                            onClick={() => { setSelectedTier(t.id); setPage(1); }}
+                            className={`px-6 py-2 rounded-full text-xs font-bold transition-all border ${selectedTier === t.id ? t.color : 'bg-transparent text-slate-500 border-white/5 hover:border-white/10'}`}
+                        >
+                            {t.name}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {/* Jobs Grid */}

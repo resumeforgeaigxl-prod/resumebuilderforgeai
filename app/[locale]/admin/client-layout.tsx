@@ -3,7 +3,7 @@
 import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, Target, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning, Briefcase, FileHeart, Receipt, LifeBuoy, Mic, Compass, TrendingUp, Bell, BookOpen, Sparkles } from 'lucide-react';
+import { Shield, Target, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning, Briefcase, FileHeart, Receipt, LifeBuoy, Mic, Compass, TrendingUp, Bell, BookOpen, Sparkles, Video, BookOpenCheck, Bot, GraduationCap } from 'lucide-react';
 import Image from 'next/image';
 
 export default function AdminLayoutClient({ children, profile, locale }: { children: ReactNode, profile: { email: string }, locale: string }) {
@@ -53,6 +53,11 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
         { href: `/${locale}/admin/explainforge`, label: 'ExplainForge AI', icon: Sparkles },
         { href: `/${locale}/admin/ai-monitoring`, label: 'AI Neural Monitor', icon: MessageSquareWarning },
         { href: `/${locale}/admin/learnforge`, label: 'LearnForge Library', icon: BookOpen },
+        { href: `/${locale}/admin/demo-studio`, label: 'Demo Studio', icon: Video },
+        { href: `/${locale}/mentorforge`, label: 'MentorForge AI', icon: Bot },
+        { href: `/${locale}/admin/knowledge-runner`, label: 'KnowledgeForge AI', icon: GraduationCap },
+        { href: `/${locale}/admin/posts`, label: 'Platform Posts', icon: LayoutDashboard },
+        { href: `/${locale}/admin/knowledge`, label: 'Knowledge SEO', icon: BookOpenCheck },
         { href: `/${locale}/admin/logs`, label: 'Audit Logs', icon: ScrollText },
     ];
 

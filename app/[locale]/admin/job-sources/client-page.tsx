@@ -13,22 +13,21 @@ export default function JobSourcesClient({ initialStats }: { initialStats: Recor
         setMessages(prev => ({ ...prev, [source]: 'Running pipeline...' }));
 
         try {
-            const res = await fetch(`/api/jobs/fetch?source=${source}`);
+            const query = source === 'apify' && apifyUrl ? `&url=${encodeURIComponent(apifyUrl)}` : '';
+            const res = await fetch(`/api/jobs/fetch?source=${source}${query}`);
             const data = await res.json();
 
             if (data.success) {
                 const result = data.summary[source];
-                setMessages(prev => ({ 
-                    ...prev, 
-                    [source]: `Success: ${result.inserted} new jobs inserted (${result.skipped} skipped)` 
-                }));
+                const msg = `Fetched: ${result.total} | Inserted: ${result.inserted} | Skipped: ${result.skipped} | Failed: ${result.failed || 0}`;
+                setMessages(prev => ({ ...prev, [source]: msg }));
                 // Update stats
                 setStats(prev => ({ ...prev, [source]: prev[source] + result.inserted }));
             } else {
-                setMessages(prev => ({ ...prev, [source]: `Error: ${data.detail || 'Unknown error'}` }));
+                setMessages(prev => ({ ...prev, [source]: `Failed: ${data.detail || data.error || 'Server Error'}` }));
             }
         } catch {
-            setMessages(prev => ({ ...prev, [source]: 'Failed to connect to API' }));
+            setMessages(prev => ({ ...prev, [source]: 'Connection Error: Check server status.' }));
         } finally {
             setLoading(prev => ({ ...prev, [source]: false }));
         }
@@ -74,6 +73,8 @@ export default function JobSourcesClient({ initialStats }: { initialStats: Recor
         { id: 'apify', name: 'Apify Scraper', icon: Globe, color: 'text-orange-400', bg: 'bg-orange-500/10' },
         { id: 'jobforgecollector', name: 'JobForgeCollector AI', icon: Shield, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
     ];
+
+    const [apifyUrl, setApifyUrl] = useState('');
 
     return (
         <div className="space-y-8">
@@ -121,10 +122,27 @@ export default function JobSourcesClient({ initialStats }: { initialStats: Recor
                             </div>
                         </div>
 
+                        {source.id === 'apify' && (
+                            <div className="mt-6">
+                                <input 
+                                    type="text" 
+                                    placeholder="Scrape specific job URL (optional)..."
+                                    value={apifyUrl}
+                                    onChange={(e) => setApifyUrl(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-orange-500/50"
+                                />
+                                {!apifyUrl && (
+                                    <p className="text-[10px] text-slate-500 mt-2 px-1 italic">
+                                        Note: Requires APIFY_LINKEDIN_DATASET_ID in .env.local for full scraping.
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
                         <div className="mt-8 flex items-center justify-between gap-4">
-                            <div className="flex-1">
+                            <div className="flex-1 min-w-0">
                                 {messages[source.id] && (
-                                    <p className={`text-xs font-medium ${messages[source.id].includes('Error') ? 'text-red-400' : 'text-indigo-400'} animate-in fade-in slide-in-from-left-2`}>
+                                    <p className={`text-[10px] font-mono leading-tight truncate ${messages[source.id].includes('Failed') ? 'text-red-400' : 'text-indigo-400'} animate-in fade-in slide-in-from-left-2`}>
                                         {messages[source.id]}
                                     </p>
                                 )}
@@ -132,7 +150,7 @@ export default function JobSourcesClient({ initialStats }: { initialStats: Recor
                             <button
                                 onClick={() => runIngestion(source.id)}
                                 disabled={loading[source.id]}
-                                className="bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all disabled:opacity-50"
+                                className="bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all disabled:opacity-50 flex-shrink-0"
                             >
                                 {loading[source.id] ? (
                                     <Loader2 className="w-4 h-4 animate-spin" />

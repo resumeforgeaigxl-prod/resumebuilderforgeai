@@ -214,7 +214,7 @@ export default function LearnForge() {
                         </>
                     ) : (
                         <div className="aspect-video w-full rounded-[2.5rem] bg-[#0a0a16] border border-white/5 flex flex-col items-center justify-center gap-4 text-center p-12">
-                            <Video className="w-16 h-16 text-slate-800" />
+                            <VideoIcon className="w-16 h-16 text-slate-800" />
                             <h3 className="text-2xl font-black text-white uppercase tracking-tight">Select a video to start learning</h3>
                             <p className="text-slate-500 font-medium max-w-sm">Explore your roadmap or professional skills from the library on the right.</p>
                         </div>
@@ -342,7 +342,7 @@ export default function LearnForge() {
     );
 }
 
-function Video({ className }: { className?: string }) {
+function VideoIcon({ className }: { className?: string }) {
     return (
         <svg 
             xmlns="http://www.w3.org/2000/svg" 

@@ -23,7 +23,8 @@ async function generateQuestions(
     startNum: number,
     jobDescription: string,
     resumeText: string,
-    jobTitle: string
+    jobTitle: string,
+    skillLevel: string = 'Intermediate'
 ): Promise<RawQuestion[]> {
     const apiKey = (process.env.OPENROUTER_API_KEY || '').trim();
     if (!apiKey) throw new Error('OPENROUTER_API_KEY not set');
@@ -40,6 +41,7 @@ async function generateQuestions(
 
     const prompt = `${categoryPrompts[category]}
 
+TARGET SKILL LEVEL: ${skillLevel}
 JOB TITLE: ${jobTitle || 'Not specified'}
 JOB DESCRIPTION:
 ${jobDescription.slice(0, 1500)}
@@ -113,7 +115,7 @@ export async function POST(request: Request) {
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const body = await request.json();
-        const { jobDescription, resumeText = '', jobTitle = '' } = body;
+        const { jobDescription, resumeText = '', jobTitle = '', skillLevel = 'Intermediate' } = body;
 
         if (!jobDescription?.trim() || jobDescription.trim().length < 50) {
             return NextResponse.json({ error: 'Please paste a full job description (minimum 50 characters).' }, { status: 400 });
@@ -122,8 +124,7 @@ export async function POST(request: Request) {
         const supabase = createClient();
 
         // Create the mock_test record
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: testRow, error: testErr } = await (supabase as any)
+        const { data: testRow, error: testErr } = await supabase
             .from('mock_tests')
             .insert({
                 user_id: session.userId,
@@ -155,7 +156,7 @@ export async function POST(request: Request) {
 
         const results = await Promise.allSettled(
             categories.map(c =>
-                generateQuestions(c.name, c.start, jobDescription, resumeText, jobTitle)
+                generateQuestions(c.name, c.start, jobDescription, resumeText, jobTitle, skillLevel)
             )
         );
 
@@ -192,8 +193,7 @@ export async function POST(request: Request) {
             explanation: q.explanation ?? null,
         }));
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error: qErr } = await (supabase as any)
+        const { error: qErr } = await supabase
             .from('mock_questions')
             .insert(qRows);
 

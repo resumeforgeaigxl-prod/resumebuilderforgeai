@@ -104,7 +104,7 @@ export default function JobCollectorClient() {
                         </div>
                         <div>
                             <h3 className="text-xl font-bold text-white">Full Global Sync</h3>
-                            <p className="text-sm text-slate-500">Sync with JSearch, Adzuna, and Apify.</p>
+                            <p className="text-sm text-slate-500">Sync with JSearch, Adzuna, Apify, and AI Collector.</p>
                         </div>
                     </div>
                     <button

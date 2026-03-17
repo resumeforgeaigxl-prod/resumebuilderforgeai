@@ -2,6 +2,9 @@ import { NormalisedJob } from '../ingestion-service';
 import { generateJsonGemini } from '@/lib/gemini-service';
 import { createClient } from '@supabase/supabase-js';
 import { searchSerper, searchDuckDuckGo, searchTavily, SearchResult } from './search-providers';
+import { fetchJSearch } from './jsearch';
+import { fetchAdzuna } from './adzuna';
+import { fetchApify } from './apify';
 
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -209,16 +212,8 @@ export async function fetchJobForgeCollector(requestedLimit: number = 80): Promi
                 
                 const location = job.location || 'India';
                 
-                // STAGE 5: DEDUPLICATION
-                const normTitle = normalizeForDupCheck(job.title);
-                const normCompany = normalizeForDupCheck(job.company);
-                const normLoc = normalizeForDupCheck(location);
-                
-                const isLocalDup = finalJobs.some(f =>
-                    normalizeForDupCheck(f.title!) === normTitle && 
-                    normalizeForDupCheck(f.company!) === normCompany &&
-                    normalizeForDupCheck(f.location!) === normLoc
-                );
+                // STAGE 5: MEMORY DEDUPLICATION (Primary: apply_url)
+                const isLocalDup = finalJobs.some(f => f.apply_url === job.apply_url);
 
                 if (isLocalDup) {
                     stats.duplicates_removed++;
@@ -251,6 +246,64 @@ export async function fetchJobForgeCollector(requestedLimit: number = 80): Promi
         if (finalJobs.length >= requestedLimit) break;
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // STAGE 7: EXTERNAL API INTEGRATION (NEW SOURCES)
+    // ─────────────────────────────────────────────────────────────────────────
+    console.log('[JobForgeCollector] Stage 7: Running Parallel External APIs...');
+    
+    const [
+        arbeitnowJobs, jobicyJobs, museJobs, joobleJobs, findworkJobs, careerjetJobs,
+        jsearchJobs, adzunaJobs, apifyJobs
+    ] = await Promise.all([
+        fetchArbeitnowJobs().catch(e => { console.error('[Arbeitnow] failed:', e); return []; }),
+        fetchJobicyJobs().catch(e => { console.error('[Jobicy] failed:', e); return []; }),
+        fetchMuseJobs().catch(e => { console.error('[The Muse] failed:', e); return []; }),
+        fetchJoobleJobs().catch(e => { console.error('[Jooble] failed:', e); return []; }),
+        fetchFindworkJobs().catch(e => { console.error('[Findwork] failed:', e); return []; }),
+        fetchCareerjetJobs().catch(e => { console.error('[Careerjet] failed:', e); return []; }),
+        fetchJSearch().catch(e => { console.error('[JSearch] failed:', e); return []; }),
+        fetchAdzuna().catch(e => { console.error('[Adzuna] failed:', e); return []; }),
+        fetchApify().catch(e => { console.error('[Apify] failed:', e); return []; })
+    ]);
+
+    const allSourceJobs = [
+        ...arbeitnowJobs, ...jobicyJobs, ...museJobs, ...joobleJobs, 
+        ...findworkJobs, ...careerjetJobs, ...jsearchJobs, ...adzunaJobs, ...apifyJobs
+    ];
+
+    console.log(`[JobForgeCollector] New Sources Summary: 
+      - Arbeitnow: ${arbeitnowJobs.length}
+      - Jobicy: ${jobicyJobs.length}
+      - The Muse: ${museJobs.length}
+      - Jooble: ${joobleJobs.length}
+      - Findwork: ${findworkJobs.length}
+      - Careerjet: ${careerjetJobs.length}
+      - JSearch: ${jsearchJobs.length}
+      - Adzuna: ${adzunaJobs.length}
+      - Apify: ${apifyJobs.length}`);
+
+    // Merge API jobs with Search results using robust deduplication
+    for (const job of allSourceJobs) {
+        if (!job.apply_url && !job.title) continue;
+
+        // Primary: apply_url. Fallback: hash(title+company+location)
+        const dedupKey = job.apply_url || 
+            `hash_${Buffer.from((job.title || '') + (job.company || '') + (job.location || '')).toString('base64').slice(0, 16)}`;
+
+        const isDup = finalJobs.some(f => f.apply_url === job.apply_url || f.external_id === dedupKey);
+        
+        if (!isDup) {
+            finalJobs.push({
+                ...job,
+                external_id: job.external_id || `api_${Buffer.from(dedupKey).toString('base64').slice(0, 24)}`,
+                posted_date: job.posted_date || new Date().toISOString(),
+                source: job.source || 'jobforgecollector'
+            });
+        } else {
+            stats.duplicates_removed++;
+        }
+    }
+
     stats.jobs_inserted = finalJobs.length;
 
     // FINAL PIPELINE LOGS
@@ -268,4 +321,166 @@ Time Taken: ${((Date.now() - startTime) / 1000).toFixed(2)}s
     `);
 
     return finalJobs;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NEW SOURCE FETCHERS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * 1. Arbeitnow API
+ */
+export async function fetchArbeitnowJobs(): Promise<Partial<NormalisedJob>[]> {
+    try {
+        const res = await fetch('https://www.arbeitnow.com/api/job-board-api', { signal: AbortSignal.timeout(10000) });
+        const data = await res.json();
+        return (data.data || []).map((j: { title: string; company_name: string; location: string; remote: boolean; url: string; description: string; created_at: number }) => ({
+            title: j.title,
+            company: j.company_name,
+            location: j.location,
+            job_type: j.remote ? 'Remote' : 'Full-time',
+            apply_url: j.url,
+            description: j.description,
+            posted_date: new Date(j.created_at * 1000).toISOString(),
+            source: 'arbeitnow'
+        }));
+    } catch (e) {
+        console.error('[Arbeitnow] Fetch Error:', e);
+        return [];
+    }
+}
+
+/**
+ * 2. Jobicy API
+ */
+export async function fetchJobicyJobs(): Promise<Partial<NormalisedJob>[]> {
+    try {
+        const res = await fetch('https://jobicy.com/api/v2/remote-jobs?count=20', { signal: AbortSignal.timeout(10000) });
+        const data = await res.json();
+        return (data.jobs || []).map((j: { jobTitle: string; companyName: string; jobGeo: string; url: string; jobDescription: string; pubDate: string }) => ({
+            title: j.jobTitle,
+            company: j.companyName,
+            location: j.jobGeo || 'Remote',
+            job_type: 'Remote',
+            apply_url: j.url,
+            description: j.jobDescription,
+            posted_date: j.pubDate,
+            source: 'jobicy'
+        }));
+    } catch (e) {
+        console.error('[Jobicy] Fetch Error:', e);
+        return [];
+    }
+}
+
+/**
+ * 3. The Muse API
+ */
+export async function fetchMuseJobs(): Promise<Partial<NormalisedJob>[]> {
+    try {
+        const res = await fetch('https://www.themuse.com/api/public/jobs?page=0&category=Software%20Engineering&location=India', { signal: AbortSignal.timeout(10000) });
+        const data = await res.json();
+        return (data.results || []).map((j: { name: string; company: { name: string }; locations: { name: string }[]; refs: { landing_page: string }; contents: string; publication_date: string }) => ({
+            title: j.name,
+            company: j.company?.name || 'Unknown',
+            location: j.locations?.[0]?.name || 'India',
+            job_type: 'Full-time',
+            apply_url: j.refs?.landing_page,
+            description: j.contents,
+            posted_date: j.publication_date,
+            source: 'themuse'
+        }));
+    } catch (e) {
+        console.error('[The Muse] Fetch Error:', e);
+        return [];
+    }
+}
+
+/**
+ * 4. Jooble API
+ */
+export async function fetchJoobleJobs(): Promise<Partial<NormalisedJob>[]> {
+    const key = process.env.JOOBLE_API_KEY;
+    if (!key) {
+        console.warn('[Jooble] No API Key found.');
+        return [];
+    }
+    try {
+        const res = await fetch(`https://jooble.org/api/${key}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ keywords: 'software engineer', location: 'India' }),
+            signal: AbortSignal.timeout(10000)
+        });
+        const data = await res.json();
+        return (data.jobs || []).map((j: { title: string; company: string; location: string; type: string; link: string; snippet: string; updated: string }) => ({
+            title: j.title,
+            company: j.company || 'Unknown',
+            location: j.location || 'India',
+            job_type: j.type || 'Full-time',
+            apply_url: j.link,
+            description: j.snippet,
+            posted_date: j.updated,
+            source: 'jooble'
+        }));
+    } catch (e) {
+        console.error('[Jooble] Fetch Error:', e);
+        return [];
+    }
+}
+
+/**
+ * 5. Findwork API
+ */
+export async function fetchFindworkJobs(): Promise<Partial<NormalisedJob>[]> {
+    const token = process.env.FINDWORK_API_TOKEN;
+    if (!token) {
+        console.warn('[Findwork] No API Token found.');
+        return [];
+    }
+    try {
+        const res = await fetch('https://findwork.dev/api/jobs/?location=india&search=software', {
+            headers: { 'Authorization': `Token ${token}` },
+            signal: AbortSignal.timeout(10000)
+        });
+        const data = await res.json();
+        return (data.results || []).map((j: { role: string; company_name: string; location: string; employment_type: string; url: string; text: string; date_posted: string }) => ({
+            title: j.role,
+            company: j.company_name,
+            location: j.location || 'India',
+            job_type: j.employment_type || 'Full-time',
+            apply_url: j.url,
+            description: j.text,
+            posted_date: j.date_posted,
+            source: 'findwork'
+        }));
+    } catch (e) {
+        console.error('[Findwork] Fetch Error:', e);
+        return [];
+    }
+}
+
+/**
+ * 6. Careerjet API
+ */
+export async function fetchCareerjetJobs(): Promise<Partial<NormalisedJob>[]> {
+    const affid = process.env.CAREERJET_AFFID || 'test'; // Use test if missing
+    try {
+        const res = await fetch(`http://public.api.careerjet.net/search?affid=${affid}&keywords=software&location=india&user_ip=127.0.0.1&user_agent=Mozilla`, {
+             signal: AbortSignal.timeout(10000) 
+        });
+        const data = await res.json();
+        return (data.jobs || []).map((j: { title: string; company: string; locations: string; url: string; description: string; date: string }) => ({
+            title: j.title,
+            company: j.company,
+            location: j.locations || 'India',
+            apply_url: j.url,
+            description: j.description,
+            posted_date: j.date,
+            source: 'careerjet'
+        }));
+    } catch (e) {
+        console.error('[Careerjet] Fetch Error:', e);
+        return [];
+    }
 }

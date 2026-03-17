@@ -28,6 +28,14 @@ const INTERNAL_APP_ROOTS = new Set([
     'billing',
     'recruiter',
     'builder',
+    'mentorforge',
+    'learnforge',
+    'demo-studio',
+    'knowledge-runner',
+    'ai-monitoring',
+    'setup-username',
+    'u',
+    'knowledgeforge',
 ]);
 
 function getRouteRoot(pathname: string | null): string {
@@ -88,6 +96,9 @@ export default function Footer() {
                             <li><Link href={`/${region}/${locale}/dashboard`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> CareerForge</Link></li>
                             <li><Link href={`/${region}/${locale}/resumes`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> ResumeForge</Link></li>
                             <li><Link href={`/${region}/${locale}/mock-interview`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> InterviewForge</Link></li>
+                            <li><Link href={`/${region}/${locale}/learnforge`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> LearnForge</Link></li>
+                            <li><Link href={`/${region}/${locale}/knowledgeforge`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> KnowledgeForge</Link></li>
+                            <li><Link href={`/${region}/${locale}/mentorforge`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> MentorForge</Link></li>
                             <li><Link href={`/${region}/${locale}/company-prep`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> CompanyForge</Link></li>
                         </ul>
                     </div>

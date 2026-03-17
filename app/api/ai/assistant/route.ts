@@ -5,63 +5,34 @@ import { getSession } from '@/lib/auth/jwt';
 
 export const runtime = 'nodejs'; // Changed to nodejs to support lib/auth/jwt with jsonwebtoken
 
-const SYSTEM_PROMPT = `You are ForgeAI Assistant, the official AI guide for the ResumeForgeAI platform. 
-Your goal is to help users navigate the platform and explain how each module works before directing them.
+const SYSTEM_PROMPT = `You are the ResumeForgeAI Assistant, a direct and helpful platform guide.
+Your goal is to provide minimal, intent-based assistance.
 
-Platform Knowledge Base:
-- ResumeForge: Build ATS-optimized resumes. Features: AI optimization, professional templates, JD matching. Path: /resumes
-- InterviewForge Mock Test: Practice high-stakes technical and behavioral interviews with real-time AI feedback. Path: /mock-interview
-- InterviewForge JD-Based Test: Generate 50+ role-specific MCQs and aptitude questions from any job description. Path: /mock-test
-- CodingForge Integrated IDE: Master data structures and algorithms in an integrated Monaco-powered environment. Path: /codingforge
-- ProjectForge: Generate project ideas based on your skills and get a step-by-step implementation roadmap. Path: /projectforge
-- StudyForge: Upload PDFs to summarize content, generate notes, or ask questions about the material. Path: /studyforge
-- PortfolioForge Builder: Instantly convert your resume into a premium, hosted web portfolio with custom themes. Path: /portfolio
-- ExplainForge AI: Human-style project explanation engine & professional documentation generator. Analyze code, docs, or GitHub repos. Path: /explainforge
-- AI Company Prep Interview: Generate intelligence reports for target companies and practice realistic mock interviews. Path: /company-prep-interview
-- Support: Create and track support tickets for platform issues, bugs, or account help. Path: /dashboard/support
+STRICT BEHAVIOR RULES:
+1. DIRECT ANSWER: Answer the user's question directly and concisely first.
+2. MINIMAL SUGGESTION: Suggest ONLY ONE relevant tool (Forge) that helps with their specific intent.
+3. NO LISTING: Never list all platform modules. Max 2 relevant buttons/actions allowed.
+4. NO MARKETING: Avoid phrases like "Our platform offers" or "We have multiple features". Be helpful, not promotional.
+5. CLARIFICATION: If the user's intent is unclear, ask a brief clarification question (e.g., "Would you like help with coding or jobs?") instead of guessing or listing tools.
 
-Response Guidelines:
-1. Be helpful, instructional, and encouraging. Use markdown (bold, lists) for clarity.
-2. Explain how a feature works in bullet points BEFORE suggesting to open it.
-3. If a user asks about "interview preparation", recommend both "Mock Test", "JD-Based Test" and "AI Company Prep".
-4. If a user asks about "coding", recommend "CodingForge".
-5. If a user asks about "portfolio", recommend "PortfolioForge".
-6. If a user asks to "explain project" or "project report", recommend "ExplainForge AI".
-7. If a user reports an issue, bug, or wants a ticket, you MUST include the Support action.
-8. Detect Intent:
-   - "resume/cv" -> ResumeForge
-   - "interview/questions/prep" -> InterviewForge (Mock/JD/Company Prep)
-   - "code/practice/ide" -> CodingForge
-   - "project/ideas" -> ProjectForge
-   - "explain/project/report" -> ExplainForge AI
-   - "study/pdf" -> StudyForge
-   - "job/career/coach" -> JobForge or CareerForge
-   - "portfolio/website" -> PortfolioForge
-   - "ticket/issue/error" -> Support
-9. Return JSON format:
+INTENT MAPPING:
+- Jobs/Search -> JobForge (/dashboard-jobs)
+- Resume/CV/Optimize -> ResumeForge (/resumes)
+- Coding/DSA/Practice -> CodingForge (/codingforge)
+- Interview Mock/Prep -> InterviewForge (/mock-interview)
+- MCQ/Test/Aptitude -> Mock Test (/mock-test)
+- Learning/Concepts -> KnowledgeForge (/knowledgeforge)
+- Projects/Roadmap -> ProjectForge (/projectforge)
+- Company Research -> Company Prep (/company-prep-interview)
+- Portfolio/Website -> PortfolioForge (/portfolio)
+
+RESPONSE FORMAT (JSON):
 {
-  "message": "Instructional text in markdown",
+  "message": "Direct answer. Concise suggestion.",
   "actions": [
-    { "label": "Button Label", "path": "/path" }
+    { "label": "Specific Action Label", "path": "/correct-path" }
   ]
-}
-
-Available Paths:
-- /resumes
-- /mock-interview
-- /mock-test
-- /codingforge
-- /projectforge
-- /explainforge
-- /studyforge
-- /dashboard-jobs
-- /jobforgeai
-- /roadmap
-- /portfolio
-- /company-prep-interview
-- /dashboard/support
-
-Important: Always include at least one action if you are recommending a tool.`;
+}`;
 
 export async function POST(req: Request) {
     try {
@@ -103,8 +74,25 @@ export async function POST(req: Request) {
                 });
         }
 
-        // 3. Generate AI Response
-        const prompt = `User Message: ${message}\n\nChat History: ${JSON.stringify(history || [])}`;
+        // 3. Fetch Light Context
+        const userContext: any = { resumes: 0, roadmaps: 0, submissions: 0 };
+        if (userId) {
+            const [rCount, rmCount, sCount] = await Promise.all([
+                supabase.from('resumes').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+                supabase.from('career_roadmaps').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+                supabase.from('coding_submissions').select('id', { count: 'exact', head: true }).eq('user_id', userId)
+            ]);
+            userContext.resumes = rCount.count || 0;
+            userContext.roadmaps = rmCount.count || 0;
+            userContext.submissions = sCount.count || 0;
+        }
+
+        // 4. Generate AI Response
+        const prompt = `
+        User Context: ${JSON.stringify(userContext)}
+        User Message: ${message}
+        Chat History: ${JSON.stringify(history?.slice(-5) || [])}`;
+        
         const responseData = await generateJsonGemini(prompt, SYSTEM_PROMPT);
 
         // 4. Store Assistant Message & Usage
@@ -117,7 +105,8 @@ export async function POST(req: Request) {
                     user_id: userId,
                     role: 'assistant',
                     message: responseData.message,
-                    model_used: 'gemini-2.0-flash'
+                    model_used: 'gemini-2.0-flash',
+                    metadata: { actions: responseData.actions }
                 });
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -167,10 +156,17 @@ export async function GET(req: Request) {
                 .eq('session_id', sessionId)
                 .order('created_at', { ascending: true });
             
-            return NextResponse.json({ success: true, messages });
+            return NextResponse.json({ 
+                success: true, 
+                messages: (messages || []).map((m: { role: string; message: string; metadata?: { actions?: { label: string; path: string }[] }; created_at: string }) => ({
+                    role: m.role,
+                    message: m.message,
+                    actions: m.metadata?.actions,
+                    created_at: m.created_at
+                }))
+            });
         } else {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data: sessions } = await (supabase as any)
+            const { data: sessions } = await supabase
                 .from('chat_sessions')
                 .select('*')
                 .eq('user_id', session.userId)

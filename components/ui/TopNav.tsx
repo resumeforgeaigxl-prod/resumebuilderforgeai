@@ -13,6 +13,8 @@ import {
 } from "./DropdownMenu";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 interface TopNavProps {
   userName?: string;
@@ -21,8 +23,14 @@ interface TopNavProps {
 }
 
 export function TopNav({ userName = "User", pageTitle, locale = "en" }: TopNavProps) {
+  const pathname = usePathname();
+  const isMentorForge = (pathname ?? '').includes('/mentorforge');
+
   return (
-    <header className="fixed top-0 right-0 z-30 flex h-16 w-[calc(100%-260px)] items-center justify-between border-b border-white/5 bg-[#070710]/50 px-8 backdrop-blur-md transition-all">
+    <header className={cn(
+      "fixed top-0 right-0 z-30 flex h-16 w-[calc(100%-260px)] items-center justify-between border-b border-white/5 bg-[#070710]/50 px-8 backdrop-blur-md transition-all",
+      isMentorForge && "bg-transparent border-transparent backdrop-blur-sm shadow-none"
+    )}>
       {/* Breadcrumbs / Page Title */}
       <div className="flex items-center gap-2 text-sm">
         <span className="text-slate-500 font-medium tracking-tight">Dashboard</span>

@@ -40,8 +40,9 @@ export function stripMarkdown(text: string): string {
  * Supports both objects {...} and arrays [...]
  */
 export function extractJson(text: string): string {
-    // Try to find content between ```json and ```
-    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    // Try to find the LARGEST possible block between ```json and ```
+    // This avoids terminating early at code blocks nested INSIDE the JSON strings
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*)\s*```/i);
     if (jsonMatch && jsonMatch[1]) {
         return jsonMatch[1].trim();
     }
@@ -64,6 +65,7 @@ export function extractJson(text: string): string {
         return text.substring(firstBrace, lastBrace + 1).trim();
     }
 
+    // If no brackets but maybe valid JSON string
     return text.trim();
 }
 
@@ -127,6 +129,7 @@ async function fetchFromOpenRouter(
             ],
             temperature: temp ?? 0.2,
             max_tokens: maxTokens ?? 4000,
+            response_format: model.includes('gpt') || model.includes('gemini') || model.includes('claude') ? { type: 'json_object' } : undefined,
         }),
     });
 

@@ -1,7 +1,7 @@
 import {
     Sparkles, FileText,
     Briefcase, Zap, ArrowRight, Activity, Calendar,
-    Layout, BrainCircuit, TrendingUp, Compass, Clock, ShieldCheck, Crown
+    Layout, BrainCircuit, TrendingUp, Compass, Clock, ShieldCheck, Crown, GraduationCap, Bot
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getSession } from '@/lib/auth/jwt'
@@ -92,7 +92,7 @@ export default async function DashboardPage({ params }: { params: { locale: stri
                     <div className="lg:col-span-2 space-y-6">
                         <div className="flex items-center justify-between border-b border-white/5 pb-4">
                             <h2 className="text-xl font-bold text-white tracking-tight">Forge Ecosystem</h2>
-                            <Badge variant="secondary" className="bg-white/5 text-slate-400 px-3 py-1 font-bold">8 ACTIVE MODULES</Badge>
+                            <Badge variant="secondary" className="bg-white/5 text-slate-400 px-3 py-1 font-bold">10 ACTIVE MODULES</Badge>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <ModuleCard 
@@ -122,6 +122,20 @@ export default async function DashboardPage({ params }: { params: { locale: stri
                                 href={`/${locale}/projectforge`} 
                                 icon={<Layout />} 
                                 color="orange"
+                            />
+                            <ModuleCard 
+                                title="KnowledgeForge" 
+                                desc="Structured technical encyclopedia for masters." 
+                                href={`/${locale}/knowledgeforge`} 
+                                icon={<GraduationCap />} 
+                                color="emerald"
+                            />
+                            <ModuleCard 
+                                title="MentorForge" 
+                                desc="AI career coaching and strategic guidance." 
+                                href={`/${locale}/mentorforge`} 
+                                icon={<Bot />} 
+                                color="purple"
                             />
                         </div>
                     </div>
@@ -225,6 +239,8 @@ function ModuleCard({ title, desc, href, icon, color }: { title: string, desc: s
         blue: 'text-blue-400 bg-blue-400/10 border-blue-400/20 shadow-blue-500/10',
         pink: 'text-pink-400 bg-pink-400/10 border-pink-400/20 shadow-pink-500/10',
         orange: 'text-orange-400 bg-orange-400/10 border-orange-400/20 shadow-orange-500/10',
+        emerald: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20 shadow-emerald-500/10',
+        purple: 'text-purple-400 bg-purple-400/10 border-purple-400/20 shadow-purple-500/10',
     };
 
     return (

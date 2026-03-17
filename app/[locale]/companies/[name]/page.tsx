@@ -25,7 +25,7 @@ export default function CompanyJobsPage({ params }: { params: { locale: string; 
                     </div>
                 </div>
             </div>
-            <PublicJobBoard locale={locale} initialRole={company} />
+            <PublicJobBoard locale={locale} initialCompany={company} />
         </div>
     );
 }

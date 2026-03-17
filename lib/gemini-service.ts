@@ -14,6 +14,41 @@ const GEMINI_KEYS = [
 ].filter(Boolean) as string[];
 
 /**
+ * Safe JSON parser that attempts to clean the response if parsing fails.
+ */
+function safeJsonParse(text: string) {
+  try {
+    return JSON.parse(text);
+  } catch (_err) {
+    console.log("JSON parse failed. Cleaning response...");
+
+    // Use the improved extractJson logic to find the JSON block inside text
+    const extracted = extractJson(text);
+
+    try {
+      return JSON.parse(extracted);
+    } catch (_err2) {
+      console.log("Still invalid JSON. Returning content wrapped in 'reply' to prevent crash.");
+      
+      // Clean up stringified newlines and quotes if they exist in the raw text
+      const cleanedText = text
+        .replace(/\\n/g, '\n')
+        .replace(/\\"/g, '"')
+        .replace(/\\'/g, "'")
+        .replace(/\\\\/g, '\\');
+
+      // Return a structure that matches common AI routes (especially MentorForge)
+      return {
+        reply: cleanedText,
+        suggestedAction: null,
+        memoryExtraction: { goals: [], weaknesses: [], strengths: [] },
+        error: "JSON_PARSE_FAILED"
+      };
+    }
+  }
+}
+
+/**
  * Get a random Gemini client
  */
 function getGeminiClient() {
@@ -31,7 +66,7 @@ async function fallbackViaOpenRouter(
         "google/gemini-2.0-flash-001",
         systemInstruction,
         0.3,
-        2500
+        8000
     );
     return result.text;
 }
@@ -72,28 +107,30 @@ export async function generateJsonGemini(prompt: string, systemInstruction?: str
                 systemInstruction: systemInstruction,
                 generationConfig: {
                     responseMimeType: "application/json",
+                    maxOutputTokens: 8000,
                 },
             });
 
             const result = await model.generateContent(prompt);
             const response = await result.response;
-            return JSON.parse(response.text());
+            return safeJsonParse(response.text());
         }
+        console.warn("No Gemini client available, using fallback");
 
         const text = await fallbackViaOpenRouter(
-            `${prompt}\n\nReturn only valid JSON with no markdown.`,
-            systemInstruction
+            `${prompt}\n\nIMPORTANT: Return ONLY valid JSON. Escape all special characters and newlines correctly.`,
+            (systemInstruction || "") + " You must output valid JSON."
         );
-        return JSON.parse(extractJson(text));
-    } catch (error) {
-        console.error("Gemini JSON Error:", error);
+        return safeJsonParse(extractJson(text));
+  } catch (error: any) {
+    console.error("Native Gemini JSON Error:", error?.message || error);
 
         try {
             const text = await fallbackViaOpenRouter(
-                `${prompt}\n\nReturn only valid JSON with no markdown.`,
-                systemInstruction
+                `${prompt}\n\nIMPORTANT: Return ONLY valid JSON. Escape all special characters and newlines correctly.`,
+                (systemInstruction || "") + " You must output valid JSON."
             );
-            return JSON.parse(extractJson(text));
+            return safeJsonParse(extractJson(text));
         } catch (fallbackError) {
             console.error("OpenRouter fallback for Gemini JSON failed:", fallbackError);
             throw new Error("AI service unavailable");
@@ -122,10 +159,58 @@ export async function generateGroundedJobSearch(query: string) {
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
-        
         return JSON.parse(extractJson(text));
     } catch (error) {
         console.error("Gemini Grounded Search Error:", error);
         return [];
     }
+}
+
+/**
+ * Generates a clean, structured, production-quality learning article.
+ */
+export async function generateLearningArticle(topicName: string) {
+  const prompt = `You are an expert technical educator.
+Generate a clean, structured, beginner-to-advanced learning article for the topic: "${topicName}".
+
+STRICT FORMAT:
+
+# ${topicName}
+
+## Introduction
+- Simple explanation of the topic
+- Why it is important
+
+## Key Concepts
+- Point-wise explanation
+- Definitions
+
+## Core Topics Breakdown
+Use clear sections:
+### Topic 1
+### Topic 2
+### Topic 3
+
+## Code Examples (if applicable)
+- Proper formatted code blocks
+- With explanation
+
+## Real-world Use Cases
+
+## Common Interview Questions
+
+## Summary
+
+RULES:
+- Use proper headings
+- Use bullet points
+- Proper spacing
+- No JSON
+- No escape characters like \n
+- No markdown backticks wrapping whole response
+- Output clean markdown only
+- Ensure content is detailed and professional (800+ words)
+- Focus on high-quality technical explanations`;
+
+  return generateContentGemini(prompt, "You are a senior technical writer and educator.");
 }

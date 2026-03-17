@@ -19,7 +19,9 @@ import {
   Building2,
   Zap,
   Sparkles,
-  PlayCircle
+  PlayCircle,
+  Bot,
+  GraduationCap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -38,9 +40,11 @@ export function Sidebar({ locale }: SidebarProps) {
     { name: "ProjectForge", icon: Projector, href: `/${locale}/projectforge` },
     { name: "InterviewForge", icon: MessageSquare, href: `/${locale}/mock-interview` },
     { name: "LearnForge", icon: PlayCircle, href: `/${locale}/learnforge` },
+    { name: "KnowledgeForge", icon: GraduationCap, href: `/${locale}/knowledgeforge` },
     { name: "ExplainForge", icon: Sparkles, href: `/${locale}/explainforge` },
     { name: "StudyForge", icon: BookOpen, href: `/${locale}/studyforge` },
     { name: "CareerForge", icon: Briefcase, href: `/${locale}/careerforge` },
+    { name: "MentorForge", icon: Bot, href: `/${locale}/mentorforge` },
     { name: "JobForge", icon: Search, href: `/${locale}/jobs` },
     { name: "Company Prep", icon: Building2, href: `/${locale}/company-prep-interview` },
     { name: "AI Tools", icon: Zap, href: `/${locale}/tools` },

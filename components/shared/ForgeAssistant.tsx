@@ -3,12 +3,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-    MessageSquare, X, Send, User, Bot, 
-    ArrowRight, Rocket, Code, Laptop, Briefcase, 
-    LifeBuoy, Loader2, History, RotateCcw
+    X, Send, User, Bot, 
+    Rocket, Code, Laptop,
+    Loader2, History, RotateCcw,
+    BookOpen, Brain, Compass,
+    MessageSquare, ArrowRight
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -24,19 +27,23 @@ interface ChatSession {
 }
 
 const QUICK_ACTIONS = [
-    { label: 'Improve Resume', icon: Rocket, message: 'I want to improve my resume' },
-    { label: 'Practice Coding', icon: Code, message: 'I want to practice coding questions' },
-    { label: 'Prepare Interview', icon: Laptop, message: 'I want to prepare for an interview' },
-    { label: 'Find Jobs', icon: Briefcase, message: 'Help me find some jobs' },
-    { label: 'Support Ticket', icon: LifeBuoy, message: 'I want to create a support ticket' },
+    { label: 'ATS Resume', icon: Rocket, message: 'I want to build an ATS-optimized resume' },
+    { label: 'Mock Interview', icon: Laptop, message: 'Start an AI mock interview' },
+    { label: 'Mock Test', icon: Brain, message: 'I want to take a role-specific mock test' },
+    { label: 'DSA Practice', icon: Code, message: 'I want to practice coding questions' },
+    { label: 'Knowledge Base', icon: BookOpen, message: 'Help me learn technical concepts' },
+    { label: 'Platform Guide', icon: Compass, message: 'Tell me about all ResumeForgeAI features' },
 ];
 
 export function ForgeAssistant({ locale }: { locale: string }) {
+    const pathname = usePathname();
+    const isMentorForge = pathname?.includes('mentorforge');
+
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
         { 
             role: 'assistant', 
-            message: "👋 Hello! I'm **ResumeForgeAI Assistant**. I'm here to help you master your career journey.\n\nHow can I assist you today?" 
+            message: "Hello. I'm here to help you navigate ResumeForgeAI. What can I assist you with today?" 
         }
     ]);
     const [input, setInput] = useState('');
@@ -151,6 +158,8 @@ export function ForgeAssistant({ locale }: { locale: string }) {
             setLoading(false);
         }
     };
+
+    if (isMentorForge) return null;
 
     return (
         <div className="fixed bottom-6 right-6 z-[100] font-sans">
