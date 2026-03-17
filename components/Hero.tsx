@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import {
   DEFAULT_LOCALE,
@@ -109,7 +110,39 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
 
             <motion.div
               {...fadeInUp(0.3)}
-              className="mt-12 grid gap-4 sm:grid-cols-3"
+              className="mt-14 flex justify-center sm:justify-start"
+            >
+              <a
+                href="https://peerlist.io/resumeforgeai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-1.5 pr-6 transition-all duration-300 hover:border-sky-500/30 hover:bg-white/[0.06] hover:shadow-[0_0_40px_rgba(56,189,248,0.2)] hover:scale-[1.05]"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-black shadow-inner border border-white/5 overflow-hidden relative">
+                  <Image 
+                    src="/peerlist-badge.png" 
+                    alt="Peerlist Launchpad" 
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 group-hover:text-slate-400 transition-colors">
+                    🚀 Now Live on
+                  </span>
+                  <span className="text-sm font-bold text-white group-hover:text-sky-400 transition-colors">
+                    Peerlist Launchpad
+                  </span>
+                </div>
+                
+                {/* Subtle glow effect on hover */}
+                <div className="absolute inset-0 -z-10 bg-sky-500/0 blur-2xl transition-all duration-300 group-hover:bg-sky-500/10" />
+              </a>
+            </motion.div>
+
+            <motion.div
+              {...fadeInUp(0.36)}
+              className="mt-14 grid gap-4 sm:grid-cols-3"
             >
               {heroStats.map((item) => (
                 <div
