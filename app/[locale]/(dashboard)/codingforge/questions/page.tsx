@@ -28,7 +28,8 @@ interface Question {
 export default function QuestionsLibraryPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const { locale } = useParams() as { locale: string };
+    const params = useParams() as { locale: string };
+    const { locale } = params;
 
     const initialType = searchParams?.get('type') || '';
     const initialCompany = searchParams?.get('company') || '';

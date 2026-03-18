@@ -9,6 +9,20 @@ export function esc(s: string | undefined | null): string {
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+/**
+ * Remove ALL leading bullet/dash/asterisk symbols from a bullet string.
+ * Handles edge cases: "-", "- ", "--", "• -", "•-", "*", "* " etc.
+ * Applied before any HTML rendering so the frontend is always symbol-free.
+ */
+export function cleanBullet(s: string | undefined | null): string {
+    if (!s) return '';
+    // Repeatedly strip any leading bullet/dash/asterisk/whitespace combos
+    let cleaned = s.trim();
+    // Strip one or more leading symbols in any combination
+    cleaned = cleaned.replace(/^([-•*–—]+\s*)+/, '').trim();
+    return cleaned;
+}
+
 export function limitWords(s: string, max = 22): string {
     const words = s.trim().split(/\s+/);
     return words.length > max ? words.slice(0, max).join(' ') + '…' : s;

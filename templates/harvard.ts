@@ -1,6 +1,6 @@
 /** Template 1: Harvard Classic — Georgia serif, centered name, bottom-border section headers */
 import { ResumeData } from '@/types/resume';
-import { esc, enforceOnePage, buildLocationLine, buildContactLine, buildSkillRows, buildCertSection } from './utils';
+import { esc, enforceOnePage, buildLocationLine, buildContactLine, buildSkillRows, buildCertSection, cleanBullet } from './utils';
 
 export function generateHarvardHtml(rawResume: ResumeData): string {
     const r = enforceOnePage(rawResume);
@@ -33,8 +33,8 @@ ul li{margin-bottom:2px;font-size:10.5pt;}
 </div>
 ${r.summary ? `<div class="section"><div class="sec-title">Summary</div><p class="summary">${esc(r.summary)}</p></div>` : ''}
 ${buildSkillRows(r, 'sk-bold', '') ? `<div class="section"><div class="sec-title">Technical Skills</div>${buildSkillRows(r, 'sk-bold', '')}</div>` : ''}
-${r.experience.length ? `<div class="section"><div class="sec-title">Experience</div>${r.experience.map(e => `<div class="entry"><div class="erow"><span class="etitle">${esc(e.role)}, ${esc(e.company)}</span><span class="edate">${esc(e.duration)}</span></div><ul>${e.points.filter(Boolean).map(p => `<li>${esc(p)}</li>`).join('')}</ul></div>`).join('')}</div>` : ''}
-${r.projects.length ? `<div class="section"><div class="sec-title">Projects</div>${r.projects.map(p => `<div class="entry"><div class="erow"><span class="etitle">${esc(p.title)}</span><span class="edate">${p.tech.slice(0, 5).map(esc).join(', ')}</span></div>${p.liveLink || p.githubLink ? `<div class="plink">${[p.liveLink && `Live: ${esc(p.liveLink)}`, p.githubLink && `GitHub: ${esc(p.githubLink)}`].filter(Boolean).join(' | ')}</div>` : ''}<ul>${p.description.filter(Boolean).map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>`).join('')}</div>` : ''}
+${r.experience.length ? `<div class="section"><div class="sec-title">Experience</div>${r.experience.map(e => `<div class="entry"><div class="erow"><span class="etitle">${esc(e.role)}, ${esc(e.company)}</span><span class="edate">${esc(e.duration)}</span></div><ul>${e.points.filter(Boolean).map(p => `<li>${esc(cleanBullet(p))}</li>`).join('')}</ul></div>`).join('')}</div>` : ''}
+${r.projects.length ? `<div class="section"><div class="sec-title">Projects</div>${r.projects.map(p => `<div class="entry"><div class="erow"><span class="etitle">${esc(p.title)}</span><span class="edate">${p.tech.slice(0, 5).map(esc).join(', ')}</span></div>${p.liveLink || p.githubLink ? `<div class="plink">${[p.liveLink && `Live: ${esc(p.liveLink)}`, p.githubLink && `GitHub: ${esc(p.githubLink)}`].filter(Boolean).join(' | ')}</div>` : ''}<ul>${p.description.filter(Boolean).map(d => `<li>${esc(cleanBullet(d))}</li>`).join('')}</ul></div>`).join('')}</div>` : ''}
 ${buildCertSection(r) ? `<div class="section"><div class="sec-title">Certifications</div>${buildCertSection(r)}</div>` : ''}
 ${r.education.length ? `<div class="section"><div class="sec-title">Education</div>${r.education.map(e => `<div class="entry"><div class="erow"><span class="etitle">${esc(e.school)}</span><span class="edate">${esc(e.duration)}</span></div><div class="esub">${esc(e.degree)}${e.cgpa ? ` &mdash; CGPA: ${esc(e.cgpa)}` : ''}</div></div>`).join('')}</div>` : ''}
 </body></html>`;

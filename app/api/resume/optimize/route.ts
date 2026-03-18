@@ -40,7 +40,8 @@ Rules:
 7. Tone: Realistic and technical. No corporate fluff.
 8. If the input resume is mostly empty, DO NOT generate a sample resume. Keep it empty.
 9. CRITICAL: The "match_score" should reflect the REALITY of the input. If the input resume is empty or missing details, the match score MUST be very low (0-10%). Do NOT inflate the score.
-10. Return a JSON object containing:
+10. BULLET FORMATTING: All experience points and project descriptions MUST be plain sentences. Do NOT start any bullet with -, --, *, •, or any other symbol. The frontend handles bullet styling.
+11. Return a JSON object containing:
    - "optimized_resume": The full ResumeData object (all fields).
    - "analysis": {
        "match_score": 0-100,
@@ -94,7 +95,11 @@ Rules:
 
             // Validation and deep-cleaning the strings in the optimized JSON
             const cleanObj = (obj: unknown): unknown => {
-                if (typeof obj === 'string') return stripMarkdown(obj);
+                if (typeof obj === 'string') {
+                    // Strip leading bullet symbols from all strings (safety layer)
+                    const stripped = obj.replace(/^([-•*–—]+\s*)+/, '').trim();
+                    return stripMarkdown(stripped);
+                }
                 if (Array.isArray(obj)) return obj.map(cleanObj);
                 if (obj !== null && typeof obj === 'object') {
                     const newObj: Record<string, unknown> = {};

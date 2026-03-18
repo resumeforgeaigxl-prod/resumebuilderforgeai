@@ -1,6 +1,6 @@
 /** Template 8: Ultra ATS Light — Courier/monospace structure, maximum plain-text ATS parsing */
 import { ResumeData } from '@/types/resume';
-import { esc, enforceOnePage, buildLocationLine, buildContactLine, buildSkillRows, buildCertSection } from './utils';
+import { esc, enforceOnePage, buildLocationLine, buildContactLine, buildSkillRows, buildCertSection, cleanBullet } from './utils';
 
 export function generateAtsLightHtml(rawResume: ResumeData): string {
     const r = enforceOnePage(rawResume);
@@ -34,8 +34,8 @@ ul li{margin-bottom:1px;font-size:9.5pt;}
 </div>
 ${r.summary ? `<div class="section"><div class="sec-title">SUMMARY</div><hr class="sec-rule"><p class="summary">${esc(r.summary)}</p></div>` : ''}
 ${buildSkillRows(r, 'sk-b', '') ? `<div class="section"><div class="sec-title">TECHNICAL SKILLS</div><hr class="sec-rule">${buildSkillRows(r, 'sk-b', '')}</div>` : ''}
-${r.experience.length ? `<div class="section"><div class="sec-title">EXPERIENCE</div><hr class="sec-rule">${r.experience.map(e => `<div class="entry"><div class="erow"><span class="etitle">${esc(e.role)} @ ${esc(e.company)}</span><span class="edate">${esc(e.duration)}</span></div><ul>${e.points.filter(Boolean).map(p => `<li>> ${esc(p)}</li>`).join('')}</ul></div>`).join('')}</div>` : ''}
-${r.projects.length ? `<div class="section"><div class="sec-title">PROJECTS</div><hr class="sec-rule">${r.projects.map(p => `<div class="entry"><div class="erow"><span class="etitle">${esc(p.title)} [${p.tech.slice(0, 4).map(esc).join(', ')}]</span><span class="edate"></span></div>${p.liveLink || p.githubLink ? `<div class="plink">${[p.liveLink && esc(p.liveLink), p.githubLink && esc(p.githubLink)].filter(Boolean).join(' | ')}</div>` : ''}<ul>${p.description.filter(Boolean).map(d => `<li>> ${esc(d)}</li>`).join('')}</ul></div>`).join('')}</div>` : ''}
+${r.experience.length ? `<div class="section"><div class="sec-title">EXPERIENCE</div><hr class="sec-rule">${r.experience.map(e => `<div class="entry"><div class="erow"><span class="etitle">${esc(e.role)} @ ${esc(e.company)}</span><span class="edate">${esc(e.duration)}</span></div><ul>${e.points.filter(Boolean).map(p => `<li>&gt; ${esc(cleanBullet(p))}</li>`).join('')}</ul></div>`).join('')}</div>` : ''}
+${r.projects.length ? `<div class="section"><div class="sec-title">PROJECTS</div><hr class="sec-rule">${r.projects.map(p => `<div class="entry"><div class="erow"><span class="etitle">${esc(p.title)} [${p.tech.slice(0, 4).map(esc).join(', ')}]</span><span class="edate"></span></div>${p.liveLink || p.githubLink ? `<div class="plink">${[p.liveLink && esc(p.liveLink), p.githubLink && esc(p.githubLink)].filter(Boolean).join(' | ')}</div>` : ''}<ul>${p.description.filter(Boolean).map(d => `<li>&gt; ${esc(cleanBullet(d))}</li>`).join('')}</ul></div>`).join('')}</div>` : ''}
 ${buildCertSection(r) ? `<div class="section"><div class="sec-title">CERTIFICATIONS</div><hr class="sec-rule">${buildCertSection(r)}</div>` : ''}
 ${r.education.length ? `<div class="section"><div class="sec-title">EDUCATION</div><hr class="sec-rule">${r.education.map(e => `<div class="entry"><div class="erow"><span class="etitle">${esc(e.school)}</span><span class="edate">${esc(e.duration)}</span></div><div class="esub">${esc(e.degree)}${e.cgpa ? ` | CGPA: ${esc(e.cgpa)}` : ''}</div></div>`).join('')}</div>` : ''}
 </body></html>`;

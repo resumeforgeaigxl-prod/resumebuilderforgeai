@@ -5,7 +5,8 @@ export const dynamic = 'force-dynamic';
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { ResumeData, ResumeExperience, ResumeProject, ResumeEducation, Certification, SkillCategory, TEMPLATE_LIST } from '@/types/resume';
+import { ResumeData, ResumeExperience, ResumeProject, ResumeEducation, Certification, SkillCategory } from '@/types/resume';
+import { ALL_TEMPLATES } from '@/types/templates';
 import {
     Save, Sparkles, ArrowLeft, Plus, Trash2, Loader2,
     Building2, GraduationCap, Lightbulb, Wand2, Zap,
@@ -408,7 +409,7 @@ export default function BuilderPage() {
                     <h2 className="text-3xl font-bold text-center mb-2">Choose Your ATS Template</h2>
                     <p className="text-slate-400 text-center mb-10 text-sm">All templates are single-column, black & white, print-optimised documents</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {TEMPLATE_LIST.map(t => (
+                        {ALL_TEMPLATES.map(t => (
                             <button key={t.id} onClick={() => handleSelectTemplate(t.id)}
                                 className={`group p-5 rounded-2xl border text-left transition-all hover:scale-[1.02] ${selectedTemplate === t.id ? 'border-blue-500 bg-blue-600/10' : 'border-white/10 bg-white/5 hover:border-white/30'}`}>
                                 <div className="w-full h-24 rounded-xl bg-gradient-to-br from-slate-700 to-slate-800 mb-4 flex items-center justify-center border border-white/5">
@@ -596,7 +597,7 @@ export default function BuilderPage() {
                         <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
                             <div>
                                 <p className="text-xs text-slate-500 mb-0.5">TEMPLATE</p>
-                                <p className="font-semibold text-sm">{TEMPLATE_LIST.find(t => t.id === selectedTemplate)?.name ?? 'Harvard Classic'}</p>
+                                <p className="font-semibold text-sm">{ALL_TEMPLATES.find(t => t.id === selectedTemplate)?.name ?? 'Harvard Classic'}</p>
                             </div>
                             <button onClick={() => setStep('template')} className="text-xs text-blue-400 border border-blue-400/20 px-3 py-1 rounded-full hover:bg-blue-400/10 transition-all">Change</button>
                         </div>

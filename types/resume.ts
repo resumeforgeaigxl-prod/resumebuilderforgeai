@@ -62,15 +62,5 @@ export interface ResumeRecord {
     updated_at: string;
 }
 
-export const TEMPLATE_LIST = [
-    { id: 'harvard', name: 'Harvard Classic', desc: 'Serif, centered name, bold headers', badge: '⭐ Top ATS' },
-    { id: 'stanford', name: 'Stanford Clean', desc: 'Serif, left-aligned, authoritative', badge: '🎓 Academic' },
-    { id: 'modern', name: 'Modern Minimal', desc: 'Sans-serif, thin ruled dividers', badge: '🎯 Tech Roles' },
-    { id: 'compact', name: 'Compact Engineer', desc: 'Space-optimised, SDE layout', badge: '⚡ Max Content' },
-    { id: 'executive', name: 'Executive Pro', desc: 'Bold headers, authoritative weight', badge: '💼 Leadership' },
-    { id: 'minimal-divider', name: 'Minimal Divider', desc: 'No lines, clean whitespace hierarchy', badge: '✨ Ultra Clean' },
-    { id: 'academic', name: 'Academic Structured', desc: 'Indented clean, academic format', badge: '📚 Research' },
-    { id: 'ats-light', name: 'Ultra ATS Light', desc: 'Pure text, maximum ATS compatibility', badge: '🤖 ATS Safe' },
-] as const;
-
-export type TemplateId = (typeof TEMPLATE_LIST)[number]['id'];
+// TemplateId is a plain string — covers both legacy and config-based IDs
+export type TemplateId = string;

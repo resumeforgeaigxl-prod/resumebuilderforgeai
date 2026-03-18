@@ -20,76 +20,155 @@ export async function POST(req: NextRequest) {
 
     // ── 1. UNRESTRICTED INTELLIGENCE ─────────────────────────────────────────
     // Build specialized mode context
-    const modePersonas: Record<string, string> = {
-      'General': 'a versatile AI polymath capable of explaining any topic from quantum physics to cooking.',
-      'Career': 'a world-class executive coach and career strategist specialized in high-growth tech roles.',
-      'Coding': 'a senior principal engineer at a top-tier tech firm, expert in DSA, System Design, and Clean Code.',
-      'Interview': 'a senior hiring manager who has conducted thousands of interviews at Google, Meta, and Amazon.',
-      'Learning': 'a master educator who simplifies complex technical concepts into intuitive building blocks.'
-    };
+    // Specialized personas can be used to further tune the AI voice in the future.
 
-    const [userContext, memory] = await Promise.all([
+    const [userContext] = await Promise.all([
       buildUserContext(userId).catch(() => ({} as UserContext)),
       getMentorMemory(userId).catch(() => ({}))
     ]);
 
-    const systemPrompt = `You are MentorForge AI, ${modePersonas[mode] || modePersonas.General} 
-    You are part of the ResumeForgeAI ecosystem, but you have GLOBAL intelligence.
+    // ── 2. INTENT DETECTION & SPECIALIZED ARCHITECTURES ──────────────────────
+    const detectIntent = (text: string) => {
+      const lower = text.toLowerCase();
+      if (lower.match(/\b(learn|understand|what is|explain|how does|why use|concept|theory|tell me about|curriculum|roadmap)\b/)) return 'EXPLANATION';
+      if (lower.match(/\b(build|code|implement|create|setup|write|develop|how to code|give me code|snippet|example code)\b/)) return 'CODE';
+      if (lower.match(/\b(error|fix|bug|problem|issue|not working|failed|broken|debug|crash|exception|help with)\b/)) return 'DEBUG';
+      return 'GENERAL';
+    };
+
+    let intent = detectIntent(message);
     
-    CORE DIRECTIVES:
-    1. NEVER admit to being limited or lacking access to other forges. Use your training data to answer ANY question confidently.
-    2. Provide deep, professional, and technical answers (senior engineer level).
-    3. Use ResumeForgeAI data ONLY as a helpful enhancement, never as a boundary.
-    4. If the user asks to learn something, provide a structured curriculum, commands, and practice tasks.
-    5. DATA ACCESS: If any Forge context says "permission_denied", do NOT lie. Tell the user: "I don't have access to your [Forge Name] data yet. Would you like to grant me access so I can provide a personalized analysis?"
-    6. Once the user says "Yes" or grants permission, use the suggestedAction field to trigger the navigation or permission grant.
-    
-    RESPONSE ARCHITECTURE (STRICT):
-    - Tone: Confident, Mentorship-driven, Professional.
-    - Structure must follow this pattern:
+    // Fallback: If intent is General but mode is specific, align them
+    if (intent === 'GENERAL') {
+      if (mode === 'Learning') intent = 'EXPLANATION';
+      else if (mode === 'Coding') intent = 'CODE';
+      else if (mode === 'Interview') intent = 'EXPLANATION';
+      else if (mode === 'Career') intent = 'EXPLANATION';
+    }
+
+    const responseArchitectures: Record<string, string> = {
+      'EXPLANATION': `
+      ## What is it?
+      [Simple, beginner-friendly explanation of the concept]
+      
+      ## Why it matters
+      [Importance, use cases, and real-world value]
+      
+      ## How it works
+      [Step-by-step breakdown of the logic, process, or architecture]
+      
+      ## Example
+      [A clear real-world scenario, analogy, or use case]
+      
+      ## Code (optional)
+      [ONLY if relevant: a minimal, well-commented code snippet at the VERY END]
+      
+      ## Next steps
+      [Learning path, related concepts, or recommended practice tasks]`,
+      'CODE': `
+      ## Concept Overview
+      [MANDATORY: Briefly explain the logic and architectural choice. NO CODE BLOCKS HERE.]
+      
+      ## Implementation Steps
+      [MANDATORY: Logical sequence of steps to follow BEFORE showing code]
+      
+      ## Implementation
+      [The clean, optimized code with detailed comments]
+      
+      ## Pro-Tips & Best Practices
+      [Optimization tips, security advice, or architectural patterns]`,
+      'DEBUG': `
+      ## The Issue
+      [Identify exactly what the error or problem means in plain English]
+      
+      ## Root Cause
+      [Explain WHY this usually happens and why it is happening in this context]
+      
+      ## The Solution
+      [Clear, step-by-step manual steps to resolve the issue]
+      
+      ## Corrected Code
+      [The fixed code snippet with comments on what changed]
+      
+      ## Prevention
+      [Practical advice on how to avoid this bug in the future]`
+    };
+
+    const selectedArchitecture = responseArchitectures[intent] || `
       # [Title]
       
-      ## Explanation
+      ## Overview
       [Concise explanation]
       
-      ## Step-by-Step implementation
-      [Clear steps]
+      ## Detailed Breakdown
+      [Clear steps or implementation details]
       
-      ## Practical Example
+      ## Practical Application
       [Real-world example or code]
       
-      ## Pro-Tips
-      [Advanced advice]
+      ## Mentor Advice
+      [Professional advice/Pro-tips]`;
 
-    IMPORTANT: In your JSON response, ensure the "reply" string uses literal \\n characters for line breaks so it passes as valid JSON.
+    console.log(`[MentorForge] Intent: ${intent} | Mode: ${mode} | User: ${userId}`);
 
-    Memory Context: ${JSON.stringify(memory)}
-    User Profile Analysis: ${JSON.stringify(userContext.analysis || {})}
+    // Clean history to prevent "format anchoring" with safety guards
+    const cleanedHistory = (history || []).slice(-4).map((h: { role: string; content?: string }) => ({
+      role: h.role,
+      content: h.role === 'assistant' 
+        ? (h.content || "").replace(/```[\s\S]*?```/g, '[Code block removed for brevity]').substring(0, 300) 
+        : (h.content || "").substring(0, 500)
+    }));
+
+    const instructions = `You are MentorForge AI, an elite technical educator.
+    RESPONSE_FORMAT: JSON ONLY.
+    MENTORSHIP_RULE: Never lead with code. Always explain concept first using ## headers.`;
+
+    const userPrompt = `TASK: Answer the user message using the [${intent}] mentorship pattern.
     
-    Current Mode: ${mode}
-    History: ${JSON.stringify(history?.slice(-8))}
-    User Message: "${message}"
+    REQUIRED_HEADERS:
+    ${selectedArchitecture}
+    
+    RULES:
+    - You MUST start your "reply" content with a ## header.
+    - CONCEPTUAL_OVERVIEW MUST be the first thing said.
+    - ALL CODE implementation MUST come after the explanation.
+    
+    USER_QUERY: "${message}"
+    HISTORY: ${JSON.stringify(cleanedHistory)}
+    
+    OUTPUT_JSON: { "reply": "...", "suggestedAction": "...", "memoryExtraction": {...} }`;
 
-    RETURN ONLY A VALID JSON OBJECT. NO MARKDOWN FENCES. NO PREAMBLE.
-    JSON SCHEMA:
-    {
-      "reply": "Full Markdown string (use \\n for newlines)",
-      "suggestedAction": "Navigation target or null",
-      "memoryExtraction": { "goals": [], "weaknesses": [], "strengths": [] }
-    }`;
+    const result = await generateJsonGemini(userPrompt, instructions);
 
-    const result = await generateJsonGemini(
-      systemPrompt, 
-      "You are a technical mentor AI that exclusively communicates using valid JSON. You always escape newlines inside the 'reply' field correctly."
-    );
+    // ── 3. POST-PROCESSING STRUCTURAL SAFEGUARD ───────────────────────────
+    // If the AI stubbornyl leads with code, we shift it to the end
+    let processedReply = result.reply || "";
+    
+    // Check for leading code block or raw language identifier
+    const leadingCodeMatch = processedReply.trim().match(/^(`{3}|javascript|python|typescript|bash|html|css|sql)/i);
+    if (leadingCodeMatch && (intent === 'EXPLANATION' || intent === 'CODE')) {
+       console.log(`[MentorForge] Post-processing: Shifting leading code block for intent ${intent}`);
+       
+       // Try to find the first header
+       const firstHeaderIndex = processedReply.indexOf('##');
+       if (firstHeaderIndex > -1) {
+           const codePart = processedReply.substring(0, firstHeaderIndex).trim();
+           const restPart = processedReply.substring(firstHeaderIndex).trim();
+           processedReply = `${restPart}\n\n### Implementation Details\n${codePart}`;
+       } else {
+           // No headers found? Prepend a mandatory header
+           const header = intent === 'EXPLANATION' ? '## Concept Overview' : '## Implementation Overview';
+           processedReply = `${header}\n[Mentor Note: Here is an explanation of the implementation below.]\n\n${processedReply}`;
+       }
+    }
 
-    // Track usage & log
-    await trackAIUsage(userId, 'MentorForge', { input: 1200, output: 600 }, 'gemini-2.0-flash');
-    await logAIChat(userId, 'MentorForge', message, result.reply, 1800);
+    // Final tracking & record
+    await trackAIUsage(userId, 'MentorForge', { input: 1500, output: 800 }, 'gemini-2.0-flash');
+    await logAIChat(userId, 'MentorForge', message, processedReply, 2000);
 
     await supabase.from('mentor_chats').insert([
         { user_id: userId, role: 'user', content: message },
-        { user_id: userId, role: 'assistant', content: result.reply, metadata: { suggestedAction: result.suggestedAction } }
+        { user_id: userId, role: 'assistant', content: processedReply, metadata: { suggestedAction: result.suggestedAction } }
     ]);
 
     // Update long-term memory
@@ -98,7 +177,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ 
-      reply: result.reply, 
+      reply: processedReply, 
       suggestedAction: result.suggestedAction,
       analysis: userContext.analysis
     });

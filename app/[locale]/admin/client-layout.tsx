@@ -29,6 +29,7 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
 
     const navItems = [
         { href: `/${locale}/admin`, label: 'Dashboard', icon: LayoutDashboard },
+        { href: `/${locale}/admin/analytics`, label: 'User Analytics', icon: Activity },
         { href: `/${locale}/admin/users`, label: 'Users', icon: Users },
         { href: `/${locale}/admin/resumes`, label: 'Resumes', icon: FileText },
         { href: `/${locale}/admin/roadmaps`, label: 'AI Roadmaps', icon: Compass },

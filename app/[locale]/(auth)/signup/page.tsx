@@ -114,18 +114,20 @@ export default function SignupPage({ searchParams }: { searchParams: { error?: s
                             className="w-full px-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-slate-300">Phone Number <span className="text-slate-500 text-xs">(optional)</span></label>
+                    <div className="space-y-1">
+                        <label className="text-sm font-semibold text-slate-300">Mobile Phone Number <span className="text-purple-500">*</span></label>
                         <input
                             type="tel"
                             name="phone_number"
                             placeholder="+91 98765 43210"
+                            required
                             disabled={isLoading}
                             className="w-full px-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
                         />
+                        <p className="text-[10px] text-slate-500 px-1 font-medium italic">We need this for account verification and updates.</p>
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-slate-300">Password</label>
+                    <div className="space-y-1">
+                        <label className="text-sm font-semibold text-slate-300">Secure Password <span className="text-purple-500">*</span></label>
                         <input
                             type="password"
                             name="password"
@@ -137,14 +139,14 @@ export default function SignupPage({ searchParams }: { searchParams: { error?: s
                         />
                     </div>
 
-                    <label className="flex items-start gap-4 cursor-pointer select-none">
+                    <label className="flex items-start gap-3 p-4 rounded-xl bg-purple-500/5 border border-purple-500/10 cursor-pointer select-none mt-4">
                         <input
                             type="checkbox"
                             required
                             checked={tcChecked}
                             onChange={e => setTcChecked(e.target.checked)}
                             disabled={isLoading}
-                            className="mt-1 w-4 h-4 accent-purple-500 bg-slate-950 border-slate-800 rounded focus:ring-2 focus:ring-purple-500/50 cursor-pointer disabled:opacity-50"
+                            className="mt-1 w-4 h-4 accent-purple-500 bg-slate-950 border-slate-800 rounded cursor-pointer disabled:opacity-50"
                         />
                         <span className="text-sm text-slate-400 leading-tight">
                             I agree to the{' '}

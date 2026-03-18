@@ -8,6 +8,8 @@ import { generateExecutiveHtml } from '@/templates/executive';
 import { generateMinimalDividerHtml } from '@/templates/minimal-divider';
 import { generateAcademicHtml } from '@/templates/academic';
 import { generateAtsLightHtml } from '@/templates/ats-light';
+import { generateFromConfig } from '@/templates/ats-renderer';
+import { ATS_CONFIG_MAP } from '@/templates/configs';
 import { getSession } from '@/lib/auth/jwt';
 import { checkUserAccess } from '@/lib/access';
 import { logPDFDownload } from '@/lib/admin-logger';
@@ -20,6 +22,12 @@ import path from 'path';
 export const runtime = 'nodejs';
 
 function selectTemplate(resumeData: ResumeData, template: string): string {
+    // New config-based templates (cfg-001 … cfg-052)
+    if (template.startsWith('cfg-')) {
+        const cfg = ATS_CONFIG_MAP.get(template);
+        if (cfg) return generateFromConfig(resumeData, cfg);
+    }
+    // Legacy templates (preserved for backward compatibility)
     switch (template) {
         case 'harvard': return generateHarvardHtml(resumeData);
         case 'stanford': return generateStanfordHtml(resumeData);

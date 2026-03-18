@@ -45,20 +45,33 @@ RULES:
 6. DO NOT fabricate performance metrics or achievements.
 7. Keep it detailed but realistic for the candidate's level.
 8. If a Job Description is provided, inject relevant keywords naturally.
-9. ONLY return the improved bullet point text. No quotes, no preamble.`;
+9. CRITICAL: Return the response as a JSON object with the key "optimizedBullet".
+10. BULLET CONTENT: Output ONLY the plain improved sentence within the JSON. Do NOT start with -, --, *, •, or any bullet symbol inside the string. The frontend handles bullet rendering.`;
 
         const jdContext = jobDescription ? `\nTarget Job Description:\n${jobDescription}` : '';
         const faangRules = faangMode
             ? `\nFAANG MODE ACTIVATED:\n- Enforce the XYZ formula: "Accomplished [X] as measured by [Y], by doing [Z]".\n- Maximize leadership signals (e.g. Spearheaded, Architected).\n- Emphasize scale and system design complexity. (STILL: DO NOT FABRICATE NUMBERS)`
             : '';
 
-        const prompt = `${faangRules}${jdContext}\n\nOriginal Bullet: "${bulletText}"\n\nImproved Bullet:`;
+        const prompt = `${faangRules}${jdContext}\n\nOriginal Bullet: "${bulletText}"\n\nReturn the improved version in a JSON object.`;
 
         const aiResult = await generateAIResponse(prompt, undefined, systemPrompt, 0.2, 300);
-        let optimizedBullet = aiResult.text;
+        const aiOutput = aiResult.text;
         const endTime = Date.now();
 
-        optimizedBullet = optimizedBullet.replace(/^[-*•]\s*/, '').replace(/^"|"$/g, '').trim();
+        // Parse JSON response safely
+        let optimizedBullet = "";
+        try {
+            const cleaned = aiOutput.replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/i, '').trim();
+            const parsed = JSON.parse(cleaned);
+            optimizedBullet = parsed.optimizedBullet || parsed.bullet || aiOutput;
+        } catch (e) {
+            console.warn("[AI Enhance Bullet] JSON Parse failed, falling back to raw output", e);
+            optimizedBullet = aiOutput;
+        }
+
+        // Strip ALL leading bullet symbols in any combination (-, --, •-, • -, *, etc.)
+        optimizedBullet = optimizedBullet.replace(/^([-•*–—]+\s*)+/, '').replace(/^"|"$/g, '').trim();
 
         // Log successful usage
         const supabase = createClient();

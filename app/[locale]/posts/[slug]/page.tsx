@@ -62,7 +62,7 @@ export default async function BlogPostPage({ params }: { params: { locale: strin
         <header className="mb-12">
            <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
               <span className="flex items-center gap-1">
-                 <Calendar size={16} /> {format(new Date(post.published_at), 'MMMM dd, yyyy')}
+                 <Calendar size={16} /> {post.published_at ? format(new Date(post.published_at), 'MMMM dd, yyyy') : 'Draft'}
               </span>
               <span className="flex items-center gap-1">
                  <User size={16} /> {post.author}
@@ -75,13 +75,25 @@ export default async function BlogPostPage({ params }: { params: { locale: strin
 
            {post.cover_image && (
              <div className="rounded-2xl overflow-hidden glass-card mb-12 border-white/10 relative h-[500px]">
-                <Image 
-                  src={post.cover_image} 
-                  alt={post.title} 
-                  fill
-                  priority
-                  className="w-full h-full object-cover" 
-                />
+                {post.cover_image.endsWith('.mp4') ? (
+                  <video 
+                    src={post.cover_image}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    controls
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Image 
+                    src={post.cover_image} 
+                    alt={post.title} 
+                    fill
+                    priority
+                    className="w-full h-full object-cover" 
+                  />
+                )}
              </div>
            )}
         </header>

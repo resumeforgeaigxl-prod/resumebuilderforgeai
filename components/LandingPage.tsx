@@ -10,14 +10,18 @@ import Pricing from "@/components/Pricing";
 import Problem from "@/components/Problem";
 import Solution from "@/components/Solution";
 import Workflow from "@/components/Workflow";
+import WhatsNew from "@/components/WhatsNew";
 import { DEFAULT_LOCALE } from "@/lib/constants";
+import { BlogPost } from "@/lib/seo-service";
 
 type LandingPageProps = {
   locale?: string;
+  posts?: BlogPost[];
 };
 
 export default function LandingPage({
   locale = DEFAULT_LOCALE,
+  posts = [],
 }: LandingPageProps) {
   return (
     <div className="relative overflow-hidden">
@@ -30,6 +34,7 @@ export default function LandingPage({
         <Solution />
         <Ecosystem />
         <ForgeGrid />
+        <WhatsNew locale={locale} posts={posts} />
         <AITools />
         <CareerPaths />
         <Workflow />

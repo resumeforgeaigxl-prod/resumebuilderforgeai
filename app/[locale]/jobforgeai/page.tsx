@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Loader2, Send, Bot, User, AlertCircle, ShieldCheck, Copy, Share2, Check, Terminal, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,7 +13,9 @@ interface ChatMessage {
 }
 
 export default function JobForgeAIPage() {
-    const { locale, region } = useTranslation();
+    const params = useParams() as { locale: string };
+    const localeStr = params.locale || 'en-in';
+    const { } = useTranslation();
     const router = useRouter();
 
     const [loading, setLoading] = useState(true);
@@ -187,7 +189,7 @@ export default function JobForgeAIPage() {
 
     const shareConversation = () => {
         if (!conversationId) return;
-        const shareUrl = `${window.location.origin}/${region}/${locale}/jobforgeai/share/${conversationId}`;
+    const shareUrl = `${window.location.origin}/${localeStr}/jobforgeai/share/${conversationId}`;
         navigator.clipboard.writeText(shareUrl);
         setSharing(true);
         setTimeout(() => setSharing(false), 2000);
@@ -208,7 +210,7 @@ export default function JobForgeAIPage() {
             <header className="sticky top-0 z-30 bg-[#020205]/80 backdrop-blur-2xl border-b border-white/5 px-6 py-4">
                 <div className="max-w-5xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-6">
-                        <Link href={`/${region}/${locale}/dashboard`} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-2xl transition-all border border-white/5 group">
+                        <Link href={`/${localeStr}/dashboard`} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-2xl transition-all border border-white/5 group">
                             <ArrowLeft className="w-5 h-5 text-slate-400 group-hover:text-white" />
                         </Link>
                         <div className="flex items-center gap-3">
@@ -318,7 +320,7 @@ export default function JobForgeAIPage() {
                             <button
                                 key={i}
                                 onClick={() => {
-                                    if (card.href) router.push(`/${region}/${locale}${card.href}`);
+                                    if (card.href) router.push(`/${localeStr}${card.href}`);
                                     else if (card.prompt) { handleSendMessage(undefined, card.prompt); }
                                 }}
                                 className="flex items-center gap-4 p-5 bg-white/[0.03] border border-white/5 rounded-[2rem] hover:bg-white/[0.06] hover:border-indigo-500/30 transition-all text-left group"

@@ -81,16 +81,8 @@ const OPENROUTER_KEYS = [
     process.env.OPENROUTER_API_KEY_7,
 ].filter(Boolean) as string[];
 
-/**
- * Get a random OpenRouter API key from the list
- */
-function getRandomOpenRouterKey(): string | null {
-    if (OPENROUTER_KEYS.length === 0) {
-        return null;
-    }
-    const randomIndex = Math.floor(Math.random() * OPENROUTER_KEYS.length);
-    return OPENROUTER_KEYS[randomIndex];
-}
+// Global index for round-robin rotation
+let openRouterIndex = 0;
 
 async function fetchFromOpenRouter(
     prompt: string,
@@ -99,59 +91,74 @@ async function fetchFromOpenRouter(
     temp?: number,
     maxTokens?: number
 ): Promise<AIResponseMetadata> {
-    const apiKey = getRandomOpenRouterKey();
-
-    if (!apiKey) {
+    const keysCount = OPENROUTER_KEYS.length;
+    if (keysCount === 0) {
         throw new Error("No OPENROUTER_API_KEY found in environment variables.");
     }
 
-    const systemPrompt = customSystemPrompt || "You are an ATS resume optimization AI. When asked to return JSON, return ONLY valid JSON with no markdown formatting, no code blocks, and no extra text.";
+    // Try keys starting from current index
+    for (let i = 0; i < keysCount; i++) {
+        const currentKeyIndex = (openRouterIndex + i) % keysCount;
+        const apiKey = OPENROUTER_KEYS[currentKeyIndex];
+        
+        console.log(`[AI] Attempting OpenRouter with Key #${currentKeyIndex} (Model: ${model})`);
 
-    const response = await fetch(OPENROUTER_API_URL, {
-        method: "POST",
-        headers: {
-            "Authorization": `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": process.env.NEXTAUTH_URL || "http://localhost:3000",
-            "X-Title": "ResumeForge AI",
-        },
-        body: JSON.stringify({
-            model,
-            messages: [
-                {
-                    role: "system",
-                    content: systemPrompt,
+        try {
+            const systemPrompt = customSystemPrompt || "You are an AI assistant. Return ONLY valid JSON if asked.";
+            const response = await fetch(OPENROUTER_API_URL, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${apiKey}`,
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": process.env.NEXTAUTH_URL || "http://localhost:3000",
+                    "X-Title": "ResumeForge AI",
                 },
-                {
-                    role: "user",
-                    content: prompt,
-                },
-            ],
-            temperature: temp ?? 0.2,
-            max_tokens: maxTokens ?? 4000,
-            response_format: model.includes('gpt') || model.includes('gemini') || model.includes('claude') ? { type: 'json_object' } : undefined,
-        }),
-    });
+                body: JSON.stringify({
+                    model,
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: prompt },
+                    ],
+                    temperature: temp ?? 0.2,
+                    max_tokens: maxTokens ?? 4000,
+                    response_format: model.includes('gpt') || model.includes('gemini') || model.includes('claude') ? { type: 'json_object' } : undefined,
+                }),
+            });
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`[AI] OpenRouter error (${response.status}):`, errorText);
-        throw new Error(`OpenRouter API error ${response.status}: ${errorText}`);
+            if (response.status === 429 || response.status === 401) {
+                console.warn(`[AI] OpenRouter Key #${currentKeyIndex} failed (${response.status}). Rotating...`);
+                continue; // Try next key
+            }
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`OpenRouter API error ${response.status}: ${errorText}`);
+            }
+
+            const data = await response.json();
+            const content = data?.choices?.[0]?.message?.content;
+            
+            if (!content) {
+                console.warn(`[AI] Empty content from Key #${currentKeyIndex}.`);
+                continue;
+            }
+
+            // Success! Update index for next global request
+            openRouterIndex = (currentKeyIndex + 1) % keysCount;
+            
+            return {
+                text: content,
+                model: data?.model || model,
+                usage: data?.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 }
+            };
+
+        } catch (err: unknown) {
+            console.error(`[AI] Exception with Key #${currentKeyIndex}:`, err);
+            if (i === keysCount - 1) throw err; // Re-throw if it's the last key
+        }
     }
 
-    const data = await response.json();
-    const content = data?.choices?.[0]?.message?.content;
-    const usage = data?.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
-
-    if (!content) {
-        throw new Error("OpenRouter returned an empty response.");
-    }
-
-    return {
-        text: content,
-        model: data?.model || model,
-        usage: usage
-    };
+    throw new Error("All OpenRouter keys exhausted or failed.");
 }
 
 export async function generateAIResponse(

@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import { Metadata } from 'next';
 import LandingPage from "@/components/LandingPage";
 import { BASE_URL } from "@/lib/constants";
+import { getBlogPosts } from "@/lib/seo-service";
 
 type LocaleHomeProps = {
   params: {
@@ -40,6 +41,8 @@ export async function generateMetadata({
   };
 }
 
-export default function LocaleHome({ params }: LocaleHomeProps) {
-  return <LandingPage locale={params.locale} />;
+export default async function LocaleHome({ params }: LocaleHomeProps) {
+  // Fetch posts server-side for the "What's New" section
+  const posts = await getBlogPosts(params.locale.split('-')[0]);
+  return <LandingPage locale={params.locale} posts={posts} />;
 }

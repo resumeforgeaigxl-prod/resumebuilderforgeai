@@ -29,7 +29,9 @@ interface ExecutionResult {
 }
 
 export default function ProblemDetailPage() {
-    const { slug, locale } = useParams() as { slug: string, locale: string };
+    const params = useParams();
+    const slug = params?.slug as string;
+    const locale = params?.locale as string;
     const [problem, setProblem] = useState<Problem | null>(null);
     const [loading, setLoading] = useState(true);
     const [executionResult, setExecutionResult] = useState<ExecutionResult | null>(null);

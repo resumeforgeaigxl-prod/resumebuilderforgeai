@@ -18,44 +18,35 @@ const GEMINI_KEYS = [
  */
 function safeJsonParse(text: string) {
   try {
-    return JSON.parse(text);
+    // Attempt standard parse (assuming naked JSON from responseMimeType)
+    return JSON.parse(text.trim());
   } catch {
-    console.log("JSON parse failed. Cleaning response...");
+    console.log("JSON parse failed. Cleaning response with extractJson...");
 
-    // Use the improved extractJson logic to find the JSON block inside text
     const extracted = extractJson(text);
 
     try {
       return JSON.parse(extracted);
     } catch {
-      console.log("Still invalid JSON. Returning content wrapped in 'reply' to prevent crash.");
+      console.warn("Still invalid JSON after extraction. Falling back to structured object.");
       
-      // Clean up stringified newlines and quotes if they exist in the raw text
       const cleanedText = text
         .replace(/\\n/g, '\n')
         .replace(/\\"/g, '"')
         .replace(/\\'/g, "'")
         .replace(/\\\\/g, '\\');
 
-      // Return a structure that matches common AI routes (especially MentorForge)
       return {
         reply: cleanedText,
-        suggestedAction: null,
-        memoryExtraction: { goals: [], weaknesses: [], strengths: [] },
-        error: "JSON_PARSE_FAILED"
+        error: "JSON_PARSE_FAILED",
+        raw_text: text
       };
     }
   }
 }
 
-/**
- * Get a random Gemini client
- */
-function getGeminiClient() {
-    if (GEMINI_KEYS.length === 0) return null;
-    const randomIndex = Math.floor(Math.random() * GEMINI_KEYS.length);
-    return new GoogleGenerativeAI(GEMINI_KEYS[randomIndex]);
-}
+// Global index for round-robin rotation
+let geminiIndex = 0;
 
 async function fallbackViaOpenRouter(
     prompt: string,
@@ -72,9 +63,20 @@ async function fallbackViaOpenRouter(
 }
 
 export async function generateContentGemini(prompt: string, systemInstruction?: string) {
-    try {
-        const client = getGeminiClient();
-        if (client) {
+    const keysCount = GEMINI_KEYS.length;
+    if (keysCount === 0) {
+        return await fallbackViaOpenRouter(prompt, systemInstruction);
+    }
+
+    // Try Gemini keys in rotation
+    for (let i = 0; i < keysCount; i++) {
+        const currentKeyIndex = (geminiIndex + i) % keysCount;
+        const apiKey = GEMINI_KEYS[currentKeyIndex];
+        
+        console.log(`[AI] Attempting Gemini Content with Key #${currentKeyIndex}`);
+
+        try {
+            const client = new GoogleGenerativeAI(apiKey);
             const model = client.getGenerativeModel({
                 model: "gemini-2.0-flash",
                 systemInstruction: systemInstruction,
@@ -82,60 +84,90 @@ export async function generateContentGemini(prompt: string, systemInstruction?: 
 
             const result = await model.generateContent(prompt);
             const response = await result.response;
-            return response.text();
-        }
+            const text = response.text();
 
-        return await fallbackViaOpenRouter(prompt, systemInstruction);
-    } catch (error) {
-        console.error("Gemini API Error:", error);
+            if (text) {
+                geminiIndex = (currentKeyIndex + 1) % keysCount; // Success, move index
+                return text;
+            }
+        } catch (error: unknown) {
+            const err = error as { status?: number; message?: string };
+            const status = err?.status || 0;
+            const msg = err?.message || "";
+            
+            console.error(`[AI] Gemini Key #${currentKeyIndex} failed:`, msg);
 
-        try {
-            return await fallbackViaOpenRouter(prompt, systemInstruction);
-        } catch (fallbackError) {
-            console.error("OpenRouter fallback for Gemini content failed:", fallbackError);
-            throw new Error("AI service unavailable");
+            // If quota or unauthorized, rotate
+            if (status === 429 || status === 401 || msg.includes('429') || msg.includes('quota')) {
+                console.warn(`[AI] Key #${currentKeyIndex} rate limited. Trying next...`);
+                continue;
+            }
+            if (i === keysCount - 1) break; // End of pool
         }
     }
+
+    console.warn("[AI] All Gemini keys failed for Content. Falling back to OpenRouter.");
+    return await fallbackViaOpenRouter(prompt, systemInstruction);
 }
 
 export async function generateJsonGemini(prompt: string, systemInstruction?: string) {
-    try {
-        const client = getGeminiClient();
-        if (client) {
+    const keysCount = GEMINI_KEYS.length;
+    if (keysCount === 0) {
+        return await fallbackViaOpenRouterJson(prompt, systemInstruction);
+    }
+
+    // Try Gemini keys in rotation
+    for (let i = 0; i < keysCount; i++) {
+        const currentKeyIndex = (geminiIndex + i) % keysCount;
+        const apiKey = GEMINI_KEYS[currentKeyIndex];
+
+        console.log(`[AI] Attempting Gemini JSON with Key #${currentKeyIndex}`);
+
+        try {
+            const client = new GoogleGenerativeAI(apiKey);
             const model = client.getGenerativeModel({
                 model: "gemini-2.0-flash",
                 systemInstruction: systemInstruction,
                 generationConfig: {
                     responseMimeType: "application/json",
-                    maxOutputTokens: 8000,
+                    maxOutputTokens: 8192,
                 },
             });
 
             const result = await model.generateContent(prompt);
             const response = await result.response;
-            return safeJsonParse(response.text());
-        }
-        console.warn("No Gemini client available, using fallback");
+            const text = response.text();
 
+            if (text) {
+                geminiIndex = (currentKeyIndex + 1) % keysCount; // Success
+                return safeJsonParse(text);
+            }
+        } catch (error: unknown) {
+            const err = error as { message?: string };
+            const msg = err?.message || "";
+            console.error(`[AI] Gemini JSON Key #${currentKeyIndex} failed:`, msg);
+
+            if (msg.includes('429') || msg.includes('quota') || msg.includes('rate limit')) {
+                continue; // Rotate
+            }
+            if (i === keysCount - 1) break;
+        }
+    }
+
+    console.warn("[AI] All Gemini keys failed for JSON. Falling back to OpenRouter.");
+    return await fallbackViaOpenRouterJson(prompt, systemInstruction);
+}
+
+async function fallbackViaOpenRouterJson(prompt: string, systemInstruction?: string) {
+    try {
         const text = await fallbackViaOpenRouter(
-            `${prompt}\n\nIMPORTANT: Return ONLY valid JSON. Escape all special characters and newlines correctly.`,
+            `${prompt}\n\nIMPORTANT: Return ONLY valid JSON.`,
             (systemInstruction || "") + " You must output valid JSON."
         );
         return safeJsonParse(extractJson(text));
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : String(error);
-    console.error("Native Gemini JSON Error:", msg);
-
-        try {
-            const text = await fallbackViaOpenRouter(
-                `${prompt}\n\nIMPORTANT: Return ONLY valid JSON. Escape all special characters and newlines correctly.`,
-                (systemInstruction || "") + " You must output valid JSON."
-            );
-            return safeJsonParse(extractJson(text));
-        } catch (fallbackError) {
-            console.error("OpenRouter fallback for Gemini JSON failed:", fallbackError);
-            throw new Error("AI service unavailable");
-        }
+    } catch (err) {
+        console.error("[AI] Final Fallback (OpenRouter) also failed:", err);
+        throw new Error("AI service unavailable across all providers.");
     }
 }
 
@@ -143,10 +175,15 @@ export async function generateJsonGemini(prompt: string, systemInstruction?: str
  * Performs a grounded search using Gemini 2.0 Google Search tool
  */
 export async function generateGroundedJobSearch(query: string) {
-    try {
-        const client = getGeminiClient();
-        if (!client) throw new Error("No Gemini client available");
+    const keysCount = GEMINI_KEYS.length;
+    if (keysCount === 0) return [];
 
+    // Use current rotation key
+    const currentKeyIndex = geminiIndex % keysCount;
+    const apiKey = GEMINI_KEYS[currentKeyIndex];
+
+    try {
+        const client = new GoogleGenerativeAI(apiKey);
         const model = client.getGenerativeModel({
             model: "gemini-2.0-flash",
             tools: [{ googleSearchRetrieval: {} }]

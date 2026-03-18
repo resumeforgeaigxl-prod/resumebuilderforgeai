@@ -103,8 +103,8 @@ export function Sidebar({ isCollapsed, onToggle }: { isCollapsed: boolean, onTog
     const pathname = usePathname();
     const [mounted, setMounted] = useState(false);
 
-    const params = useParams() as { region: string; lang: string };
-    const { region, lang } = params;
+    const params = useParams() as { locale: string };
+    const { locale } = params;
     const [userRole, setUserRole] = useState<string | null>(null);
 
     useEffect(() => {
@@ -152,9 +152,7 @@ export function Sidebar({ isCollapsed, onToggle }: { isCollapsed: boolean, onTog
                         )}
                         <div className="space-y-1">
                             {module.items.map((item) => {
-                                const currentRegion = region || 'in';
-                                const currentLang = lang || 'en';
-                                const fullHref = item.href.startsWith('/recruiter') ? item.href : `/${currentRegion}/${currentLang}${item.href}`;
+                                const fullHref = item.href.startsWith('/recruiter') ? item.href : `/${locale || 'en-in'}${item.href}`;
                                 const isActive = pathname === fullHref;
                                 return (
                                     <Link
@@ -184,14 +182,14 @@ export function Sidebar({ isCollapsed, onToggle }: { isCollapsed: boolean, onTog
                     <div className="px-4 py-2 space-y-4 mb-4">
                         <div className="h-px w-full bg-white/5" />
                         <div className="space-y-3">
-                            <Link href={`/${region}/${lang}/dashboard/support`} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-indigo-400 transition-colors">
+                            <Link href={`/${locale}/dashboard/support`} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-indigo-400 transition-colors">
                                 <HelpCircle className="w-3.5 h-3.5" /> Help & Support
                             </Link>
                             <div className="flex gap-4">
-                                <Link href={`/${region}/${lang}/privacy-policy`} className="text-[9px] font-black uppercase tracking-widest text-slate-600 hover:text-slate-300 transition-colors">
+                                <Link href={`/${locale}/privacy-policy`} className="text-[9px] font-black uppercase tracking-widest text-slate-600 hover:text-slate-300 transition-colors">
                                     Privacy
                                 </Link>
-                                <Link href={`/${region}/${lang}/terms-of-service`} className="text-[9px] font-black uppercase tracking-widest text-slate-600 hover:text-slate-300 transition-colors">
+                                <Link href={`/${locale}/terms-of-service`} className="text-[9px] font-black uppercase tracking-widest text-slate-600 hover:text-slate-300 transition-colors">
                                     Terms
                                 </Link>
                             </div>
@@ -219,8 +217,8 @@ export function Sidebar({ isCollapsed, onToggle }: { isCollapsed: boolean, onTog
 // Mobile Bottom Nav
 export function MobileNav() {
     const pathname = usePathname();
-    const params = useParams() as { region: string; lang: string };
-    const { region, lang } = params;
+    const params = useParams() as { locale: string };
+    const { locale } = params;
     const [userRole, setUserRole] = useState<string | null>(null);
 
     useEffect(() => {
@@ -240,9 +238,7 @@ export function MobileNav() {
     return (
         <nav className="fixed bottom-0 left-0 right-0 h-16 bg-[#070710]/90 backdrop-blur-xl border-t border-white/5 flex md:hidden items-center justify-around px-2 z-50">
             {flatItems.slice(0, 7).map((item) => {
-                const currentRegion = region || 'in';
-                const currentLang = lang || 'en';
-                const fullHref = item.href.startsWith('/recruiter') ? item.href : `/${currentRegion}/${currentLang}${item.href}`;
+                const fullHref = item.href.startsWith('/recruiter') ? item.href : `/${locale || 'en-in'}${item.href}`;
                 const isActive = pathname === fullHref;
                 return (
                     <Link
