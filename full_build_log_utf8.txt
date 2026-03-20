@@ -1,0 +1,175 @@
+
+> ai-resume-builder@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+
+
+Failed to compile.
+
+./app/[locale]/(dashboard)/codingforge/question/[slug]/page.tsx
+15:5  Error: 'Code2' is defined but never used.  @typescript-eslint/no-unused-vars
+16:5  Error: 'BookOpen' is defined but never used.  @typescript-eslint/no-unused-vars
+17:5  Error: 'Lightbulb' is defined but never used.  @typescript-eslint/no-unused-vars
+18:5  Error: 'MessageSquare' is defined but never used.  @typescript-eslint/no-unused-vars
+21:5  Error: 'Globe' is defined but never used.  @typescript-eslint/no-unused-vars
+23:5  Error: 'BrainCircuit' is defined but never used.  @typescript-eslint/no-unused-vars
+24:5  Error: 'Timer' is defined but never used.  @typescript-eslint/no-unused-vars
+25:5  Error: 'Layers' is defined but never used.  @typescript-eslint/no-unused-vars
+26:5  Error: 'Play' is defined but never used.  @typescript-eslint/no-unused-vars
+141:60  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+253:117  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+253:128  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./app/[locale]/(dashboard)/projectforge/app/page.tsx
+22:10  Error: 'FeatureGate' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/[locale]/careerforge/page.tsx
+37:278  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+40:282  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+43:74  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+46:164  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+46:254  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/[locale]/codingforge/page.tsx
+38:68  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+41:15  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+41:78  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+41:346  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+44:174  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+44:291  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+50:161  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/[locale]/company-prep/page.tsx
+34:148  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+37:416  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+46:240  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+46:271  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/[locale]/explainforge/page.tsx
+35:51  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+35:133  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+35:305  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+35:365  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+44:200  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+44:339  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+47:101  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+47:121  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+47:138  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+47:236  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/[locale]/interviewforge/page.tsx
+37:132  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+37:352  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+43:214  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/[locale]/jobforge/page.tsx
+37:84  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+43:241  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+46:84  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+49:217  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/[locale]/knowledgeforge/page.tsx
+37:47  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+37:51  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+37:109  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+37:114  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+37:120  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+37:296  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+40:269  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+40:381  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+46:260  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/[locale]/learnforge/page.tsx
+34:324  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+37:87  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+43:59  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+43:119  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+46:286  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/[locale]/mentorforge/page.tsx
+34:289  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+34:403  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+37:19  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+43:295  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/[locale]/projectforge/page.tsx
+35:273  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+38:19  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+44:52  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+44:108  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+44:261  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+47:34  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+47:45  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./app/[locale]/resumeforge/page.tsx
+37:71  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+37:84  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+43:348  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+49:288  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/[locale]/studyforge/page.tsx
+34:78  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+34:361  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+40:452  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./components/codingforge/CodeEditor.tsx
+17:24  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+27:30  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+104:43  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/codingforge/OutputConsole.tsx
+4:56  Error: 'Layers' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/pricing/FeatureGate.tsx
+6:18  Error: 'AnimatePresence' is defined but never used.  @typescript-eslint/no-unused-vars
+15:75  Error: 'fallback' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/projectforge/CodeViewer.tsx
+32:42  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/seo/SEOForgePage.tsx
+18:3  Error: 'title' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/WhatsNew.tsx
+69:49  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./lib/ai/forges/mentor.ts
+3:10  Error: 'CodingForge' is defined but never used.  @typescript-eslint/no-unused-vars
+4:10  Error: 'CareerForge' is defined but never used.  @typescript-eslint/no-unused-vars
+5:10  Error: 'LearnForge' is defined but never used.  @typescript-eslint/no-unused-vars
+12:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+36:46  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./lib/ai/key-pool.ts
+1:33  Error: 'KeyStatus' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./lib/ai/router.ts
+1:39  Error: 'AIProviderName' is defined but never used.  @typescript-eslint/no-unused-vars
+64:27  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./lib/ai/safety.ts
+11:37  Error: 'task' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./lib/code-execution-credits.ts
+103:14  Error: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./lib/coding-generator.ts
+10:7  Error: 'LANGUAGES' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+116:69  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./lib/pricing/service.ts
+35:26  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+43:26  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+82:46  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+89:55  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+90:32  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+96:28  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+111:28  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules

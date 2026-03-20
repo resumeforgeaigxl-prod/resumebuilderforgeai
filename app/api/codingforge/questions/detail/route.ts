@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
             .select(`
                 *,
                 coding_solutions (*),
-                coding_tasks (*),
+                coding_test_cases (*),
                 coding_companies (*)
             `);
 

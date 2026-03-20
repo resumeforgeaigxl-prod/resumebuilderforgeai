@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { generateAIResponse, logAIUsage, stripMarkdown } from '@/lib/ai-provider';
+import { ResumeForge } from '@/lib/ai/forges/resume';
 import { ResumeData } from '@/types/resume';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
+import { AI_MESSAGES } from '@/lib/ai/safety';
 
 export async function POST(request: Request) {
     try {
@@ -24,114 +25,27 @@ export async function POST(request: Request) {
             .eq('id', session.userId)
             .single();
 
-        // 1. Pre-fill missing personal info from profile if resume is empty
+        // Pre-fill missing personal info
         if (!resumeData.name && userProfile?.full_name) resumeData.name = userProfile.full_name;
         if (!resumeData.email && userProfile?.email) resumeData.email = userProfile.email;
 
-        const systemPrompt = `You are a resume enhancement engine focused on intelligent JD-alignment.
-
-Rules:
-1. Extract key technologies and skills from the Job Description.
-2. Compare them with the candidate's resume.
-3. Enhance ONLY matching sections (Experience points and Project descriptions) to highlight relevant skills.
-4. Insert missing relevant keywords NATURALLY where they fit the candidate's actual work.
-5. PRESERVE authenticity: Do NOT rewrite the entire resume or invent personal info (name, email, phone, location, country).
-6. DO NOT invent new companies, schools, or entire projects. ONLY improve existing descriptions.
-7. Tone: Realistic and technical. No corporate fluff.
-8. If the input resume is mostly empty, DO NOT generate a sample resume. Keep it empty.
-9. CRITICAL: The "match_score" should reflect the REALITY of the input. If the input resume is empty or missing details, the match score MUST be very low (0-10%). Do NOT inflate the score.
-10. BULLET FORMATTING: All experience points and project descriptions MUST be plain sentences. Do NOT start any bullet with -, --, *, •, or any other symbol. The frontend handles bullet styling.
-11. Return a JSON object containing:
-   - "optimized_resume": The full ResumeData object (all fields).
-   - "analysis": {
-       "match_score": 0-100,
-       "matched_keywords": ["skill1", "tech2"],
-       "missing_keywords": ["skill3"],
-       "improvements": ["improvement description 1", "improvement description 2"]
-     }`;
-
-        const prompt = `Enhance this Resume JSON to align with the provided Job Description.
-        
-        STEPS:
-        1. Identify JD keywords.
-        2. Map them to existing resume experiences and projects.
-        3. Inject keywords naturally while improving clarity.
-        4. Focus on matching tech stacks.
-        
-        CRITICAL: Do NOT change the candidate's name, email, phone, location, country, or LinkedIn. 
-        If these fields are provided as empty strings, KEEP them as empty strings. 
-        Do NOT invent "John Doe" or any placeholder details.
-
-        RESUME:
-        ${JSON.stringify(resumeData)}
-        
-        JOB DESCRIPTION:
-        ${jobDescription}`;
-
-        const startTime = Date.now();
-        const aiResult = await generateAIResponse(prompt, undefined, systemPrompt, 0.2, 3000);
-        const endTime = Date.now();
-        const aiOutput = aiResult.text;
-
-        await logAIUsage(supabase, session.userId, null, aiResult, endTime - startTime);
-
-        let parsedResult;
+        // NEW: Using the centralized ResumeForge
         try {
-            // Clean AI Output from markdown artifacts before parsing
-            const cleaned = aiOutput
-                .replace(/^```json/i, '')
-                .replace(/^```/i, '')
-                .replace(/```$/i, '')
-                .trim();
-
-            parsedResult = JSON.parse(cleaned);
-            let optimizedJson = parsedResult.optimized_resume || parsedResult;
-            const analysis = parsedResult.analysis || {
-                match_score: 0,
-                matched_keywords: [],
-                missing_keywords: [],
-                improvements: []
-            };
-
-            // Validation and deep-cleaning the strings in the optimized JSON
-            const cleanObj = (obj: unknown): unknown => {
-                if (typeof obj === 'string') {
-                    // Strip leading bullet symbols from all strings (safety layer)
-                    const stripped = obj.replace(/^([-•*–—]+\s*)+/, '').trim();
-                    return stripMarkdown(stripped);
-                }
-                if (Array.isArray(obj)) return obj.map(cleanObj);
-                if (obj !== null && typeof obj === 'object') {
-                    const newObj: Record<string, unknown> = {};
-                    Object.entries(obj).forEach(([key, val]) => {
-                        newObj[key] = cleanObj(val);
-                    });
-                    return newObj;
-                }
-                return obj;
-            };
-
-            optimizedJson = cleanObj(optimizedJson) as Partial<ResumeData>;
-
-            // Ensure core structure is preserved from original if missing in AI response
-            optimizedJson = { ...resumeData, ...optimizedJson };
-
-            // Re-assert array structures
-            if (!Array.isArray(optimizedJson.experience)) optimizedJson.experience = resumeData.experience || [];
-            if (!Array.isArray(optimizedJson.projects)) optimizedJson.projects = resumeData.projects || [];
-            if (!Array.isArray(optimizedJson.skills)) optimizedJson.skills = resumeData.skills || [];
-            if (!Array.isArray(optimizedJson.skillCategories)) optimizedJson.skillCategories = resumeData.skillCategories || [];
-
+            const result = await ResumeForge.optimize(resumeData, jobDescription, session.userId);
+            
             return NextResponse.json({
                 success: true,
-                optimizedData: optimizedJson,
-                analysis: analysis
+                optimizedData: result.optimized_resume || resumeData,
+                analysis: result.analysis || { match_score: 0 }
             });
-        } catch (e) {
-            console.error("[Optimize] Parse Error:", e);
-            return NextResponse.json({ success: false, error: "AI returned an invalid format." }, { status: 500 });
+        } catch (aiErr) {
+            console.warn("[Optimize AI Error]", aiErr);
+            return NextResponse.json({ 
+                success: false, 
+                error: AI_MESSAGES.BUSY,
+                optimizedData: resumeData // Safety: return original data
+            });
         }
-
 
     } catch (e: unknown) {
         console.error("Error optimizing resume:", e);

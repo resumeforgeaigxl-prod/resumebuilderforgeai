@@ -7,10 +7,26 @@ const TOPICS = [
     'Graphs', 'Trees', 'SQL', 'Bit Manipulation', 'Logic'
 ];
 
-const LANGUAGES = [
-    'Java', 'Python', 'C', 'C++', 'JavaScript',
-    'Go', 'Rust', 'C#', 'PHP'
-];
+interface GeneratedTestCase {
+    input: string;
+    output: string;
+    is_hidden?: boolean;
+}
+
+interface GeneratedCodingQuestion {
+    title: string;
+    description: string;
+    difficulty: string;
+    type?: string;
+    topic: string;
+    approach: string;
+    interview_tips: string;
+    time_complexity: string;
+    space_complexity: string;
+    test_cases?: GeneratedTestCase[];
+    solutions?: Record<string, string>;
+    company_tags?: string[];
+}
 
 export async function generateCodingQuestions(count: number = 5) {
     const stats = {
@@ -27,10 +43,8 @@ export async function generateCodingQuestions(count: number = 5) {
 
             const prompt = `
             Generate EXACTLY ONE unique coding interview question.
-            Type: Randomly pick from [Programming, SQL, Debugging, Logic].
+            Type: Randomly pick from [Programming, Debugging].
             Topic: ${topic}.
-            
-            UNiQUENESS RULE: Generate a highly specific and creative problem. Avoid generic titles like "Reverse a String" or "Binary Search". Try to create a scenario-based or advanced version of common problems.
             
             Provide:
             - title: Highly specific and unique.
@@ -39,43 +53,30 @@ export async function generateCodingQuestions(count: number = 5) {
             - type: The picked type.
             - topic: ${topic}.
             - company_tags: Array of companies.
-            - approach: Step-by-step logic explanation.
-            - interview_tips: Advice for answering this in interviews.
-            - time_complexity: e.g. O(N log N).
-            - space_complexity: e.g. O(1).
-            - solutions: Object with keys as language names.
-              For Programming: include ${LANGUAGES.join(', ')}.
-              For SQL: include 'SQL'.
-              For Logic: include explanation.
+            - approach: Step-by-step logic.
+            - interview_tips: Advice.
+            - time_complexity: O(...).
+            - space_complexity: O(...).
+            - test_cases: Array of 3 objects { "input": "...", "output": "...", "is_hidden": boolean }. 
+                - Ensure the first test case matches the example usage and is NOT hidden.
+                - The remaining 2 should be hidden edge cases.
+            - solutions: Object { "Java": "...", "Python": "..." }
             
-            Return ONLY a valid JSON object:
-            {
-              "title": "...",
-              "description": "...",
-              "difficulty": "Easy",
-              "type": "...",
-              "topic": "...",
-              "company_tags": ["..."],
-              "approach": "...",
-              "interview_tips": "... ",
-              "time_complexity": "...",
-              "space_complexity": "...",
-              "solutions": { "Java": "...", "Python": "..." }
-            }
+            Return ONLY a valid JSON object.
             `;
 
             console.log(`[Gen] Requesting question ${i + 1}/${count} (Topic: ${topic})...`);
             const response = await generateAIResponse(
                 prompt,
                 'openai/gpt-4o-mini',
-                "expert competitive programmer. Focus on creating unique, non-generic interview questions.",
-                0.8, // Increased temperature for variety
+                "expert competitive programmer. Focus on creating unique, non-generic interview questions with automated test cases.",
+                0.8,
                 4000
             );
 
             stats.generated++;
             const jsonString = extractJson(response.text);
-            const q = JSON.parse(jsonString);
+            const q = JSON.parse(jsonString) as GeneratedCodingQuestion;
 
             const supabase = createAdminClient();
             const slug = q.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -118,17 +119,29 @@ export async function generateCodingQuestions(count: number = 5) {
             const questionId = questionData.id;
 
             // Solutions
-            const solutionsToInsert = Object.entries(q.solutions).map(([lang, code]) => ({
+            const solutionsToInsert = Object.entries(q.solutions ?? {}).map(([lang, code]) => ({
                 question_id: questionId,
                 language: lang,
-                code: code as string
+                code
             }));
             if (solutionsToInsert.length > 0) {
                 await supabase.from('coding_solutions').insert(solutionsToInsert);
             }
 
+            // Test Cases
+            const testCasesToInsert = (q.test_cases || []).map((tc, idx) => ({
+                question_id: questionId,
+                input: tc.input,
+                expected_output: tc.output,
+                is_hidden: tc.is_hidden || false,
+                order_index: idx
+            }));
+            if (testCasesToInsert.length > 0) {
+                await supabase.from('coding_test_cases').insert(testCasesToInsert);
+            }
+
             // Companies
-            const companiesToInsert = (q.company_tags || []).map((company: string) => ({
+            const companiesToInsert = (q.company_tags || []).map((company) => ({
                 question_id: questionId,
                 company_name: company
             }));
@@ -145,4 +158,3 @@ export async function generateCodingQuestions(count: number = 5) {
 
     return stats;
 }
-

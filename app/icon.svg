@@ -1,14 +1,47 @@
-<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="64" height="64" rx="16" fill="url(#paint0_linear)"/>
-  <path d="M44 20C44 18.8954 43.1046 18 42 18H22C20.8954 18 20 18.8954 20 20V44C20 45.1046 20.8954 46 22 46H42C43.1046 46 44 45.1046 44 44V20Z" fill="white" fill-opacity="0.1"/>
-  <path d="M20 20C20 18.8954 20.8954 18 22 18H33L44 29V44C44 45.1046 43.1046 46 42 46H22C20.8954 46 20 45.1046 20 44V20Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M33 18V29H44" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M26 33H38" stroke="#60A5FA" stroke-width="2" stroke-linecap="round"/>
-  <path d="M26 39H32" stroke="#A78BFA" stroke-width="2" stroke-linecap="round"/>
+<svg width="64" height="64" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="paint0_linear" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#3B82F6"/>
-      <stop offset="1" stop-color="#9333EA"/>
+    <!-- Gradient for the main Ribbon -->
+    <linearGradient id="ribbon_gradient" x1="100" y1="300" x2="300" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#C026D3" /> <!-- Fuchsia -->
+      <stop offset="50%" stop-color="#7C3AED" /> <!-- Violet -->
+      <stop offset="100%" stop-color="#3B82F6" /> <!-- Blue -->
     </linearGradient>
+    
+    <!-- Glow filter for nodes and branches -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Sparkle glow -->
+    <filter id="sparkle_filter" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
   </defs>
+
+  <!-- Main V-shaped Ribbon (No Text for icon) -->
+  <g transform="translate(45, 100)">
+    <!-- Main thick path -->
+    <path d="M40 80 Q120 280 180 200 Q240 120 280 40" stroke="url(#ribbon_gradient)" stroke-width="45" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.9" />
+    
+    <!-- Delicate Tech Branches -->
+    <g stroke="#3B82F6" stroke-width="6" fill="none" stroke-linecap="round">
+      <path d="M230 110 L275 60" />
+      <path d="M235 125 L290 100" />
+      <path d="M245 150 L300 135" />
+    </g>
+
+    <!-- Branch Nodes (Circles) -->
+    <circle cx="275" cy="60" r="10" fill="#3B82F6" />
+    <circle cx="290" cy="100" r="10" fill="#3B82F6" />
+    <circle cx="300" cy="135" r="10" fill="#3B82F6" />
+
+    <!-- Sparkle on the top-right node -->
+    <g transform="translate(275, 60)" filter="url(#glow)">
+       <path d="M-20 0 L20 0 M0 -20 L0 20" stroke="white" stroke-width="2" opacity="0.8" />
+       <path d="M-12 -12 L12 12 M-12 12 L12 -12" stroke="white" stroke-width="1.5" opacity="0.6" />
+       <circle r="4" fill="white" />
+    </g>
+  </g>
 </svg>

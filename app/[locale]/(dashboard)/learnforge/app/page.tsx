@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Play, Clock, Sparkles, Loader2, MessageSquare, Zap, Target, Globe } from 'lucide-react';
+import { FeatureGate } from '@/components/pricing/FeatureGate';
 
 interface VideoRecord {
     id: string;
@@ -111,7 +112,8 @@ export default function LearnForge() {
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-6 py-8 space-y-10">
+        <FeatureGate task="learn">
+            <div className="max-w-7xl mx-auto px-6 py-8 space-y-10">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div className="space-y-2">
@@ -339,6 +341,7 @@ export default function LearnForge() {
                 </div>
             </div>
         </div>
+        </FeatureGate>
     );
 }
 

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { ResumeData, ResumeRecord } from '@/types/resume';
+import { FeatureGate } from '@/components/pricing/FeatureGate';
 
 type OptimizationStep = 'SELECT' | 'OPTIMIZING' | 'RESULT';
 
@@ -216,7 +217,8 @@ export default function ResumeOptimizePage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#070710] py-24 px-4 sm:px-6 lg:px-8">
+        <FeatureGate task="resume">
+            <div className="min-h-screen bg-[#070710] py-24 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
 
                 {/* ── SELECT RESUME STEP ── */}
@@ -430,5 +432,6 @@ export default function ResumeOptimizePage() {
                 )}
             </div>
         </div>
+        </FeatureGate>
     );
 }

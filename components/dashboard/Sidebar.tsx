@@ -57,19 +57,19 @@ const MODULES = [
     {
         name: 'CodingForge',
         items: [
-            { label: 'Coding Practice', href: '/codingforge', icon: Code2 },
+            { label: 'Coding Practice', href: '/codingforge/app', icon: Code2 },
         ]
     },
     {
         name: 'ProjectForge',
         items: [
-            { label: 'Project Generator', href: '/projectforge', icon: Zap },
+            { label: 'Project Generator', href: '/projectforge/app', icon: Zap },
         ]
     },
     {
         name: 'StudyForge',
         items: [
-            { label: 'Study Assistant', href: '/studyforge', icon: BookOpen },
+            { label: 'Study Assistant', href: '/studyforge/app', icon: BookOpen },
         ]
     },
     {

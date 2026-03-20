@@ -18,6 +18,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
+import { FeatureGate } from '@/components/pricing/FeatureGate';
 
 interface Document {
     id: string;
@@ -175,7 +176,8 @@ export default function StudyForgePage() {
     );
 
     return (
-        <div className="space-y-12 animate-fade-in">
+        <FeatureGate task="study">
+            <div className="space-y-12 animate-fade-in">
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-8 border-b border-white/5">
                 <div>
                     <div className="flex items-center gap-2 text-indigo-400 font-bold tracking-[0.2em] text-[10px] uppercase mb-3">
@@ -300,5 +302,6 @@ export default function StudyForgePage() {
                 </div>
             )}
         </div>
+        </FeatureGate>
     );
 }

@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { Mic, CheckCircle, ArrowRight, RotateCcw, FileText, Target, Calendar, BarChart, TrendingUp, X, Award, Lightbulb, Clock, Layers } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { FeatureGate } from '@/components/pricing/FeatureGate';
 import Link from 'next/link';
 
 interface IntelligenceReport {
@@ -67,7 +68,9 @@ interface User {
 export default function CompanyPrepInterviewPage() {
   return (
     <Suspense fallback={<div>Loading company prep setup...</div>}>
-      <CompanyPrepInterviewContent />
+      <FeatureGate task="company-prep">
+        <CompanyPrepInterviewContent />
+      </FeatureGate>
     </Suspense>
   );
 }

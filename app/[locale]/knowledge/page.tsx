@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { getKnowledgeCategories } from '@/lib/seo-service';
 import { ChevronRight, BookOpen, GraduationCap, Code } from 'lucide-react';
+import { FeatureGate } from '@/components/pricing/FeatureGate';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -20,7 +21,8 @@ export default async function KnowledgeHome({ params }: { params: { locale: stri
   const categories = await getKnowledgeCategories();
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-6xl">
+    <FeatureGate task="knowledge">
+      <div className="container mx-auto px-4 py-12 max-w-6xl">
       <div className="text-center mb-16">
         <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gradient">
           Expand Your Knowledge
@@ -82,5 +84,6 @@ export default async function KnowledgeHome({ params }: { params: { locale: stri
          </section>
       </div>
     </div>
+    </FeatureGate>
   );
 }

@@ -26,6 +26,7 @@ const SKILL_CATEGORIES: string[] = ['Languages', 'Frontend', 'Backend', 'Databas
 import posthog from '@/lib/posthog';
 import { CoverLetterModal } from '@/components/builder/cover-letter-modal';
 import { ResumeIntelligence } from '@/components/builder/ResumeIntelligence';
+import { FeatureGate } from '@/components/pricing/FeatureGate';
 
 type Step = 'edit' | 'template' | 'optimize' | 'download';
 
@@ -337,7 +338,8 @@ export default function BuilderPage() {
     const rd = resumeData;
 
     return (
-        <div className="min-h-screen bg-[#070710] text-slate-200 pt-20">
+        <FeatureGate task="resume">
+            <div className="min-h-screen bg-[#070710] text-slate-200 pt-20">
             {/* ── Header ── */}
             <header className="sticky top-0 z-20 bg-slate-900/80 backdrop-blur-md border-b border-white/5 px-4 sm:px-6 py-3">
                 <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -820,6 +822,7 @@ export default function BuilderPage() {
                 />
             )}
         </div>
+        </FeatureGate>
     );
 }
 

@@ -6,6 +6,7 @@ import { Loader2, Send, Bot, User, AlertCircle, ShieldCheck, Copy, Share2, Check
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/lib/i18n/I18nProvider';
+import { FeatureGate } from '@/components/pricing/FeatureGate';
 
 interface ChatMessage {
     role: 'user' | 'assistant' | 'system';
@@ -205,7 +206,8 @@ export default function JobForgeAIPage() {
     }
 
     return (
-        <div className="h-screen bg-[#020205] text-slate-200 flex flex-col selection:bg-indigo-500/30 overflow-hidden">
+        <FeatureGate task="job">
+            <div className="h-screen bg-[#020205] text-slate-200 flex flex-col selection:bg-indigo-500/30 overflow-hidden">
             {/* Header */}
             <header className="sticky top-0 z-30 bg-[#020205]/80 backdrop-blur-2xl border-b border-white/5 px-6 py-4">
                 <div className="max-w-5xl mx-auto flex items-center justify-between">
@@ -427,7 +429,8 @@ export default function JobForgeAIPage() {
                     {blocked && <p className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-red-500 mt-4 animate-pulse italic">Access Denied: Protocol Violation Detected</p>}
                 </form>
             </div>
-        </div>
+            </div>
+        </FeatureGate>
     );
 }
 

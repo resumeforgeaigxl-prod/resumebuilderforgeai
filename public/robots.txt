@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://resumeforgeai.in/sitemap.xml
+Sitemap: https://www.resumeforgeai.in/sitemap.xml

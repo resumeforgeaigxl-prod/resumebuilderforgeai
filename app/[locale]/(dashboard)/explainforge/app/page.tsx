@@ -35,6 +35,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { Accordion } from '@/components/ui/Accordion';
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FeatureGate } from '@/components/pricing/FeatureGate';
 
 interface ExplainForgeFileResult {
     summary: string;
@@ -355,7 +356,8 @@ export default function ExplainForgePage() {
     };
 
     return (
-        <div className="space-y-12 animate-fade-in py-8 max-w-7xl mx-auto px-4">
+        <FeatureGate task="explain">
+            <div className="space-y-12 animate-fade-in py-8 max-w-7xl mx-auto px-4">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
                 <header className="space-y-4">
@@ -832,5 +834,6 @@ export default function ExplainForgePage() {
                 </motion.div>
             )}
         </div>
+        </FeatureGate>
     );
 }

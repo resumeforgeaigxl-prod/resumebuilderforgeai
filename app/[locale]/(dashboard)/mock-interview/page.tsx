@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { Mic, CheckCircle, ArrowRight, RotateCcw, FileText, Target } from 'lucide-react';
+import { FeatureGate } from '@/components/pricing/FeatureGate';
 import Link from 'next/link';
 
 interface InterviewSetup {
@@ -42,7 +43,9 @@ interface User {
 export default function MockInterviewPage() {
   return (
     <Suspense fallback={<div>Loading interview setup...</div>}>
-      <MockInterviewContent />
+      <FeatureGate task="interview">
+        <MockInterviewContent />
+      </FeatureGate>
     </Suspense>
   );
 }

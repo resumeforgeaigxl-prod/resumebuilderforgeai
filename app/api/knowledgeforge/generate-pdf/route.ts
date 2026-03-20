@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { jsPDF } from 'jspdf';
 import { getSession } from '@/lib/auth/jwt';
 
+export const dynamic = 'force-dynamic';
+
 interface TopicInfo {
   name: string;
 }

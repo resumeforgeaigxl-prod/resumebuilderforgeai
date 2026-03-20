@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { fadeInUp, fadeInScale } from '@/lib/constants';
 import { ArrowRight, Sparkles, Calendar, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { BlogPost } from '@/lib/seo-service';
 
 export default function WhatsNew({ locale = 'en', posts = [] }: { locale: string, posts?: BlogPost[] }) {
@@ -66,9 +67,11 @@ export default function WhatsNew({ locale = 'en', posts = [] }: { locale: string
                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out"
                                                 />
                                             ) : (
-                                                <img 
+                                                <Image
                                                     src={post.cover_image} 
-                                                    alt={post.title} 
+                                                    alt={post.title}
+                                                    fill
+                                                    sizes="(max-width: 768px) 85vw, 420px"
                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out grayscale-[20%] group-hover:grayscale-0"
                                                 />
                                             )}

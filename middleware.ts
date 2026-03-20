@@ -93,7 +93,7 @@ export async function middleware(request: NextRequest) {
     const host = request.headers.get('host') ?? '';
     const STATIC_FILE_EXTENSIONS = [
         '.svg', '.png', '.ico', '.jpg', '.jpeg', '.gif', '.webp', '.xml',
-        '.js', '.mjs', '.css', '.map', '.txt', '.woff', '.woff2', '.ttf', '.otf'
+        '.js', '.mjs', '.css', '.map', '.txt', '.woff', '.woff2', '.ttf', '.otf', '.html'
     ];
 
     // Determine if this is a subdomain request
@@ -236,75 +236,20 @@ export async function middleware(request: NextRequest) {
     }
 
     // ─── Admin subdomain ──────────────────────────────────────────────────────
+    // ─── Admin subdomain: Redirect to main domain ──────────────────────────────
     if (isAdminSubdomain) {
-        if (!session) {
-            const loginUrl = new URL(`/${currentLocale}-${currentRegion}/login`, request.url);
-            return NextResponse.redirect(loginUrl);
+        let subRoute = pathname === '/' ? '/admin' : pathname;
+        if (!subRoute.startsWith('/admin')) {
+            subRoute = `/admin${subRoute}`;
         }
-        if (session.isBlocked) {
-            const res = NextResponse.redirect(new URL(`/${currentLocale}-${currentRegion}/login?error=AccountBlocked`, request.url));
-            res.cookies.delete('resume_forge_auth');
-            return res;
-        }
-        if (session.role !== 'admin') {
-            return NextResponse.redirect(new URL(`/${currentLocale}-${currentRegion}/dashboard`, request.url));
-        }
-
-        // If on admin subdomain and the path has a locale, we should redirect to clean URL
-        // or just rewrite it to the internal localized path.
-        // For subdomains, we usually want clean URLs in the browser.
-        
-        // 1. Get the path without locale
-        let subRoute = pathname;
-        if (hasFullLocale || isLegacyRegion || SUPPORTED_LOCALES.includes(firstSegment)) {
-            subRoute = '/' + pathParts.slice(1).join('/');
-        }
-
-        // 2. Strip leading /admin to get the sub-route relative to admin dashboard
-        // This handles cases like /admin/resumes
-        let internalSubPath = subRoute;
-        if (internalSubPath.startsWith('/admin')) {
-            internalSubPath = internalSubPath.replace('/admin', '') || '/';
-        }
-
-        // 3. Reconstruct internal rewrite: /[locale]/admin/[sub-route]
-        const internalRewritePath = `/${currentLocale}-${currentRegion}/admin${internalSubPath === '/' ? '' : internalSubPath}`.replace(/\/+/g, '/');
-
-        return NextResponse.rewrite(new URL(internalRewritePath, request.url));
+        return NextResponse.redirect(new URL(`https://www.resumeforgeai.in/${currentLocale}-${currentRegion}${subRoute}`, request.url));
     }
 
     // ─── App subdomain ────────────────────────────────────────────────────────
+    // ─── App subdomain: Redirect to main dashboard ────────────────────────────
     if (isAppSubdomain) {
-        const isAuthRoute = normalizedPath.startsWith('/login') || normalizedPath.startsWith('/signup');
-        const isPublicRoute = normalizedPath === '/' ||
-            normalizedPath.startsWith('/privacy') ||
-            normalizedPath.startsWith('/terms') ||
-            normalizedPath.startsWith('/cookie-policy') ||
-            normalizedPath.startsWith('/data-deletion');
-        const isCompleteProfile = normalizedPath === '/complete-profile';
-
-        if (!session && !isAuthRoute && !isPublicRoute && !isCompleteProfile) {
-            return NextResponse.redirect(new URL(`/${currentLocale}-${currentRegion}/login`, request.url));
-        }
-
-        if (session) {
-            if (session.isBlocked) {
-                const res = NextResponse.redirect(new URL(`/${currentLocale}-${currentRegion}/login?error=AccountBlocked`, request.url));
-                res.cookies.delete('resume_forge_auth');
-                return res;
-            }
-            const profileIncomplete = !session.profileCompleted;
-            if (profileIncomplete && !isCompleteProfile && !isAuthRoute && !isPublicRoute) {
-                return NextResponse.redirect(new URL(`/${currentLocale}-${currentRegion}/complete-profile`, request.url));
-            }
-            if (!profileIncomplete && isCompleteProfile) {
-                return NextResponse.redirect(new URL(`/${currentLocale}-${currentRegion}/dashboard`, request.url));
-            }
-            if (isAuthRoute) {
-                return NextResponse.redirect(new URL(`/${currentLocale}-${currentRegion}/dashboard`, request.url));
-            }
-        }
-        return NextResponse.rewrite(new URL(`${pathname}`, request.url));
+        let targetPath = pathname === '/' ? '/dashboard' : pathname;
+        return NextResponse.redirect(new URL(`https://www.resumeforgeai.in/${currentLocale}-${currentRegion}${targetPath}`, request.url));
     }
 
     // ─── Main domain: handle regional subfolders + geo detection ─────────────
