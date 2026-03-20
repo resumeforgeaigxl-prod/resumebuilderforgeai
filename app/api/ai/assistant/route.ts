@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { generateJsonGemini } from '@/lib/gemini-service';
+import { generateAIResponse } from '@/lib/ai-core/rag-engine';
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
 
@@ -96,7 +96,14 @@ export async function POST(req: Request) {
         User Message: ${message}
         Chat History: ${JSON.stringify(history?.slice(-5) || [])}`;
         
-        const responseData = await generateJsonGemini(prompt, SYSTEM_PROMPT);
+        const responseData = await generateAIResponse(prompt, {
+            userId: userId!,
+            contextType: 'jobs',
+            jsonMode: true,
+            systemPrompt: SYSTEM_PROMPT
+        });
+        
+        if (!responseData) throw new Error("AI Assistant failed");
 
         // 4. Store Assistant Message & Usage
         if (userId && chatId) {

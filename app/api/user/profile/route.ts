@@ -18,7 +18,7 @@ export async function GET() {
         const supabase = createClient();
         const { data: user } = await supabase
             .from('users')
-            .select('email, full_name, role')
+            .select('email, full_name, role, phone_number')
             .eq('id', session.userId)
             .single();
 
@@ -29,9 +29,11 @@ export async function GET() {
         return NextResponse.json({
             success: true,
             user: {
+                id: session.userId,
                 role: user.role,
                 email: user.email ?? null,
-                name: user.full_name ?? null,
+                full_name: user.full_name ?? null,
+                phone_number: user.phone_number ?? null,
             }
         });
     } catch (err) {

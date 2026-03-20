@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateJsonGemini } from '@/lib/gemini-service';
+import { generateAIResponse } from '@/lib/ai-core/rag-engine';
 import { createClient } from '@supabase/supabase-js';
 import { buildUserContext, type UserContext } from '@/lib/ai/mentor-context';
 import { getSession } from '@/lib/auth/jwt';
@@ -138,7 +138,12 @@ export async function POST(req: NextRequest) {
     
     OUTPUT_JSON: { "reply": "...", "suggestedAction": "...", "memoryExtraction": {...} }`;
 
-    const result = await generateJsonGemini(userPrompt, instructions);
+    const result = await generateAIResponse(userPrompt, {
+        userId,
+        contextType: 'general',
+        jsonMode: true,
+        systemPrompt: instructions,
+    });
 
     // ── 3. POST-PROCESSING STRUCTURAL SAFEGUARD ───────────────────────────
     // If the AI stubbornyl leads with code, we shift it to the end

@@ -3,12 +3,13 @@ import Razorpay from 'razorpay';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
 
-type PlanName = 'PRO' | 'PREMIUM' | 'CAREER';
+type PlanName = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'PRO';
 
 const PLAN_PRICES: Record<PlanName, number> = {
-    PRO: 29,
-    PREMIUM: 199,
-    CAREER: 499,
+    DAILY: 29,
+    WEEKLY: 79,
+    MONTHLY: 199,
+    PRO: 499,
 };
 
 /**
@@ -49,8 +50,8 @@ export async function POST(req: NextRequest) {
         // ── 2. Determine Pricing ──────────────────────────────────────────
         // Career: 499 INR or 6 USD
         const CURRENCY_PRICES: Record<string, Record<PlanName, number>> = {
-            INR: { PRO: 29, PREMIUM: 199, CAREER: 499 },
-            USD: { PRO: 1, PREMIUM: 3, CAREER: 6 }
+            INR: { DAILY: 29, WEEKLY: 79, MONTHLY: 199, PRO: 499 },
+            USD: { DAILY: 1, WEEKLY: 3, MONTHLY: 6, PRO: 12 }
         };
 
         const basePrice = CURRENCY_PRICES[currency][planName] || CURRENCY_PRICES['INR'][planName];

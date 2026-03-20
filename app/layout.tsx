@@ -70,6 +70,8 @@ export const metadata: Metadata = {
 };
 
 
+import { Toaster } from "react-hot-toast";
+
 export default function RootLayout({
   children,
 }: {
@@ -80,6 +82,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-[var(--page-bg)] text-[var(--text-primary)] antialiased`}
       >
+        <Toaster position="top-right" />
         {children}
       </body>
     </html>

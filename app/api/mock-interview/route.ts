@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { generateAIResponse, stripMarkdown } from '@/lib/ai-provider';
+import { generateAIResponse } from '@/lib/ai-core/rag-engine';
+import { stripMarkdown } from '@/lib/ai-provider';
 
 export const runtime = 'nodejs';
 
@@ -102,8 +103,8 @@ Questions should be relevant to the role and experience level. Return only a JSO
 
 Example: ["Question 1", "Question 2", "Question 3"]`;
 
-            const response = await generateAIResponse(prompt);
-            const cleanText = stripMarkdown(response.text);
+            const response = await generateAIResponse(prompt, { userId: session.userId, contextType: 'interview' });
+            const cleanText = stripMarkdown(response as string);
             let questions;
 
             try {
@@ -135,8 +136,8 @@ Return a JSON object with:
 
 Example: {"score": 7, "feedback": "Good explanation but could be more specific", "tips": "Add examples from your experience"}`;
 
-            const response = await generateAIResponse(prompt);
-            const cleanText = stripMarkdown(response.text);
+            const response = await generateAIResponse(prompt, { userId: session.userId, contextType: 'interview' });
+            const cleanText = stripMarkdown(response as string);
             let evaluation;
 
             try {
@@ -219,8 +220,14 @@ Example: {"score": 7, "feedback": "Good explanation but could be more specific",
               "improvement_suggestions": ["string"]
             }`;
 
-            const response = await generateAIResponse(prompt, 'openai/gpt-4o-mini');
-            const cleanText = stripMarkdown(response.text);
+            const response = await generateAIResponse(prompt, {
+                userId: session.userId,
+                contextType: 'interview',
+                jsonMode: false,
+                systemPrompt: "Analyze the interview performance. Return JSON scorecard.",
+                model: 'openai/gpt-4o-mini'
+            });
+            const cleanText = stripMarkdown(response as string);
             let report;
 
             try {

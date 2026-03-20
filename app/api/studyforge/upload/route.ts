@@ -2,13 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 import mammoth from 'mammoth';
+import { extractTextFromPdf } from '@/lib/pdf-service';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
     try {
         const session = await getSession();
-        if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        if (!session) {
+            console.error('[StudyForge] Upload attempt without session.');
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        console.log(`[StudyForge] Uploading for user: ${session.userId}`);
 
         const formData = await request.formData();
         const file = formData.get('file') as File;
@@ -60,7 +66,6 @@ export async function POST(request: NextRequest) {
         try {
             if (resolvedFileType === 'application/pdf' || lowerName.endsWith('.pdf')) {
                 // Use the new Python PDF Extraction Service
-                const { extractTextFromPdf } = await import('@/lib/pdf-service');
                 textContent = await extractTextFromPdf(buffer, file.name);
 
                 // Simple chunking for StudyForge (approx 1200 chars as before)

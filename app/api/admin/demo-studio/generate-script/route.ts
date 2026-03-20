@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateJsonGemini } from '@/lib/gemini-service';
+import { generateAIResponse } from '@/lib/ai-core/rag-engine';
 import { getSession } from '@/lib/auth/jwt';
+
 
 export async function POST(req: NextRequest) {
   try {
@@ -33,7 +34,12 @@ export async function POST(req: NextRequest) {
 
     const systemInstruction = "You are a marketing expert skilled in creating product demos for SaaS platforms.";
 
-    const result = await generateJsonGemini(prompt, systemInstruction);
+    const result = await generateAIResponse(prompt, {
+        userId: session!.userId,
+        contextType: 'general',
+        jsonMode: true,
+        systemPrompt: systemInstruction
+    });
 
     return NextResponse.json(result);
   } catch (error: unknown) {

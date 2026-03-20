@@ -4,6 +4,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Zap } from 'lucide-react';
 import { PLANS, PlanID } from '@/lib/pricing/config';
+import { useRouter, useParams } from 'next/navigation';
 
 interface UpgradeModalProps {
     isOpen: boolean;
@@ -11,6 +12,15 @@ interface UpgradeModalProps {
 }
 
 export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose }) => {
+    const router = useRouter();
+    const params = useParams();
+    const locale = params?.locale || 'en-in';
+
+    const handleUpgrade = (planId: PlanID) => {
+        router.push(`/${locale}/dashboard/billing?plan=${planId}`);
+        onClose();
+    };
+
     return (
         <AnimatePresence>
             {isOpen && (
@@ -67,7 +77,10 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose }) =
                                                 )}
                                             </ul>
 
-                                            <button className="w-full py-2.5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg font-semibold hover:bg-primary hover:text-white transition-all">
+                                            <button 
+                                                onClick={() => handleUpgrade(planId)}
+                                                className="w-full py-2.5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg font-semibold hover:bg-indigo-600 hover:text-white transition-all shadow-lg active:scale-95"
+                                            >
                                                 Upgrade Now
                                             </button>
                                         </div>
@@ -76,7 +89,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({ isOpen, onClose }) =
                             </div>
 
                             <div className="mt-10 p-6 bg-zinc-50 dark:bg-zinc-950 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 text-center">
-                                <p className="text-sm font-medium">✨ Need everything + Mentor AI? Check out our <span className="text-primary font-bold">Pro Plan (₹499)</span></p>
+                                <p className="text-sm font-medium">✨ Need everything + Mentor AI? Check out our <button onClick={() => handleUpgrade('pro')} className="text-indigo-500 font-bold hover:underline">Professional Plan (₹499)</button></p>
                             </div>
                         </div>
                     </motion.div>

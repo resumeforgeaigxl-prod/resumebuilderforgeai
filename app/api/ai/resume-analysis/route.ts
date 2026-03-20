@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { generateJsonGemini } from '@/lib/gemini-service';
+import { generateAIResponse } from '@/lib/ai-core/rag-engine';
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
 
@@ -42,7 +42,12 @@ export async function POST(req: Request) {
 
         // 1. Generate AI Analysis
         const prompt = ANALYSIS_PROMPT.replace('{{RESUME_DATA}}', JSON.stringify(resumeData));
-        const aiResponse = await generateJsonGemini(prompt, "You are a Resume Intelligence AI.");
+        const aiResponse = await generateAIResponse(prompt, {
+            userId: session!.userId,
+            contextType: 'general',
+            jsonMode: true,
+            systemPrompt: "You are a Resume Intelligence AI."
+        });
 
         if (!aiResponse || typeof aiResponse.ats_score !== 'number') {
             throw new Error("Invalid AI response");

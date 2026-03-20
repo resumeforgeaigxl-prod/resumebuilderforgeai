@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 
-export type PlanName = 'PRO' | 'PREMIUM' | 'CAREER';
+export type PlanName = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'PRO';
 
 interface PlanConfig {
     durationHours: number | null; // null = 30 days
@@ -12,29 +12,37 @@ interface PlanConfig {
 }
 
 const PLAN_CONFIG: Record<PlanName, PlanConfig> = {
-    PRO: {
+    DAILY: {
         durationHours: 24,
         isMonthly: false,
         dailyResumeLimit: 9999,
         dailyCoverLimit: 9999,
         dailyMockLimit: 9999,
-        subscriptionPlan: 'pro',
+        subscriptionPlan: 'daily',
     },
-    PREMIUM: {
-        durationHours: null,
-        isMonthly: true,
-        dailyResumeLimit: 10,
-        dailyCoverLimit: 10,
-        dailyMockLimit: 10,
-        subscriptionPlan: 'premium',
+    WEEKLY: {
+        durationHours: 168, // 7 days
+        isMonthly: false,
+        dailyResumeLimit: 9999,
+        dailyCoverLimit: 9999,
+        dailyMockLimit: 9999,
+        subscriptionPlan: 'weekly',
     },
-    CAREER: {
+    MONTHLY: {
         durationHours: null,
         isMonthly: true,
         dailyResumeLimit: 9999,
         dailyCoverLimit: 9999,
         dailyMockLimit: 9999,
-        subscriptionPlan: 'career',
+        subscriptionPlan: 'monthly',
+    },
+    PRO: {
+        durationHours: null,
+        isMonthly: true,
+        dailyResumeLimit: 9999,
+        dailyCoverLimit: 9999,
+        dailyMockLimit: 9999,
+        subscriptionPlan: 'pro',
     },
 } as const;
 
@@ -61,6 +69,7 @@ export async function activateUserPlan(userId: string, planName: PlanName, payme
         .from('users')
         .update({
             plan_type: planName.toLowerCase(),
+            plan_id: planName.toLowerCase(), // Ensure both are in sync
             plan_start: now.toISOString(),
             plan_end: planEnd.toISOString(),
             plan: 'pro', // legacy field — so existing checkUserAccess still works
@@ -68,6 +77,8 @@ export async function activateUserPlan(userId: string, planName: PlanName, payme
             daily_resume_limit: config.dailyResumeLimit,
             daily_cover_limit: config.dailyCoverLimit,
             daily_mock_limit: config.dailyMockLimit,
+            daily_credits_used: 0, // Reset usage on upgrade
+            daily_job_views: 0,   // Reset job views
         })
         .eq('id', userId);
 

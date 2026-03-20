@@ -32,8 +32,6 @@ export default function Pricing({ locale = DEFAULT_LOCALE }: PricingProps) {
 
         <div className="mt-16 grid gap-6 lg:grid-cols-3">
           {pricingTiers.map((tier, index) => {
-            const href = `/${locale}${tier.href}`;
-
             return (
               <motion.article
                 key={tier.name}
@@ -82,7 +80,7 @@ export default function Pricing({ locale = DEFAULT_LOCALE }: PricingProps) {
                   </ul>
 
                   <Link
-                    href={href}
+                    href={`/${locale}${tier.href}`}
                     className={`mt-10 inline-flex w-full items-center justify-center rounded-full px-6 py-3.5 text-sm font-semibold transition-all duration-200 ${
                       tier.featured ? "btn-primary" : "btn-secondary"
                     }`}

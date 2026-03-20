@@ -1,6 +1,9 @@
-import jwt from 'jsonwebtoken';
+import { SignJWT, jwtVerify } from 'jose';
+import { MAIN_DOMAIN } from '../constants';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_change_in_production';
+const JWT_SECRET = new TextEncoder().encode(
+    process.env.JWT_SECRET || 'fallback_secret_change_in_production'
+);
 const COOKIE_NAME = 'resume_forge_auth';
 const JWT_EXPIRES_IN = '7d';
 
@@ -13,18 +16,19 @@ export interface AuthSession {
     provider: string;
 }
 
-import { MAIN_DOMAIN } from '../constants';
-
 export async function createSession(payload: AuthSession) {
     const expiresInSec = 7 * 24 * 60 * 60; // 7 days
 
-    // Strip JWT-reserved fields (exp, iat, nbf) that may be present if
-    // payload was spread from a previously decoded token (getSession result)
+    // Strip JWT-reserved fields (exp, iat, nbf)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { exp, iat, nbf, ...cleanPayload } = payload as any;
-    void exp; void iat; void nbf; // suppress unused var warnings
+    void exp; void iat; void nbf;
 
-    const token = jwt.sign(cleanPayload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+    const token = await new SignJWT(cleanPayload)
+        .setProtectedHeader({ alg: 'HS256' })
+        .setIssuedAt()
+        .setExpirationTime(JWT_EXPIRES_IN)
+        .sign(JWT_SECRET);
 
     const { cookies } = await import('next/headers');
     cookies().set(COOKIE_NAME, token, {
@@ -44,9 +48,10 @@ export async function getSession(): Promise<AuthSession | null> {
     if (!token) return null;
 
     try {
-        const decoded = jwt.verify(token, JWT_SECRET) as AuthSession;
-        return decoded;
-    } catch {
+        const { payload } = await jwtVerify(token, JWT_SECRET);
+        return payload as unknown as AuthSession;
+    } catch (err) {
+        console.error('[Auth] getSession failed:', err instanceof Error ? err.message : 'Unknown error');
         return null;
     }
 }

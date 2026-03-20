@@ -61,8 +61,8 @@ export async function POST(req: NextRequest) {
         const currency = isIndia ? 'INR' : 'USD';
 
         const CURRENCY_PRICES: Record<string, Record<PlanName, number>> = {
-            INR: { PRO: 29, PREMIUM: 199, CAREER: 499 },
-            USD: { PRO: 1, PREMIUM: 3, CAREER: 6 }
+            INR: { DAILY: 29, WEEKLY: 79, MONTHLY: 199, PRO: 499 },
+            USD: { DAILY: 1, WEEKLY: 3, MONTHLY: 6, PRO: 12 }
         };
 
         const basePrice = CURRENCY_PRICES[currency][planName] || CURRENCY_PRICES['INR'][planName];

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { generateJsonGemini } from '@/lib/gemini-service';
+import { generateAIResponse } from '@/lib/ai-core/rag-engine';
 import { getSession } from '@/lib/auth/jwt';
 
 export const runtime = 'nodejs';
@@ -45,7 +45,12 @@ export async function POST(req: Request) {
 
         let response;
         try {
-            response = await generateJsonGemini(prompt, REVIEW_SYSTEM_PROMPT);
+            response = await generateAIResponse(prompt, {
+                userId: session!.userId,
+                contextType: 'project',
+                jsonMode: true,
+                systemPrompt: REVIEW_SYSTEM_PROMPT
+            });
         } catch (err) {
             console.error('[CodeReview API] AI Service Failure:', err);
             response = { error: "JSON_PARSE_FAILED" };

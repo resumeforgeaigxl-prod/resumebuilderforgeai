@@ -1,17 +1,8 @@
 import Link from 'next/link';
 import { ShieldAlert } from 'lucide-react';
-import { getSession } from '@/lib/auth/jwt';
-import { cookies } from 'next/headers';
 
-export default async function NotFound() {
-    const session = await getSession();
-
-    // Try to preserve language/region
-    const cookieStore = cookies();
-    const region = cookieStore.get('preferred_region')?.value || 'in';
-    const lang = cookieStore.get('preferred_lang')?.value || 'en';
-
-    const dashboardLink = `/${lang}-${region}/dashboard`;
+export default function NotFound() {
+    const dashboardLink = '/en-in/dashboard';
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-[#070710] text-slate-100 p-4 selection:bg-indigo-500/30">
@@ -29,25 +20,12 @@ export default async function NotFound() {
                     The page you are looking for doesn’t exist or may have been moved.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    {session ? (
-                        <>
-                            <Link href={dashboardLink} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold transition-all shadow-lg hover:shadow-indigo-500/20 active:scale-95 text-center">
-                                Go to Dashboard
-                            </Link>
-                            <Link href="/" className="px-6 py-3 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl font-bold transition-all active:scale-95 text-center">
-                                Go to Home
-                            </Link>
-                        </>
-                    ) : (
-                        <>
-                            <Link href="/" className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold transition-all shadow-lg hover:shadow-indigo-500/20 active:scale-95 text-center">
-                                Go to Home
-                            </Link>
-                            <Link href={dashboardLink} className="px-6 py-3 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl font-bold transition-all active:scale-95 text-center">
-                                Go to Dashboard
-                            </Link>
-                        </>
-                    )}
+                    <Link href="/" className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold transition-all shadow-lg hover:shadow-indigo-500/20 active:scale-95 text-center">
+                        Go to Home
+                    </Link>
+                    <Link href={dashboardLink} className="px-6 py-3 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl font-bold transition-all active:scale-95 text-center">
+                        Go to Dashboard
+                    </Link>
                 </div>
             </div>
         </div>

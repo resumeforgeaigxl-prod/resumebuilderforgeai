@@ -22,10 +22,12 @@ export async function POST(req: Request) {
             .update({
                 full_name: fullName,
                 phone_number: phone,
-                college: college, // This might need a column addition
-                skills: skills,   // This might need a column addition
-                experience_level: experience, // This might need a column addition
+                college: college, 
+                skills: Array.isArray(skills) ? skills : skills.split(',').map((s: string) => s.trim()).filter(Boolean),
+                experience_level: experience,
                 profile_completed: true,
+                terms_accepted: true,
+                terms_accepted_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             })
             .eq('id', session.userId);
@@ -40,7 +42,8 @@ export async function POST(req: Request) {
         // 2. Refresh the JWT Session and Cookie
         await createSession({
             ...session,
-            profileCompleted: true
+            profileCompleted: true,
+            termsAccepted: true
         });
 
         return NextResponse.json({ 

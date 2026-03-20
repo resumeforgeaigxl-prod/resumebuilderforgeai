@@ -45,12 +45,12 @@ export const PLANS: Record<PlanID, PlanConfig> = {
     },
     daily: {
         id: 'daily',
-        name: 'Daily (₹29)',
+        name: 'Daily',
         price: 29,
-        creditsPerDay: 500,
+        creditsPerDay: 300,
         features: {
             forges: {
-                resume: 'full', // AI optimize
+                resume: 'full',
                 code: 'basic',
                 interview: 'basic',
                 explain: 'basic',
@@ -69,7 +69,7 @@ export const PLANS: Record<PlanID, PlanConfig> = {
     },
     weekly: {
         id: 'weekly',
-        name: 'Weekly (₹79)',
+        name: 'Weekly',
         price: 79,
         creditsPerDay: 800,
         features: {
@@ -94,9 +94,9 @@ export const PLANS: Record<PlanID, PlanConfig> = {
     },
     monthly: {
         id: 'monthly',
-        name: 'Monthly (₹199)',
+        name: 'Monthly',
         price: 199,
-        creditsPerDay: 1500,
+        creditsPerDay: 2000,
         features: {
             forges: {
                 resume: 'full',
@@ -119,9 +119,9 @@ export const PLANS: Record<PlanID, PlanConfig> = {
     },
     pro: {
         id: 'pro',
-        name: 'Pro (₹499)',
+        name: 'Professional',
         price: 499,
-        creditsPerDay: 3000,
+        creditsPerDay: 5000,
         features: {
             forges: {
                 resume: 'full',

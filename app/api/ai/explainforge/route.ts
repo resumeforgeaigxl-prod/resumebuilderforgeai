@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { generateJsonGemini } from '@/lib/gemini-service';
+import { generateAIResponse } from '@/lib/ai-core/rag-engine';
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
 import { logUsage } from '@/lib/usage';
@@ -139,7 +139,7 @@ async function fetchFileObjects(urls: string[], names: string[]): Promise<FileOb
     return fileObjects;
 }
 
-async function summarizeFiles(files: FileObject[]): Promise<FileSummary[]> {
+async function summarizeFiles(files: FileObject[], userId: string): Promise<FileSummary[]> {
     const summaries: FileSummary[] = [];
     const batchSize = 5;
     for (let i = 0; i < files.length; i += batchSize) {
@@ -147,7 +147,12 @@ async function summarizeFiles(files: FileObject[]): Promise<FileSummary[]> {
         const batchPromises = batch.map(async (file) => {
             try {
                 const prompt = `FILE NAME: ${file.name}\nCONTENT:\n${file.content}`;
-                const result = await generateJsonGemini(prompt, SUMMARY_SYSTEM_PROMPT);
+                const result = await generateAIResponse(prompt, {
+                    userId,
+                    contextType: 'project',
+                    jsonMode: true,
+                    systemPrompt: SUMMARY_SYSTEM_PROMPT
+                });
                 return result as FileSummary;
             } catch (err) {
                 console.error(`[ExplainForge] Error summarizing ${file.name}:`, err);
@@ -205,7 +210,7 @@ export async function POST(req: Request) {
         let aggregatedSummaries = "";
         if (fileObjects.length > 0) {
             console.log(`[ExplainForge] Summarizing ${fileObjects.length} files...`);
-            const summaries = await summarizeFiles(fileObjects);
+            const summaries = await summarizeFiles(fileObjects, session.userId);
             aggregatedSummaries = summaries.map(s => 
                 `File: ${s.fileName}\nPurpose: ${s.purpose}\nLogic: ${s.logicSummary}\n---`
             ).join('\n');
@@ -223,7 +228,12 @@ Task: Transform this project into a career-ready interview explanation and human
 
         let response;
         try {
-            const rawResult = await generateJsonGemini(prompt, SYSTEM_PROMPT);
+            const rawResult = await generateAIResponse(prompt, {
+                userId: session.userId,
+                contextType: 'project',
+                jsonMode: true,
+                systemPrompt: SYSTEM_PROMPT
+            });
             if (typeof rawResult === 'string') {
                 response = safeParseExplainForgeResponse(rawResult);
             } else if (rawResult && rawResult.error === "JSON_PARSE_FAILED") {

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import { generateJsonGemini } from '@/lib/gemini-service';
-import { createClient } from '@/lib/supabase/server';
+import { generateAIResponse } from '@/lib/ai-core/rag-engine';
 import { getSession } from '@/lib/auth/jwt';
+import { createClient } from '@/lib/supabase/server';
+
 
 export async function POST(req: Request) {
     try {
@@ -44,7 +45,12 @@ Return JSON format: { "timestamp_explanations": [ { "time": "00:00 - 00:20", "to
 
         const userPrompt = `Transcript: \n${mockTranscript}`;
         
-        const aiResponse = await generateJsonGemini(userPrompt, systemPrompt);
+        const aiResponse = await generateAIResponse(userPrompt, {
+            userId: session!.userId,
+            contextType: 'general',
+            jsonMode: true,
+            systemPrompt: systemPrompt
+        });
 
         // 4. Save to DB
         const { data: newNotes, error: insertErr } = await supabase

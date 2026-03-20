@@ -6,7 +6,7 @@ import { MapPin, CreditCard, Shield, Clock, Zap, Crown, CheckCircle, ArrowLeft, 
 import Link from 'next/link';
 
 // ── Plan definitions ──────────────────────────────────────────────────────────
-type PlanName = 'PRO' | 'PREMIUM' | 'CAREER';
+type PlanName = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'PRO';
 
 const PLANS: Record<PlanName, {
     label: string;
@@ -18,46 +18,61 @@ const PLANS: Record<PlanName, {
     gradient: string;
     border: string;
 }> = {
-    PRO: {
-        label: 'Pro',
+    DAILY: {
+        label: 'Daily',
         price: 29,
         priceLabel: '₹29',
         description: '24-hour unlimited access',
         features: [
-            'Unlimited resumes (24h)',
-            'Unlimited cover letters (24h)',
-            'Unlimited mock tests (24h)',
+            '300 Daily AI credits',
+            'Full ResumeForge access',
+            '24-hour validity',
             'No watermarks',
         ],
         icon: <Zap className="w-5 h-5" />,
         gradient: 'from-blue-500/20 to-cyan-500/20',
         border: 'border-blue-500/40',
     },
-    PREMIUM: {
-        label: 'Premium',
+    WEEKLY: {
+        label: 'Weekly',
+        price: 79,
+        priceLabel: '₹79',
+        description: '7-day career sprint',
+        features: [
+            '800 Daily AI credits',
+            'Everything in Daily',
+            'InterviewForge access',
+            '7-day validity',
+        ],
+        icon: <Zap className="w-5 h-5" />,
+        gradient: 'from-emerald-500/20 to-teal-500/20',
+        border: 'border-emerald-500/40',
+    },
+    MONTHLY: {
+        label: 'Monthly',
         price: 199,
         priceLabel: '₹199/mo',
         description: 'Monthly subscription with generous limits',
         features: [
-            '10 resumes/day',
-            '10 cover letters/day',
-            '10 mock tests/day',
-            'No watermarks',
+            '2000 Daily AI credits',
+            'Full Advanced AI Forges',
+            'Everything in Weekly',
+            '30-day validity',
         ],
         icon: <Crown className="w-5 h-5" />,
         gradient: 'from-purple-500/20 to-pink-500/20',
         border: 'border-purple-500/40',
     },
-    CAREER: {
-        label: 'Career',
+    PRO: {
+        label: 'Professional',
         price: 499,
         priceLabel: '₹499/mo',
         description: 'Unlimited monthly access — for serious job seekers',
         features: [
-            'Unlimited resumes',
-            'Unlimited cover letters',
-            'Unlimited mock tests',
-            'Priority AI processing',
+            '5000 Daily AI credits',
+            'All AI Forges + Mentor AI',
+            'Priority Support',
+            '30-day validity',
         ],
         icon: <Crown className="w-5 h-5 text-yellow-400" />,
         gradient: 'from-amber-500/20 to-orange-500/20',
@@ -90,8 +105,8 @@ function BillingContent({ params }: { params: { locale: string } }) {
     const { locale } = params;
     const router = useRouter();
     const searchParams = useSearchParams();
-    const rawPlan = ((searchParams?.get('plan') ?? 'PRO').toUpperCase() as PlanName);
-    const plan = PLANS[rawPlan] ? rawPlan : 'PRO';
+    const rawPlan = ((searchParams?.get('plan') ?? 'MONTHLY').toUpperCase() as PlanName);
+    const plan = PLANS[rawPlan] ? rawPlan : 'MONTHLY';
     const planInfo = PLANS[plan];
 
     const [form, setForm] = useState({
@@ -347,7 +362,7 @@ function BillingContent({ params }: { params: { locale: string } }) {
                                 coupon_code: couponResult?.code
                             });
                         } catch (e) { console.error('[PostHog] Event error:', e); }
-                        router.push('/dashboard?payment=success');
+                        router.push(`/${locale}/dashboard?payment=success`);
                     } catch {
                         setError('Payment verification failed. Please contact support.');
                         setLoading(false);
@@ -464,7 +479,7 @@ function BillingContent({ params }: { params: { locale: string } }) {
                                 {(Object.keys(PLANS) as PlanName[]).map((p) => (
                                     <Link
                                         key={p}
-                                        href={`/${locale}/billing?plan=${p}`}
+                                        href={`/${locale}/dashboard/billing?plan=${p}`}
                                         className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${p === plan ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/20' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
                                             }`}
                                     >
