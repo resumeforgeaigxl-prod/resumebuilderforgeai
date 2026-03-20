@@ -1,9 +1,9 @@
-const CACHE_NAME = 'resumeforge-v1';
+const CACHE_NAME = 'resumeforge-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/manifest.json',
-  '/logo/resumeforge-logo.svg',
-  '/logo/resumeforge-icon.svg'
+  '/logo/resumeforge-logo-v2.svg',
+  '/logo/resumeforge-icon-v2.svg'
 ];
 
 self.addEventListener('install', (event) => {

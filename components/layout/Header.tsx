@@ -16,7 +16,7 @@ export default async function Header({ lang = 'en', region = 'in' }: { lang?: st
             <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
                 <div className="flex items-center gap-2">
                     <Link href={`/${locale}`} className="flex items-center">
-                        <Image src="/logo/resumeforge-logo.svg" width={200} height={50} className="w-40 md:w-[200px] h-auto object-contain" alt="ResumeForgeAI" priority />
+                        <Image src="/logo/resumeforge-logo-v2.svg" width={180} height={40} className="w-36 md:w-[180px] h-auto object-contain" alt="ResumeForgeAI" priority />
                     </Link>
                 </div>
                 <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">

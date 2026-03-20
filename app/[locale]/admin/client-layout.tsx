@@ -85,7 +85,7 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                 <div className={`h-16 flex items-center border-b border-white/5 overflow-hidden shrink-0 ${isCollapsed ? 'md:px-0 md:justify-center px-4' : 'px-6'}`}>
                     {!isCollapsed ? (
                         <Image 
-                            src="/logo/resumeforge-logo.svg" 
+                            src="/logo/resumeforge-logo-v2.svg" 
                             width={160}
                             height={40}
                             className="w-[160px] h-auto object-contain transition-all" 
@@ -94,7 +94,7 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                         />
                     ) : (
                         <Image 
-                            src="/logo/resumeforge-icon.svg" 
+                            src="/logo/resumeforge-icon-v2.svg" 
                             width={40}
                             height={40}
                             className="w-10 h-10 object-contain transition-all" 

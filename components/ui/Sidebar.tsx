@@ -62,19 +62,19 @@ export function Sidebar({ locale }: SidebarProps) {
         <div className="mb-8 flex items-center justify-center min-h-[48px] px-2">
           {!collapsed ? (
             <Image 
-              src="/logo/resumeforge-logo.svg" 
-              width={180}
-              height={40}
-              className="w-[180px] h-auto object-contain transition-all" 
+              src="/logo/resumeforge-logo-v2.svg" 
+              width={160}
+              height={34}
+              className="w-[160px] h-auto object-contain transition-all" 
               alt="ResumeForgeAI" 
               priority
             />
           ) : (
             <Image 
-              src="/logo/resumeforge-icon.svg" 
-              width={40}
-              height={40}
-              className="w-10 h-10 object-contain transition-all" 
+              src="/logo/resumeforge-icon-v2.svg" 
+              width={32}
+              height={32}
+              className="w-8 h-8 object-contain transition-all" 
               alt="RF" 
               priority
             />
