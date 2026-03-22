@@ -3,7 +3,7 @@ import { getSession } from '@/lib/auth/jwt';
 import { consumeCodeExecutionCredit, refundCodeExecutionCredit } from '@/lib/code-execution-credits';
 import { createClient } from '@/lib/supabase/server';
 
-const JUDGE0_URL = process.env.JUDGE0_URL || 'http://localhost:2358';
+const JUDGE0_URL = process.env.JUDGE0_URL || 'http://34.170.78.245:2358';
 
 const LANGUAGE_MAP: Record<string, number> = {
     'python': 71,

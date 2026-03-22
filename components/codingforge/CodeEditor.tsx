@@ -52,12 +52,16 @@ export default function CodeEditor({ problemId, problemContext, onResult, onExpl
 
         setIsRunning(true);
         try {
-            const res = await fetch('/api/run-code', {
+            const body = { language, code, problemId };
+            console.log('[CodingForge] Requesting execution:', body);
+
+            const res = await fetch('/api/run', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ language, code, problemId }),
+                body: JSON.stringify(body),
             });
             const data = await res.json();
+            console.log('[CodingForge] Execution result:', data);
             
             if (res.ok) {
                 setCredits(prev => (prev !== null ? prev - 1 : null));
@@ -68,7 +72,8 @@ export default function CodeEditor({ problemId, problemContext, onResult, onExpl
                 const credData = await credRes.json();
                 setCredits(credData.credits);
             }
-        } catch {
+        } catch (err) {
+            console.error('[CodingForge] Fatal error during run:', err);
             onResult({ error: 'Failed to execute code. Check connection.' });
         }
         setIsRunning(false);

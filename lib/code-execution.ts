@@ -25,4 +25,5 @@ export interface ExecutionResult {
     execution_time?: number;
     success?: boolean;
     safeMessage?: string;
+    output?: string;
 }
