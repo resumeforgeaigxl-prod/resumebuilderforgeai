@@ -339,7 +339,24 @@ export const pricingTiers = [
       "Priority Email Support",
     ],
   },
+  {
+    name: "Professional",
+    price: "₹499",
+    cadence: "/month",
+    description: "For serious job seekers looking for an unfair advantage.",
+    cta: "Go Pro",
+    href: "/dashboard/billing?plan=pro",
+    accent: "from-amber-500/[0.35] to-orange-400/[0.15]",
+    featured: false,
+    features: [
+      "5000 Daily AI credits",
+      "All Forges + Mentor AI",
+      "Priority Routing & Skill Gap",
+      "Knowledge Runner Enabled",
+    ],
+  },
 ] as const;
+
 
 export const sectionTransition = {
   duration: 0.7,

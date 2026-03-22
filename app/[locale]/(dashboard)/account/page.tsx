@@ -37,16 +37,20 @@ export default async function AccountPage({ params }: { params: { locale: string
         );
     }
 
+    const isAdmin = user.role === 'admin';
     const planType = user.plan_type?.toUpperCase() || 'FREE';
     const isPlanActive = user.plan_end ? new Date(user.plan_end) > new Date() : false;
-    const activePlan = (planType !== 'FREE' && isPlanActive) ? planType : 'FREE';
+    const activePlan = isAdmin ? 'ADMIN' : ((planType !== 'FREE' && isPlanActive) ? planType : 'FREE');
+
 
     const planBadgeStyles: Record<string, string> = {
         FREE: 'bg-slate-800/10 text-slate-500 border-slate-700/30',
         PRO: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
         PREMIUM: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
         CAREER: 'bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-xl shadow-amber-500/10',
+        ADMIN: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-xl shadow-emerald-500/10',
     };
+
 
     return (
         <div className="space-y-12 animate-fade-in max-w-6xl mx-auto py-6">

@@ -11,7 +11,7 @@ export class PricingService {
         
         const { data: user, error } = await supabase
             .from('users')
-            .select('plan_id, daily_credits_used, last_credits_reset, daily_job_views, last_job_reset')
+            .select('role, plan_id, daily_credits_used, last_credits_reset, daily_job_views, last_job_reset')
             .eq('id', userId)
             .single();
 
@@ -20,8 +20,10 @@ export class PricingService {
             return { plan: PLANS.free, creditsUsed: 0, creditsRemaining: 0, jobViews: 0 };
         }
 
-        const planId = (user.plan_id || 'free') as PlanID;
+        const isAdmin = user.role === 'admin';
+        const planId = (isAdmin ? 'pro' : (user.plan_id || 'free')) as PlanID;
         const plan = PLANS[planId] || PLANS.free;
+
 
         // Reset credits if it's a new day
         const today = new Date().toISOString().split('T')[0];
@@ -48,10 +50,11 @@ export class PricingService {
         return {
             plan,
             creditsUsed,
-            creditsRemaining: Math.max(0, plan.creditsPerDay - creditsUsed),
+            creditsRemaining: isAdmin ? 99999 : Math.max(0, plan.creditsPerDay - creditsUsed),
             jobViews,
-            jobViewsRemaining: plan.features.jobLimit ? Math.max(0, plan.features.jobLimit - jobViews) : 9999
+            jobViewsRemaining: isAdmin ? 99999 : (plan.features.jobLimit ? Math.max(0, plan.features.jobLimit - jobViews) : 9999)
         };
+
     }
 
     static async canPerformTask(userId: string, task: AITask): Promise<{ allowed: boolean; reason?: string }> {

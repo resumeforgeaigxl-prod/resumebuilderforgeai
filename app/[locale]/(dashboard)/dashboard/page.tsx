@@ -33,7 +33,8 @@ export default async function DashboardPage({ params }: { params: { locale: stri
         ]);
 
         const displayName = user?.full_name || user?.email?.split('@')[0] || 'Member';
-        const plan = user?.plan_type?.toUpperCase() || 'FREE';
+        const isAdmin = user?.role === 'admin';
+        const plan = isAdmin ? 'ADMIN' : (user?.plan_type?.toUpperCase() || 'FREE');
 
         return (
             <div className="space-y-10 animate-fade-in">
@@ -50,19 +51,25 @@ export default async function DashboardPage({ params }: { params: { locale: stri
                         </h1>
                         <p className="text-slate-400 mt-1">Manage your professional evolution across the ecosystem.</p>
                     </div>
-                    {plan === 'FREE' ? (
+                    {isAdmin ? (
+                        <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
+                            <ShieldCheck className="w-5 h-5 text-indigo-400" />
+                            <span className="text-sm font-bold text-indigo-400 uppercase tracking-widest leading-none">System Admin</span>
+                        </div>
+                    ) : plan === 'FREE' ? (
                        <Button asChild variant="premium" size="lg" className="rounded-xl group shadow-indigo-500/20 shadow-lg">
-                          <Link href={`/${locale}/#pricing`}>
+                          <Link href={`/${locale}/dashboard/billing?plan=monthly`}>
                             Upgrade to Pro <Sparkles className="ml-2 w-4 h-4 group-hover:rotate-12 transition-transform" />
                           </Link>
                        </Button>
                     ) : (
                         <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
                             <Crown className="w-5 h-5 text-amber-400" />
-                            <span className="text-sm font-bold text-amber-400 uppercase tracking-widest leading-none">Pro Member</span>
+                            <span className="text-sm font-bold text-amber-400 uppercase tracking-widest leading-none">{plan} Member</span>
                         </div>
                     )}
                 </div>
+
 
                 {/* Stats Summary */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

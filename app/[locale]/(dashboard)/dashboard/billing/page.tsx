@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { MapPin, CreditCard, Shield, Clock, Zap, Crown, CheckCircle, ArrowLeft, Tag, X, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
+import { PLANS as CONFIG_PLANS } from '@/lib/pricing/config';
+
 // ── Plan definitions ──────────────────────────────────────────────────────────
 type PlanName = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'PRO';
 
@@ -20,8 +22,8 @@ const PLANS: Record<PlanName, {
 }> = {
     DAILY: {
         label: 'Daily',
-        price: 29,
-        priceLabel: '₹29',
+        price: CONFIG_PLANS.daily.price,
+        priceLabel: `₹${CONFIG_PLANS.daily.price}`,
         description: '24-hour unlimited access',
         features: [
             '300 Daily AI credits',
@@ -35,8 +37,8 @@ const PLANS: Record<PlanName, {
     },
     WEEKLY: {
         label: 'Weekly',
-        price: 79,
-        priceLabel: '₹79',
+        price: CONFIG_PLANS.weekly.price,
+        priceLabel: `₹${CONFIG_PLANS.weekly.price}`,
         description: '7-day career sprint',
         features: [
             '800 Daily AI credits',
@@ -50,8 +52,8 @@ const PLANS: Record<PlanName, {
     },
     MONTHLY: {
         label: 'Monthly',
-        price: 199,
-        priceLabel: '₹199/mo',
+        price: CONFIG_PLANS.monthly.price,
+        priceLabel: `₹${CONFIG_PLANS.monthly.price}/mo`,
         description: 'Monthly subscription with generous limits',
         features: [
             '2000 Daily AI credits',
@@ -65,8 +67,8 @@ const PLANS: Record<PlanName, {
     },
     PRO: {
         label: 'Professional',
-        price: 499,
-        priceLabel: '₹499/mo',
+        price: CONFIG_PLANS.pro.price,
+        priceLabel: `₹${CONFIG_PLANS.pro.price}/mo`,
         description: 'Unlimited monthly access — for serious job seekers',
         features: [
             '5000 Daily AI credits',
@@ -79,6 +81,7 @@ const PLANS: Record<PlanName, {
         border: 'border-amber-500/40',
     },
 };
+
 
 // Razorpay types
 declare global {
