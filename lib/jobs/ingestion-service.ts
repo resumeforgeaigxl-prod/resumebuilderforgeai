@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { createHash } from 'crypto';
+import { isValidLocation } from './utils';
 
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,7 +13,7 @@ export interface NormalisedJob {
     location: string;
     job_type: string;
     platform: string;
-    source: 'jsearch' | 'adzuna' | 'apify' | 'jobforgecollector';
+    source: 'jsearch' | 'adzuna' | 'apify' | 'jobforgecollector' | 'arbeitnow' | 'jobicy' | 'themuse' | 'jooble' | 'findwork' | 'careerjet';
     apply_url: string;
     description: string;
     posted_date: string;
@@ -45,24 +46,37 @@ export function classifyLevel(title: string): 'fresher' | 'intern' | 'experience
 }
 
 export function normalizeJob(job: Partial<NormalisedJob>): NormalisedJob {
-    // 1. NORMALIZE & CLEAN (Strict as requested)
-    const title = (job.title || 'Untitled').trim().replace(/\s+/g, ' ');
-    const company = (job.company || 'Unknown').trim().replace(/\s+/g, ' ');
-    const location = (job.location || 'India').trim().toLowerCase();
+    // 1. NORMALIZE & CLEAN
+    const title = String(job.title || 'Untitled').trim().replace(/\s+/g, ' ');
+    const company = String(job.company || 'Unknown').trim().replace(/\s+/g, ' ');
+    const rawLocation = job.location || 'India';
+    let location = 'India';
+    if (typeof rawLocation === 'string') {
+        location = rawLocation;
+    } else if (rawLocation && typeof rawLocation === 'object') {
+        const obj = rawLocation as Record<string, unknown>;
+        location = (obj.name as string) || (obj.display_name as string) || 'India';
+    }
     const apply_url = (job.apply_url || '').trim();
 
     // 2. Normalize job type
-    let jobType = (job.job_type || 'Full-time').toLowerCase().replace(/[-_ ]/g, '_');
+    let jobType = String(job.job_type || 'Full-time').toLowerCase().replace(/[-_ ]/g, '_');
     if (jobType.includes('intern')) jobType = 'internship';
-    if (jobType.includes('full')) jobType = 'full_time';
-    if (jobType.includes('contract')) jobType = 'contract';
+    else if (jobType.includes('full')) jobType = 'full_time';
+    else if (jobType.includes('contract')) jobType = 'contract';
+    else if (jobType.includes('part')) jobType = 'part_time';
 
-    // 3. GENERATE DEDUP_KEY (SHA256 of title + company + location + source)
-    const dedupInput = `${title}|${company}|${location}|${job.source || 'jfc'}`;
+    // 3. GENERATE STABLE EXTERNAL_ID (Based on Title + Company + Location)
+    // We normalize the strings to ensure consistency across search platforms
+    const normTitle = title.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const normCompany = company.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const normLocation = location.toLowerCase().replace(/[^a-z0-9]/g, '');
+    
+    const dedupInput = `${normTitle}|${normCompany}|${normLocation}`;
     const dedup_key = createHash('sha256').update(dedupInput).digest('hex');
     
-    // For legacy support and batch dedup in memory
-    const external_id = apply_url || `hash_${dedup_key.slice(0, 24)}`;
+    // As per requirement: Stable external_id for global deduplication
+    const external_id = `hash_${dedup_key.slice(0, 32)}`;
 
     return {
         ...job,
@@ -76,143 +90,119 @@ export function normalizeJob(job: Partial<NormalisedJob>): NormalisedJob {
         description: (job.description || '').slice(0, 5000),
         posted_date: job.posted_date || new Date().toISOString(),
         external_id,
-        dedup_key
+        dedup_key,
+        country: job.country || 'India'
     } as NormalisedJob;
 }
 
+
+
+
 export async function ingestJobs(jobs: Partial<NormalisedJob>[]) {
-    if (jobs.length === 0) return { total: 0, inserted: 0, skipped: 0, failed: 0 };
+    if (!jobs || jobs.length === 0) {
+        console.log('[IngestionPipeline] Received 0 jobs.');
+        return { total: 0, inserted: 0, filtered: 0, skipped: 0, failed: 0 };
+    }
 
-    // LAYER 3: NORMALIZATION
-    const normalizedJobs = jobs.map(normalizeJob);
     const totalFetched = jobs.length;
+    console.log(`[IngestionPipeline] Starting ingestion for ${totalFetched} items...`);
 
-    // LAYER 3.5: COMPANY PRIORITY ENRICHMENT
-    const { data: priorities } = await supabaseAdmin.from('target_companies').select('name, tier, priority_score');
-    const priorityMap = new Map();
-    priorities?.forEach(p => {
-        priorityMap.set(p.name.toLowerCase(), { tier: p.tier, priority_score: p.priority_score });
-    });
+    // LAYER 3: NORMALIZATION & IN-MEMORY DEDUPLICATION (Batch Level)
+    const seenInBatch = new Set<string>();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    // LAYER 4: PRE-DEDUPLICATION (Identify reasons for skipping)
-    const finalDbJobs: Record<string, unknown>[] = [];
-    const skipLog: string[] = [];
+    const readyToIngest = jobs
+        .filter(job => isValidLocation(job.location || 'India')) // Filter by location early
+        .map(normalizeJob)                                        // Normalize (generates stable external_id)
+        .filter(j => {
+            if (!j.external_id) return false;
+            
+            // Skip Duplicates in this same run
+            if (seenInBatch.has(j.external_id)) return false;
+            seenInBatch.add(j.external_id);
+
+            // OPTIMIZATION: Skip very old jobs (30+ days)
+            const postDate = new Date(j.posted_date);
+            if (postDate < thirtyDaysAgo) return false;
+
+            return true;
+        });
+
+    const filteredCount = totalFetched - readyToIngest.length;
+
+    // LAYER 4: DATABASE CHECK (UPSERT LOGIC)
+
+    // LAYER 4: DATABASE CHECK (UPSERT LOGIC)
     let inserted = 0;
     let skipped = 0;
     let failed = 0;
     
-    // Fetch current existing keys to check against
-    const { data: existingJobs } = await supabaseAdmin
+    const { data: recentJobs } = await supabaseAdmin
         .from('jobs')
-        .select('apply_url, dedup_key');
+        .select('external_id')
+        .order('created_at', { ascending: false })
+        .limit(2000);
         
-    const existingUrls = new Set(existingJobs?.map(j => j.apply_url).filter(Boolean));
-    const existingHashes = new Set(existingJobs?.map(j => j.dedup_key).filter(Boolean));
+    const recentIds = new Set(recentJobs?.map(j => j.external_id));
 
-    normalizedJobs.forEach(j => {
-        const companyKey = j.company.toLowerCase();
-        const pInfo = priorityMap.get(companyKey);
-
-        if (j.apply_url && existingUrls.has(j.apply_url)) {
-            if (skipLog.length < 5) skipLog.push(`Skipped due to duplicate apply_url: ${j.apply_url.slice(0, 50)}...`);
+    const finalDbJobs = readyToIngest.filter(j => {
+        if (recentIds.has(j.external_id)) {
             skipped++;
-            return;
+            return false;
         }
-
-        if (j.dedup_key && existingHashes.has(j.dedup_key)) {
-            if (skipLog.length < 5) skipLog.push(`Skipped due to dedup_key (hash): ${j.title} @ ${j.company}`);
-            skipped++;
-            return;
-        }
-
-        const dbJob = {
-            title: j.title,
-            company: j.company,
-            location: j.location,
-            description: j.description,
-            apply_url: j.apply_url,
-            employment_type: j.job_type,
-            posted_at: j.posted_date,
-            source: j.source,
-            external_id: j.external_id,
-            dedup_key: j.dedup_key,
-            platform: j.platform,
-            country: j.country || 'India',
-            level: j.level || classifyLevel(j.title),
-            is_mnc: j.is_mnc ?? isMNC(j.company),
-            tier: pInfo?.tier || 0,
-            priority_score: pInfo?.priority_score || 10,
-            created_at: new Date().toISOString()
-        };
-
-        finalDbJobs.push(dbJob);
-    });
-
-    if (skipLog.length > 0) {
-        console.log('[IngestionPipeline] First few duplicates found:');
-        skipLog.forEach(l => console.log(`  - ${l}`));
-    }
-
-    console.log(`[IngestionPipeline] Processing ${finalDbJobs.length} unique jobs after DB check...`);
+        return true;
+    }).map(j => ({
+        title: j.title,
+        company: j.company,
+        location: j.location,
+        description: j.description,
+        apply_url: j.apply_url,
+        employment_type: j.job_type,
+        posted_at: j.posted_date,
+        source: j.source,
+        external_id: j.external_id,
+        dedup_key: j.dedup_key,
+        platform: j.platform,
+        country: j.country || 'India',
+        level: j.level || classifyLevel(j.title),
+        is_mnc: j.is_mnc ?? isMNC(j.company),
+        created_at: new Date().toISOString()
+    }));
 
     if (finalDbJobs.length === 0) {
-        return { total: totalFetched, inserted: 0, skipped: totalFetched, failed: 0 };
+        console.log(`[IngestionPipeline] All jobs duplicate/filtered. Fetched: ${totalFetched}, Skipped: ${skipped}`);
+        return { total: totalFetched, filtered: filteredCount, inserted: 0, skipped, failed: 0 };
     }
 
-    // LAYER 5: STORAGE (Split into batches to handle different unique constraints)
-    const jobsWithUrl = finalDbJobs.filter(j => j.apply_url) as Record<string, unknown>[];
-    const jobsWithoutUrl = finalDbJobs.filter(j => !j.apply_url) as Record<string, unknown>[];
+    // UPSERT with Conflict on external_id
+    const { data, error } = await supabaseAdmin
+        .from('jobs')
+        .upsert(finalDbJobs, { 
+            onConflict: 'external_id', 
+            ignoreDuplicates: true 
+        })
+        .select('id');
 
-    // Case 1: Jobs with apply_url (Conflict target: apply_url)
-    if (jobsWithUrl.length > 0) {
-        const { data, error } = await supabaseAdmin
-            .from('jobs')
-            .upsert(jobsWithUrl, { 
-                onConflict: 'apply_url', 
-                ignoreDuplicates: true 
-            })
-            .select('id');
-
-        if (error) {
-            console.error('[IngestionPipeline] Batch 1 (apply_url) Error:', error.message);
-            failed += jobsWithUrl.length;
-        } else {
-            const batchInserted = data?.length || 0;
-            inserted += batchInserted;
-            skipped += (jobsWithUrl.length - batchInserted);
-        }
+    if (error) {
+        console.error('[IngestionPipeline] UPSERT Error:', error.message);
+        failed = finalDbJobs.length;
+    } else {
+        inserted = data?.length || 0;
+        skipped += (finalDbJobs.length - inserted);
     }
 
-    // Case 2: Jobs without apply_url (Conflict target: dedup_key)
-    if (jobsWithoutUrl.length > 0) {
-        const { data, error } = await supabaseAdmin
-            .from('jobs')
-            .upsert(jobsWithoutUrl, { 
-                onConflict: 'dedup_key', 
-                ignoreDuplicates: true 
-            })
-            .select('id');
-
-        if (error) {
-            console.error('[IngestionPipeline] Batch 2 (dedup_key) Error:', error.message);
-            failed += jobsWithoutUrl.length;
-        } else {
-            const batchInserted = data?.length || 0;
-            inserted += batchInserted;
-            skipped += (jobsWithoutUrl.length - batchInserted);
-        }
-    }
-
-    // FINAL VALIDATION LOGGING
-    console.log(`[IngestionPipeline] Result -> Inserted: ${inserted} | Skipped: ${skipped} | Failed: ${failed}`);
+    console.log(`[IngestionPipeline] Result: Fetched: ${totalFetched} | Inserted: ${inserted} | Skipped: ${skipped} | Failed: ${failed}`);
 
     return {
         total: totalFetched,
+        filtered: filteredCount,
         inserted,
         skipped,
         failed
     };
 }
+
 
 export async function manualDeduplicate() {
     try {
@@ -231,3 +221,4 @@ export async function manualDeduplicate() {
         return { success: false, error: String(err) };
     }
 }
+
