@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Terminal, CheckCircle2, XCircle, Info, Clock } from 'lucide-react';
-import type { ExecutionResult } from '@/lib/code-execution';
+import type { ExecutionResult, TestResult } from '../../lib/code-execution';
 
 interface OutputConsoleProps {
     result: ExecutionResult | null;
@@ -101,7 +101,7 @@ export default function OutputConsole({ result }: OutputConsoleProps) {
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        {result.results?.map((tc, idx) => (
+                        {result.results?.map((tc: TestResult, idx: number) => (
                             <div key={idx} className={`p-4 rounded-[2rem] border transition-all ${tc.passed ? 'bg-green-500/5 border-green-500/10' : 'bg-red-500/5 border-red-500/10'}`}>
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-2">

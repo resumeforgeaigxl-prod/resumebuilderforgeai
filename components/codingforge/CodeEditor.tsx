@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import { Loader2, Zap, Sparkles, Copy, RotateCcw } from 'lucide-react';
-import type { ExecutionResult } from '@/lib/code-execution';
+import type { ExecutionResult } from '../../lib/code-execution';
+
 
 const STARTER_CODE: Record<string, string> = {
     python: 'def solution():\n    # Write your code here\n    print("Hello from Python!")\n\nsolution()',
