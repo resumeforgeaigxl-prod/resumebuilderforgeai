@@ -58,6 +58,7 @@ export const metadata: Metadata = {
   verification: {
     google: "googlea5530cdfb982a1f8",
   },
+  manifest: "/manifest.json",
   icons: {
     icon: "/favicon.png",
     shortcut: "/favicon-16x16.png",
@@ -69,6 +70,11 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport = {
+  themeColor: "#6c63ff",
+};
+
+
 
 import { Toaster } from "react-hot-toast";
 
@@ -79,12 +85,33 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#6c63ff" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-[var(--page-bg)] text-[var(--text-primary)] antialiased`}
       >
         <Toaster position="top-right" />
         {children}
+        
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ("serviceWorker" in navigator) {
+                window.addEventListener("load", () => {
+                  navigator.serviceWorker.register("/sw.js").then((reg) => {
+                    console.log("Service Worker registered:", reg.scope);
+                  }).catch((err) => {
+                    console.log("Service Worker registration failed:", err);
+                  });
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );
 }
+

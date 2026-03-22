@@ -1,23 +1,5 @@
-const CACHE_NAME = 'resumeforge-v2';
-const ASSETS_TO_CACHE = [
-  '/',
-  '/manifest.json',
-  '/logo/resumeforge-logo-v2.svg',
-  '/logo/resumeforge-icon-v2.svg'
-];
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
+self.addEventListener("install", () => {
+  console.log("Service Worker Installed");
 });
 
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
-});
+self.addEventListener("fetch", (event) => {});
