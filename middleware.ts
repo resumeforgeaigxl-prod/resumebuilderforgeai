@@ -93,7 +93,7 @@ export async function middleware(request: NextRequest) {
     const host = request.headers.get('host') ?? '';
     const STATIC_FILE_EXTENSIONS = [
         '.svg', '.png', '.ico', '.jpg', '.jpeg', '.gif', '.webp', '.xml',
-        '.js', '.mjs', '.css', '.map', '.txt', '.woff', '.woff2', '.ttf', '.otf', '.html'
+        '.js', '.mjs', '.css', '.map', '.txt', '.woff', '.woff2', '.ttf', '.otf', '.html', '.json'
     ];
 
     // Determine if this is a subdomain request
@@ -153,6 +153,8 @@ export async function middleware(request: NextRequest) {
         '/terms',
         '/robots.txt',
         '/favicon.ico',
+        '/manifest.json',
+        '/sw.js',
         '/locales',
         '/pdfjs-worker',
         '/portfolio',
@@ -373,6 +375,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
-        '/((?!api|_next/static|_next/image|favicon.ico|locales|pdfjs-worker|.*\\.(?:svg|png|jpg|jpeg|gif|webp|xml|ico|js|mjs|css|map|txt|woff|woff2|ttf|otf)$).*)',
+        '/((?!api|_next/static|_next/image|favicon.ico|manifest.json|sw.js|locales|pdfjs-worker|.*\\.(?:svg|png|jpg|jpeg|gif|webp|xml|ico|js|mjs|css|map|txt|woff|woff2|ttf|otf|json)$).*)',
     ],
 };

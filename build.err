@@ -1,0 +1,12 @@
+[31m
+Failed to compile.[39m
+
+./app/api/run/route.ts
+53:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./lib/code-execution-engine.ts
+16:63  Error: 'stdin' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+56:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+[?25h

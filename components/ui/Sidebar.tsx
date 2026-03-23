@@ -21,7 +21,8 @@ import {
   Sparkles,
   PlayCircle,
   Bot,
-  GraduationCap
+  GraduationCap,
+  Brain
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +38,7 @@ export function Sidebar({ locale }: SidebarProps) {
     { name: "Overview", icon: LayoutDashboard, href: `/${locale}/dashboard` },
     { name: "ResumeForge", icon: FileText, href: `/${locale}/resumes` },
     { name: "CodingForge", icon: Code, href: `/${locale}/codingforge` },
+    { name: "PrepForge", icon: Brain, href: `/${locale}/prepforge/app` },
     { name: "ProjectForge", icon: Projector, href: `/${locale}/projectforge` },
     { name: "InterviewForge", icon: MessageSquare, href: `/${locale}/mock-interview` },
     { name: "LearnForge", icon: PlayCircle, href: `/${locale}/learnforge` },
