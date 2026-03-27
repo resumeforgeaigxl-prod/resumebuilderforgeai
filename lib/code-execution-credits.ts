@@ -91,18 +91,29 @@ export async function getCodeExecutionCredits(userId: string): Promise<RunCredit
     return creditData as RunCredits;
 }
 
+import { checkForgeAccess, incrementForgeUsage } from './auth/usage';
+
 /**
  * Validates if the user can run code and consumes credit if they can.
  */
-export async function consumeCodeExecutionCredit(userId: string): Promise<{ success: boolean; error?: string }> {
+export async function consumeCodeExecutionCredit(userId: string): Promise<{ success: boolean; error?: string; limitReached?: boolean }> {
     const supabase = createClient();
-    let credits;
     
+    // 1. Check Lifetime Free Trial Access via new usage logic
+    const access = await checkForgeAccess('codingforge');
+    if (!access.hasAccess && access.reason === 'limit_reached') {
+        return { success: false, error: 'You’ve used your free attempts. Unlock full access to continue.', limitReached: true };
+    }
+    
+    let credits;
     try {
         credits = await getCodeExecutionCredits(userId);
     } catch {
         return { success: false, error: 'System error. Try again later.' };
     }
+
+    // Admins bypass daily limits too
+    if (access.isAdmin) return { success: true };
 
     if (credits.runs_remaining <= 0) {
         return { success: false, error: 'Daily run limit reached (30/day).' };
@@ -121,7 +132,8 @@ export async function consumeCodeExecutionCredit(userId: string): Promise<{ succ
         }
     }
 
-    const { error } = await supabase
+    // 2. Consume Daily Credit
+    const { error: consumeError } = await supabase
         .from('code_execution_credits')
         .update({ 
             runs_remaining: credits.runs_remaining - 1,
@@ -130,10 +142,13 @@ export async function consumeCodeExecutionCredit(userId: string): Promise<{ succ
         })
         .eq('user_id', userId);
 
-    if (error) {
-        console.error('[CodeCredits] Failed to consume:', error);
+    if (consumeError) {
+        console.error('[CodeCredits] Failed to consume:', consumeError);
         return { success: false, error: 'Failed to update credits.' };
     }
+
+    // 3. Increment Lifetime Usage if on free plan
+    await incrementForgeUsage('codingforge');
 
     return { success: true };
 }

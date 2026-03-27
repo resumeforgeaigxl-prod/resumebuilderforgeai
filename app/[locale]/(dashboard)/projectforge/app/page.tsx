@@ -19,6 +19,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { ForgeSoftPaywall } from '@/components/auth/ForgeSoftPaywall';
 
 export default function ProjectForgeLanding() {
     const params = useParams() as { locale: string };
@@ -29,6 +30,7 @@ export default function ProjectForgeLanding() {
     const [isGenerating, setIsGenerating] = useState(false);
     const [credits, setCredits] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [showPaywall, setShowPaywall] = useState(false);
 
     useEffect(() => {
         const fetchCredits = async () => {
@@ -60,6 +62,11 @@ export default function ProjectForgeLanding() {
 
             const data = await res.json();
 
+            if (data.limitReached) {
+                setShowPaywall(true);
+                return;
+            }
+
             if (!res.ok) {
                 throw new Error(data.error || 'Failed to generate project');
             }
@@ -72,6 +79,10 @@ export default function ProjectForgeLanding() {
             setIsGenerating(false);
         }
     };
+
+    if (showPaywall) {
+        return <ForgeSoftPaywall forgeName="ProjectForge" />;
+    }
 
     return (
         <div className="space-y-24 animate-fade-in py-12">
@@ -244,5 +255,3 @@ export default function ProjectForgeLanding() {
         </div>
     );
 }
-
-

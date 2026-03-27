@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import { SEOForgePage } from '@/components/seo/SEOForgePage';
 
 export const metadata: Metadata = {
-  title: "AI Coding Practice & Analysis | ResumeForgeAI",
-  description: "Master coding interviews with AI feedback. Practice real-world programming problems and get instant code analysis to improve your skills.",
+  title: "CodingForge – AI Coding Practice Platform | ResumeForgeAI",
+  description: "Use CodingForge to practice AI coding practice platform focused on real interview problems. Part of ResumeForgeAI, an AI career platform for developers.",
   keywords: "tech jobs, resume builder, coding practice, interview prep, programming",
   alternates: {
     canonical: 'https://resumeforgeai.in/en-in/codingforge',
@@ -18,7 +18,7 @@ export default function CodingForgeSEO({ params }: { params: { locale: string } 
       description={metadata.description as string}
       h1="Practice Coding with AI Insights"
       schemaName="CodingForge"
-      schemaDescription="Code faster and better with our AI-driven practice platform that provides real-time analysis and improvement suggestions."
+      schemaDescription="AI coding practice platform focused on real interview problems."
       ctaText="Practice Coding"
       ctaLink={`/${locale}/codingforge/app`}
       features={[

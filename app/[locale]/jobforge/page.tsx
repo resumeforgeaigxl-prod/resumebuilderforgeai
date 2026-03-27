@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import { SEOForgePage } from '@/components/seo/SEOForgePage';
 
 export const metadata: Metadata = {
-  title: "AI Job Search & Discovery | ResumeForgeAI",
-  description: "Find the best tech jobs matched to your skills with AI. Discover roles from top companies and startups using our smart matching engine.",
+  title: "JobForge – AI Job Discovery Platform | ResumeForgeAI",
+  description: "Use JobForge to find tech jobs. Part of ResumeForgeAI, an AI career platform for developers.",
   keywords: "tech jobs, resume builder, coding practice, interview prep, job search ai",
   alternates: {
     canonical: 'https://resumeforgeai.in/en-in/jobforge',
@@ -17,7 +17,7 @@ export default function JobForgeSEO() {
       description={metadata.description as string}
       h1="Find Your Next Tech Role"
       schemaName="JobForge"
-      schemaDescription="An AI-powered job discovery tool that matches developer skills with open tech roles from top global companies."
+      schemaDescription="AI-powered job search platform."
       ctaText="Find Jobs"
       ctaLink="/en-in/jobs"
       features={[

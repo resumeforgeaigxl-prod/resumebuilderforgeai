@@ -6,6 +6,8 @@ import { stripMarkdown } from '@/lib/ai-provider';
 
 export const runtime = 'nodejs';
 
+import { checkForgeAccess, incrementForgeUsage } from '@/lib/auth/usage';
+
 /**
  * GET /api/mock-interview/check-access
  * Checks if user is logged in and returns daily interview limits/usage.
@@ -17,59 +19,29 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const admin = createAdminClient();
-
-        // 1. Fetch user plan details
-        const { data: userData, error: userError } = await admin
-            .from('users')
-            .select('role, plan_type, daily_mock_limit, plan_end')
-            .eq('id', session.userId)
-            .single();
-
-        if (userError || !userData) {
-            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        const access = await checkForgeAccess('interviewforge');
+        
+        // If limit reached, return specifically to trigger UI logic if needed
+        if (!access.hasAccess && access.reason === 'limit_reached') {
+            return NextResponse.json({ 
+                error: 'You’ve used your free interview session. Unlock full access to continue.',
+                limitReached: true,
+                user: {
+                    id: session.userId,
+                    interviewsUsed: 1, // Assume 1 for free users who are blocked
+                    interviewLimit: 1
+                }
+            });
         }
-
-        // 2. Count interviews used today
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const { count, error: countError } = await admin
-            .from('mock_interviews')
-            .select('id', { count: 'exact', head: true })
-            .eq('user_id', session.userId)
-            .gte('created_at', today.toISOString());
-
-        if (countError) {
-            console.error('[MockInterview] Count error:', countError);
-        }
-
-        const planLimits = {
-            free: 3,
-            pro: 10,
-            premium: 15,
-            career: 999
-        };
-
-        const userPlan = userData.plan_type || 'free';
-        // Use daily_mock_limit if set, otherwise fallback to plan defaults
-        let limit = userData.daily_mock_limit || (planLimits[userPlan as keyof typeof planLimits] || 3);
-
-        // Admins get unlimited access
-        if (userData.role === 'admin') {
-            limit = 9999;
-        }
-
-        const used = count || 0;
 
         return NextResponse.json({
             success: true,
             user: {
                 id: session.userId,
-                role: userData.role,
-                plan_type: userPlan,
-                interviewsUsed: used,
-                interviewLimit: limit
+                role: access.isAdmin ? 'admin' : 'user',
+                plan_type: access.isPro ? 'pro' : 'free',
+                interviewsUsed: 0, // Placeholder as we use lifetime tracking now
+                interviewLimit: access.isPro ? 999 : 1
             }
         });
 
@@ -78,6 +50,7 @@ export async function GET() {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
+
 
 /**
  * POST /api/mock-interview/session
@@ -153,6 +126,15 @@ Example: {"score": 7, "feedback": "Good explanation but could be more specific",
         if (action === 'create') {
             const { role, jobDescription, experienceLevel, interviewType, numQuestions, questions } = data;
 
+            // Check access before creating
+            const access = await checkForgeAccess('interviewforge');
+            if (!access.hasAccess && access.reason === 'limit_reached') {
+                return NextResponse.json({ 
+                    error: 'Limit reached. Upgrade to start a new interview session.',
+                    limitReached: true 
+                }, { status: 403 });
+            }
+
             const { data: interviewData, error: insertError } = await admin
                 .from('mock_interviews')
                 .insert({
@@ -169,6 +151,10 @@ Example: {"score": 7, "feedback": "Good explanation but could be more specific",
                 .single();
 
             if (insertError) throw insertError;
+
+            // Increment lifetime usage
+            await incrementForgeUsage('interviewforge');
+
             return NextResponse.json({ success: true, interview: interviewData });
         }
 

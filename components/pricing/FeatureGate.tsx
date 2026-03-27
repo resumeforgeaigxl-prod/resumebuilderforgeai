@@ -6,6 +6,9 @@ import { Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { UpgradeModal } from './UpgradeModal';
 
+import { ForgeSoftPaywall } from '../auth/ForgeSoftPaywall';
+import { checkForgeAccess, ForgeType, ForgeAccessResponse } from '@/lib/auth/usage';
+
 interface FeatureGateProps {
     task: string;
     children: React.ReactNode;
@@ -15,13 +18,26 @@ interface FeatureGateProps {
 export const FeatureGate: React.FC<FeatureGateProps> = ({ task, children, fallback }) => {
     const { checkAccess, isLoading } = usePricing();
     const [showUpgrade, setShowUpgrade] = React.useState(false);
+    const [accessResult, setAccessResult] = React.useState<ForgeAccessResponse | null>(null);
 
-    const hasAccess = checkAccess(task);
+    React.useEffect(() => {
+        if (!isLoading) {
+            checkForgeAccess(task as ForgeType).then(setAccessResult);
+        }
+    }, [task, isLoading]);
+
+    const hasPricingAccess = checkAccess(task);
     const lockedPreview = fallback ?? children;
 
-    if (isLoading) return <div className="animate-pulse">{children}</div>;
+    if (isLoading || !accessResult) return <div className="animate-pulse">{children}</div>;
 
-    if (!hasAccess) {
+    // Soft paywall if limit reached
+    if (accessResult.reason === 'limit_reached') {
+        return <ForgeSoftPaywall forgeName={task.charAt(0).toUpperCase() + task.slice(1)} />;
+    }
+
+    // Hard block if pricing config explicitly locks it (e.g. for certain tasks)
+    if (!hasPricingAccess && !accessResult.isAdmin) {
         return (
             <div className="relative group">
                 <div className="filter blur-[2px] pointer-events-none opacity-60">

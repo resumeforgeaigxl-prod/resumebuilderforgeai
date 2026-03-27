@@ -27,6 +27,7 @@ import posthog from '@/lib/posthog';
 import { CoverLetterModal } from '@/components/builder/cover-letter-modal';
 import { ResumeIntelligence } from '@/components/builder/ResumeIntelligence';
 import { FeatureGate } from '@/components/pricing/FeatureGate';
+import { incrementForgeUsage } from '@/lib/auth/usage';
 
 type Step = 'edit' | 'template' | 'optimize' | 'download';
 
@@ -303,6 +304,9 @@ export default function BuilderPage() {
                 body: JSON.stringify({ resumeId: id, resumeData, template: selectedTemplate }),
             });
             if (res.ok) {
+                // Success! Increment free usage count for resumeforge
+                await incrementForgeUsage('resumeforge');
+
                 const blob = await res.blob();
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a'); a.href = url; a.download = `${title || 'resume'}.pdf`; a.click();

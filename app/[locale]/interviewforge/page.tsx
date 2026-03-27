@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import { SEOForgePage } from '@/components/seo/SEOForgePage';
 
 export const metadata: Metadata = {
-  title: "AI Mock Interviews | ResumeForgeAI",
-  description: "Prepare for your dream job with AI-powered mock interviews. Get realistic practice and personalized feedback on your performance.",
+  title: "InterviewForge – AI Mock Interview Platform | ResumeForgeAI",
+  description: "Use InterviewForge to practice AI mock interviews with feedback. Part of ResumeForgeAI, an AI career platform for developers.",
   keywords: "tech jobs, resume builder, coding practice, interview prep, mock interview",
   alternates: {
     canonical: 'https://resumeforgeai.in/en-in/interviewforge',
@@ -17,7 +17,7 @@ export default function InterviewForgeSEO() {
       description={metadata.description as string}
       h1="Master Your Interviews with AI"
       schemaName="InterviewForge"
-      schemaDescription="Prepare for behavioral and technical interviews with a realistic AI interviewer that gives instant feedback."
+      schemaDescription="AI mock interview platform with feedback."
       ctaText="Start Practice"
       ctaLink="/en-in/mock-interview"
       features={[

@@ -44,5 +44,33 @@ export async function generateMetadata({
 export default async function LocaleHome({ params }: LocaleHomeProps) {
   // Fetch posts server-side for the "What's New" section
   const posts = await getBlogPosts(params.locale.split('-')[0]);
-  return <LandingPage locale={params.locale} posts={posts} />;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "ResumeForgeAI",
+    "alternateName": "Resume Forge AI",
+    "description": "An AI career platform for developers designed as a Forge Ecosystem.",
+    "applicationCategory": "Career & Job Search",
+    "operatingSystem": "Web",
+    "url": BASE_URL,
+    "hasPart": [
+      { "@type": "SoftwareApplication", "name": "ResumeForge", "description": "AI-powered resume builder" },
+      { "@type": "SoftwareApplication", "name": "CodingForge", "description": "AI coding practice platform" },
+      { "@type": "SoftwareApplication", "name": "InterviewForge", "description": "AI mock interview platform" },
+      { "@type": "SoftwareApplication", "name": "PrepForge", "description": "TCS NQT and company-specific preparation platform" },
+      { "@type": "SoftwareApplication", "name": "JobForge", "description": "AI-powered job discovery platform" },
+      { "@type": "SoftwareApplication", "name": "ProjectForge", "description": "Developer project showcase system" }
+    ]
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <LandingPage locale={params.locale} posts={posts} />
+    </>
+  );
 }

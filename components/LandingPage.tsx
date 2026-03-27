@@ -33,7 +33,7 @@ export default function LandingPage({
         <Problem />
         <Solution />
         <Ecosystem />
-        <ForgeGrid />
+        <ForgeGrid locale={locale} />
         <WhatsNew locale={locale} posts={posts} />
         <AITools />
         <CareerPaths />

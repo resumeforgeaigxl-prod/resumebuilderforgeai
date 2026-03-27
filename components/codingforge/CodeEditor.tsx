@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import { Loader2, Zap, Sparkles, Copy, RotateCcw } from 'lucide-react';
 import type { ExecutionResult } from '../../lib/code-execution';
+import { ForgeSoftPaywall } from '../auth/ForgeSoftPaywall';
 
 
 const STARTER_CODE: Record<string, string> = {
@@ -45,39 +46,42 @@ export default function CodeEditor({ problemId, problemContext, onResult, onExpl
         fetchCredits();
     }, []);
 
+    const [showPaywall, setShowPaywall] = useState(false);
+
     const handleRunCode = async () => {
         if (credits !== null && credits <= 0) {
-            onResult({ error: 'Run limit reached. Try again tomorrow.' });
+            onResult({ error: 'Daily run limit reached. Try again tomorrow.' });
             return;
         }
 
         setIsRunning(true);
         try {
-            const body = { language, code, problemId };
-            console.log('[CodingForge] Requesting execution:', body);
-
             const res = await fetch('/api/run', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
+                body: JSON.stringify({ language, code, problemId }),
             });
             const data = await res.json();
-            console.log('[CodingForge] Execution result:', data);
             
             if (res.ok) {
                 setCredits(prev => (prev !== null ? prev - 1 : null));
                 onResult(data);
             } else {
-                onResult({ error: data.error || 'Failed to execute code' });
+                if (data.limitReached) {
+                    setShowPaywall(true);
+                } else {
+                    onResult({ error: data.error || 'Failed to execute code' });
+                }
                 const credRes = await fetch('/api/run-code/credits');
                 const credData = await credRes.json();
                 setCredits(credData.credits);
             }
         } catch (err) {
-            console.error('[CodingForge] Fatal error during run:', err);
+            console.error('Code execution failed:', err);
             onResult({ error: 'Failed to execute code. Check connection.' });
+        } finally {
+            setIsRunning(false);
         }
-        setIsRunning(false);
     };
 
     const handleExplainAI = async () => {
@@ -111,6 +115,10 @@ export default function CodeEditor({ problemId, problemContext, onResult, onExpl
         }
         setIsExplaining(false);
     };
+
+    if (showPaywall) {
+        return <ForgeSoftPaywall forgeName="CodingForge" />;
+    }
 
     const handleEditorDidMount: NonNullable<React.ComponentProps<typeof Editor>['onMount']> = (editor) => {
         editorRef.current = editor;

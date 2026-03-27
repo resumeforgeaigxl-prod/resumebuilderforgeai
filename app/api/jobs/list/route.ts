@@ -3,25 +3,17 @@ import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 
+
 export const dynamic = 'force-dynamic';
 
-/**
- * Fetch job listings with optional section filtering.
- * ?section=mnc | remote | latest | fresher (default: latest)
- *
- * Enforces visibility limits based on user subscription plan:
- * - FREE:    max 30 jobs per section (rest returned as locked)
- * - PREMIUM: max 80 jobs per section
- * - CAREER:  unlimited
- */
-
 const PLAN_LIMITS: Record<string, number> = {
-    free: 30,
-    premium: 80,
+    free: 5,         // New Forge Ecosystem limit: 5 free jobs
+    premium: 100,
     career: Infinity,
-    pro: 80,       // legacy 'pro' → treat as premium
+    pro: 100,
     admin: Infinity,
 };
+
 
 function getPlanLimit(plan: string | null | undefined): number {
     if (!plan) return PLAN_LIMITS.free;

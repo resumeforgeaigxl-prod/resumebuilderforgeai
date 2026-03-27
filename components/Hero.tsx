@@ -84,6 +84,16 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
               {...fadeInUp(0.18)}
               className="mt-6 max-w-2xl text-lg leading-8 text-slate-300 sm:text-xl"
             >
+              ResumeForgeAI is an AI career platform for developers built as a
+              Forge Ecosystem, where each forge solves a specific part of the
+              journey including resumes, coding practice, interview preparation,
+              and job discovery.
+            </motion.p>
+
+            <motion.p
+              {...fadeInUp(0.20)}
+              className="mt-4 max-w-2xl text-base leading-7 text-slate-400"
+            >
               Build ATS-optimized resumes, practice coding, prepare for
               interviews, follow AI career roadmaps, and discover job
               opportunities inside the ResumeForgeAI ecosystem.

@@ -1,12 +1,28 @@
 import { NextResponse } from 'next/server';
+import { getSession } from '@/lib/auth/jwt';
+import { consumeCodeExecutionCredit } from '@/lib/code-execution-credits';
 
 export async function POST(req: Request) {
     try {
+        const session = await getSession();
+        if (!session || !session.userId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const body = await req.json();
         const { code, language } = body;
 
         if (!code || !language) {
             return NextResponse.json({ error: 'Code and Language are required' }, { status: 400 });
+        }
+
+        // Consume credit and check limits
+        const credit = await consumeCodeExecutionCredit(session.userId);
+        if (!credit.success) {
+            return NextResponse.json({ 
+                error: credit.error, 
+                limitReached: credit.limitReached 
+            }, { status: 403 });
         }
 
         // JUDGE0_URL is usually http://34.170.78.245:2358

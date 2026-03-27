@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import { SEOForgePage } from '@/components/seo/SEOForgePage';
 
 export const metadata: Metadata = {
-  title: "AI Resume Builder | ResumeForgeAI",
-  description: "Create ATS-optimized resumes with AI. Generate high-impact bullet points and choose from professional templates to land your next job.",
+  title: "ResumeForge – AI Resume Builder Platform | ResumeForgeAI",
+  description: "Use ResumeForge to build ATS-optimized resumes. Part of ResumeForgeAI, an AI career platform for developers.",
   keywords: "tech jobs, resume builder, coding practice, interview prep, ats optimization",
   alternates: {
     canonical: 'https://resumeforgeai.in/en-in/resumeforge',
@@ -17,7 +17,7 @@ export default function ResumeForgeSEO() {
       description={metadata.description as string}
       h1="Professional AI Resume Builder"
       schemaName="ResumeForge"
-      schemaDescription="A powerful AI resume builder that helps users create ATS-optimized resumes and professional profiles."
+      schemaDescription="AI-powered resume builder specializing in ATS-optimized developer resumes."
       ctaText="Build My Resume"
       ctaLink="/en-in/resume"
       features={[

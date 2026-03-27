@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { generateProject } from '@/lib/projectforge-ai';
 import { getUserCredits, consumeCredit } from '@/lib/projectforge-credits';
 import { getSession } from '@/lib/auth/jwt';
+import { checkForgeAccess, incrementForgeUsage } from '@/lib/auth/usage';
 
 export async function POST(req: Request) {
     const supabase = createClient();
@@ -19,11 +20,21 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Project idea is required' }, { status: 400 });
     }
 
-    // Check credits
-    const { credits } = await getUserCredits(user.userId);
-    if (credits <= 0) {
-        return NextResponse.json({ error: 'You have reached your daily ProjectForge limit.' }, { status: 429 });
+    // New Forge Ecosystem Access Check
+    const access = await checkForgeAccess('projectforge');
+    if (!access.hasAccess && access.reason === 'limit_reached') {
+        return NextResponse.json({ 
+            error: 'You’ve reached your free project creation limit. Unlock full access to continue building.',
+            limitReached: true 
+        }, { status: 403 });
     }
+
+    // Step 0: Check legacy daily credits (optional, but keeping for double safety)
+    const { credits } = await getUserCredits(user.userId);
+    if (credits <= 0 && !access.isAdmin) {
+        return NextResponse.json({ error: 'System daily limit reached. Try again in 24h.' }, { status: 429 });
+    }
+
 
     try {
         // Step 1: Save request
@@ -62,7 +73,10 @@ export async function POST(req: Request) {
         // Step 4: Consume credit
         await consumeCredit(user.userId);
 
-        // Step 5: Record Activity for Streak
+        // Step 5: Forge Ecosystem Usage Track
+        await incrementForgeUsage('projectforge');
+
+        // Step 6: Record Activity for Streak
         const { recordUserActivity } = await import('@/lib/streak-service');
         await recordUserActivity(user.userId);
 

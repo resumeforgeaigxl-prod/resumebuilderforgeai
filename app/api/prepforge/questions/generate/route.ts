@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generatePrepForgeQuestion, generateDailyPrepBundle } from '@/lib/prepforge/generator';
 import { getSession } from '@/lib/auth/jwt';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { checkForgeAccess, incrementForgeUsage } from '@/lib/auth/usage';
 
 const slugify = (text: string) => text.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
 
@@ -12,11 +13,22 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        const access = await checkForgeAccess('prepforge');
+        if (!access.hasAccess && access.reason === 'limit_reached') {
+            return NextResponse.json({ 
+                error: 'Free limit reached. Upgrade for full access to TCS NQT prep material.',
+                limitReached: true 
+            }, { status: 403 });
+        }
+
         const body = await request.json();
         const { type, topic, dailyMode } = body;
         const supabase = createAdminClient();
 
         console.log(`[PrepForge] Request for: Type=${type}, Topic=${topic}, Daily=${dailyMode}`);
+
+        // Increment usage before proceeding (or after, but better before to prevent race)
+        await incrementForgeUsage('prepforge');
 
         if (dailyMode) {
             const bundle = await generateDailyPrepBundle();

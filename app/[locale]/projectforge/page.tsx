@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import { SEOForgePage } from '@/components/seo/SEOForgePage';
 
 export const metadata: Metadata = {
-  title: "AI Guided Coding Projects | ResumeForgeAI",
-  description: "Build impressive portfolio projects with AI guidance. Get step-by-step instructions and project ideas in this AI project builder.",
+  title: "ProjectForge – Developer Project Showcase Platform | ResumeForgeAI",
+  description: "Use ProjectForge to showcase projects. Part of ResumeForgeAI, an AI career platform for developers.",
   keywords: "tech jobs, resume builder, coding practice, interview prep, programming",
   alternates: {
     canonical: 'https://resumeforgeai.in/en-in/projectforge',
@@ -18,7 +18,7 @@ export default function ProjectForgeSEO({ params }: { params: { locale: string }
       description={metadata.description as string}
       h1="Showcase Your Skills with ProjectForge"
       schemaName="ProjectForge"
-      schemaDescription="Build and host your project portfolios with AI-generated documentation and live previews."
+      schemaDescription="Developer project showcase platform."
       ctaText="Go to ProjectForge"
       ctaLink={`/${locale}/projectforge/app`}
       features={[

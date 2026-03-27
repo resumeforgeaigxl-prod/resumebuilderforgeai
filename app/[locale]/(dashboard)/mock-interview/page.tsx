@@ -50,6 +50,8 @@ export default function MockInterviewPage() {
   );
 }
 
+import { ForgeSoftPaywall } from '@/components/auth/ForgeSoftPaywall';
+
 function MockInterviewContent() {
   const params = useParams() as { locale: string };
   const { locale } = params;
@@ -58,6 +60,7 @@ function MockInterviewContent() {
 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showPaywall, setShowPaywall] = useState(false);
   const [setup, setSetup] = useState<InterviewSetup>({
     role: initialRole,
     jobDescription: '',
@@ -86,14 +89,14 @@ function MockInterviewContent() {
           return;
         }
 
-        if (data.error) {
-          setError(data.error);
+        if (data.limitReached) {
+          setShowPaywall(true);
+          setLoading(false);
           return;
         }
 
-        if (data.user.interviewsUsed >= data.user.interviewLimit) {
-          setError(`You've reached your daily limit of ${data.user.interviewLimit} interviews. Upgrade your plan for more interviews.`);
-          setUser(data.user); // Store to show correct stats if needed
+        if (data.error) {
+          setError(data.error);
           return;
         }
 
@@ -108,6 +111,8 @@ function MockInterviewContent() {
 
     checkUserAccess();
   }, [locale]);
+
+
 
   const startInterview = async () => {
     if (!setup.role.trim()) {
@@ -392,6 +397,10 @@ function MockInterviewContent() {
         </div>
       </div>
     );
+  }
+
+  if (showPaywall) {
+    return <ForgeSoftPaywall forgeName="InterviewForge" />;
   }
 
   if (!session) {

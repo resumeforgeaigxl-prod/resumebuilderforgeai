@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import { SEOForgePage } from '@/components/seo/SEOForgePage';
 
 export const metadata: Metadata = {
-  title: "PrepForge | TCS NQT Pattern-Based Learning",
-  description: "Master TCS NQT with pattern-based learning. Practice Aptitude, Reasoning, and Coding with real-world problems and step-by-step logic explanations.",
+  title: "PrepForge – TCS NQT Preparation Platform | ResumeForgeAI",
+  description: "Use PrepForge to prepare for TCS NQT with logic patterns. Part of ResumeForgeAI, an AI career platform for developers.",
   keywords: "TCS NQT, TCS NQT preparation, coding practice, aptitude, reasoning, pattern-based learning",
   alternates: {
     canonical: 'https://resumeforgeai.in/en-in/prepforge',
@@ -18,7 +18,7 @@ export default function PrepForgeSEO({ params }: { params: { locale: string } })
       description="Prepare for TCS NQT using our specialized pattern-based learning system for Aptitude, Reasoning, and Coding."
       h1="Bridge the Gap to Your Dream Tech Career"
       schemaName="PrepForge"
-      schemaDescription="A comprehensive preparation platform for TCS NQT and other major tech hiring assessments through pattern-based learning."
+      schemaDescription="TCS NQT preparation platform focused on logic patterns."
       ctaText="Start Preparing"
       ctaLink={`/${locale}/prepforge/app`}
       features={[

@@ -62,6 +62,8 @@ const PREVIEW_PROBLEMS = [
   { title: "Number Reversal", icon: <RefreshCw className="w-4 h-4" />, slug: "reverse-number" }
 ];
 
+import { ForgeSoftPaywall } from '@/components/auth/ForgeSoftPaywall';
+
 function PrepForgeLogic() {
     const params = useParams() as { locale: string };
     const locale = params.locale || 'en-IN';
@@ -72,6 +74,7 @@ function PrepForgeLogic() {
     const [selectedTopic, setSelectedTopic] = useState('Numbers');
     const [generatedQuestion, setGeneratedQuestion] = useState<PrepForgeQuestion | null>(null);
     const [dailyBundle, setDailyBundle] = useState<PrepForgeQuestion[]>([]);
+    const [showPaywall, setShowPaywall] = useState(false);
 
     useEffect(() => {
         if (slug) {
@@ -105,6 +108,8 @@ function PrepForgeLogic() {
             if (data.success) {
                 setGeneratedQuestion(data.question);
                 setDailyBundle([]); // Clear bundle if single gen is triggered
+            } else if (data.limitReached) {
+                setShowPaywall(true);
             }
         } catch (err) {
             console.error('Gen Error', err);
@@ -125,6 +130,8 @@ function PrepForgeLogic() {
             if (data.success) {
                 setDailyBundle(data.bundle);
                 setGeneratedQuestion(null); // Clear single gen
+            } else if (data.limitReached) {
+                setShowPaywall(true);
             }
         } catch (err) {
             console.error('Daily Gen Error', err);
@@ -132,6 +139,10 @@ function PrepForgeLogic() {
             setIsGenerating(false);
         }
     };
+
+    if (showPaywall) {
+        return <ForgeSoftPaywall forgeName="PrepForge" />;
+    }
 
     return (
         <div className="space-y-12 animate-fade-in max-w-7xl mx-auto pb-24">
