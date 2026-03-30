@@ -1,29 +1,22 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Loader2, Sparkles, Globe, Eye, Copy, Check, Layout } from 'lucide-react';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Loader2, Sparkles, Globe, Eye, Copy, Check, Layout, ArrowLeft } from 'lucide-react';
 import { FeatureGate } from '@/components/pricing/FeatureGate';
 import { Portfolio, PORTFOLIO_THEMES } from '@/types/portfolio';
+import Link from 'next/link';
+import { Badge } from '@/components/ui/Badge';
 
-export default function PortfolioPage() {
+function PortfolioContent() {
     const router = useRouter();
-    // Removed unused region/lang params to fix lint errors.
+    const searchParams = useSearchParams();
+    const shouldAutoGenerate = searchParams?.get('generate') === 'true';
 
     const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
     const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState(false);
     const [copied, setCopied] = useState(false);
     const [error, setError] = useState('');
-
-    async function load() {
-        setLoading(true);
-        const res = await fetch('/api/portfolio');
-        const data = await res.json();
-        setPortfolio(data.portfolio);
-        setLoading(false);
-    }
-
-    useEffect(() => { load(); }, []);
 
     async function generate() {
         setGenerating(true); setError('');
@@ -40,6 +33,31 @@ export default function PortfolioPage() {
         } catch { setError('Network error. Please try again.'); setGenerating(false); }
     }
 
+    async function load() {
+        setLoading(true);
+        try {
+            const res = await fetch('/api/portfolio');
+            const data = await res.json();
+            
+            if (data.portfolio) {
+                setPortfolio(data.portfolio);
+                setLoading(false);
+            } else if (shouldAutoGenerate) {
+                // If no portfolio exists but we have the flag, start generating immediately
+                setLoading(false);
+                generate();
+            } else {
+                setLoading(false);
+            }
+        } catch (err) {
+            console.error(err);
+            setLoading(false);
+        }
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => { load(); }, []);
+
     async function copyLink(url: string) {
         await navigator.clipboard.writeText(url);
         setCopied(true); setTimeout(() => setCopied(false), 1500);
@@ -55,98 +73,111 @@ export default function PortfolioPage() {
         if (data.success) setPortfolio(data.portfolio);
     }
 
-    const publicUrl = portfolio ? `${window?.location?.origin}/portfolio/${portfolio.username}` : '';
-    const previewUrl = portfolio?.preview_token ? `${window?.location?.origin}/preview/${portfolio.preview_token}` : '';
+    const publicUrl = typeof window !== 'undefined' && portfolio ? `${window.location.origin}/portfolio/${portfolio.username}` : '';
+    const previewUrl = typeof window !== 'undefined' && portfolio?.preview_token ? `${window.location.origin}/preview/${portfolio.preview_token}` : '';
 
-    if (loading) return (
-        <div className="min-h-screen bg-[#070710] flex items-center justify-center">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+    if (loading || (generating && !portfolio)) return (
+        <div className="min-h-screen bg-[#070710] flex flex-col items-center justify-center gap-6">
+            <div className="relative">
+                <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full animate-pulse" />
+                <Loader2 className="w-12 h-12 animate-spin text-blue-500 relative z-10" />
+            </div>
+            <div className="text-center space-y-2">
+                <h3 className="text-xl font-black text-white tracking-tight uppercase italic">{generating ? 'Architecting Portfolio...' : 'Loading Console...'}</h3>
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-[0.3em]">{generating ? 'Synchronizing with Neural Core' : 'Connecting to Protocol'}</p>
+            </div>
         </div>
     );
 
     return (
         <FeatureGate task="portfolio">
-            <div className="min-h-screen bg-[#070710] text-slate-200 p-4 sm:p-0">
+            <div className="min-h-screen bg-[#070710] text-slate-200 p-4 sm:p-0 pb-24">
                 <div className="max-w-3xl mx-auto py-8">
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-black mb-2 flex items-center gap-3 tracking-tight"><Layout className="w-8 h-8 text-indigo-400" />My Portfolio</h1>
-                        <p className="text-slate-500 font-medium">AI-generated portfolio page hosted at your own unique URL.</p>
+                    <div className="mb-12 flex items-center justify-between">
+                        <div>
+                            <Link href="/dashboard" className="flex items-center gap-2 text-slate-500 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest mb-4 group">
+                                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Dashboard
+                            </Link>
+                            <h1 className="text-4xl font-black mb-2 flex items-center gap-4 tracking-tighter italic uppercase"><Layout className="w-10 h-10 text-indigo-500" />Portfolio_</h1>
+                            <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Cloud Infrastructure & Neural Architecture Rendering</p>
+                        </div>
                     </div>
 
                     {!portfolio ? (
                         /* No portfolio yet */
-                        <div className="text-center py-20 bg-white/[0.03] border border-white/10 rounded-[3rem] backdrop-blur-sm">
-                            <div className="w-20 h-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                                <Sparkles className="w-10 h-10 text-indigo-400" />
+                        <div className="text-center py-24 bg-white/[0.02] border border-white/5 rounded-[4rem] backdrop-blur-xl relative overflow-hidden group">
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
+                            <div className="w-24 h-24 bg-indigo-500/10 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 group-hover:scale-110 transition-transform duration-700">
+                                <Sparkles className="w-12 h-12 text-indigo-400" />
                             </div>
-                            <h2 className="text-2xl font-black mb-2 tracking-tight">Create Your Professional Portfolio</h2>
-                            <p className="text-slate-500 mb-8 max-w-sm mx-auto text-sm font-medium">Our AI will analyze your latest resume and build a stunning portfolio in ~20 seconds.</p>
-                            {error && <p className="text-red-400 text-sm mb-6 bg-red-400/10 py-2 rounded-xl border border-red-400/20 max-w-xs mx-auto">{error}</p>}
+                            <h2 className="text-3xl font-black mb-3 tracking-tight italic uppercase text-white">Initialize Signal</h2>
+                            <p className="text-slate-500 mb-10 max-w-sm mx-auto text-xs font-black uppercase tracking-widest leading-relaxed">Our AI will analyze your latest resume and materialize a stunning high-performance portfolio in seconds.</p>
+                            {error && <p className="text-red-400 text-[10px] font-black uppercase tracking-widest mb-8 bg-red-400/5 py-3 px-6 rounded-2xl border border-red-400/10 max-w-xs mx-auto italic">ERR: {error}</p>}
                             <button onClick={generate} disabled={generating}
-                                className="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-black rounded-2xl transition-all flex items-center gap-3 mx-auto shadow-2xl shadow-indigo-600/30">
-                                {generating ? <><Loader2 className="w-5 h-5 animate-spin" />Building Portfolio…</> : <><Sparkles className="w-5 h-5" />Generate Portfolio Now</>}
+                                className="px-12 py-5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-black rounded-[2rem] transition-all flex items-center gap-4 mx-auto shadow-2xl shadow-indigo-600/40 uppercase tracking-[0.2em] text-xs">
+                                {generating ? <><Loader2 className="w-5 h-5 animate-spin" />Assembling...</> : <><Sparkles className="w-5 h-5" />Construct Now</>}
                             </button>
                         </div>
                     ) : (
-                        <div className="space-y-6">
+                        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
                             {/* Status Card */}
-                            <div className="p-8 bg-white/[0.03] border border-white/10 rounded-[2.5rem] backdrop-blur-sm relative overflow-hidden group">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/5 blur-3xl rounded-full" />
-                                <div className="flex items-center justify-between mb-6 relative">
-                                    <div className="flex items-center gap-4">
-                                        <div className={`w-3 h-3 rounded-full ${portfolio.is_public ? 'bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.6)] animate-pulse' : 'bg-slate-600'}`} />
+                            <div className="p-10 bg-white/[0.02] border border-white/5 rounded-[3.5rem] backdrop-blur-xl relative overflow-hidden group">
+                                <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-600/10 blur-[100px] rounded-full group-hover:bg-indigo-600/20 transition-all duration-1000" />
+                                <div className="flex items-center justify-between mb-10 relative">
+                                    <div className="flex items-center gap-6">
+                                        <div className={`w-4 h-4 rounded-full ${portfolio.is_public ? 'bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-slate-700'}`} />
                                         <div>
-                                            <span className="font-black text-lg tracking-tight">{portfolio.is_public ? 'Live on Web' : 'Draft Mode'}</span>
-                                            <p className="text-xs text-slate-500 font-medium">{portfolio.is_public ? 'Anyone with the link can view' : 'Only you can see this'}</p>
+                                            <span className="font-black text-2xl tracking-tighter italic uppercase text-white">{portfolio.is_public ? 'Signal Active' : 'Offline / Draft'}</span>
+                                            <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">{portfolio.is_public ? 'Global Broadcast Protocol Active' : 'Local Sandbox Environment'}</p>
                                         </div>
                                     </div>
                                     <button onClick={togglePublish}
-                                        className={`px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${portfolio.is_public ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20'}`}>
-                                        {portfolio.is_public ? 'Take Offline' : 'Go Live Now'}
+                                        className={`px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${portfolio.is_public ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/10' : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border border-emerald-500/10'}`}>
+                                        {portfolio.is_public ? 'Kill Signal' : 'Go Live_'}
                                     </button>
                                 </div>
-
+                                
                                 {portfolio.is_public && (
-                                    <div className="flex items-center gap-3 p-4 bg-black/40 border border-white/5 rounded-2xl relative group/link">
-                                        <Globe className="w-5 h-5 text-indigo-400 shrink-0" />
-                                        <a href={publicUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors font-bold truncate flex-1">{publicUrl}</a>
-                                        <button onClick={() => copyLink(publicUrl)} className="p-2 hover:bg-white/5 rounded-xl transition-colors shrink-0">
-                                            {copied ? <Check className="w-5 h-5 text-emerald-400" /> : <Copy className="w-5 h-5 text-slate-500" />}
+                                    <div className="flex items-center gap-4 p-5 bg-black/60 border border-white/5 rounded-3xl relative group/link hover:border-indigo-500/30 transition-all duration-500">
+                                        <Globe className="w-6 h-6 text-indigo-500 shrink-0" />
+                                        <a href={publicUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors font-black truncate flex-1 uppercase tracking-tight italic">{publicUrl}</a>
+                                        <button onClick={() => copyLink(publicUrl)} className="p-3 hover:bg-white/5 rounded-2xl transition-colors shrink-0">
+                                            {copied ? <Check className="w-5 h-5 text-emerald-500" /> : <Copy className="w-5 h-5 text-slate-600" />}
                                         </button>
                                     </div>
                                 )}
                             </div>
 
                             {/* Theme & Customization */}
-                            <div className="p-8 bg-white/[0.03] border border-white/10 rounded-[2.5rem] backdrop-blur-sm">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h3 className="font-black text-sm text-slate-400 uppercase tracking-[0.2em]">Appearance</h3>
-                                    <span className="px-3 py-1 bg-indigo-500/10 text-indigo-400 text-[10px] font-black rounded-full border border-indigo-500/20 uppercase tracking-widest">Premium Themes</span>
+                            <div className="p-10 bg-white/[0.02] border border-white/5 rounded-[3.5rem] backdrop-blur-xl">
+                                <div className="flex items-center justify-between mb-10">
+                                    <h3 className="font-black text-[10px] text-slate-500 uppercase tracking-[0.3em]">Neural Interface Theme</h3>
+                                    <Badge variant="outline" className="border-indigo-500/30 bg-indigo-500/5 text-indigo-400 font-black px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest animate-pulse">Enterprise v2</Badge>
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                                     {PORTFOLIO_THEMES.map(t => (
                                         <button key={t.id} onClick={async () => {
                                             const res = await fetch('/api/portfolio', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ theme: t.id }) });
                                             const d = await res.json(); if (d.success) setPortfolio(d.portfolio);
                                         }}
-                                            className={`p-4 rounded-2xl border text-left transition-all ${portfolio.theme === t.id ? 'border-indigo-500 bg-indigo-600/10 shadow-[0_0_20px_rgba(99,102,241,0.1)]' : 'border-white/5 bg-white/5 hover:border-white/20'}`}>
-                                            <p className="text-sm font-black tracking-tight">{t.name}</p>
-                                            <p className="text-[10px] text-slate-500 mt-1 uppercase font-bold tracking-wider">{t.badge}</p>
+                                            className={`p-6 rounded-3xl border text-left transition-all group/theme ${portfolio.theme === t.id ? 'border-indigo-500 bg-indigo-500/10 shadow-2xl shadow-indigo-500/20' : 'border-white/5 bg-white/[0.02] hover:border-white/20'}`}>
+                                            <p className="text-base font-black tracking-tight uppercase italic text-white group-hover/theme:text-indigo-400 transition-colors">{t.name}</p>
+                                            <p className="text-[9px] text-slate-600 mt-2 uppercase font-black tracking-widest">{t.badge}</p>
                                         </button>
                                     ))}
                                 </div>
                             </div>
 
                             {/* Actions */}
-                            <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="flex flex-col sm:flex-row gap-5 pt-4">
                                 <a href={portfolio.is_public ? publicUrl : previewUrl} target="_blank" rel="noopener noreferrer"
-                                    className="flex-1 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-sm font-black text-center flex items-center justify-center gap-3 transition-all">
-                                    <Eye className="w-5 h-5 text-slate-400" /> View Live Preview
+                                    className="flex-1 py-5 bg-white/[0.02] hover:bg-white/5 border border-white/5 rounded-[2rem] text-[10px] font-black text-center flex items-center justify-center gap-4 transition-all uppercase tracking-[0.2em] group">
+                                    <Eye className="w-6 h-6 text-slate-500 group-hover:text-white transition-colors" /> Preview Interface
                                 </a>
                                 <button onClick={() => { setPortfolio(null); generate(); }} disabled={generating}
-                                    className="flex-1 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 rounded-2xl text-sm font-black flex items-center justify-center gap-3 transition-all shadow-xl shadow-indigo-600/20">
-                                    {generating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-                                    Regenerate with AI
+                                    className="flex-1 py-5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 rounded-[2rem] text-[10px] font-black flex items-center justify-center gap-4 transition-all shadow-2xl shadow-indigo-600/30 uppercase tracking-[0.2em]">
+                                    {generating ? <Loader2 className="w-6 h-6 animate-spin" /> : <Sparkles className="w-6 h-6" />}
+                                    Re-Materialize
                                 </button>
                             </div>
                         </div>
@@ -154,5 +185,17 @@ export default function PortfolioPage() {
                 </div>
             </div>
         </FeatureGate>
+    );
+}
+
+export default function PortfolioPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-[#070710] flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+            </div>
+        }>
+            <PortfolioContent />
+        </Suspense>
     );
 }

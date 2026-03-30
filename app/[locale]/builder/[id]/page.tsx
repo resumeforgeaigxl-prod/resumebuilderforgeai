@@ -11,9 +11,10 @@ import {
     Save, Sparkles, ArrowLeft, Plus, Trash2, Loader2,
     Building2, GraduationCap, Lightbulb, Wand2, Zap,
     AlertCircle, CheckCircle, X, Download, ExternalLink,
-    Github, Layout, ChevronRight, Award
+    Github, Layout, ChevronRight, Award, Eye, EyeOff
 } from 'lucide-react';
 import Link from 'next/link';
+import { PreviewLayer } from '@/components/builder/preview/PreviewLayer';
 import { ResumeUpload } from '@/components/dashboard/resume-upload';
 import { HealthScorePanel } from '@/components/builder/HealthScore';
 import { JdMatcher } from '@/components/builder/JdMatcher';
@@ -27,7 +28,7 @@ import posthog from '@/lib/posthog';
 import { CoverLetterModal } from '@/components/builder/cover-letter-modal';
 import { ResumeIntelligence } from '@/components/builder/ResumeIntelligence';
 import { FeatureGate } from '@/components/pricing/FeatureGate';
-import { incrementForgeUsage } from '@/lib/auth/usage';
+// removed incrementForgeUsage import
 
 type Step = 'edit' | 'template' | 'optimize' | 'download';
 
@@ -53,10 +54,8 @@ export default function BuilderPage() {
     const [jobDescription, setJobDescription] = useState('');
     const [showOptimizer, setShowOptimizer] = useState(false);
     const [atsResult, setAtsResult] = useState<ATSScoreResult | null>(null);
-    const [isAtsLoading, setIsAtsLoading] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState('harvard');
     const [couponCode, setCouponCode] = useState('');
-    const [couponMsg, setCouponMsg] = useState<{ text: string; ok: boolean } | null>(null);
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponApplied, setCouponApplied] = useState(false);
     const [faangMode, setFaangMode] = useState(false);
@@ -65,6 +64,8 @@ export default function BuilderPage() {
     const [isNotFound, setIsNotFound] = useState(false);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [showCoverLetter, setShowCoverLetter] = useState(false);
+    const [previewEnabled, setPreviewEnabled] = useState(true);
+    const preview_enabled = previewEnabled; // for prompt consistency
 
     useEffect(() => {
         fetch('/api/user/access').then(res => res.json()).then(data => {
@@ -127,7 +128,6 @@ export default function BuilderPage() {
 
     const fetchATSScore = useCallback(async () => {
         if (!resumeData) return;
-        setIsAtsLoading(true);
         try {
             const res = await fetch('/api/resume/ats-score', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -135,7 +135,9 @@ export default function BuilderPage() {
             });
             const result = (await res.json()) as { success: boolean; scoreResult: ATSScoreResult };
             if (result.success) setAtsResult(result.scoreResult);
-        } finally { setIsAtsLoading(false); }
+        } catch (e) {
+            console.error('[ATS] Score fetch failed:', e);
+        }
     }, [resumeData, jobDescription]);
 
     useEffect(() => {
@@ -234,10 +236,10 @@ export default function BuilderPage() {
         if (finalData) {
             setSaving(true);
             setResumeData(finalData);
-            await supabase.from('resumes').update({ 
-                resume_json: finalData, 
-                title, 
-                updated_at: new Date().toISOString() 
+            await supabase.from('resumes').update({
+                resume_json: finalData,
+                title,
+                updated_at: new Date().toISOString()
             }).eq('id', id);
             setInitialData(JSON.stringify(finalData));
             setOptimizedResumeData(null);
@@ -264,7 +266,6 @@ export default function BuilderPage() {
     async function redeemCoupon() {
         if (!couponCode.trim()) return;
         setCouponLoading(true);
-        setCouponMsg(null);
         try {
             const res = await fetch('/api/coupon/redeem', {
                 method: 'POST',
@@ -276,16 +277,16 @@ export default function BuilderPage() {
                 try {
                     posthog.capture('coupon_applied', { coupon_code: couponCode });
                 } catch (e) { console.error('[PostHog] Event error:', e); }
-                setCouponMsg({ text: data.message, ok: true });
+                // setCouponMsg removed
                 if (data.unlock_all) {
                     setCouponApplied(true);
                     setUserAccess(true); // Immediate unlock
                 }
             } else {
-                setCouponMsg({ text: data.error || 'Invalid coupon', ok: false });
+                // setCouponMsg removed
             }
         } catch {
-            setCouponMsg({ text: 'Network error. Please try again.', ok: false });
+            // setCouponMsg removed
         } finally {
             setCouponLoading(false);
         }
@@ -299,25 +300,41 @@ export default function BuilderPage() {
         } catch (e) { console.error('[PostHog] Event error:', e); }
 
         try {
+            console.log('[Download] Requesting PDF with:', { id, template: selectedTemplate });
             const res = await fetch('/api/resume/download', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ resumeId: id, resumeData, template: selectedTemplate }),
             });
+            console.log('[Download] Response:', res.status, res.statusText);
+
             if (res.ok) {
-                // Success! Increment free usage count for resumeforge
-                await incrementForgeUsage('resumeforge');
+                // Usage increment is now handled on the server side correctly
+                // as part of the download route, avoiding request scope issues.
 
                 const blob = await res.blob();
+                console.log('[Download] Blob received, size:', blob.size);
                 const url = URL.createObjectURL(blob);
-                const a = document.createElement('a'); a.href = url; a.download = `${title || 'resume'}.pdf`; a.click();
-                URL.revokeObjectURL(url);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${title || 'resume'}.pdf`;
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(url), 100);
             } else {
-                const data = await res.json().catch(() => ({ error: 'Download failed' }));
-                alert(`Download error: ${data.error || 'Unknown error'}${data.details ? ` (${data.details})` : ''}`);
+                let errorData: { error?: string; details?: string } = { error: 'Unknown server error' };
+                try {
+                    errorData = await res.json();
+                } catch {
+                    const text = await res.text();
+                    console.error('[Download] Failed to parse error JSON, raw response:', text);
+                    errorData = { error: 'Server error', details: text.slice(0, 100) };
+                }
+                alert(`Download error [${res.status}]: ${errorData.error || 'Server error'}${errorData.details ? ` (${errorData.details})` : ''}`);
             }
         } catch (err: unknown) {
-            console.error('[Download] Error:', err);
-            alert('Download error: Network failure or timeout.');
+            const error = err as Error;
+            console.error('[Download] Fatal Error:', error);
+            alert(`Download error: ${error.message || 'Network failure or timeout.'}`);
         } finally { setDownloading(false); }
     }
 
@@ -344,488 +361,519 @@ export default function BuilderPage() {
     return (
         <FeatureGate task="resume">
             <div className="min-h-screen bg-[#070710] text-slate-200 pt-20">
-            {/* ── Header ── */}
-            <header className="sticky top-0 z-20 bg-slate-900/80 backdrop-blur-md border-b border-white/5 px-4 sm:px-6 py-3">
-                <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-start">
-                        <Link href="/dashboard" className="p-2 hover:bg-white/5 rounded-xl transition-colors shrink-0"><ArrowLeft className="w-5 h-5" /></Link>
-                        <input value={title} onChange={e => setTitle(e.target.value)}
-                            className="bg-transparent border-none text-base sm:text-lg font-bold focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 w-full sm:w-64" />
-                    </div>
-                    <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 w-full sm:w-auto">
-                        <ResumeIntelligence resumeId={id} resumeData={resumeData} />
-                        <button onClick={() => setShowOptimizer(true)} disabled={isResumeEmpty}
-                            className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-700 to-blue-700 hover:from-purple-600 hover:to-blue-600 text-white rounded-lg text-sm font-medium disabled:opacity-50">
-                            <Sparkles className="w-4 h-4" /> AI Optimize
-                        </button>
-                        <button onClick={handleSave} disabled={saving || !hasChanges}
-                            className="flex items-center gap-2 px-3 py-2 bg-white text-black hover:bg-gray-100 rounded-lg text-sm font-medium disabled:opacity-50">
-                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                            {hasChanges ? 'Save' : 'Saved'}
-                        </button>
-                        {step === 'download'
-                            ? (
-                                <div className="relative group">
-                                    <button onClick={handleDownload} disabled={downloading}
-                                        className={`flex items-center gap-2 px-6 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium transition-all ${(userAccess === false && !couponApplied) ? 'blur-[3px] opacity-70 cursor-not-allowed group-hover:blur-sm' : 'hover:bg-emerald-500 disabled:opacity-50'}`}>
-                                        {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} Download PDF
-                                    </button>
-
-                                    {(userAccess === false && !couponApplied) && (
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900/80 rounded-lg pointer-events-none">
-                                            <span className="text-xs font-bold text-emerald-400">Upgrade to Pro</span>
-                                            <span className="text-[10px] text-slate-300 leading-tight">For Clean PDF</span>
-                                        </div>
-                                    )}
-                                </div>
-                            )
-                            : <button onClick={() => setStep('template')} disabled={isResumeEmpty}
-                                className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium disabled:opacity-50">
-                                <Layout className="w-4 h-4" /> Choose Template
+                {/* ── Header ── */}
+                <header className="sticky top-0 z-20 bg-slate-900/80 backdrop-blur-md border-b border-white/5 px-4 sm:px-6 py-3">
+                    <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-start">
+                            <Link href="/dashboard" className="p-2 hover:bg-white/5 rounded-xl transition-colors shrink-0"><ArrowLeft className="w-5 h-5" /></Link>
+                            <input value={title} onChange={e => setTitle(e.target.value)}
+                                className="bg-transparent border-none text-base sm:text-lg font-bold focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 w-full sm:w-64" />
+                        </div>
+                        <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 w-full sm:w-auto">
+                            <ResumeIntelligence resumeId={id} resumeData={resumeData} />
+                            <button onClick={() => setShowOptimizer(true)} disabled={isResumeEmpty}
+                                className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-700 to-blue-700 hover:from-purple-600 hover:to-blue-600 text-white rounded-lg text-sm font-medium disabled:opacity-50">
+                                <Sparkles className="w-4 h-4" /> AI Optimize
                             </button>
-                        }
-                    </div>
-                </div>
+                            <button onClick={handleSave} disabled={saving || !hasChanges}
+                                className="flex items-center gap-2 px-3 py-2 bg-white text-black hover:bg-gray-100 rounded-lg text-sm font-medium disabled:opacity-50">
+                                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                {hasChanges ? 'Save' : 'Saved'}
+                            </button>
+                            {step === 'download'
+                                ? (
+                                    <div className="relative group">
+                                        <button onClick={handleDownload} disabled={downloading}
+                                            className={`flex items-center gap-2 px-6 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium transition-all ${(userAccess === false && !couponApplied) ? 'blur-[3px] opacity-70 cursor-not-allowed group-hover:blur-sm' : 'hover:bg-emerald-500 disabled:opacity-50'}`}>
+                                            {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} Download PDF
+                                        </button>
 
-                {/* Progress Bar */}
-                <div className="max-w-7xl mx-auto mt-2 flex items-center gap-1.5 text-xs overflow-x-auto">
-                    {(['edit', 'template', 'optimize', 'download'] as Step[]).map((s, i) => {
-                        const labels = ['1. Fill Resume', '2. Template', '3. AI Optimize', '4. Download'];
-                        const idx = ['edit', 'template', 'optimize', 'download'].indexOf(step);
-                        const isActive = s === step, isDone = idx > i;
-                        return (
-                            <button 
-                                key={s} 
-                                onClick={() => setStep(s)}
-                                className="flex items-center gap-1.5 shrink-0 hover:bg-white/5 rounded-full transition-all px-1 py-0.5"
+                                        {(userAccess === false && !couponApplied) && (
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900/80 rounded-lg pointer-events-none">
+                                                <span className="text-xs font-bold text-emerald-400">Upgrade to Pro</span>
+                                                <span className="text-[10px] text-slate-300 leading-tight">For Clean PDF</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <button onClick={() => setStep('template')} disabled={isResumeEmpty}
+                                        className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium disabled:opacity-50">
+                                        <Layout className="w-4 h-4" /> Choose Template
+                                    </button>
+                                )}
+
+                            <div className="h-6 w-px bg-white/10 mx-1 hidden sm:block" />
+
+                            <button
+                                onClick={() => setPreviewEnabled(!previewEnabled)}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${previewEnabled ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'bg-white/5 text-slate-400 border border-white/5 hover:bg-white/10'}`}
                             >
-                                <span className={`px-2.5 py-1 rounded-full font-medium whitespace-nowrap ${isActive ? 'bg-blue-600 text-white' : isDone ? 'bg-emerald-700/40 text-emerald-400' : 'text-slate-600'}`}>
-                                    {isDone ? '✓ ' : ''}{labels[i]}
-                                </span>
-                                {i < 3 && <ChevronRight className="w-3 h-3 text-slate-700" />}
+                                {previewEnabled ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                                <span className="hidden sm:inline">{previewEnabled ? 'Preview On' : 'Preview Off'}</span>
                             </button>
-                        );
-                    })}
-                </div>
-            </header>
-
-            {/* ── Template Selection ── */}
-            {step === 'template' && (
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12">
-                    <h2 className="text-3xl font-bold text-center mb-2">Choose Your ATS Template</h2>
-                    <p className="text-slate-400 text-center mb-10 text-sm">All templates are single-column, black & white, print-optimised documents</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {ALL_TEMPLATES.map(t => (
-                            <button key={t.id} onClick={() => handleSelectTemplate(t.id)}
-                                className={`group p-5 rounded-2xl border text-left transition-all hover:scale-[1.02] ${selectedTemplate === t.id ? 'border-blue-500 bg-blue-600/10' : 'border-white/10 bg-white/5 hover:border-white/30'}`}>
-                                <div className="w-full h-24 rounded-xl bg-gradient-to-br from-slate-700 to-slate-800 mb-4 flex items-center justify-center border border-white/5">
-                                    <Layout className="w-8 h-8 text-white/30" />
-                                </div>
-                                <span className="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">{t.badge}</span>
-                                <p className="font-semibold mt-2 text-sm">{t.name}</p>
-                                <p className="text-xs text-slate-500 mt-1">{t.desc}</p>
-                            </button>
-                        ))}
+                        </div>
                     </div>
-                    <div className="text-center mt-8">
-                        <button onClick={() => setStep('edit')} className="text-slate-500 hover:text-slate-300 text-sm">← Back to editing</button>
-                    </div>
-                </div>
-            )}
 
-            {/* ── Main Editor ── */}
-            {step !== 'template' && (
-                <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    <div className="lg:col-span-8 space-y-6 pb-24 w-full overflow-hidden">
-                        {isReviewing && (
-                            <div className="p-4 bg-blue-600/10 border border-blue-500/30 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
-                                        <Sparkles className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-bold text-white">Reviewing AI Changes</p>
-                                        <p className="text-xs text-blue-300">Manually edit the optimized content or apply it to save.</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2 w-full sm:w-auto">
-                                    <button onClick={handleRevertToOriginal} className="flex-1 sm:flex-none px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-xs font-bold rounded-xl border border-white/10 transition-all">
-                                        Revert
-                                    </button>
-                                    <button onClick={handleAcceptOptimized} className="flex-1 sm:flex-none px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-blue-600/20">
-                                        Accept & Save
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Upload */}
-                        <ResumeUpload
-                            onUploadSuccess={parsed => {
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                const mappedData: ResumeData = {
-                                    ...parsed,
-                                    // Inject IDs for local state management (Builder needs these for keys/deletion)
-                                    experience: (parsed.experience || []).map((exp: ResumeExperience) => ({ ...exp, id: uid() })),
-                                    projects: (parsed.projects || []).map((proj: ResumeProject) => ({ ...proj, id: uid() })),
-                                    education: (parsed.education || []).map((edu: ResumeEducation) => ({ ...edu, id: uid() })),
-                                    certifications: (parsed.certifications || []).map((cert: Certification) => ({ ...cert, id: uid() }))
-                                };
-
-                                setResumeData(mappedData);
-                                alert('Resume parsed and mapped successfully!');
-                            }}
-                            onUploadError={err => alert(err)}
-                        />
-
-                        {/* Versions */}
-                        {typeof id === 'string' && <VersionHistory resumeId={id} onRestore={(d) => setResumeData(d as unknown as ResumeData)} />}
-
-                        {/* Personal Info */}
-                        <Section title="Personal Information" icon={<Building2 className="w-5 h-5" />}>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FInput label="Full Name" value={rd.name} onChange={v => setResumeData({ ...rd, name: v })} />
-                                <FInput label="Email" value={rd.email} onChange={v => setResumeData({ ...rd, email: v })} />
-                                <FInput label="Phone" value={rd.phone} onChange={v => setResumeData({ ...rd, phone: v })} />
-                                <FInput label="Location (City, State)" value={rd.location ?? ''} onChange={v => setResumeData({ ...rd, location: v })} />
-                                <FInput label="Country" value={rd.country ?? ''} onChange={v => setResumeData({ ...rd, country: v })} />
-                                <FInput label="LinkedIn URL" value={rd.linkedin} onChange={v => setResumeData({ ...rd, linkedin: v })} />
-                                <FInput label="GitHub URL" value={rd.github} onChange={v => setResumeData({ ...rd, github: v })} />
-                            </div>
-                        </Section>
-
-                        <Section title="Professional Summary" icon={<Lightbulb className="w-5 h-5" />}
-                            onAction={
+                    {/* Progress Bar */}
+                    <div className="max-w-7xl mx-auto mt-2 flex items-center gap-1.5 text-xs overflow-x-auto">
+                        {(['edit', 'template', 'optimize', 'download'] as Step[]).map((s, i) => {
+                            const labels = ['1. Fill Resume', '2. Template', '3. AI Optimize', '4. Download'];
+                            const idx = ['edit', 'template', 'optimize', 'download'].indexOf(step);
+                            const isActive = s === step, isDone = idx > i;
+                            return (
                                 <button
-                                    onClick={handleGenerateSummary}
-                                    disabled={isGeneratingSummary || !rd.experience?.length}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
+                                    key={s}
+                                    onClick={() => setStep(s)}
+                                    className="flex items-center gap-1.5 shrink-0 hover:bg-white/5 rounded-full transition-all px-1 py-0.5"
                                 >
-                                    {isGeneratingSummary ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                                    AI Generate
+                                    <span className={`px-2.5 py-1 rounded-full font-medium whitespace-nowrap ${isActive ? 'bg-blue-600 text-white' : isDone ? 'bg-emerald-700/40 text-emerald-400' : 'text-slate-600'}`}>
+                                        {isDone ? '✓ ' : ''}{labels[i]}
+                                    </span>
+                                    {i < 3 && <ChevronRight className="w-3 h-3 text-slate-700" />}
                                 </button>
-                            }
-                        >
-                            <textarea value={rd.summary} onChange={e => setResumeData({ ...rd, summary: e.target.value })}
-                                className="w-full h-28 bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-2 focus:ring-blue-500/50 outline-none resize-none text-sm" placeholder="Brief professional summary..." />
-                        </Section>
-
-                        {/* Experience */}
-                        <Section title="Work Experience" icon={<Building2 className="w-5 h-5" />}
-                            onAdd={() => setResumeData({ ...rd, experience: [...(rd.experience || []), { id: uid(), company: '', role: '', duration: '', points: [''] } as ResumeExperience] })}>
-                            {(rd.experience || []).map((exp, idx) => (
-                                <ListCard key={exp.id} onDelete={() => setResumeData({ ...rd, experience: rd.experience.filter((_, i) => i !== idx) })}>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-                                        <FInput label="Company" value={exp.company} onChange={v => { const l = [...rd.experience]; l[idx].company = v; setResumeData({ ...rd, experience: l }); }} />
-                                        <FInput label="Role / Title" value={exp.role} onChange={v => { const l = [...rd.experience]; l[idx].role = v; setResumeData({ ...rd, experience: l }); }} />
-                                        <FInput label="Duration" value={exp.duration} onChange={v => { const l = [...rd.experience]; l[idx].duration = v; setResumeData({ ...rd, experience: l }); }} />
-                                    </div>
-                                    <Bullets points={exp.points} faangMode={faangMode} jobDescription={jobDescription} onChange={p => { const l = [...rd.experience]; l[idx].points = p; setResumeData({ ...rd, experience: l }); }} />
-                                </ListCard>
-                            ))}
-                        </Section>
-
-                        {/* Education */}
-                        <Section title="Education" icon={<GraduationCap className="w-5 h-5" />}
-                            onAdd={() => setResumeData({ ...rd, education: [...(rd.education || []), { id: uid(), school: '', degree: '', duration: '', cgpa: '' } as ResumeEducation] })}>
-                            {(rd.education || []).map((edu, idx) => (
-                                <ListCard key={edu.id} onDelete={() => setResumeData({ ...rd, education: rd.education.filter((_, i) => i !== idx) })}>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        <FInput label="School / University" value={edu.school} onChange={v => { const l = [...rd.education]; l[idx].school = v; setResumeData({ ...rd, education: l }); }} />
-                                        <FInput label="Degree" value={edu.degree} onChange={v => { const l = [...rd.education]; l[idx].degree = v; setResumeData({ ...rd, education: l }); }} />
-                                        <FInput label="Duration" value={edu.duration} onChange={v => { const l = [...rd.education]; l[idx].duration = v; setResumeData({ ...rd, education: l }); }} />
-                                        <FInput label="CGPA / GPA" value={edu.cgpa ?? ''} onChange={v => { const l = [...rd.education]; l[idx].cgpa = v; setResumeData({ ...rd, education: l }); }} />
-                                    </div>
-                                </ListCard>
-                            ))}
-                        </Section>
-
-                        {/* Certifications */}
-                        <Section title="Certifications" icon={<Award className="w-5 h-5" />}
-                            onAdd={() => setResumeData({ ...rd, certifications: [...(rd.certifications ?? []), { id: uid(), title: '', issuer: '', year: '' } as Certification] })}>
-                            {(rd.certifications ?? []).map((cert, idx) => (
-                                <ListCard key={cert.id} onDelete={() => setResumeData({ ...rd, certifications: (rd.certifications ?? []).filter((_, i) => i !== idx) })}>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                        <FInput label="Certification Title" value={cert.title} onChange={v => { const l = [...(rd.certifications ?? [])]; l[idx].title = v; setResumeData({ ...rd, certifications: l }); }} />
-                                        <FInput label="Issuer (AWS, Google…)" value={cert.issuer} onChange={v => { const l = [...(rd.certifications ?? [])]; l[idx].issuer = v; setResumeData({ ...rd, certifications: l }); }} />
-                                        <FInput label="Year" value={cert.year} onChange={v => { const l = [...(rd.certifications ?? [])]; l[idx].year = v; setResumeData({ ...rd, certifications: l }); }} />
-                                    </div>
-                                </ListCard>
-                            ))}
-                        </Section>
-
-                        {/* Projects */}
-                        <Section title="Projects" icon={<Lightbulb className="w-5 h-5" />}
-                            onAdd={() => setResumeData({ ...rd, projects: [...(rd.projects || []), { id: uid(), title: '', tech: [], description: [''], liveLink: '', githubLink: '' } as ResumeProject] })}>
-                            {(rd.projects || []).map((proj, idx) => (
-                                <ListCard key={proj.id} onDelete={() => setResumeData({ ...rd, projects: rd.projects.filter((_, i) => i !== idx) })}>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                                        <FInput label="Project Title" value={proj.title} onChange={v => { const l = [...rd.projects]; l[idx].title = v; setResumeData({ ...rd, projects: l }); }} />
-                                        <FInput label="Technologies (comma-separated)" value={proj.tech.join(', ')} onChange={v => { const l = [...rd.projects]; l[idx].tech = v.split(',').map(s => s.trim()).filter(Boolean); setResumeData({ ...rd, projects: l }); }} />
-                                        <div className="flex items-center gap-2"><ExternalLink className="w-4 h-4 text-slate-500 shrink-0" /><FInput label="Live URL" value={proj.liveLink ?? ''} onChange={v => { const l = [...rd.projects]; l[idx].liveLink = v; setResumeData({ ...rd, projects: l }); }} /></div>
-                                        <div className="flex items-center gap-2"><Github className="w-4 h-4 text-slate-500 shrink-0" /><FInput label="GitHub URL" value={proj.githubLink ?? ''} onChange={v => { const l = [...rd.projects]; l[idx].githubLink = v; setResumeData({ ...rd, projects: l }); }} /></div>
-                                    </div>
-                                    <Bullets points={proj.description} faangMode={faangMode} jobDescription={jobDescription} onChange={p => { const l = [...rd.projects]; l[idx].description = p; setResumeData({ ...rd, projects: l }); }} />
-                                </ListCard>
-                            ))}
-                        </Section>
-
-                        {/* Skills */}
-                        <Section title="Technical Skills" icon={<Zap className="w-5 h-5" />}>
-                            <p className="text-xs text-slate-500 mb-4">Comma-separated values per category. Rendered as plain text in PDF.</p>
-                            <div className="space-y-3">
-                                {SKILL_CATEGORIES.map(cat => {
-                                    const cats: SkillCategory[] = rd.skillCategories ?? SKILL_CATEGORIES.map(c => ({ category: c, skills: [] }));
-                                    const entry = cats.find(c => c.category === cat) ?? { category: cat, skills: [] };
-                                    return (
-                                        <div key={cat} className="flex items-center gap-3">
-                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide w-28 shrink-0">{cat}</label>
-                                            <input value={entry.skills.join(', ')} placeholder="e.g. Python, TypeScript"
-                                                onChange={e => {
-                                                    const newSkills = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
-                                                    const newCats: SkillCategory[] = SKILL_CATEGORIES.map(c =>
-                                                        c === cat ? { category: c, skills: newSkills } : (cats.find(x => x.category === c) ?? { category: c, skills: [] })
-                                                    );
-                                                    setResumeData({ ...rd, skillCategories: newCats, skills: newCats.flatMap(c => c.skills) });
-                                                }}
-                                                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
-                                            />
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </Section>
+                            );
+                        })}
                     </div>
+                </header>
 
-                    {/* ── Sidebar ── */}
-                    <div className="lg:col-span-4 sticky top-24 h-fit space-y-5">
-                        {/* Selected Template */}
-                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
-                            <div>
-                                <p className="text-xs text-slate-500 mb-0.5">TEMPLATE</p>
-                                <p className="font-semibold text-sm">{ALL_TEMPLATES.find(t => t.id === selectedTemplate)?.name ?? 'Harvard Classic'}</p>
-                            </div>
-                            <button onClick={() => setStep('template')} className="text-xs text-blue-400 border border-blue-400/20 px-3 py-1 rounded-full hover:bg-blue-400/10 transition-all">Change</button>
+                {/* ── Template Selection ── */}
+                {step === 'template' && (
+                    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12">
+                        <h2 className="text-3xl font-bold text-center mb-2">Choose Your ATS Template</h2>
+                        <p className="text-slate-400 text-center mb-10 text-sm">All templates are single-column, black & white, print-optimised documents</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {ALL_TEMPLATES.map(t => (
+                                <button key={t.id} onClick={() => handleSelectTemplate(t.id)}
+                                    className={`group p-5 rounded-2xl border text-left transition-all hover:scale-[1.02] ${selectedTemplate === t.id ? 'border-blue-500 bg-blue-600/10' : 'border-white/10 bg-white/5 hover:border-white/30'}`}>
+                                    <div className="w-full h-24 rounded-xl bg-gradient-to-br from-slate-700 to-slate-800 mb-4 flex items-center justify-center border border-white/5">
+                                        <Layout className="w-8 h-8 text-white/30" />
+                                    </div>
+                                    <span className="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">{t.badge}</span>
+                                    <p className="font-semibold mt-2 text-sm">{t.name}</p>
+                                    <p className="text-xs text-slate-500 mt-1">{t.desc}</p>
+                                </button>
+                            ))}
+                        </div>
+                        <div className="text-center mt-8">
+                            <button onClick={() => setStep('edit')} className="text-slate-500 hover:text-slate-300 text-sm">← Back to editing</button>
+                        </div>
+                    </div>
+                )}
+
+                {/* ── Main Editor ── */}
+                {step !== 'template' && (
+                    <main className={`mx-auto px-4 sm:px-6 py-8 transition-all duration-500 ${preview_enabled ? 'max-w-full grid grid-cols-1 lg:grid-cols-2 gap-8' : 'max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-8'}`}>
+                        <div className={`${preview_enabled ? 'lg:col-span-1' : 'lg:col-span-8'} space-y-6 pb-24 w-full overflow-hidden`}>
+                            {isReviewing && (
+                                <div className="p-4 bg-blue-600/10 border border-blue-500/30 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+                                            <Sparkles className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-white">Reviewing AI Changes</p>
+                                            <p className="text-xs text-blue-300">Manually edit the optimized content or apply it to save.</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                                        <button onClick={handleRevertToOriginal} className="flex-1 sm:flex-none px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-xs font-bold rounded-xl border border-white/10 transition-all">
+                                            Revert
+                                        </button>
+                                        <button onClick={handleAcceptOptimized} className="flex-1 sm:flex-none px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-blue-600/20">
+                                            Accept & Save
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Upload */}
+                            <ResumeUpload
+                                onUploadSuccess={parsed => {
+                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                    const mappedData: ResumeData = {
+                                        ...parsed,
+                                        // Inject IDs for local state management (Builder needs these for keys/deletion)
+                                        experience: (parsed.experience || []).map((exp: ResumeExperience) => ({ ...exp, id: uid() })),
+                                        projects: (parsed.projects || []).map((proj: ResumeProject) => ({ ...proj, id: uid() })),
+                                        education: (parsed.education || []).map((edu: ResumeEducation) => ({ ...edu, id: uid() })),
+                                        certifications: (parsed.certifications || []).map((cert: Certification) => ({ ...cert, id: uid() }))
+                                    };
+
+                                    setResumeData(mappedData);
+                                    alert('Resume parsed and mapped successfully!');
+                                }}
+                                onUploadError={err => alert(err)}
+                            />
+
+                            {/* Versions */}
+                            {typeof id === 'string' && <VersionHistory resumeId={id} onRestore={(d) => setResumeData(d as unknown as ResumeData)} />}
+
+                            {/* Personal Info */}
+                            <Section title="Personal Information" icon={<Building2 className="w-5 h-5" />}>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <FInput label="Full Name" value={rd.name} onChange={v => setResumeData({ ...rd, name: v })} />
+                                    <FInput label="Email" value={rd.email} onChange={v => setResumeData({ ...rd, email: v })} />
+                                    <FInput label="Phone" value={rd.phone} onChange={v => setResumeData({ ...rd, phone: v })} />
+                                    <FInput label="Location (City, State)" value={rd.location ?? ''} onChange={v => setResumeData({ ...rd, location: v })} />
+                                    <FInput label="Country" value={rd.country ?? ''} onChange={v => setResumeData({ ...rd, country: v })} />
+                                    <FInput label="LinkedIn URL" value={rd.linkedin} onChange={v => setResumeData({ ...rd, linkedin: v })} />
+                                    <FInput label="GitHub URL" value={rd.github} onChange={v => setResumeData({ ...rd, github: v })} />
+                                </div>
+                            </Section>
+
+                            <Section title="Professional Summary" icon={<Lightbulb className="w-5 h-5" />}
+                                onAction={
+                                    <button
+                                        onClick={handleGenerateSummary}
+                                        disabled={isGeneratingSummary || !rd.experience?.length}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
+                                    >
+                                        {isGeneratingSummary ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                                        AI Generate
+                                    </button>
+                                }
+                            >
+                                <textarea value={rd.summary} onChange={e => setResumeData({ ...rd, summary: e.target.value })}
+                                    className="w-full h-28 bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-2 focus:ring-blue-500/50 outline-none resize-none text-sm" placeholder="Brief professional summary..." />
+                            </Section>
+
+                            {/* Experience */}
+                            <Section title="Work Experience" icon={<Building2 className="w-5 h-5" />}
+                                onAdd={() => setResumeData({ ...rd, experience: [...(rd.experience || []), { id: uid(), company: '', role: '', duration: '', points: [''] } as ResumeExperience] })}>
+                                {(rd.experience || []).map((exp, idx) => (
+                                    <ListCard key={exp.id} onDelete={() => setResumeData({ ...rd, experience: rd.experience.filter((_, i) => i !== idx) })}>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                                            <FInput label="Company" value={exp.company} onChange={v => { const l = [...rd.experience]; l[idx].company = v; setResumeData({ ...rd, experience: l }); }} />
+                                            <FInput label="Role / Title" value={exp.role} onChange={v => { const l = [...rd.experience]; l[idx].role = v; setResumeData({ ...rd, experience: l }); }} />
+                                            <FInput label="Duration" value={exp.duration} onChange={v => { const l = [...rd.experience]; l[idx].duration = v; setResumeData({ ...rd, experience: l }); }} />
+                                        </div>
+                                        <Bullets points={exp.points} faangMode={faangMode} jobDescription={jobDescription} onChange={p => { const l = [...rd.experience]; l[idx].points = p; setResumeData({ ...rd, experience: l }); }} />
+                                    </ListCard>
+                                ))}
+                            </Section>
+
+                            {/* Education */}
+                            <Section title="Education" icon={<GraduationCap className="w-5 h-5" />}
+                                onAdd={() => setResumeData({ ...rd, education: [...(rd.education || []), { id: uid(), school: '', degree: '', duration: '', cgpa: '' } as ResumeEducation] })}>
+                                {(rd.education || []).map((edu, idx) => (
+                                    <ListCard key={edu.id} onDelete={() => setResumeData({ ...rd, education: rd.education.filter((_, i) => i !== idx) })}>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <FInput label="School / University" value={edu.school} onChange={v => { const l = [...rd.education]; l[idx].school = v; setResumeData({ ...rd, education: l }); }} />
+                                            <FInput label="Degree" value={edu.degree} onChange={v => { const l = [...rd.education]; l[idx].degree = v; setResumeData({ ...rd, education: l }); }} />
+                                            <FInput label="Duration" value={edu.duration} onChange={v => { const l = [...rd.education]; l[idx].duration = v; setResumeData({ ...rd, education: l }); }} />
+                                            <FInput label="CGPA / GPA" value={edu.cgpa ?? ''} onChange={v => { const l = [...rd.education]; l[idx].cgpa = v; setResumeData({ ...rd, education: l }); }} />
+                                        </div>
+                                    </ListCard>
+                                ))}
+                            </Section>
+
+                            {/* Certifications */}
+                            <Section title="Certifications" icon={<Award className="w-5 h-5" />}
+                                onAdd={() => setResumeData({ ...rd, certifications: [...(rd.certifications ?? []), { id: uid(), title: '', issuer: '', year: '' } as Certification] })}>
+                                {(rd.certifications ?? []).map((cert, idx) => (
+                                    <ListCard key={cert.id} onDelete={() => setResumeData({ ...rd, certifications: (rd.certifications ?? []).filter((_, i) => i !== idx) })}>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                            <FInput label="Certification Title" value={cert.title} onChange={v => { const l = [...(rd.certifications ?? [])]; l[idx].title = v; setResumeData({ ...rd, certifications: l }); }} />
+                                            <FInput label="Issuer (AWS, Google…)" value={cert.issuer} onChange={v => { const l = [...(rd.certifications ?? [])]; l[idx].issuer = v; setResumeData({ ...rd, certifications: l }); }} />
+                                            <FInput label="Year" value={cert.year} onChange={v => { const l = [...(rd.certifications ?? [])]; l[idx].year = v; setResumeData({ ...rd, certifications: l }); }} />
+                                        </div>
+                                    </ListCard>
+                                ))}
+                            </Section>
+
+                            {/* Projects */}
+                            <Section title="Projects" icon={<Lightbulb className="w-5 h-5" />}
+                                onAdd={() => setResumeData({ ...rd, projects: [...(rd.projects || []), { id: uid(), title: '', tech: [], description: [''], liveLink: '', githubLink: '' } as ResumeProject] })}>
+                                {(rd.projects || []).map((proj, idx) => (
+                                    <ListCard key={proj.id} onDelete={() => setResumeData({ ...rd, projects: rd.projects.filter((_, i) => i !== idx) })}>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                                            <FInput label="Project Title" value={proj.title} onChange={v => { const l = [...rd.projects]; l[idx].title = v; setResumeData({ ...rd, projects: l }); }} />
+                                            <FInput label="Technologies (comma-separated)" value={proj.tech.join(', ')} onChange={v => { const l = [...rd.projects]; l[idx].tech = v.split(',').map(s => s.trim()).filter(Boolean); setResumeData({ ...rd, projects: l }); }} />
+                                            <div className="flex items-center gap-2"><ExternalLink className="w-4 h-4 text-slate-500 shrink-0" /><FInput label="Live URL" value={proj.liveLink ?? ''} onChange={v => { const l = [...rd.projects]; l[idx].liveLink = v; setResumeData({ ...rd, projects: l }); }} /></div>
+                                            <div className="flex items-center gap-2"><Github className="w-4 h-4 text-slate-500 shrink-0" /><FInput label="GitHub URL" value={proj.githubLink ?? ''} onChange={v => { const l = [...rd.projects]; l[idx].githubLink = v; setResumeData({ ...rd, projects: l }); }} /></div>
+                                        </div>
+                                        <Bullets points={proj.description} faangMode={faangMode} jobDescription={jobDescription} onChange={p => { const l = [...rd.projects]; l[idx].description = p; setResumeData({ ...rd, projects: l }); }} />
+                                    </ListCard>
+                                ))}
+                            </Section>
+
+                            {/* Skills */}
+                            <Section title="Technical Skills" icon={<Zap className="w-5 h-5" />}>
+                                <p className="text-xs text-slate-500 mb-4">Comma-separated values per category. Rendered as plain text in PDF.</p>
+                                <div className="space-y-3">
+                                    {SKILL_CATEGORIES.map(cat => {
+                                        const cats: SkillCategory[] = rd.skillCategories ?? SKILL_CATEGORIES.map(c => ({ category: c, skills: [] }));
+                                        const entry = cats.find(c => c.category === cat) ?? { category: cat, skills: [] };
+                                        return (
+                                            <div key={cat} className="flex items-center gap-3">
+                                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wide w-28 shrink-0">{cat}</label>
+                                                <input value={entry.skills.join(', ')} placeholder="e.g. Python, TypeScript"
+                                                    onChange={e => {
+                                                        const newSkills = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                                                        const newCats: SkillCategory[] = SKILL_CATEGORIES.map(c =>
+                                                            c === cat ? { category: c, skills: newSkills } : (cats.find(x => x.category === c) ?? { category: c, skills: [] })
+                                                        );
+                                                        setResumeData({ ...rd, skillCategories: newCats, skills: newCats.flatMap(c => c.skills) });
+                                                    }}
+                                                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
+                                                />
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </Section>
                         </div>
 
-                        {/* Coupon Box — shown on download step */}
-                        {step === 'download' && (
-                            <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
-                                <h3 className="font-bold mb-3 flex items-center gap-2 text-sm">
-                                    <span>🎟️</span> Have a Coupon?
-                                </h3>
-                                {couponApplied ? (
-                                    <p className="text-xs text-emerald-400 font-medium">✓ Full access active — no watermark!</p>
+                        {/* ── Right Column (Sidebar or Live Preview) ── */}
+                        <div className={`${preview_enabled ? 'lg:col-span-1' : 'lg:col-span-4'} relative z-10 animate-in fade-in slide-in-from-right-8 duration-700`}>
+                            <div className="sticky top-24 h-fit space-y-5 pb-24">
+                                {preview_enabled ? (
+                                    <div className="h-[calc(100vh-120px)] rounded-[40px] overflow-hidden border border-white/10 shadow-4xl bg-[#0a0a15] ring-1 ring-white/5 ring-inset">
+                                        <PreviewLayer
+                                            resumeData={rd}
+                                            templateId={selectedTemplate}
+                                            isWatermarked={userAccess === false && !couponApplied}
+                                            onDownload={handleDownload}
+                                            isDownloading={downloading}
+                                        />
+                                    </div>
                                 ) : (
                                     <>
-                                        <div className="flex gap-2 mb-2">
-                                            <input
-                                                value={couponCode}
-                                                onChange={e => setCouponCode(e.target.value.toUpperCase())}
-                                                placeholder="ENTER CODE"
-                                                className="flex-1 bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-sm font-mono uppercase focus:ring-2 focus:ring-purple-500/50 outline-none"
-                                            />
-                                            <button
-                                                onClick={redeemCoupon}
-                                                disabled={couponLoading || !couponCode.trim()}
-                                                className="px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-sm rounded-xl font-medium transition-all flex items-center gap-1">
-                                                {couponLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Apply'}
-                                            </button>
+                                        {/* Quick Info & Controls */}
+                                        <div className="p-5 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm space-y-4">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Active Template</p>
+                                                    <p className="font-bold text-sm text-white">{ALL_TEMPLATES.find(t => t.id === selectedTemplate)?.name || 'Classic'}</p>
+                                                </div>
+                                                <button onClick={() => setStep('template')} className="px-4 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-full text-xs font-bold transition-all border border-blue-500/20">
+                                                    Change
+                                                </button>
+                                            </div>
+
+                                            <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                                                <div>
+                                                    <p className="text-[11px] font-bold text-slate-200">FAANG Mode</p>
+                                                    <p className="text-[10px] text-slate-500 italic">Optimize for top-tier tech</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => setFaangMode(!faangMode)}
+                                                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors focus:outline-none ${faangMode ? 'bg-purple-600' : 'bg-white/10'}`}
+                                                >
+                                                    <span className={`pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${faangMode ? 'translate-x-4' : 'translate-x-0'}`} />
+                                                </button>
+                                            </div>
+
+                                            {step === 'download' && (
+                                                <div className="pt-4 border-t border-white/5">
+                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-3">Redeem Credit</p>
+                                                    {couponApplied ? (
+                                                        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-2">
+                                                            <CheckCircle className="w-4 h-4 text-emerald-400" />
+                                                            <span className="text-xs text-emerald-400 font-bold">Pro Access Active</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex gap-2">
+                                                            <input
+                                                                value={couponCode}
+                                                                onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                                                                placeholder="COUPON"
+                                                                className="flex-1 bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs font-mono focus:ring-1 focus:ring-blue-500 outline-none uppercase"
+                                                            />
+                                                            <button onClick={redeemCoupon} disabled={couponLoading} className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all">
+                                                                {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
-                                        {couponMsg && (
-                                            <p className={`text-xs mt-1 ${couponMsg.ok ? 'text-emerald-400' : 'text-red-400'}`}>
-                                                {couponMsg.text}
-                                            </p>
-                                        )}
-                                        <p className="text-xs text-slate-600 mt-2">Without a plan, PDF will include a watermark.</p>
+
+                                        {/* Stats & AI */}
+                                        <div className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h3 className="font-bold text-sm flex items-center gap-2">
+                                                    <Sparkles className="w-4 h-4 text-purple-400" /> ATS Optimization
+                                                </h3>
+                                                <span className="text-2xl font-black text-blue-400">{atsResult?.score || 0}%</span>
+                                            </div>
+
+                                            <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden mb-5">
+                                                <div
+                                                    className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-1000"
+                                                    style={{ width: `${atsResult?.score || 0}%` }}
+                                                />
+                                            </div>
+
+                                            {atsResult?.isValid ? (
+                                                <div className="space-y-4">
+                                                    <div className="space-y-2">
+                                                        {([
+                                                            { label: 'JD Match', val: atsResult.details.keywords, max: 35 },
+                                                            { label: 'Skill Depth', val: atsResult.details.completeness, max: 25 },
+                                                            { label: 'Action Verbs', val: atsResult.details.skills, max: 20 },
+                                                            { label: 'Metrics', val: atsResult.details.metrics, max: 10 },
+                                                            { label: 'Structure', val: atsResult.details.projectLinks, max: 10 },
+                                                        ] as const).map(item => (
+                                                            <div key={item.label} className="flex items-center gap-2">
+                                                                <span className="text-[10px] text-slate-500 w-20 shrink-0 uppercase tracking-wider font-bold">{item.label}</span>
+                                                                <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
+                                                                    <div className="h-full bg-blue-500/60 rounded-full" style={{ width: `${(item.val / item.max) * 100}%` }} />
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    <div className="pt-4 border-t border-white/5">
+                                                        {(atsResult.feedback || []).slice(0, 3).map((f, i) => (
+                                                            <div key={i} className="flex gap-2 text-[10px] text-slate-400 mb-2 leading-relaxed italic">
+                                                                <div className="mt-1.5 w-1 h-1 rounded-full bg-blue-500 shrink-0" />{f}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="text-center py-6 bg-black/20 rounded-2xl border border-white/5">
+                                                    <Sparkles className="w-8 h-8 text-slate-700 mx-auto mb-2" />
+                                                    <p className="text-[10px] text-slate-500 font-medium px-6 leading-relaxed italic">
+                                                        Enter a Target Role or Job Description below for better scores.
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            <div className="mt-6 pt-4 border-t border-white/5 space-y-4">
+                                                <div>
+                                                    <label className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2 block">Target Job Context</label>
+                                                    <textarea
+                                                        value={jobDescription}
+                                                        onChange={e => setJobDescription(e.target.value)}
+                                                        placeholder="Paste Job Description for AI context..."
+                                                        className="w-full h-24 bg-black/40 border border-white/10 rounded-xl p-3 text-xs focus:ring-1 focus:ring-blue-500 outline-none resize-none placeholder:text-slate-700"
+                                                    />
+                                                </div>
+
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => setShowOptimizer(true)} className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-bold transition-all border border-white/10 flex items-center justify-center gap-2">
+                                                        <Zap className="w-3.5 h-3.5" /> AI Review
+                                                    </button>
+                                                    <button onClick={() => setShowCoverLetter(true)} className="flex-1 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-purple-600/20 flex items-center justify-center gap-2 text-center">
+                                                        Cover Letter
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {typeof id === 'string' && <JdMatcher resumeId={id} resumeData={rd} />}
+
+                                        <HealthScorePanel
+                                            resumeData={rd}
+                                            resumeId={id as string}
+                                        />
+
+                                        <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-600/10 to-blue-600/10 border border-indigo-500/20 backdrop-blur-sm relative overflow-hidden group">
+                                            <div className="absolute -top-10 -right-10 w-24 h-24 bg-indigo-500/10 rounded-full blur-3xl group-hover:bg-indigo-500/20 transition-all" />
+                                            <h3 className="text-sm font-black mb-2 flex items-center gap-2 uppercase tracking-widest text-indigo-300">
+                                                Build Personal Portfolio
+                                            </h3>
+                                            <p className="text-[11px] text-slate-400 mb-4 leading-relaxed font-bold">Instantly convert this resume into a stunning professional website.</p>
+                                            <Link
+                                                href={`/${params?.locale}/portfolio?generate=true`}
+                                                className="block w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-center rounded-xl text-[11px] font-black uppercase tracking-widest transition-all"
+                                            >
+                                                Launch Portfolio Builder
+                                            </Link>
+                                        </div>
+
+                                        <VersionHistory resumeId={id as string} onRestore={(d: unknown) => setResumeData(d as ResumeData)} />
                                     </>
                                 )}
                             </div>
-                        )}
+                        </div>
+                    </main>
+                )}
 
-                        {/* AI Tips */}
-                        <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
-                            <h3 className="font-bold mb-3 flex items-center gap-2 text-sm"><Sparkles className="w-4 h-4 text-purple-400" />AI Optimization</h3>
+                {/* ── Optimizer Modal ── */}
+                {showOptimizer && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md">
+                        <div className="bg-slate-900 border border-white/10 w-full max-w-2xl rounded-3xl p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+                            <button onClick={() => setShowOptimizer(false)} className="absolute top-5 right-5 p-2 hover:bg-white/5 rounded-full"><X className="w-5 h-5" /></button>
 
-                            {optimizationSuccess && !isReviewing ? (
-                                <div className="space-y-3 mb-4 animate-in fade-in slide-in-from-right-4 duration-300">
-                                    <p className="text-xs text-emerald-400 font-medium bg-emerald-400/10 p-2 rounded-lg border border-emerald-400/20">✓ AI Optimization Ready!</p>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <button onClick={handleEditOptimized} className="py-2 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 font-bold rounded-xl transition-all border border-blue-500/30 text-xs">Edit & Review</button>
-                                        <button onClick={handleAcceptOptimized} className="py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all text-xs">Accept All</button>
-                                    </div>
-                                    <button onClick={handleRevertToOriginal} className="w-full py-2 bg-white/5 hover:bg-white/10 text-slate-400 font-medium rounded-xl transition-all border border-white/10 text-[10px] uppercase tracking-wider">Discard Changes</button>
-                                </div>
-                            ) : (
+                            {!optimizationSuccess ? (
                                 <>
-                                    <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg border border-white/5 mb-4">
-                                        <div>
-                                            <p className="text-sm font-bold text-slate-200">FAANG Mode</p>
-                                            <p className="text-xs text-slate-400">Optimize bullets for top tech</p>
-                                        </div>
-                                        <button
-                                            onClick={() => setFaangMode(!faangMode)}
-                                            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors focus:outline-none ${faangMode ? 'bg-purple-600' : 'bg-white/10'}`}
-                                        >
-                                            <span className="sr-only">Use setting</span>
-                                            <span className={`pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${faangMode ? 'translate-x-4' : 'translate-x-0'}`} />
-                                        </button>
-                                    </div>
-
-                                    <p className="text-xs text-slate-400 mb-3">{step === 'download' ? 'Retweak your resume for this JD anytime.' : 'Or use the legacy full resume optimizer.'}</p>
-                                    <button onClick={() => setShowOptimizer(true)} className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all text-sm mb-3">
-                                        {optimizationSuccess ? 'Open Results' : 'Open Optimizer'}
+                                    <h2 className="text-xl font-bold mb-2 flex items-center gap-2"><Sparkles className="w-5 h-5 text-blue-400" />AI Job Optimizer</h2>
+                                    <p className="text-slate-400 mb-5 text-sm">Paste the Job Description to align your resume experience and projects.</p>
+                                    <textarea
+                                        value={jobDescription}
+                                        onChange={e => setJobDescription(e.target.value)}
+                                        className="w-full h-64 bg-black/40 border border-white/10 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/50 outline-none resize-none mb-5 text-sm"
+                                        placeholder="Paste Job Description here..."
+                                    />
+                                    <button
+                                        onClick={handleOptimize}
+                                        disabled={optimizing || !jobDescription}
+                                        className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-2xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                    >
+                                        {optimizing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                                        {optimizing ? 'Optimizing...' : 'Optimize My Resume'}
                                     </button>
                                 </>
-                            )}
-                            
-                            <button onClick={() => setShowCoverLetter(true)} className="w-full py-2 bg-purple-600 hover:bg-purple-500 rounded-xl transition-all text-sm font-bold shadow-lg shadow-purple-900/20 flex items-center justify-center gap-2">
-                                <Sparkles className="w-3.5 h-3.5" /> Generate Cover Letter
-                            </button>
-                            {step === 'download' && (
-                                <button onClick={() => setStep('edit')} className="w-full py-2 mt-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all text-xs text-slate-500 font-medium">
-                                    ← Edit Resume Details
-                                </button>
-                            )}
-                        </div>
-
-                        {/* Health & JD */}
-                        {typeof id === 'string' && <HealthScorePanel resumeId={id} resumeData={rd} />}
-                        {typeof id === 'string' && <JdMatcher resumeId={id} resumeData={rd} />}
-
-                        {/* ATS Score */}
-                        <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-white/10 relative overflow-hidden">
-                            {isAtsLoading && <div className="absolute inset-0 bg-black/40 z-10 flex items-center justify-center"><Loader2 className="w-5 h-5 animate-spin text-blue-400" /></div>}
-                            {!atsResult ? (
-                                <div className="text-center py-3"><AlertCircle className="w-8 h-8 text-slate-600 mx-auto mb-2" /><p className="text-xs text-slate-500">Provide a Job Description to see JD Match score.</p></div>
-                            ) : !atsResult.isValid ? (
-                                <div className="text-center py-3">
-                                    <AlertCircle className="w-8 h-8 text-red-500/50 mx-auto mb-2" />
-                                    <p className="text-xs text-red-400 font-medium">Resume content appears invalid or incomplete.</p>
-                                    <p className="text-[10px] text-slate-500 mt-1 px-4">Ensure you are using real words and technical terms.</p>
-                                </div>
-                            ) : (<>
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="flex items-center gap-2">
-                                        {atsResult.score >= 70 ? <CheckCircle className="w-4 h-4 text-emerald-400" /> : <AlertCircle className="w-4 h-4 text-yellow-400" />}
-                                        <span className="font-medium text-sm">{atsResult.isMatch ? 'JD Match' : 'ATS Score'}</span>
-                                    </div>
-                                    <span className="text-2xl font-bold">{atsResult.score}%</span>
-                                </div>
-                                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-4">
-                                    <div className="h-full bg-gradient-to-r from-blue-400 to-purple-400 transition-all duration-700" style={{ width: `${atsResult.score}%` }} />
-                                </div>
-                                <div className="text-[10px] text-slate-500 mb-3 italic">Improve your resume to increase ATS score.</div>
-                                <div className="space-y-1.5 mb-3">
-                                    {([
-                                        { label: 'JD Match', val: atsResult.details.keywords, max: 35 },
-                                        { label: 'Skill Depth', val: atsResult.details.completeness, max: 25 },
-                                        { label: 'Action Verbs', val: atsResult.details.skills, max: 20 },
-                                        { label: 'Metrics', val: atsResult.details.metrics, max: 10 },
-                                        { label: 'Structure', val: atsResult.details.projectLinks, max: 10 },
-                                    ] as const).map(item => (
-                                        <div key={item.label} className="flex items-center gap-2">
-                                            <span className="text-xs text-slate-500 w-20 shrink-0">{item.label}</span>
-                                            <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                                                <div className="h-full bg-blue-500/60 rounded-full" style={{ width: `${(item.val / item.max) * 100}%` }} />
-                                            </div>
-                                            <span className="text-xs text-slate-500 w-10 text-right">{item.val}/{item.max}</span>
+                            ) : (
+                                <>
+                                    <div className="text-center mb-6">
+                                        <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <CheckCircle className="w-8 h-8 text-emerald-400" />
                                         </div>
-                                    ))}
-                                </div>
-                                {(atsResult.feedback || []).map((f, i) => (
-                                    <div key={i} className="flex gap-2 text-xs text-slate-400 italic mb-1">
-                                        <div className="mt-1 w-1 h-1 rounded-full bg-blue-400 shrink-0" />{f}
+                                        <h2 className="text-2xl font-bold mb-1 text-white">AI optimization complete.</h2>
+                                        <p className="text-slate-400 text-sm">Review and edit before applying.</p>
                                     </div>
-                                ))}
-                            </>)}
+
+                                    <div className="bg-black/40 border border-white/5 rounded-2xl p-5 mb-6">
+                                        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Optimization Preview</h3>
+                                        <div className="space-y-4">
+                                            {optimizedResumeData?.summary && (
+                                                <div>
+                                                    <p className="text-[10px] font-bold text-blue-400 mb-1">REWRITTEN SUMMARY</p>
+                                                    <p className="text-xs text-slate-300 line-clamp-3 italic">&quot;{optimizedResumeData.summary}&quot;</p>
+                                                </div>
+                                            )}
+                                            <p className="text-[10px] text-slate-500">All experience bullets and project descriptions have been optimized for ATS compatibility with the provided JD.</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <button
+                                            onClick={handleRevertToOriginal}
+                                            className="py-3 bg-white/5 hover:bg-white/10 text-white font-medium rounded-2xl transition-all border border-white/10 text-sm order-3 sm:order-1"
+                                        >
+                                            Revert to Original
+                                        </button>
+                                        <button
+                                            onClick={handleEditOptimized}
+                                            className="py-3 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 font-bold rounded-2xl transition-all border border-blue-500/30 text-sm order-1 sm:order-2"
+                                        >
+                                            Edit Resume
+                                        </button>
+                                        <button
+                                            onClick={handleAcceptOptimized}
+                                            className="py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-emerald-600/20 text-sm order-2 sm:order-3"
+                                        >
+                                            Accept Changes
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
-                </main>
-            )}
+                )}
 
-            {/* ── Optimizer Modal ── */}
-            {showOptimizer && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md">
-                    <div className="bg-slate-900 border border-white/10 w-full max-w-2xl rounded-3xl p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-                        <button onClick={() => setShowOptimizer(false)} className="absolute top-5 right-5 p-2 hover:bg-white/5 rounded-full"><X className="w-5 h-5" /></button>
-
-                        {!optimizationSuccess ? (
-                            <>
-                                <h2 className="text-xl font-bold mb-2 flex items-center gap-2"><Sparkles className="w-5 h-5 text-blue-400" />AI Job Optimizer</h2>
-                                <p className="text-slate-400 mb-5 text-sm">Paste the Job Description to align your resume experience and projects.</p>
-                                <textarea
-                                    value={jobDescription}
-                                    onChange={e => setJobDescription(e.target.value)}
-                                    className="w-full h-64 bg-black/40 border border-white/10 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/50 outline-none resize-none mb-5 text-sm"
-                                    placeholder="Paste Job Description here..."
-                                />
-                                <button
-                                    onClick={handleOptimize}
-                                    disabled={optimizing || !jobDescription}
-                                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-2xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                                >
-                                    {optimizing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
-                                    {optimizing ? 'Optimizing...' : 'Optimize My Resume'}
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <div className="text-center mb-6">
-                                    <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <CheckCircle className="w-8 h-8 text-emerald-400" />
-                                    </div>
-                                    <h2 className="text-2xl font-bold mb-1 text-white">AI optimization complete.</h2>
-                                    <p className="text-slate-400 text-sm">Review and edit before applying.</p>
-                                </div>
-
-                                <div className="bg-black/40 border border-white/5 rounded-2xl p-5 mb-6">
-                                    <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Optimization Preview</h3>
-                                    <div className="space-y-4">
-                                        {optimizedResumeData?.summary && (
-                                            <div>
-                                                <p className="text-[10px] font-bold text-blue-400 mb-1">REWRITTEN SUMMARY</p>
-                                                <p className="text-xs text-slate-300 line-clamp-3 italic">&quot;{optimizedResumeData.summary}&quot;</p>
-                                            </div>
-                                        )}
-                                        <p className="text-[10px] text-slate-500">All experience bullets and project descriptions have been optimized for ATS compatibility with the provided JD.</p>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    <button
-                                        onClick={handleRevertToOriginal}
-                                        className="py-3 bg-white/5 hover:bg-white/10 text-white font-medium rounded-2xl transition-all border border-white/10 text-sm order-3 sm:order-1"
-                                    >
-                                        Revert to Original
-                                    </button>
-                                    <button
-                                        onClick={handleEditOptimized}
-                                        className="py-3 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 font-bold rounded-2xl transition-all border border-blue-500/30 text-sm order-1 sm:order-2"
-                                    >
-                                        Edit Resume
-                                    </button>
-                                    <button
-                                        onClick={handleAcceptOptimized}
-                                        className="py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-emerald-600/20 text-sm order-2 sm:order-3"
-                                    >
-                                        Accept Changes
-                                    </button>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {showCoverLetter && id && resumeData && (
-                <CoverLetterModal
-                    resumeId={id}
-                    resumeData={resumeData}
-                    onClose={() => setShowCoverLetter(false)}
-                />
-            )}
-        </div>
+                {showCoverLetter && id && resumeData && (
+                    <CoverLetterModal
+                        resumeId={id}
+                        resumeData={resumeData}
+                        onClose={() => setShowCoverLetter(false)}
+                    />
+                )}
+            </div>
         </FeatureGate>
     );
 }
