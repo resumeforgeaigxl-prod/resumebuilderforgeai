@@ -2,15 +2,9 @@
 
 import { 
     Terminal, 
-    Book, 
     Code, 
     Shield, 
-    Zap, 
-    MessageSquare, 
-    Cpu, 
-    Key,
     ArrowRight,
-    ExternalLink,
     ChevronRight,
     Copy,
     Check
