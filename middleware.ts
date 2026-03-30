@@ -227,8 +227,20 @@ export async function middleware(request: NextRequest) {
     // ─── Docs subdomain: rewrite to /[locale]/docs ────────────────────────────
     if (isDocsSubdomain) {
         const localePrefix = `${currentLocale}-${currentRegion}`;
-        const targetPath = pathname === '/' ? `/${localePrefix}/docs` : `/${localePrefix}/docs${pathname}`;
-        const rewriteUrl = new URL(targetPath.replace(/\/+/g, '/'), request.url);
+        let targetPath = pathname;
+        
+        // If pathname already starts with a valid locale-region, strip it for internal routing
+        const pathParts = pathname.split('/').filter(Boolean);
+        const firstSegment = pathParts[0] ?? '';
+        const localeMatch = firstSegment.match(/^([a-z]{2})-([a-z]{2})$/);
+        const hasLocaleInPath = localeMatch && SUPPORTED_LOCALES.includes(localeMatch[1]) && VALID_REGIONS.has(localeMatch[2]);
+        
+        if (hasLocaleInPath) {
+            targetPath = '/' + pathParts.slice(1).join('/');
+        }
+
+        const finalUrl = `/${localePrefix}/docs${targetPath === '/' ? '' : targetPath}`;
+        const rewriteUrl = new URL(finalUrl.replace(/\/+/g, '/'), request.url);
         return NextResponse.rewrite(rewriteUrl);
     }
 
