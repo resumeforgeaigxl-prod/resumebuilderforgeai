@@ -46,7 +46,7 @@ export default function ApiKeysPage() {
             const res = await fetch('/api/v1/keys');
             const data = await res.json();
             if (data.success) {
-                setKeys(data.keys);
+                setKeys(data.data || []);
             }
         } catch {
             console.error('Failed to fetch keys');
@@ -70,11 +70,11 @@ export default function ApiKeysPage() {
                 body: JSON.stringify({ name: keyName })
             });
             const data = await res.json();
-            if (data.success) {
+            if (data.success && data.data) {
                 toast.success('API Key created successfully');
-                setKeys([data.key, ...keys]);
+                setKeys([data.data, ...keys]);
                 setKeyName('');
-                setShowKeyId(data.key.id); // Show only the newly created key immediately
+                setShowKeyId(data.data.id); // Show only the newly created key immediately
             } else {
                 toast.error(data.error || 'Failed to create key');
             }
