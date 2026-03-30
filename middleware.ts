@@ -100,7 +100,8 @@ export async function middleware(request: NextRequest) {
     const isAppSubdomain = host.startsWith('app.');
     const isApiSubdomain = host.startsWith('api.');
     const isAdminSubdomain = host.startsWith('admin.');
-    const isSubdomain = isAppSubdomain || isApiSubdomain || isAdminSubdomain;
+    const isDocsSubdomain = host.startsWith('docs.');
+    const isSubdomain = isAppSubdomain || isApiSubdomain || isAdminSubdomain || isDocsSubdomain;
 
     // ─── Always pass through: static files, locales, and API routes early
     if (
@@ -221,6 +222,14 @@ export async function middleware(request: NextRequest) {
             return new NextResponse(null, { status: 204, headers: response.headers });
         }
         return response;
+    }
+
+    // ─── Docs subdomain: rewrite to /[locale]/docs ────────────────────────────
+    if (isDocsSubdomain) {
+        const localePrefix = `${currentLocale}-${currentRegion}`;
+        const targetPath = pathname === '/' ? `/${localePrefix}/docs` : `/${localePrefix}/docs${pathname}`;
+        const rewriteUrl = new URL(targetPath.replace(/\/+/g, '/'), request.url);
+        return NextResponse.rewrite(rewriteUrl);
     }
 
     // ─── JWT session resolution ───────────────────────────────────────────────
