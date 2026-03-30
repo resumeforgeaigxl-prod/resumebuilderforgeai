@@ -199,12 +199,11 @@ export async function middleware(request: NextRequest) {
 
     // ─── API subdomain: rewrite to /api/* and add CORS headers ───────────────
     if (isApiSubdomain) {
-        let apiPath = pathname;
+        const nextUrl = request.nextUrl.clone();
         if (!pathname.startsWith('/api')) {
-            apiPath = `/api${pathname}`;
+            nextUrl.pathname = `/api${pathname}`;
         }
-        const rewriteUrl = new URL(apiPath, request.url);
-        const response = NextResponse.rewrite(rewriteUrl);
+        const response = NextResponse.rewrite(nextUrl);
         const origin = request.headers.get('origin') ?? '';
         const allowedOrigins = [
             'https://app.resumeforgeai.in',
@@ -239,9 +238,10 @@ export async function middleware(request: NextRequest) {
             targetPath = '/' + pathParts.slice(1).join('/');
         }
 
-        const finalUrl = `/${localePrefix}/docs${targetPath === '/' ? '' : targetPath}`;
-        const rewriteUrl = new URL(finalUrl.replace(/\/+/g, '/'), request.url);
-        return NextResponse.rewrite(rewriteUrl);
+        const nextUrl = request.nextUrl.clone();
+        const finalPath = `/${localePrefix}/docs${targetPath === '/' ? '' : targetPath}`;
+        nextUrl.pathname = finalPath.replace(/\/+/g, '/');
+        return NextResponse.rewrite(nextUrl);
     }
 
     // ─── JWT session resolution ───────────────────────────────────────────────
