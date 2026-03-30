@@ -22,7 +22,8 @@ import {
   PlayCircle,
   Bot,
   GraduationCap,
-  Brain
+  Brain,
+  Terminal
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -49,6 +50,7 @@ export function Sidebar({ locale }: SidebarProps) {
     { name: "MentorForge", icon: Bot, href: `/${locale}/mentorforge` },
     { name: "JobForge", icon: Search, href: `/${locale}/jobs` },
     { name: "Company Prep", icon: Building2, href: `/${locale}/company-prep-interview` },
+    { name: "API Platform", icon: Terminal, href: `/${locale}/api-keys` },
     { name: "AI Tools", icon: Zap, href: `/${locale}/tools` },
   ];
 
