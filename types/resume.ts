@@ -8,18 +8,25 @@ export interface ResumeExperience {
 
 export interface ResumeProject {
     id: string;
-    title: string;
+    name: string; // was title
     tech: string[];
     description: string[];
+    link?: string; // consolidated liveLink/githubLink
+    // Legacy support
+    title?: string;
     liveLink?: string;
     githubLink?: string;
 }
 
 export interface ResumeEducation {
     id: string;
-    school: string;
+    institution: string; // was school
     degree: string;
-    duration: string;
+    year: string; // was duration
+    score?: string; // was cgpa
+    // Legacy support
+    school?: string;
+    duration?: string;
     cgpa?: string;
 }
 
@@ -30,26 +37,29 @@ export interface Certification {
     year: string;
 }
 
-export interface SkillCategory {
-    category: string;
-    skills: string[];
+export interface ResumeSkills {
+    languages: string[];
+    frameworks: string[];
+    tools: string[];
+    other: string[];
 }
 
 export interface ResumeData {
     name: string;
     email: string;
     phone: string;
-    location?: string;
-    country?: string;
+    location: string;
     linkedin: string;
     github: string;
     summary: string;
-    skills: string[];
-    skillCategories?: SkillCategory[];
+    skills: ResumeSkills;
     experience: ResumeExperience[];
     projects: ResumeProject[];
     education: ResumeEducation[];
-    certifications?: Certification[];
+    certifications: Certification[];
+    // Legacy support
+    skillCategories?: { category: string; skills: string[] }[];
+    country?: string;
 }
 
 export interface ResumeRecord {

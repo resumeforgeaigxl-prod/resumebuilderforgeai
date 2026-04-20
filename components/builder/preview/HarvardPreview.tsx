@@ -68,18 +68,23 @@ export const HarvardPreview: React.FC<Props> = ({ resumeData: r, isWatermarked }
                 </section>
             )}
 
-            {(r.skillCategories?.length || r.skills?.length) && (
-                <section className="mb-[9px]">
-                    <h2 className="text-[10pt] font-bold uppercase tracking-[1.2px] border-b-[1.5px] border-black pb-0.5 mb-[5px]">Technical Skills</h2>
-                    <div className="text-[9.8pt] space-y-0.5">
-                        {r.skillCategories ? r.skillCategories.map((cat, i) => (
-                            <div key={i}><span className="font-bold">{cat.category}:</span> {cat.skills.join(', ')}</div>
-                        )) : (
-                            <div>{r.skills.join(', ')}</div>
-                        )}
-                    </div>
-                </section>
-            )}
+            {(() => {
+                const s = r.skills;
+                const allSkills = s ? [...s.languages, ...s.frameworks, ...s.tools, ...s.other] : [];
+                if (allSkills.length === 0 && !r.skillCategories?.length) return null;
+                return (
+                    <section className="mb-[9px]">
+                        <h2 className="text-[10pt] font-bold uppercase tracking-[1.2px] border-b-[1.5px] border-black pb-0.5 mb-[5px]">Technical Skills</h2>
+                        <div className="text-[9.8pt] space-y-0.5">
+                            {r.skillCategories ? r.skillCategories.map((cat, i) => (
+                                <div key={i}><span className="font-bold">{cat.category}:</span> {cat.skills.join(', ')}</div>
+                            )) : (
+                                <div>{allSkills.join(', ')}</div>
+                            )}
+                        </div>
+                    </section>
+                );
+            })()}
 
             {r.experience?.length > 0 && (
                 <section className="mb-[9px]">
@@ -106,7 +111,7 @@ export const HarvardPreview: React.FC<Props> = ({ resumeData: r, isWatermarked }
                     {r.projects.map((p, i) => (
                         <div key={i} className="mb-2">
                             <div className="flex justify-between items-baseline gap-2">
-                                <span className="font-bold text-[11pt]">{p.title}</span>
+                                <span className="font-bold text-[11pt]">{p.name || p.title}</span>
                                 <span className="text-[9pt] whitespace-nowrap">{p.tech.slice(0, 5).join(', ')}</span>
                             </div>
                             {(p.liveLink || p.githubLink) && (
@@ -141,10 +146,10 @@ export const HarvardPreview: React.FC<Props> = ({ resumeData: r, isWatermarked }
                     {r.education.map((edu, i) => (
                         <div key={i} className="mb-2">
                             <div className="flex justify-between items-baseline gap-2">
-                                <span className="font-bold text-[11pt]">{edu.school}</span>
+                                <span className="font-bold text-[11pt]">{edu.institution || edu.school}</span>
                                 <span className="text-[9pt] whitespace-nowrap">{edu.duration}</span>
                             </div>
-                            <div className="italic text-[9.5pt]">{edu.degree}{edu.cgpa ? ` \u2014 CGPA: ${edu.cgpa}` : ''}</div>
+                            <div className="italic text-[9.5pt]">{edu.degree}{(edu.score || edu.cgpa) ? ` \u2014 Score: ${edu.score || edu.cgpa}` : ''}</div>
                         </div>
                     ))}
                 </section>

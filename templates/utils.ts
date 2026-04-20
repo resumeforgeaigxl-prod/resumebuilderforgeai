@@ -2,7 +2,7 @@
  * Shared template utilities
  * — used by all 8 print template generators
  */
-import { ResumeData, SkillCategory } from '@/types/resume';
+import { ResumeData } from '@/types/resume';
 
 export function esc(s: string | undefined | null): string {
     if (!s) return '';
@@ -61,9 +61,13 @@ export function enforceOnePage(r: ResumeData): ResumeData {
 
     d.education = d.education.filter(Boolean);
 
-    if (!Array.isArray(d.skills)) d.skills = [];
-    if (!Array.isArray(d.skillCategories)) d.skillCategories = [];
-    if (!Array.isArray(d.certifications)) d.certifications = [];
+    if (!Array.isArray(d.experience)) d.experience = [];
+    if (!Array.isArray(d.education)) d.education = [];
+
+    // Ensure skills object exists
+    if (!d.skills) {
+        d.skills = { languages: [], frameworks: [], tools: [], other: [] };
+    }
 
     return d;
 }
@@ -83,14 +87,18 @@ export function buildContactLine(r: ResumeData, sep = ' &bull; '): string {
 }
 
 export function buildSkillRows(r: ResumeData, catStyle: string, valStyle: string): string {
-    const cats: SkillCategory[] = (r.skillCategories ?? []).filter(c => c.skills.length > 0);
+    const cats = (r.skillCategories ?? []).filter(c => c.skills.length > 0);
     if (cats.length > 0) {
         return cats.map(c =>
             `<p class="sk-row"><span class="${catStyle}">${esc(c.category)}:</span><span class="${valStyle}"> ${c.skills.map(esc).join(', ')}</span></p>`
         ).join('');
     }
-    if (r.skills?.length > 0) {
-        return `<p class="sk-row"><span class="${catStyle}">Technical Skills:</span><span class="${valStyle}"> ${r.skills.map(esc).join(', ')}</span></p>`;
+    if (r.skills) {
+        const s = r.skills;
+        const allSkills = [...s.languages, ...s.frameworks, ...s.tools, ...s.other];
+        if (allSkills.length > 0) {
+            return `<p class="sk-row"><span class="${catStyle}">Technical Skills:</span><span class="${valStyle}"> ${allSkills.map(esc).join(', ')}</span></p>`;
+        }
     }
     return '';
 }

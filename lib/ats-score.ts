@@ -126,7 +126,13 @@ export function calculateATSScore(resume: ResumeData, jobDescription?: string): 
         if ((resume.experience?.length || 0) > 0) points += 4;
         if ((resume.projects?.length || 0) > 0) points += 3;
         if ((resume.education?.length || 0) > 0) points += 2;
-        if ((resume.skills?.length || 0) > 0 || (resume.skillCategories?.some(c => c.skills.length > 0))) points += 3;
+        
+        // Check for skills in either new object or legacy categories
+        const s = resume.skills;
+        const hasSkills = s && (s.languages.length > 0 || s.frameworks.length > 0 || s.tools.length > 0 || s.other.length > 0);
+        const hasLegacySkills = (resume.skillCategories?.some(c => c.skills.length > 0));
+        
+        if (hasSkills || hasLegacySkills) points += 3;
 
         return points;
     };

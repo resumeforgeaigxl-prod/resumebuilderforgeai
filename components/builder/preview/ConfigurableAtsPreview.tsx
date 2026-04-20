@@ -98,7 +98,9 @@ export const ConfigurableAtsPreview: React.FC<Props> = ({ resumeData: r, config:
                         </div>
                     );
                 case 'skills':
-                    if (!r.skills?.length && !r.skillCategories?.length) return null;
+                    const s = r.skills;
+                    const allSkills = s ? [...s.languages, ...s.frameworks, ...s.tools, ...s.other] : [];
+                    if (allSkills.length === 0 && !r.skillCategories?.length) return null;
                     return (
                         <div key="skills" style={{ marginBottom: sp.sectionMb }}>
                             <div style={{ fontSize: sp.secTitlePt, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '2px' }}>Technical Skills</div>
@@ -107,7 +109,7 @@ export const ConfigurableAtsPreview: React.FC<Props> = ({ resumeData: r, config:
                                 {r.skillCategories?.map((cat, i) => (
                                     <div key={i} className="mb-0.5"><span className="font-bold">{cat.category}:</span> {cat.skills.join(', ')}</div>
                                 )) || (
-                                    <div>{r.skills.join(', ')}</div>
+                                    <div>{allSkills.join(', ')}</div>
                                 )}
                             </div>
                         </div>
@@ -143,7 +145,7 @@ export const ConfigurableAtsPreview: React.FC<Props> = ({ resumeData: r, config:
                             {r.projects.map((p, i) => (
                                 <div key={i} style={{ marginBottom: sp.entryMb }}>
                                     <div className="flex justify-between items-baseline gap-2">
-                                        <span style={{ fontWeight: 700, fontSize: sp.bodySize }}>{p.title}</span>
+                                        <span style={{ fontWeight: 700, fontSize: sp.bodySize }}>{p.name || p.title}</span>
                                         <span style={{ fontSize: '8.2pt' }}>{p.tech.slice(0, 4).join(' \u00b7 ')}</span>
                                     </div>
                                     {(p.liveLink || p.githubLink) && (
@@ -182,10 +184,10 @@ export const ConfigurableAtsPreview: React.FC<Props> = ({ resumeData: r, config:
                             {r.education.map((e, i) => (
                                 <div key={i} style={{ marginBottom: sp.entryMb }}>
                                     <div className="flex justify-between items-baseline gap-2">
-                                        <span style={{ fontWeight: 700, fontSize: sp.bodySize }}>{e.school}</span>
-                                        <span style={{ fontSize: '8.2pt' }}>{e.duration}</span>
+                                        <span style={{ fontWeight: 700, fontSize: sp.bodySize }}>{e.institution || e.school}</span>
+                                        <span style={{ fontSize: '8.2pt' }}>{e.year || e.duration}</span>
                                     </div>
-                                    <div style={{ fontSize: '8.8pt', color: '#333' }}>{e.degree}{e.cgpa ? ` \u2014 CGPA: ${e.cgpa}` : ''}</div>
+                                    <div style={{ fontSize: '8.8pt', color: '#333' }}>{e.degree}{(e.score || e.cgpa) ? ` \u2014 Score: ${e.score || e.cgpa}` : ''}</div>
                                 </div>
                             ))}
                         </div>

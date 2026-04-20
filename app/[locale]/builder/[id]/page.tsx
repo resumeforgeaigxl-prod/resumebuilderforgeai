@@ -5,13 +5,13 @@ export const dynamic = 'force-dynamic';
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { ResumeData, ResumeExperience, ResumeProject, ResumeEducation, Certification, SkillCategory } from '@/types/resume';
+import { ResumeData, ResumeExperience, ResumeProject, ResumeEducation, Certification, ResumeSkills } from '@/types/resume';
 import { ALL_TEMPLATES } from '@/types/templates';
 import {
     Save, Sparkles, ArrowLeft, Plus, Trash2, Loader2,
     Building2, GraduationCap, Lightbulb, Wand2, Zap,
     AlertCircle, CheckCircle, X, Download, ExternalLink,
-    Github, Layout, ChevronRight, Award, Eye, EyeOff
+    Layout, ChevronRight, Award, Eye, EyeOff
 } from 'lucide-react';
 import Link from 'next/link';
 import { PreviewLayer } from '@/components/builder/preview/PreviewLayer';
@@ -21,8 +21,6 @@ import { JdMatcher } from '@/components/builder/JdMatcher';
 import { VersionHistory } from '@/components/builder/VersionHistory';
 import { BulletEnhancer } from '@/components/builder/BulletEnhancer';
 import { ATSScoreResult } from '@/lib/ats-score';
-
-const SKILL_CATEGORIES: string[] = ['Languages', 'Frontend', 'Backend', 'Databases', 'Cloud & DevOps', 'System Design', 'AI & Automation'];
 
 import posthog from '@/lib/posthog';
 import { CoverLetterModal } from '@/components/builder/cover-letter-modal';
@@ -168,10 +166,10 @@ export default function BuilderPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     role: resumeData.experience?.[0]?.role || '',
-                    skills: resumeData.skills?.join(', ') || '',
+                    skills: Object.values(resumeData.skills || {}).flat().join(', '),
                     experienceText: resumeData.experience?.map(e => `${e.role} at ${e.company} (${e.duration})`).join('\n') || '',
-                    educationText: resumeData.education?.map(e => `${e.degree} from ${e.school}`).join(', ') || '',
-                    projectsText: resumeData.projects?.map(p => p.title).join(', ') || '',
+                    educationText: resumeData.education?.map(e => `${e.degree} from ${e.institution}`).join(', ') || '',
+                    projectsText: resumeData.projects?.map(p => p.name).join(', ') || '',
                     jobDescription: jobDescription
                 }),
             });
@@ -206,8 +204,7 @@ export default function BuilderPage() {
                     experience: Array.isArray(raw.experience) ? raw.experience : (resumeData.experience || []),
                     projects: Array.isArray(raw.projects) ? raw.projects : (resumeData.projects || []),
                     education: Array.isArray(raw.education) ? raw.education : (resumeData.education || []),
-                    skills: Array.isArray(raw.skills) ? raw.skills : (resumeData.skills || []),
-                    skillCategories: Array.isArray(raw.skillCategories) ? raw.skillCategories : (resumeData.skillCategories || []),
+                    skills: (raw.skills && typeof raw.skills === 'object' && !Array.isArray(raw.skills)) ? (raw.skills as ResumeSkills) : (resumeData.skills || { languages: [], frameworks: [], tools: [], other: [] }),
                 };
                 setOriginalResumeData(JSON.parse(JSON.stringify(resumeData)));
                 setOptimizedResumeData(normalized);
@@ -558,10 +555,10 @@ export default function BuilderPage() {
                                 {(rd.education || []).map((edu, idx) => (
                                     <ListCard key={edu.id} onDelete={() => setResumeData({ ...rd, education: rd.education.filter((_, i) => i !== idx) })}>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            <FInput label="School / University" value={edu.school} onChange={v => { const l = [...rd.education]; l[idx].school = v; setResumeData({ ...rd, education: l }); }} />
+                                            <FInput label="School / University" value={edu.institution} onChange={v => { const l = [...rd.education]; l[idx].institution = v; setResumeData({ ...rd, education: l }); }} />
                                             <FInput label="Degree" value={edu.degree} onChange={v => { const l = [...rd.education]; l[idx].degree = v; setResumeData({ ...rd, education: l }); }} />
-                                            <FInput label="Duration" value={edu.duration} onChange={v => { const l = [...rd.education]; l[idx].duration = v; setResumeData({ ...rd, education: l }); }} />
-                                            <FInput label="CGPA / GPA" value={edu.cgpa ?? ''} onChange={v => { const l = [...rd.education]; l[idx].cgpa = v; setResumeData({ ...rd, education: l }); }} />
+                                            <FInput label="Year" value={edu.year} onChange={v => { const l = [...rd.education]; l[idx].year = v; setResumeData({ ...rd, education: l }); }} />
+                                            <FInput label="Score / CGPA" value={edu.score ?? ''} onChange={v => { const l = [...rd.education]; l[idx].score = v; setResumeData({ ...rd, education: l }); }} />
                                         </div>
                                     </ListCard>
                                 ))}
@@ -583,14 +580,13 @@ export default function BuilderPage() {
 
                             {/* Projects */}
                             <Section title="Projects" icon={<Lightbulb className="w-5 h-5" />}
-                                onAdd={() => setResumeData({ ...rd, projects: [...(rd.projects || []), { id: uid(), title: '', tech: [], description: [''], liveLink: '', githubLink: '' } as ResumeProject] })}>
+                                onAdd={() => setResumeData({ ...rd, projects: [...(rd.projects || []), { id: uid(), name: '', tech: [], description: [''], link: '' } as ResumeProject] })}>
                                 {(rd.projects || []).map((proj, idx) => (
                                     <ListCard key={proj.id} onDelete={() => setResumeData({ ...rd, projects: rd.projects.filter((_, i) => i !== idx) })}>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                                            <FInput label="Project Title" value={proj.title} onChange={v => { const l = [...rd.projects]; l[idx].title = v; setResumeData({ ...rd, projects: l }); }} />
+                                            <FInput label="Project Name" value={proj.name} onChange={v => { const l = [...rd.projects]; l[idx].name = v; setResumeData({ ...rd, projects: l }); }} />
                                             <FInput label="Technologies (comma-separated)" value={proj.tech.join(', ')} onChange={v => { const l = [...rd.projects]; l[idx].tech = v.split(',').map(s => s.trim()).filter(Boolean); setResumeData({ ...rd, projects: l }); }} />
-                                            <div className="flex items-center gap-2"><ExternalLink className="w-4 h-4 text-slate-500 shrink-0" /><FInput label="Live URL" value={proj.liveLink ?? ''} onChange={v => { const l = [...rd.projects]; l[idx].liveLink = v; setResumeData({ ...rd, projects: l }); }} /></div>
-                                            <div className="flex items-center gap-2"><Github className="w-4 h-4 text-slate-500 shrink-0" /><FInput label="GitHub URL" value={proj.githubLink ?? ''} onChange={v => { const l = [...rd.projects]; l[idx].githubLink = v; setResumeData({ ...rd, projects: l }); }} /></div>
+                                            <div className="flex items-center gap-2"><ExternalLink className="w-4 h-4 text-slate-500 shrink-0" /><FInput label="Project URL" value={proj.link ?? ''} onChange={v => { const l = [...rd.projects]; l[idx].link = v; setResumeData({ ...rd, projects: l }); }} /></div>
                                         </div>
                                         <Bullets points={proj.description} faangMode={faangMode} jobDescription={jobDescription} onChange={p => { const l = [...rd.projects]; l[idx].description = p; setResumeData({ ...rd, projects: l }); }} />
                                     </ListCard>
@@ -599,27 +595,28 @@ export default function BuilderPage() {
 
                             {/* Skills */}
                             <Section title="Technical Skills" icon={<Zap className="w-5 h-5" />}>
-                                <p className="text-xs text-slate-500 mb-4">Comma-separated values per category. Rendered as plain text in PDF.</p>
-                                <div className="space-y-3">
-                                    {SKILL_CATEGORIES.map(cat => {
-                                        const cats: SkillCategory[] = rd.skillCategories ?? SKILL_CATEGORIES.map(c => ({ category: c, skills: [] }));
-                                        const entry = cats.find(c => c.category === cat) ?? { category: cat, skills: [] };
-                                        return (
-                                            <div key={cat} className="flex items-center gap-3">
-                                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wide w-28 shrink-0">{cat}</label>
-                                                <input value={entry.skills.join(', ')} placeholder="e.g. Python, TypeScript"
-                                                    onChange={e => {
-                                                        const newSkills = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
-                                                        const newCats: SkillCategory[] = SKILL_CATEGORIES.map(c =>
-                                                            c === cat ? { category: c, skills: newSkills } : (cats.find(x => x.category === c) ?? { category: c, skills: [] })
-                                                        );
-                                                        setResumeData({ ...rd, skillCategories: newCats, skills: newCats.flatMap(c => c.skills) });
-                                                    }}
-                                                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
-                                                />
-                                            </div>
-                                        );
-                                    })}
+                                <p className="text-xs text-slate-500 mb-4">Categorized skills for optimized ATS parsing.</p>
+                                <div className="space-y-4">
+                                    {(['languages', 'frameworks', 'tools', 'other'] as const).map(cat => (
+                                        <div key={cat} className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest w-24 shrink-0">{cat}</label>
+                                            <input 
+                                                value={(rd.skills[cat] || []).join(', ')} 
+                                                placeholder={`e.g. ${cat === 'languages' ? 'Java, Python' : 'React, Node.js'}`}
+                                                onChange={e => {
+                                                    const vals = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                                                    setResumeData({
+                                                        ...rd,
+                                                        skills: {
+                                                            ...rd.skills,
+                                                            [cat]: vals
+                                                        }
+                                                    });
+                                                }}
+                                                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-1 focus:ring-blue-500/50 text-sm"
+                                            />
+                                        </div>
+                                    ))}
                                 </div>
                             </Section>
                         </div>

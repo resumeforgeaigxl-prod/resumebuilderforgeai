@@ -1,15 +1,6 @@
 import { NextResponse } from 'next/server';
 import { ResumeData } from '@/types/resume';
-import { generateHarvardHtml } from '@/templates/harvard';
-import { generateStanfordHtml } from '@/templates/stanford';
-import { generateModernHtml } from '@/templates/modern';
-import { generateCompactHtml } from '@/templates/compact';
-import { generateExecutiveHtml } from '@/templates/executive';
-import { generateMinimalDividerHtml } from '@/templates/minimal-divider';
-import { generateAcademicHtml } from '@/templates/academic';
-import { generateAtsLightHtml } from '@/templates/ats-light';
-import { generateFromConfig } from '@/templates/ats-renderer';
-import { ATS_CONFIG_MAP } from '@/templates/configs';
+import { renderResumeToHtml } from '@/lib/resume-server-renderer';
 import { getSession } from '@/lib/auth/jwt';
 import { checkUserAccess } from '@/lib/access';
 import { logPDFDownload } from '@/lib/admin-logger';
@@ -20,24 +11,6 @@ import fs from 'fs';
 import path from 'path';
 
 export const runtime = 'nodejs';
-
-function selectTemplate(resumeData: ResumeData, template: string): string {
-    if (template.startsWith('cfg-')) {
-        const cfg = ATS_CONFIG_MAP.get(template);
-        if (cfg) return generateFromConfig(resumeData, cfg);
-    }
-    switch (template) {
-        case 'harvard': return generateHarvardHtml(resumeData);
-        case 'stanford': return generateStanfordHtml(resumeData);
-        case 'modern': return generateModernHtml(resumeData);
-        case 'compact': return generateCompactHtml(resumeData);
-        case 'executive': return generateExecutiveHtml(resumeData);
-        case 'minimal-divider': return generateMinimalDividerHtml(resumeData);
-        case 'academic': return generateAcademicHtml(resumeData);
-        case 'ats-light': return generateAtsLightHtml(resumeData);
-        default: return generateHarvardHtml(resumeData);
-    }
-}
 
 async function injectWatermark(page: Page): Promise<void> {
     await page.evaluate(() => {
@@ -97,7 +70,7 @@ export async function POST(request: Request) {
 
         console.log(`[Download] PDF gen start | Template: ${template} | Watermark: ${showWatermark}`);
 
-        const html = selectTemplate(resumeData, template);
+        const html = renderResumeToHtml(resumeData, template);
         const isLocal = process.env.NODE_ENV === 'development' || !process.env.VERCEL;
         const c = (chromium as unknown) as { args: string[]; defaultViewport: unknown; executablePath: () => Promise<string>; headless: boolean };
         let launchOptions: unknown;
