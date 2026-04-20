@@ -125,9 +125,10 @@ export async function POST(request: Request) {
         await page.setDefaultNavigationTimeout(120000);
         await page.setDefaultTimeout(120000);
 
-        await page.setContent(html, { waitUntil: 'load' });
+        await page.setContent(html, { waitUntil: 'networkidle0' });
 
-        const ratio = await page.evaluate(() => document.body.scrollHeight / 1050);
+        // Optional: wait a tiny bit more for layout stabilization
+        await new Promise(r => setTimeout(r, 500));
 
         if (showWatermark) {
             await injectWatermark(page);
@@ -136,6 +137,8 @@ export async function POST(request: Request) {
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
+            margin: { top: 0, right: 0, bottom: 0, left: 0 }, // Template handles its own margins
+            preferCSSPageSize: true
         });
 
         if (!pdfBuffer || pdfBuffer.length === 0) {
@@ -161,7 +164,6 @@ export async function POST(request: Request) {
             headers: {
                 'Content-Type': 'application/pdf',
                 'Content-Disposition': 'attachment; filename="resume.pdf"',
-                'X-Compress-Ratio': String(ratio),
                 'X-Watermark': showWatermark ? 'true' : 'false',
                 'Cache-Control': 'no-store, max-age=0',
             },

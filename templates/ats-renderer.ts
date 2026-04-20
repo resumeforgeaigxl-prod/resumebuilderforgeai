@@ -11,6 +11,7 @@ import {
     buildSkillRows,
     buildCertSection,
     cleanBullet,
+    GLOBAL_PRINT_CSS
 } from './utils';
 
 // ─── Config Interface ──────────────────────────────────────────────────────────
@@ -119,14 +120,14 @@ function dividerEl(divider: TemplateDivider): string {
 function renderSummary(r: ReturnType<typeof enforceOnePage>, cfg: TemplateConfig): string {
     if (!r.summary) return '';
     const d = dividerEl(cfg.divider);
-    return `<div class="section"><div class="sec-title">Professional Summary</div>${d}<p class="summary">${esc(r.summary)}</p></div>`;
+    return `<section class="section"><h2 class="sec-title">Professional Summary</h2>${d}<p class="summary">${esc(r.summary)}</p></section>`;
 }
 
 function renderSkills(r: ReturnType<typeof enforceOnePage>, cfg: TemplateConfig): string {
     const rows = buildSkillRows(r, 'sk-b', '');
     if (!rows) return '';
     const d = dividerEl(cfg.divider);
-    return `<div class="section"><div class="sec-title">Technical Skills</div>${d}${rows}</div>`;
+    return `<section class="section"><h2 class="sec-title">Technical Skills</h2>${d}${rows}</section>`;
 }
 
 function renderExperience(r: ReturnType<typeof enforceOnePage>, cfg: TemplateConfig): string {
@@ -137,8 +138,8 @@ function renderExperience(r: ReturnType<typeof enforceOnePage>, cfg: TemplateCon
   <div class="erow"><span class="etitle">${esc(e.role)}</span><span class="edate">${esc(e.duration)}</span></div>
   <div class="esub">${esc(e.company)}</div>
   <ul>${e.points.filter(Boolean).map(p => `<li>${esc(cleanBullet(p))}</li>`).join('')}</ul>
-</div>`).join('');
-    return `<div class="section"><div class="sec-title">Work Experience</div>${d}${entries}</div>`;
+</article>`).join('');
+    return `<section class="section"><h2 class="sec-title">Work Experience</h2>${d}${entries}</section>`;
 }
 
 function renderProjects(r: ReturnType<typeof enforceOnePage>, cfg: TemplateConfig): string {
@@ -149,15 +150,15 @@ function renderProjects(r: ReturnType<typeof enforceOnePage>, cfg: TemplateConfi
   <div class="erow"><span class="etitle">${esc(p.title)}</span><span class="edate">${p.tech.slice(0, 4).map(esc).join(' \u00b7 ')}</span></div>
   ${(p.liveLink || p.githubLink) ? `<div class="plink">${[p.liveLink && esc(p.liveLink), p.githubLink && esc(p.githubLink)].filter(Boolean).join(' | ')}</div>` : ''}
   <ul>${p.description.filter(Boolean).map(d2 => `<li>${esc(cleanBullet(d2))}</li>`).join('')}</ul>
-</div>`).join('');
-    return `<div class="section"><div class="sec-title">Projects</div>${d}${entries}</div>`;
+</article>`).join('');
+    return `<section class="section"><h2 class="sec-title">Projects</h2>${d}${entries}</section>`;
 }
 
 function renderCertifications(r: ReturnType<typeof enforceOnePage>, cfg: TemplateConfig): string {
     const rows = buildCertSection(r);
     if (!rows) return '';
     const d = dividerEl(cfg.divider);
-    return `<div class="section"><div class="sec-title">Certifications</div>${d}${rows}</div>`;
+    return `<section class="section"><h2 class="sec-title">Certifications</h2>${d}${rows}</section>`;
 }
 
 function renderEducation(r: ReturnType<typeof enforceOnePage>, cfg: TemplateConfig): string {
@@ -167,8 +168,8 @@ function renderEducation(r: ReturnType<typeof enforceOnePage>, cfg: TemplateConf
 <div class="entry">
   <div class="erow"><span class="etitle">${esc(e.school)}</span><span class="edate">${esc(e.duration)}</span></div>
   <div class="esub">${esc(e.degree)}${e.cgpa ? ` \u2014 CGPA: ${esc(e.cgpa)}` : ''}</div>
-</div>`).join('');
-    return `<div class="section"><div class="sec-title">Education</div>${d}${entries}</div>`;
+</article>`).join('');
+    return `<section class="section"><h2 class="sec-title">Education</h2>${d}${entries}</section>`;
 }
 
 const SECTION_RENDERERS: Record<
@@ -204,38 +205,40 @@ export function generateFromConfig(rawResume: ResumeData, cfg: TemplateConfig): 
     const hrCss = dividerCss(cfg.divider);
 
     const css = `
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-@page{size:A4;margin:${sp.pageMargin};}
+${GLOBAL_PRINT_CSS}
 body{font-family:${fontStack};font-size:${sp.bodySize};line-height:${sp.bodyLine};color:#000;background:#fff;}
+@page{margin:${sp.pageMargin};}
 a{color:#000;text-decoration:none;}
-.name-hd{font-size:${sp.namePt};font-weight:700;text-align:${align};letter-spacing:-.2px;margin-bottom:3px;}
+.name-hd{font-size:${sp.namePt};font-weight:700;text-align:${align};letter-spacing:-.2px;margin-bottom:3px;text-transform:uppercase;}
 .contact{text-align:${align};font-size:${sp.contactPt};color:#222;margin-bottom:8px;}
 .section{margin-bottom:${sp.sectionMb};}
-.sec-title{font-size:${sp.secTitlePt};font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px;}
-hr{border:none;${hrCss}margin-bottom:5px;}
+.sec-title{font-size:${sp.secTitlePt};font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px;border-bottom:1px solid #000;padding-bottom:1px;}
+hr{display:none;} /* Hidden as we use border-bottom on titles for ATS consistency */
 .entry{margin-bottom:${sp.entryMb};}
 .erow{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
 .etitle{font-weight:700;font-size:${sp.bodySize};}
 .edate{font-size:8.2pt;white-space:nowrap;flex-shrink:0;}
 .esub{font-size:8.8pt;color:#333;margin:1px 0 2px;}
 ul{margin-left:14px;margin-top:2px;}
-ul li{margin-bottom:2px;font-size:${sp.bulletPt};}
+ul li{margin-bottom:2px;font-size:${sp.bulletPt};list-style-type:disc;}
 .sk-row{font-size:${sp.skPt};margin-bottom:2px;}.sk-b{font-weight:700;}
 .cert-item{font-size:${sp.skPt};margin-bottom:2px;}
 .plink{font-size:7.8pt;color:#333;margin:1px 0;}
 .summary{font-size:${sp.summaryPt};line-height:1.32;}
 `.trim();
 
-    const contactSep = cfg.headerAlign === 'left' ? ' | ' : ' &middot; ';
+    const contactSep = cfg.headerAlign === 'left' ? ' | ' : ' \u2022 ';
     const locationLine = buildLocationLine(r);
     const contactLine = buildContactLine(r, contactSep);
 
     const header = `
-<div class="name-hd">${esc(r.name)}</div>
+<header>
+<h1 class="name-hd">${esc(r.name)}</h1>
 <div class="contact">
   ${locationLine ? `${locationLine}<br>` : ''}
   ${contactLine}
-</div>`.trim();
+</div>
+</header>`.trim();
 
     const sections = cfg.sectionOrder
         .map(key => SECTION_RENDERERS[key](r, cfg))

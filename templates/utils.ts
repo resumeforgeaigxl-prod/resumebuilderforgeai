@@ -149,8 +149,62 @@ export const COMPRESS_STAGE_3 = `
   .cert-item       { font-size: 9pt !important; }
   .edate           { font-size: 8.2pt !important; }
   .plink           { font-size: 7.8pt !important; }
-  .section, .sec   { margin-bottom: 5px !important; }
   .entry           { margin-bottom: 2px !important; }
+`;
+
+/**
+ * GLOBAL PRINT CSS
+ * Ensures A4 sizing, white background, black text, and no layout shifts.
+ * Used as a base for all ATS-friendly templates.
+ */
+export const GLOBAL_PRINT_CSS = `
+  @page {
+    size: A4;
+    margin: 0; /* Managed by template-specific margins */
+  }
+  
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ATS Structural Resets */
+  h1, h2, h3, h4 {
+    font-weight: 700;
+    color: #000;
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  /* Page Break Control */
+  .section, section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .entry {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  /* Remove Scaling Artifacts */
+  .transform-gpu, [style*="transform"] {
+    transform: none !important;
+  }
 `;
 
 /** @deprecated use COMPRESS_STAGE_* instead */
