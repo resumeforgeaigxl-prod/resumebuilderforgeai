@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { PLANS as CONFIG_PLANS } from '@/lib/pricing/config';
 
 // ── Plan definitions ──────────────────────────────────────────────────────────
-type PlanName = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'PRO';
+type PlanName = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'PROFESSIONAL';
 
 const PLANS: Record<PlanName, {
     label: string;
@@ -65,7 +65,7 @@ const PLANS: Record<PlanName, {
         gradient: 'from-purple-500/20 to-pink-500/20',
         border: 'border-purple-500/40',
     },
-    PRO: {
+    PROFESSIONAL: {
         label: 'Professional',
         price: CONFIG_PLANS.pro.price,
         priceLabel: `₹${CONFIG_PLANS.pro.price}/mo`,

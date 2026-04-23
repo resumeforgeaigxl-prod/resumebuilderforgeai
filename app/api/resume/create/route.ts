@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { getSession } from '@/lib/auth/jwt'
 import { sendResumeCreatedEmail } from '@/lib/brevo'
+import { checkForgeAccess } from '@/lib/auth/usage'
 
 const DEFAULT_RESUME_JSON = {
     name: "",
@@ -31,6 +32,17 @@ export async function POST() {
     if (!userId) {
         console.warn('[API] Resume Create - No userId found');
         return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    // 2.5 Check usage limits
+    const access = await checkForgeAccess('resumecount');
+    if (!access.hasAccess) {
+        return NextResponse.json({ 
+            success: false, 
+            error: access.reason === 'limit_reached' 
+                ? 'Limit reached: Free users can create up to 2 resumes. Upgrade to unlock unlimited!' 
+                : 'Access denied' 
+        }, { status: 403 });
     }
 
     try {

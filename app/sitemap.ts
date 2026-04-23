@@ -36,5 +36,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 1.0,
   });
 
+  // ProductHunt visibility
+  sitemapData.push({
+    url: `${baseUrl}/?ref=producthunt`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.9,
+  });
+
   return sitemapData;
 }

@@ -1,13 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 
-export type PlanName = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'PRO';
+export type PlanName = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'PROFESSIONAL' | 'PRO';
 
 interface PlanConfig {
     durationHours: number | null; // null = 30 days
     isMonthly: boolean;
-    dailyResumeLimit: number;
-    dailyCoverLimit: number;
-    dailyMockLimit: number;
+    dailyTokens: number;
     subscriptionPlan: string;
 }
 
@@ -15,33 +13,31 @@ const PLAN_CONFIG: Record<PlanName, PlanConfig> = {
     DAILY: {
         durationHours: 24,
         isMonthly: false,
-        dailyResumeLimit: 9999,
-        dailyCoverLimit: 9999,
-        dailyMockLimit: 9999,
+        dailyTokens: 300,
         subscriptionPlan: 'daily',
     },
     WEEKLY: {
         durationHours: 168, // 7 days
         isMonthly: false,
-        dailyResumeLimit: 9999,
-        dailyCoverLimit: 9999,
-        dailyMockLimit: 9999,
+        dailyTokens: 800,
         subscriptionPlan: 'weekly',
     },
     MONTHLY: {
         durationHours: null,
         isMonthly: true,
-        dailyResumeLimit: 9999,
-        dailyCoverLimit: 9999,
-        dailyMockLimit: 9999,
+        dailyTokens: 2000,
         subscriptionPlan: 'monthly',
+    },
+    PROFESSIONAL: {
+        durationHours: null,
+        isMonthly: true,
+        dailyTokens: 5000,
+        subscriptionPlan: 'professional',
     },
     PRO: {
         durationHours: null,
         isMonthly: true,
-        dailyResumeLimit: 9999,
-        dailyCoverLimit: 9999,
-        dailyMockLimit: 9999,
+        dailyTokens: 5000,
         subscriptionPlan: 'pro',
     },
 } as const;
@@ -74,10 +70,8 @@ export async function activateUserPlan(userId: string, planName: PlanName, payme
             plan_end: planEnd.toISOString(),
             plan: 'pro', // legacy field — so existing checkUserAccess still works
             access_expires_at: planEnd.toISOString(), // legacy field
-            daily_resume_limit: config.dailyResumeLimit,
-            daily_cover_limit: config.dailyCoverLimit,
-            daily_mock_limit: config.dailyMockLimit,
-            daily_credits_used: 0, // Reset usage on upgrade
+            daily_credits_limit: config.dailyTokens,
+            tokens_used: 0, // Reset usage on upgrade
             daily_job_views: 0,   // Reset job views
         })
         .eq('id', userId);

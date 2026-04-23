@@ -57,6 +57,7 @@ export default function BuilderPage() {
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponApplied, setCouponApplied] = useState(false);
     const [faangMode, setFaangMode] = useState(false);
+    const [userPlan, setUserPlan] = useState<string>('FREE');
     const [userAccess, setUserAccess] = useState<boolean | null>(null);
     const [authLoading, setAuthLoading] = useState(true);
     const [isNotFound, setIsNotFound] = useState(false);
@@ -70,7 +71,8 @@ export default function BuilderPage() {
             if (data.reason === 'unauthorized') {
                 router.push('/login');
             } else {
-                if (data.hasAccess !== undefined) setUserAccess(data.hasAccess);
+                setUserAccess(data.hasAccess);
+                setUserPlan(data.plan || 'FREE');
                 if (data.userId) setCurrentUserId(data.userId);
                 setAuthLoading(false);
             }
@@ -81,9 +83,15 @@ export default function BuilderPage() {
     }, [router]);
 
     const fetchResume = useCallback(async (isRetry = false) => {
-        if (authLoading || !id || !currentUserId) return;
+        if (!id) {
+            router.push('/dashboard');
+            return;
+        }
+        if (authLoading || !currentUserId) return;
+
         try {
             const { data, error } = await supabase.from('resumes').select('*').eq('id', id).single();
+            
             if (error || !data) {
                 console.error('[Builder] Resume fetch error:', error);
                 if (!isRetry) {
@@ -94,33 +102,45 @@ export default function BuilderPage() {
                 setLoading(false);
                 return;
             }
-            console.log('[Builder] Resume fetched:', {
-                id: data.id,
-                owner: data.user_id,
-                currentUser: currentUserId
-            });
-            if (currentUserId && data.user_id !== currentUserId) {
-                console.warn('[Builder] Access denied - Redirecting to dashboard', {
-                    resumeOwner: data.user_id,
-                    currentUser: currentUserId
-                });
+
+            if (currentUserId && data.user_id !== currentUserId && userPlan !== 'ADMIN') {
+                console.warn('[Builder] Access denied - Redirecting to dashboard');
                 router.push('/dashboard');
                 return;
             }
+
             let rData = data.resume_json;
-            if (typeof rData === 'string') { try { rData = JSON.parse(rData); } catch { /* ok */ } }
-            setResumeData(rData as ResumeData);
-            setInitialData(JSON.stringify(rData));
-            setTitle(data.title);
+            if (typeof rData === 'string') {
+                try {
+                    rData = JSON.parse(rData);
+                } catch {
+                    rData = {};
+                }
+            }
+
+            // Ensure proper structure and handle undefined arrays
+            const normalizedData: ResumeData = {
+                ...rData,
+                experience: Array.isArray(rData?.experience) ? rData.experience : [],
+                projects: Array.isArray(rData?.projects) ? rData.projects : [],
+                education: Array.isArray(rData?.education) ? rData.education : [],
+                skills: (rData?.skills && typeof rData.skills === 'object') ? rData.skills : { languages: [], frameworks: [], tools: [], other: [] },
+                certifications: Array.isArray(rData?.certifications) ? rData.certifications : []
+            };
+
+            setResumeData(normalizedData);
+            setInitialData(JSON.stringify(normalizedData));
+            setTitle(data.title || 'Untitled Resume');
             setSelectedTemplate(data.template_selected || 'harvard');
             setIsNotFound(false);
-        } catch {
+        } catch (e) {
+            console.error('[Builder] Fetch exception:', e);
             if (!isRetry) setTimeout(() => fetchResume(true), 300);
             else setIsNotFound(true);
         } finally {
             setLoading(false);
         }
-    }, [id, supabase, authLoading, currentUserId, router]);
+    }, [id, supabase, authLoading, currentUserId, router, userPlan]);
 
     useEffect(() => { fetchResume(); }, [fetchResume]);
 
