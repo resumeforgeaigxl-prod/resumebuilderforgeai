@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { createAdminClient } from './supabase/admin';
 
 export interface KnowledgeCategory {
@@ -31,7 +32,7 @@ export interface BlogPost {
   locale: string;
 }
 
-export async function getKnowledgeCategories() {
+export const getKnowledgeCategories = cache(async () => {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from('knowledge_categories')
@@ -40,9 +41,9 @@ export async function getKnowledgeCategories() {
   
   if (error) throw error;
   return data as KnowledgeCategory[];
-}
+});
 
-export async function getKnowledgeCategoryBySlug(slug: string) {
+export const getKnowledgeCategoryBySlug = cache(async (slug: string) => {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from('knowledge_categories')
@@ -52,9 +53,9 @@ export async function getKnowledgeCategoryBySlug(slug: string) {
   
   if (error) return null;
   return data as KnowledgeCategory;
-}
+});
 
-export async function getKnowledgeTopicsByCategory(categoryId: string) {
+export const getKnowledgeTopicsByCategory = cache(async (categoryId: string) => {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from('knowledge_topics')
@@ -64,9 +65,9 @@ export async function getKnowledgeTopicsByCategory(categoryId: string) {
   
   if (error) throw error;
   return data as KnowledgeTopic[];
-}
+});
 
-export async function getKnowledgeTopicBySlug(categorySlug: string, topicSlug: string) {
+export const getKnowledgeTopicBySlug = cache(async (categorySlug: string, topicSlug: string) => {
   const supabase = createAdminClient();
   
   // First get category
@@ -82,9 +83,9 @@ export async function getKnowledgeTopicBySlug(categorySlug: string, topicSlug: s
   
   if (error) return null;
   return data;
-}
+});
 
-export async function getBlogPosts(locale: string = 'en') {
+export const getBlogPosts = cache(async (locale: string = 'en') => {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from('blog_posts')
@@ -95,9 +96,9 @@ export async function getBlogPosts(locale: string = 'en') {
   
   if (error) throw error;
   return data as BlogPost[];
-}
+});
 
-export async function getBlogPostBySlug(slug: string, locale: string = 'en') {
+export const getBlogPostBySlug = cache(async (slug: string, locale: string = 'en') => {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from('blog_posts')
@@ -108,9 +109,9 @@ export async function getBlogPostBySlug(slug: string, locale: string = 'en') {
   
   if (error) return null;
   return data as BlogPost;
-}
+});
 
-export async function getSitemapData() {
+export const getSitemapData = cache(async () => {
   const supabase = createAdminClient();
   
   const [categories, topics, posts, users] = await Promise.all([
@@ -126,4 +127,4 @@ export async function getSitemapData() {
     posts: posts.data || [],
     users: users.data || []
   };
-}
+});

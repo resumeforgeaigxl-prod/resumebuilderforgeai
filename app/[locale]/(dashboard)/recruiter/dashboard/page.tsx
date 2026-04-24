@@ -12,6 +12,7 @@ import {
     Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 export default function RecruiterHubPage() {
     const router = useRouter();
@@ -227,8 +228,13 @@ export default function RecruiterHubPage() {
                                     >
                                         <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex-shrink-0 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
                                             {c.users?.profile_image ? (
-                                                /* eslint-disable-next-line @next/next/no-img-element */
-                                                <img src={c.users.profile_image} alt={c.users?.full_name || 'Candidate'} className="w-full h-full rounded-3xl object-cover" />
+                                                <Image
+                                                    src={c.users.profile_image}
+                                                    alt={c.users?.full_name || 'Candidate'}
+                                                    width={96}
+                                                    height={96}
+                                                    className="w-full h-full rounded-3xl object-cover"
+                                                />
                                             ) : (
 
 

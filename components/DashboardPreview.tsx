@@ -33,8 +33,8 @@ export default function DashboardPreview() {
               alt="ResumeForgeAI dashboard preview"
               width={1440}
               height={900}
-              priority
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1440px"
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1200px"
               className="h-auto w-full"
             />
           </div>

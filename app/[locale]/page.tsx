@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // Revalidate every hour
 import { Metadata } from 'next';
 import LandingPage from "@/components/LandingPage";
 import { BASE_URL } from "@/lib/constants";

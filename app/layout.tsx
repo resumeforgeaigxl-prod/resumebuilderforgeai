@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "../styles/globals.css";
 import { BASE_URL } from "@/lib/constants";
+import Script from "next/script";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -91,6 +92,8 @@ export default function RootLayout({
   return (
     <html lang={locale} className="dark">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#6c63ff" />
       </head>
@@ -102,7 +105,9 @@ export default function RootLayout({
         <Analytics />
         <SpeedInsights />
         
-        <script
+        <Script
+          id="service-worker-reg"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               if ("serviceWorker" in navigator) {
