@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
@@ -43,3 +44,5 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Activation failed' }, { status: 500 });
     }
 }
+
+

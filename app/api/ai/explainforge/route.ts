@@ -1,11 +1,10 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { generateAIResponse } from '@/lib/ai-core/rag-engine';
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
 import { logUsage } from '@/lib/usage';
 import JSZip from 'jszip';
-
-export const runtime = 'nodejs';
 
 const SYSTEM_PROMPT = `Analyze this code/project and return a JSON object ONLY.
 No intro/outro conversation. No markdown backticks.
@@ -342,3 +341,6 @@ export async function GET(req: Request) {
         return NextResponse.json({ success: false, message: "Failed to fetch history" }, { status: 500 });
     }
 }
+
+
+

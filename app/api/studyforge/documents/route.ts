@@ -1,9 +1,7 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
-
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
@@ -36,3 +34,5 @@ export async function GET() {
         return NextResponse.json({ error: message }, { status: 500 });
     }
 }
+
+

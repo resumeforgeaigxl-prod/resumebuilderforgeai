@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKey, createApiError } from '@/lib/api/v1-utils';
 import { generatePdfFromHtml } from '@/lib/pdf-generator';
@@ -51,3 +52,5 @@ export async function POST(req: NextRequest) {
         return createApiError(err.message || 'Internal server error', 500);
     }
 }
+
+

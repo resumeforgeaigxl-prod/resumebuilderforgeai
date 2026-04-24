@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Compass, BookOpen, GraduationCap, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 import Link from 'next/link';
 

@@ -1,4 +1,6 @@
-'use client';
+'use client'
+export const dynamic = 'force-dynamic';
+;
 import { useParams } from 'next/navigation';
 import { Brain, Globe, MessageSquareWarning, Sparkles, Wrench, ArrowRight, Code2, Building2 } from 'lucide-react';
 import Link from 'next/link';

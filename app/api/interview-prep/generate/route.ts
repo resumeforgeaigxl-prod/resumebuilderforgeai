@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { generateAIResponse } from '@/lib/ai-provider';
 import google from 'googlethis';
@@ -5,8 +6,6 @@ import { getSession } from '@/lib/auth/jwt';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const maxDuration = 60; // Set higher timeout limit for Vercel
-export const dynamic = 'force-dynamic';
-
 type GeneratedPrep = {
     company: string;
     role: string;
@@ -305,3 +304,4 @@ SCHEMA:
         }, { status: 500 });
     }
 }
+

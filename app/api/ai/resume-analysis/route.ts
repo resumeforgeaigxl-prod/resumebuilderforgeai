@@ -1,9 +1,8 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { generateAIResponse } from '@/lib/ai-core/rag-engine';
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
-
-export const runtime = 'nodejs';
 
 const ANALYSIS_PROMPT = `
 You are a professional Resume Strategist and ATS (Applicant Tracking System) Expert. 
@@ -96,3 +95,6 @@ export async function POST(req: Request) {
         }, { status: 500 });
     }
 }
+
+
+

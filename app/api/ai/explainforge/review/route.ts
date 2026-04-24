@@ -1,8 +1,7 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { generateAIResponse } from '@/lib/ai-core/rag-engine';
 import { getSession } from '@/lib/auth/jwt';
-
-export const runtime = 'nodejs';
 
 const REVIEW_SYSTEM_PROMPT = `Analyze the following code file and return ONLY valid JSON. 
 Your goal is to provide a career-ready code review optimized for interview preparation.
@@ -87,3 +86,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: false, message: "System logic error during review." }, { status: 500 });
     }
 }
+
+
+

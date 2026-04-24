@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { generatePrepForgeQuestion, generateDailyPrepBundle } from '@/lib/prepforge/generator';
 import { getSession } from '@/lib/auth/jwt';
@@ -97,3 +98,5 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: message }, { status: 500 });
     }
 }
+
+

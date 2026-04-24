@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { ResumeData } from '@/types/resume';
 import { renderResumeToHtml } from '@/lib/resume-server-renderer';
@@ -9,8 +10,6 @@ import puppeteer, { Browser, Page } from 'puppeteer-core';
 import chromium from '@sparticuz/chromium';
 import fs from 'fs';
 import path from 'path';
-
-export const runtime = 'nodejs';
 
 async function injectWatermark(page: Page): Promise<void> {
     await page.evaluate(() => {
@@ -162,3 +161,6 @@ export async function POST(request: Request) {
         if (browser) await browser.close();
     }
 }
+
+
+

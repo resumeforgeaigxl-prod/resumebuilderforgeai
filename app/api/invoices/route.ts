@@ -39,3 +39,4 @@ export async function GET() {
         return NextResponse.json({ error: 'Failed to load invoices' }, { status: 500 });
     }
 }
+

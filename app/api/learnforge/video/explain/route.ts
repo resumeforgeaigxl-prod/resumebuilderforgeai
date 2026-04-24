@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { generateAIResponse } from '@/lib/ai-core/rag-engine';
 import { getSession } from '@/lib/auth/jwt';
@@ -72,3 +73,5 @@ Return JSON format: { "timestamp_explanations": [ { "time": "00:00 - 00:20", "to
         return NextResponse.json({ error: message }, { status: 500 });
     }
 }
+
+

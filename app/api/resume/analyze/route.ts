@@ -1,8 +1,7 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
-
-export const runtime = 'nodejs';
 
 // Heuristic analysis patterns
 const ACTION_VERBS = ['achieved', 'managed', 'developed', 'led', 'designed', 'created', 'improved', 'increased', 'decreased', 'resolved', 'spearheaded', 'orchestrated', 'built', 'implemented', 'optimized'];
@@ -109,3 +108,6 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Failed to analyze resume' }, { status: 500 });
     }
 }
+
+
+

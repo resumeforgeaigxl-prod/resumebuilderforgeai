@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { generateAIResponse, logAIUsage } from '@/lib/ai-provider';
 import { createClient } from '@/lib/supabase/server';
@@ -106,3 +107,5 @@ export async function POST(req: Request) {
         }, { status: 500 });
     }
 }
+
+

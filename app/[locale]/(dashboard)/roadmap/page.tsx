@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import RoadmapGenerator from '@/components/dashboard/RoadmapGenerator';
 import { FeatureGate } from '@/components/pricing/FeatureGate';
 

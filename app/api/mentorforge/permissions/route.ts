@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { grantMentorPermission } from '@/lib/ai/governance-service';
@@ -18,3 +19,5 @@ export async function POST(req: Request) {
          return NextResponse.json({ error: msg }, { status: 500 });
     }
 }
+
+

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
@@ -26,3 +27,5 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: true, tracked: false });
     }
 }
+
+

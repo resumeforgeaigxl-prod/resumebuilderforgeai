@@ -1,10 +1,8 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
-
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 interface InterviewData {
     id: string;
@@ -123,3 +121,4 @@ export async function DELETE(request: Request) {
         return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }
+

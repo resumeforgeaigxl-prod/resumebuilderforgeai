@@ -1,11 +1,10 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
 import { isJobRelated } from '@/lib/ai-intent';
 import { generateAIResponse } from '@/lib/ai-provider';
 import { checkUserAccess } from '@/lib/access';
-
-export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
     try {
@@ -199,3 +198,6 @@ NEVER: Break character, output JSON, or use markdown formatting.`;
         return NextResponse.json({ error: message }, { status: 500 });
     }
 }
+
+
+

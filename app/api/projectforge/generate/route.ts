@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { generateProject } from '@/lib/projectforge-ai';
@@ -90,3 +91,5 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Failed to generate project. Please try again.' }, { status: 500 });
     }
 }
+
+

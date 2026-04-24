@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { checkUserAccess } from '@/lib/access';

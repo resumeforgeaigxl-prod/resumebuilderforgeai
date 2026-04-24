@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { createAdminClient } from '@/lib/supabase/admin';
 import Link from 'next/link';
 import { Plus, FolderTree, BookOpen, ChevronRight, PlayCircle } from 'lucide-react';

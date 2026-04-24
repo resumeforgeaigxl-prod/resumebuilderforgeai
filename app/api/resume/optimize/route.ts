@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { ResumeForge } from '@/lib/ai/forges/resume';
 import { ResumeData } from '@/types/resume';
@@ -55,3 +56,5 @@ export async function POST(request: Request) {
         }, { status: 500 });
     }
 }
+
+

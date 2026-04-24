@@ -1,4 +1,6 @@
-'use client';
+'use client'
+export const dynamic = 'force-dynamic';
+;
 import { useState, useEffect } from 'react';
 import { CopyCheck, Loader2, Search, Calendar, User, Building, Briefcase } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';

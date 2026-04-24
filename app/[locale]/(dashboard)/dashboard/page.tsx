@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import {
     Sparkles, FileText,
     Briefcase, Zap, ArrowRight, Activity, Calendar,

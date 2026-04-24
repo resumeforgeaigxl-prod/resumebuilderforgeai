@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { generateLearningArticle } from '@/lib/gemini-service';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -108,3 +109,5 @@ export async function POST(req: NextRequest) {
     }, { status: 200 });
   }
 }
+
+

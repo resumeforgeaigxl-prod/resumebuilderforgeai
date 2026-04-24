@@ -1,4 +1,6 @@
-'use client';
+'use client'
+export const dynamic = 'force-dynamic';
+;
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Play, Clock, Sparkles, Loader2, MessageSquare, Zap, Target, Globe } from 'lucide-react';

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { validateApiKey, createApiResponse, createApiError } from '@/lib/api/v1-utils';
 import { ResumeForge } from '@/lib/ai/forges/resume';
@@ -28,3 +29,5 @@ export async function POST(req: NextRequest) {
         return createApiError(err.message || 'Internal server error', 500);
     }
 }
+
+

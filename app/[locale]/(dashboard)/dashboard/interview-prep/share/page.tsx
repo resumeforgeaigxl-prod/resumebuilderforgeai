@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import ShareExperienceForm from '@/components/interview-prep/ShareExperienceForm';
 import { Sparkles, Trophy, ShieldHalf } from 'lucide-react';
 

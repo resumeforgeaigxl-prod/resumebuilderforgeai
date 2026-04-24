@@ -1,8 +1,7 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin'; 
 import { getSession } from '@/lib/auth/jwt';
-
-export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
     console.log('[ExplainForge] Upload started');
@@ -84,3 +83,6 @@ export async function POST(req: NextRequest) {
         }, { status: 500 });
     }
 }
+
+
+

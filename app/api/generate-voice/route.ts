@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { generateVoice, uploadVoiceToSupabase } from '@/lib/ai/elevenlabs-service';
 import { createClient } from '@supabase/supabase-js';
@@ -34,3 +35,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: msg || 'Internal Server Error' }, { status: 500 });
   }
 }
+
+

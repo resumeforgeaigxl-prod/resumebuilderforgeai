@@ -1,10 +1,9 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 
-
-export const dynamic = 'force-dynamic';
 
 const PLAN_LIMITS: Record<string, number> = {
     free: 5,         // New Forge Ecosystem limit: 5 free jobs
@@ -177,3 +176,4 @@ export async function GET(req: Request) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
+

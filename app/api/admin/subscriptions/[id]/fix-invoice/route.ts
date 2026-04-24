@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -6,8 +7,6 @@ import { createInvoice } from '@/lib/invoice';
 import { sendPaymentSuccessEmail } from '@/lib/brevo';
 import { generateInvoiceHtml } from '@/lib/invoice-template';
 import { generatePdfFromHtml } from '@/lib/pdf-generator';
-
-export const dynamic = 'force-dynamic';
 
 export async function POST(
     req: Request,

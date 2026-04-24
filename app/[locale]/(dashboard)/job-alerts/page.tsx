@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import JobAlertsManager from '@/components/dashboard/JobAlertsManager';
 
 export default function JobAlertsPage() {

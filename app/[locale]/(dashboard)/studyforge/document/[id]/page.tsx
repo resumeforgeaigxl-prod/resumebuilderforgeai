@@ -1,4 +1,6 @@
-'use client';
+'use client'
+export const dynamic = 'force-dynamic';
+;
 
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
@@ -11,13 +13,13 @@ import {
     Download,
     Loader2
 } from 'lucide-react';
-import dynamic from 'next/dynamic';
+import NextDynamic from 'next/dynamic';
 import Link from 'next/link';
 
 /**
  * PDF Viewer - Dynamically imported
  */
-const PDFViewer = dynamic(() => import('@/components/studyforge/PDFViewer'), {
+const PDFViewer = NextDynamic(() => import('@/components/studyforge/PDFViewer'), {
     ssr: false,
     loading: () => (
         <div className="flex flex-col items-center justify-center p-20 gap-4 min-h-[400px]">
@@ -30,7 +32,7 @@ const PDFViewer = dynamic(() => import('@/components/studyforge/PDFViewer'), {
 /**
  * AI Sidebar - Dynamically imported
  */
-const AISidebar = dynamic(() => import('@/components/studyforge/AISidebar'), {
+const AISidebar = NextDynamic(() => import('@/components/studyforge/AISidebar'), {
     ssr: false,
     loading: () => <div className="w-80 border-l border-white/5 bg-[#070710]/50" />
 });
@@ -38,7 +40,7 @@ const AISidebar = dynamic(() => import('@/components/studyforge/AISidebar'), {
 /**
  * ReactMarkdown - Dynamically imported to prevent Object.defineProperty crash
  */
-const Markdown = dynamic(() => import('react-markdown'), { ssr: false });
+const Markdown = NextDynamic(() => import('react-markdown'), { ssr: false });
 
 interface StudyDocument {
     id: string;

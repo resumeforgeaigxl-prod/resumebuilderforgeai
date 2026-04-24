@@ -1,10 +1,9 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createSession } from '@/lib/auth/jwt';
 import bcrypt from 'bcrypt';
 import { sendLoginEmail } from '@/lib/brevo';
-
-export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
     try {
@@ -70,3 +69,6 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Something went wrong. Please try again later.' }, { status: 500 });
     }
 }
+
+
+

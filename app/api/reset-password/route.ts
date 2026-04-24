@@ -1,8 +1,7 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import bcrypt from 'bcrypt';
-
-export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
     try {
@@ -66,3 +65,6 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Something went wrong. Please try again later.' }, { status: 500 });
     }
 }
+
+
+

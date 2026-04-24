@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import PublicJobBoard from '@/components/jobs/PublicJobBoard';
 import { Metadata } from 'next';
 

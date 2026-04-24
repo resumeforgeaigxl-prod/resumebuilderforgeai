@@ -1,9 +1,8 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
-
-export const dynamic = 'force-dynamic';
 
 export async function GET() {
     const session = await getSession();
@@ -165,3 +164,4 @@ function formatRow(inv: any, pay: any, sub: any, billing: any, email: string, so
         invoice_number: inv?.invoice_number || null,
     };
 }
+

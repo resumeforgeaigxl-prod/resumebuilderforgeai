@@ -1,4 +1,6 @@
-'use client';
+'use client'
+export const dynamic = 'force-dynamic';
+;
 
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Video, Globe, BookOpen, ExternalLink, Loader2, Sparkles } from 'lucide-react';

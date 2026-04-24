@@ -1,4 +1,6 @@
-'use client';
+'use client'
+export const dynamic = 'force-dynamic';
+;
 import { useState, useEffect } from 'react';
 import { Ban, Loader2, Phone, User, Unlock, Infinity, ShieldCheck } from 'lucide-react';
 

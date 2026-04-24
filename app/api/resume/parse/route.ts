@@ -1,10 +1,9 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
 import { generateAIResponse, logAIUsage } from '@/lib/ai-provider';
 import mammoth from 'mammoth';
-
-export const runtime = 'nodejs';
 
 import { extractTextFromPdf } from '@/lib/pdf-service';
 
@@ -198,3 +197,6 @@ ${rawText}
     return NextResponse.json({ error: e instanceof Error ? e.message : 'Internal error' }, { status: 500 });
   }
 }
+
+
+

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { createAdminClient } from '@/lib/supabase/admin';
 import JobSourcesClient from './client-page';
 import { ShieldCheck } from 'lucide-react';

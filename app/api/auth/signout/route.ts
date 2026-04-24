@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { clearSession } from '@/lib/auth/jwt';
 import { clearOAuthStateCookie } from '@/lib/auth/oauth';
@@ -13,3 +14,5 @@ export async function POST(request: Request) {
         status: 301,
     });
 }
+
+

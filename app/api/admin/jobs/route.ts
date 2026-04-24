@@ -1,9 +1,7 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
-
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
 export async function GET(request: Request) {
     try {
@@ -82,3 +80,5 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
+
+

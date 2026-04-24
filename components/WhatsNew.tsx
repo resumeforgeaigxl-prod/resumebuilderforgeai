@@ -64,6 +64,7 @@ export default function WhatsNew({ locale = 'en', posts = [] }: { locale: string
                                                     muted
                                                     loop
                                                     playsInline
+                                                    aria-label="Platform feature demonstration"
                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out"
                                                 />
                                             ) : (

@@ -34,6 +34,7 @@ export default function DashboardPreview() {
               width={1440}
               height={900}
               priority
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1440px"
               className="h-auto w-full"
             />
           </div>

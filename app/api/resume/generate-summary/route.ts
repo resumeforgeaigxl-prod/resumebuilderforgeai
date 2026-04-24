@@ -1,9 +1,8 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { generateAIResponse, logAIUsage, stripMarkdown } from '@/lib/ai-provider';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
-
-export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
     try {
@@ -68,3 +67,6 @@ Return the result in a JSON object.`;
         }, { status: 500 });
     }
 }
+
+
+

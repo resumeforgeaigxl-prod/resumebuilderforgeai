@@ -1,4 +1,6 @@
-'use client';
+'use client'
+export const dynamic = 'force-dynamic';
+;
 
 import { useState, useEffect, useCallback } from 'react';
 import { FileHeart, Loader2, RefreshCw, Calendar, Building2, Briefcase, FileText } from 'lucide-react';

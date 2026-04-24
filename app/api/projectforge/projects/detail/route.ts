@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
@@ -28,3 +29,5 @@ export async function GET(
 
     return NextResponse.json(project);
 }
+
+

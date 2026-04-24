@@ -1,4 +1,6 @@
-'use client';
+'use client'
+export const dynamic = 'force-dynamic';
+;
 import { useState, useEffect } from 'react';
 import {
     LifeBuoy, Send, Loader2, CheckCircle2, AlertCircle,

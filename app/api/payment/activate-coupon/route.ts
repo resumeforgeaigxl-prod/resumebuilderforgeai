@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
@@ -5,8 +6,6 @@ import { activateUserPlan, PlanName } from '@/lib/plan-activation';
 import { createInvoice } from '@/lib/invoice';
 import { sendPaymentSuccessEmail } from '@/lib/brevo';
 import { format } from 'date-fns';
-
-export const runtime = 'nodejs';
 
 /**
  * POST /api/payment/activate-coupon
@@ -228,3 +227,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Failed to activate coupon plan' }, { status: 500 });
     }
 }
+
+
+

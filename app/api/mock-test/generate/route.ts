@@ -1,9 +1,8 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
 import { logMockTestGenerated } from '@/lib/admin-logger';
-
-export const runtime = 'nodejs';
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const MODEL = process.env.DEFAULT_MODEL || 'openai/gpt-4o-mini';
@@ -222,3 +221,6 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: e instanceof Error ? e.message : 'Internal error' }, { status: 500 });
     }
 }
+
+
+

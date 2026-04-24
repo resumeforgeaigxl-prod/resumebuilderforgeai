@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
@@ -124,3 +125,5 @@ export async function DELETE(request: Request) {
         return NextResponse.json({ error: e instanceof Error ? e.message : 'Internal error' }, { status: 500 });
     }
 }
+
+

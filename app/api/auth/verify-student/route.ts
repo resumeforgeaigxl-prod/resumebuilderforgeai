@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
@@ -92,3 +93,5 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: message }, { status: 500 });
     }
 }
+
+

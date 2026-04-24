@@ -12,7 +12,13 @@ export const createAdminClient = () => {
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!url || !key) {
-        throw new Error('Missing Supabase admin environment variables');
+        if (process.env.NODE_ENV === 'production' && !process.env.CI) {
+            console.warn('[Supabase Admin] Missing environment variables. This might cause runtime errors.');
+        }
+        // Return a dummy client or null to prevent crash during build
+        return createClient(url || 'http://localhost:54321', key || 'dummy', {
+            auth: { autoRefreshToken: false, persistSession: false }
+        });
     }
 
     return createClient(url, key, {

@@ -1,7 +1,6 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { manualDeduplicate } from '@/lib/jobs/ingestion-service';
-
-export const dynamic = 'force-dynamic';
 
 export async function POST() {
     try {
@@ -24,3 +23,4 @@ export async function POST() {
         return NextResponse.json({ error: 'Internal server error', detail: message }, { status: 500 });
     }
 }
+

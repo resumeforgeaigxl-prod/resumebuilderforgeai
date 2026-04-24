@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import InterviewWeaknessTracker from '@/components/dashboard/InterviewWeaknessTracker';
 
 export default function InterviewIntelligencePage() {

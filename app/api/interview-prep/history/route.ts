@@ -1,8 +1,7 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createAdminClient } from '@/lib/supabase/admin';
-
-export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
@@ -60,3 +59,4 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: 'Failed to add event' }, { status: 500 });
     }
 }
+

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { generateVoice, uploadVoiceToSupabase } from '@/lib/ai/elevenlabs-service';
 import { getSession } from '@/lib/auth/jwt';
@@ -38,3 +39,5 @@ export async function POST(req: NextRequest) {
     }, { status: 500 });
   }
 }
+
+

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { PROVIDERS, getRedirectUri, setOAuthStateCookie } from '@/lib/auth/oauth';
 import crypto from 'crypto';

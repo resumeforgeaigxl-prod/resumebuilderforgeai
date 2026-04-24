@@ -1,4 +1,6 @@
-'use client';
+'use client'
+export const dynamic = 'force-dynamic';
+;
 
 import { useState } from 'react';
 import { ShieldCheck, Building2, Briefcase, Zap, Loader2, ArrowRight } from 'lucide-react';

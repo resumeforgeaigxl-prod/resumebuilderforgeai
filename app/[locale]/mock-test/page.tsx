@@ -1,4 +1,6 @@
-'use client';
+'use client'
+export const dynamic = 'force-dynamic';
+;
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Sparkles, Briefcase, FileText, ChevronRight, Brain, Target, BookOpen, Zap, Mic } from 'lucide-react';

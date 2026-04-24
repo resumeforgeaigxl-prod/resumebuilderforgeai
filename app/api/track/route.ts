@@ -1,8 +1,7 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { trackEvent } from '@/lib/analytics';
 import { getSession } from '@/lib/auth/jwt';
-
-export const runtime = 'nodejs';
 
 export async function POST(req: Request) {
     try {
@@ -30,3 +29,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: false }, { status: 400 });
     }
 }
+
+
+

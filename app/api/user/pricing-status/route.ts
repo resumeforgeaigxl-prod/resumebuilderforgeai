@@ -1,8 +1,7 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { PricingService } from '@/lib/pricing/service';
-
-export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
@@ -24,3 +23,4 @@ export async function GET() {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
+

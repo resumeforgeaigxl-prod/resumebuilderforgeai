@@ -1,8 +1,7 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
-
-export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
@@ -23,3 +22,4 @@ export async function GET() {
         return NextResponse.json({ error: 'Failed to fetch posts' }, { status: 500 });
     }
 }
+

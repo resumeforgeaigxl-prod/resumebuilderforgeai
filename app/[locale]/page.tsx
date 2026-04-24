@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Metadata } from 'next';
 import LandingPage from "@/components/LandingPage";
 import { BASE_URL } from "@/lib/constants";
@@ -16,16 +17,16 @@ export async function generateMetadata({
 
   return {
     metadataBase: new URL(BASE_URL),
-    title: "ResumeForgeAI",
+    title: "ResumeForgeAI | AI-Powered Career Platform for Developers",
     description:
-      "AI-powered platform to build resumes, practice coding, prepare for interviews, and discover tech jobs.",
+      "Build ATS-optimized resumes, practice coding, prepare for interviews, and discover tech jobs with the ResumeForgeAI ecosystem.",
     alternates: {
-      canonical: canonicalPath,
+      canonical: `${BASE_URL}${canonicalPath}`,
     },
     openGraph: {
-      title: "ResumeForgeAI",
+      title: "ResumeForgeAI | AI-Powered Career Platform for Developers",
       description:
-        "AI-powered platform to build resumes, practice coding, prepare for interviews, and discover tech jobs.",
+        "Build ATS-optimized resumes, practice coding, prepare for interviews, and discover tech jobs with the ResumeForgeAI ecosystem.",
       url: `${BASE_URL}${canonicalPath}`,
       siteName: "ResumeForgeAI",
       type: "website",

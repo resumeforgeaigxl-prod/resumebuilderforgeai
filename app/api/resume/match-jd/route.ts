@@ -1,9 +1,8 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
 import { generateAIResponse, logAIUsage } from '@/lib/ai-provider';
-
-export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
     try {
@@ -96,3 +95,6 @@ ${JSON.stringify(resumeData).slice(0, 3000)}`;
         return NextResponse.json({ error: 'Internal JD matching error' }, { status: 500 });
     }
 }
+
+
+

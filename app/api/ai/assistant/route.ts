@@ -1,9 +1,10 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { generateAIResponse } from '@/lib/ai-core/rag-engine';
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
 
-export const runtime = 'nodejs'; // Changed to nodejs to support lib/auth/jwt with jsonwebtoken
+// Changed to nodejs to support lib/auth/jwt with jsonwebtoken
 
 const SYSTEM_PROMPT = `You are the ResumeForgeAI Career Copilot, an intelligent and helpful assistant designed to guide users through their career journey.
 
@@ -189,3 +190,6 @@ export async function GET(req: Request) {
         return NextResponse.json({ success: false }, { status: 500 });
     }
 }
+
+
+

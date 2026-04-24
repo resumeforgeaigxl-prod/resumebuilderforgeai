@@ -1,10 +1,9 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { generateAIResponse } from '@/lib/ai-core/rag-engine';
 import { stripMarkdown } from '@/lib/ai-provider';
-
-export const runtime = 'nodejs';
 
 import { checkForgeAccess, incrementForgeUsage } from '@/lib/auth/usage';
 
@@ -247,3 +246,6 @@ Example: {"score": 7, "feedback": "Good explanation but could be more specific",
         return NextResponse.json({ error: 'Failed to process request' }, { status: 500 });
     }
 }
+
+
+

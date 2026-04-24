@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { getCodeExecutionCredits } from '@/lib/code-execution-credits';
@@ -21,3 +22,5 @@ export async function GET() {
         return NextResponse.json({ error: 'Failed to fetch credits' }, { status: 500 });
     }
 }
+
+

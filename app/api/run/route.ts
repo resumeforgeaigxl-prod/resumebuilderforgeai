@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { consumeCodeExecutionCredit } from '@/lib/code-execution-credits';
@@ -77,4 +78,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Judge Server is offline or unreachable.', detail: message }, { status: 503 });
     }
 }
+
+
 

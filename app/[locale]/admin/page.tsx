@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { createAdminClient } from '@/lib/supabase/admin';
 import Link from 'next/link';
 import { Users, FileText, Activity, CreditCard, ShieldCheck, Zap, Clock, ArrowRight, MessageSquare, Briefcase } from 'lucide-react';

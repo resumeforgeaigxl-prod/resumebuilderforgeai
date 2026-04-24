@@ -1,9 +1,8 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
 import { isValidUsername } from '@/types/portfolio';
-
-export const runtime = 'nodejs';
 
 // GET — fetch current user's portfolio
 export async function GET() {
@@ -74,3 +73,6 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({ success: true, portfolio: updated });
 }
+
+
+

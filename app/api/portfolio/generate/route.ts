@@ -1,10 +1,9 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
 import { generateAIResponse, logAIUsage } from '@/lib/ai-provider';
 import { isValidUsername, PortfolioData } from '@/types/portfolio';
-
-export const runtime = 'nodejs';
 
 function slugify(name: string): string {
     return name
@@ -188,3 +187,6 @@ SCHEMA:
         return NextResponse.json({ error: 'Internal error' }, { status: 500 });
     }
 }
+
+
+

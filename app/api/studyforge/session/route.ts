@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
@@ -10,8 +11,6 @@ interface StudyDocument {
     text_chunks?: string[];
     file_type: string;
 }
-
-export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
     try {
@@ -109,3 +108,6 @@ export async function POST(request: NextRequest) {
         );
     }
 }
+
+
+

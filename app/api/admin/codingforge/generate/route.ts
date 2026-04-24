@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { generateCodingQuestions } from '@/lib/coding-generator';
@@ -26,3 +27,4 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: message }, { status: 500 });
     }
 }
+

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { PROVIDERS, getOAuthStateCookie, clearOAuthStateCookie, getRedirectUri } from '@/lib/auth/oauth';
 import { createSession } from '@/lib/auth/jwt';

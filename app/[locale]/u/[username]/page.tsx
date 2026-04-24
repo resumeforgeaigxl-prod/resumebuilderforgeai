@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';

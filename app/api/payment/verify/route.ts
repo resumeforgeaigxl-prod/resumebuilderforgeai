@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { createHmac } from 'crypto';
 import { getSession } from '@/lib/auth/jwt';
@@ -6,8 +7,6 @@ import { activateUserPlan, PlanName } from '@/lib/plan-activation';
 import { createInvoice } from '@/lib/invoice';
 import { sendPaymentSuccessEmail } from '@/lib/brevo';
 import { format } from 'date-fns';
-
-export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
     try {
@@ -202,3 +201,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Payment verification failed' }, { status: 500 });
     }
 }
+
+
+

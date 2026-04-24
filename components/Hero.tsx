@@ -36,9 +36,10 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
         >
           <Link
             href={homeHref}
+            aria-label="ResumeForgeAI Home"
             className="flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.18em] text-white"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[linear-gradient(135deg,rgba(56,189,248,0.95),rgba(245,158,11,0.85))] text-sm text-slate-950 shadow-[0_0_30px_rgba(56,189,248,0.28)]">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[linear-gradient(135deg,rgba(56,189,248,0.95),rgba(245,158,11,0.85))] text-sm text-slate-950 shadow-[0_0_30px_rgba(56,189,248,0.28)]" aria-hidden="true">
               RF
             </span>
             <span className="hidden sm:block">ResumeForgeAI</span>
@@ -133,6 +134,8 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
                     src="/peerlist-badge.png" 
                     alt="Peerlist Launchpad" 
                     fill
+                    priority
+                    sizes="48px"
                     className="object-cover"
                   />
                 </div>

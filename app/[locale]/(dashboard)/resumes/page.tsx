@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { ResumeCard } from '@/components/dashboard/resume-card'
 import { FileText, ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'

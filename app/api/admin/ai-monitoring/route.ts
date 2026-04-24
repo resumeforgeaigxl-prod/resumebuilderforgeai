@@ -1,9 +1,7 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
-
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
 
 interface UsageUser {
     email: string | null;
@@ -123,3 +121,5 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Failed to fetch monitoring data' }, { status: 500 });
     }
 }
+
+

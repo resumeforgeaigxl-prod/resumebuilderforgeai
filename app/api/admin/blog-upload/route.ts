@@ -1,8 +1,7 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
-
-export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
     try {
@@ -59,3 +58,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Failed to upload media' }, { status: 500 });
     }
 }
+
+
+

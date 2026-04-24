@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server'; // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
@@ -27,3 +28,5 @@ export async function GET() {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
+
+

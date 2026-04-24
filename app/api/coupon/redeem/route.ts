@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
@@ -7,8 +8,6 @@ import { sendPaymentSuccessEmail } from '@/lib/brevo';
 import { format } from 'date-fns';
 import { generateInvoiceHtml } from '@/lib/invoice-template';
 import { generatePdfFromHtml } from '@/lib/pdf-generator';
-
-export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
     const session = await getSession();
@@ -276,3 +275,6 @@ export async function POST(request: Request) {
         message: `Coupon valid! ${coupon.value}% discount applied.`,
     });
 }
+
+
+

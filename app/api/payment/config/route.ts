@@ -1,6 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-
 export const dynamic = 'force-dynamic';
+import { NextRequest, NextResponse } from 'next/server';
 
 const CURRENCY_PRICES: Record<string, Record<string, number>> = {
     INR: { 
@@ -31,3 +30,4 @@ export async function GET(req: NextRequest) {
         prices: CURRENCY_PRICES[currency]
     });
 }
+

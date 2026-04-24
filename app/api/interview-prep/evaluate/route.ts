@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { generateAIResponse } from '@/lib/ai-provider';
 import { getSession } from '@/lib/auth/jwt';
@@ -53,3 +54,5 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Failed to evaluate answer' }, { status: 500 });
     }
 }
+
+

@@ -1,10 +1,9 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { generateAIResponse, logAIUsage } from '@/lib/ai-provider';
 import { checkDailyLimit, logUsage } from '@/lib/usage';
 import { createClient } from '@/lib/supabase/server';
-
-export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
     try {
@@ -91,3 +90,6 @@ RULES:
         return NextResponse.json({ error: 'Internal failure optimizing bullet' }, { status: 500 });
     }
 }
+
+
+

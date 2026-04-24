@@ -1,4 +1,6 @@
-'use client';
+'use client'
+export const dynamic = 'force-dynamic';
+;
 
 import { useState, useEffect } from 'react';
 import { FileText, Download, Loader2, Receipt, CreditCard, Ticket, Calendar, IndianRupee } from 'lucide-react';

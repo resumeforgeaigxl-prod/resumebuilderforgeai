@@ -1,8 +1,7 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { checkUserAccess } from '@/lib/access';
-
-export const runtime = 'nodejs';
 
 export async function GET() {
     try {
@@ -20,3 +19,6 @@ export async function GET() {
         return NextResponse.json({ hasAccess: false, reason: 'error' });
     }
 }
+
+
+

@@ -1,11 +1,10 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { ingestJobs } from '@/lib/jobs/ingestion-service';
 import { fetchJSearch } from '@/lib/jobs/sources/jsearch';
 import { fetchAdzuna } from '@/lib/jobs/sources/adzuna';
 import { fetchApify } from '@/lib/jobs/sources/apify';
 import { fetchJobForgeCollector } from '@/lib/jobs/sources/jobforgecollector';
-
-export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
     try {
@@ -59,3 +58,4 @@ export async function GET(req: Request) {
         return NextResponse.json({ error: 'Internal server error', detail: message }, { status: 500 });
     }
 }
+
