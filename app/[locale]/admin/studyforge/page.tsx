@@ -164,7 +164,7 @@ export default function AdminStudyForge() {
                                                     <Download className="w-5 h-5" />
                                                 </a>
                                                 <button
-                                                    onClick={() => window.open(`/in/en/studyforge/document/${doc.id}`, '_blank')}
+                                                    onClick={() => window.open(`/en-in/studyforge/document/${doc.id}`, '_blank')}
                                                     className="p-3 rounded-2xl bg-white/5 border border-white/5 text-slate-400 hover:text-white hover:bg-blue-600 hover:border-blue-500 transition-all active:scale-95"
                                                     title="View in StudyForge"
                                                 >

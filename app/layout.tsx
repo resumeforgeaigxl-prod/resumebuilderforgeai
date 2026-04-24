@@ -77,14 +77,19 @@ export const viewport = {
 
 
 import { Toaster } from "react-hot-toast";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default function RootLayout({
   children,
+  params
 }: {
   children: React.ReactNode;
+  params: { locale?: string };
 }) {
+  const locale = params?.locale || "en-in";
   return (
-    <html lang="en" className="dark">
+    <html lang={locale} className="dark">
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#6c63ff" />
@@ -94,6 +99,8 @@ export default function RootLayout({
       >
         <Toaster position="top-right" />
         {children}
+        <Analytics />
+        <SpeedInsights />
         
         <script
           dangerouslySetInnerHTML={{

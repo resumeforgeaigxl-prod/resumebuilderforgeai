@@ -38,3 +38,20 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# build/debug logs and temp files
+*.log
+*.err
+*.bak
+build_output_*.txt
+build_errors_*.txt
+lint_output_*.txt
+*build*.txt
+*lint*.txt
+errors.txt
+fix.txt
+help.txt
+single-lint*.txt
+
+# Sentry Config File
+.env.sentry-build-plugin

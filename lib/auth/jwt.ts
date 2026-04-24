@@ -1,9 +1,10 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { MAIN_DOMAIN } from '../constants';
 
-const JWT_SECRET = new TextEncoder().encode(
-    process.env.JWT_SECRET || 'fallback_secret_change_in_production'
-);
+if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not defined');
+}
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 const COOKIE_NAME = 'resume_forge_auth';
 const JWT_EXPIRES_IN = '7d';
 

@@ -35,7 +35,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <button
-                        onClick={() => window.location.href = '/in/en/dashboard'}
+                        onClick={() => window.location.href = '/en-in/dashboard'}
                         className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-all shadow-lg active:scale-95 text-center"
                     >
                         Go to Dashboard
