@@ -1,13 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
+
 import { PlusCircle, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 
 export function CreateResumeButton({ variant = 'primary' }: { variant?: 'primary' | 'secondary' }) {
     const router = useRouter()
+    const params = useParams()
+    const locale = params?.locale || 'en'
     const [isCreating, setIsCreating] = useState(false)
+
     const [error, setError] = useState<string | null>(null)
 
     const handleCreate = async () => {
@@ -43,7 +47,8 @@ export function CreateResumeButton({ variant = 'primary' }: { variant?: 'primary
             }
 
             await new Promise(resolve => setTimeout(resolve, 300));
-            router.push(`/builder/${data.id}`)
+            router.push(`/${locale}/builder/${data.id}`)
+
 
         } catch (err: unknown) {
             console.error('[CreateButton] Error:', err)

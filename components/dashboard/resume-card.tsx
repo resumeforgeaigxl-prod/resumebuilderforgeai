@@ -13,6 +13,8 @@ import {
     DropdownMenuTrigger 
 } from '@/components/ui/DropdownMenu'
 import { Button } from '@/components/ui/Button'
+import { useParams } from 'next/navigation'
+
 
 interface ResumeCardProps {
     id: string
@@ -23,7 +25,11 @@ interface ResumeCardProps {
 }
 
 export function ResumeCard({ id, title, updatedAt, versionName, onDelete }: ResumeCardProps) {
+    const params = useParams();
+    const locale = params?.locale || 'en';
+
     const handleClone = async (e: React.MouseEvent) => {
+
         e.preventDefault();
         e.stopPropagation();
 
@@ -62,10 +68,11 @@ export function ResumeCard({ id, title, updatedAt, versionName, onDelete }: Resu
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48 bg-[#0c0c1b] border-white/5">
                         <DropdownMenuItem asChild>
-                            <Link href={`/builder/${id}`} className="flex items-center gap-2 cursor-pointer">
+                            <Link href={`/${locale}/builder/${id}`} className="flex items-center gap-2 cursor-pointer">
                                 <Edit2 className="w-4 h-4" /> Edit Profile
                             </Link>
                         </DropdownMenuItem>
+
                         <DropdownMenuItem onClick={handleClone} className="flex items-center gap-2 cursor-pointer">
                             <Copy className="w-4 h-4" /> Clone as Version
                         </DropdownMenuItem>
@@ -104,11 +111,12 @@ export function ResumeCard({ id, title, updatedAt, versionName, onDelete }: Resu
                 <div className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">
                     Last sync: {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}
                 </div>
-                <Link href={`/builder/${id}`}>
+                <Link href={`/${locale}/builder/${id}`}>
                     <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 hover:text-indigo-300 hover:bg-transparent p-0">
                         Enter <Edit2 className="ml-1.5 w-3 h-3" />
                     </Button>
                 </Link>
+
             </div>
         </Card>
     )
