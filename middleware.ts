@@ -95,13 +95,43 @@ export async function middleware(request: NextRequest) {
         '.js', '.mjs', '.css', '.map', '.txt', '.woff', '.woff2', '.ttf', '.otf', '.html', '.json'
     ];
 
-    // Determine if this is a subdomain request
-    const isAppSubdomain = host.startsWith('app.');
-    const isApiSubdomain = host.startsWith('api.');
-    const isAdminSubdomain = host.startsWith('admin.');
-    const isDocsSubdomain = host.startsWith('docs.');
-    const isWaitlistSubdomain = host.startsWith('waitlist.');
+    const hostLower = host.toLowerCase();
+    const isAppSubdomain = hostLower.startsWith('app.');
+    const isApiSubdomain = hostLower.startsWith('api.');
+    const isAdminSubdomain = hostLower.startsWith('admin.');
+    const isDocsSubdomain = hostLower.startsWith('docs.');
+    const isWaitlistSubdomain = hostLower.startsWith('waitlist.');
     const isSubdomain = isAppSubdomain || isApiSubdomain || isAdminSubdomain || isDocsSubdomain || isWaitlistSubdomain;
+
+    // ─── Subdomain Early Handling ─────────────────────────────────────────────
+    if (isSubdomain && !pathname.startsWith('/api')) {
+        const targetLocale = getLocale(request);
+        const targetRegion = getRegion(request);
+        const localePrefix = `${targetLocale}-${targetRegion}`;
+
+        if (isAdminSubdomain) {
+            let subRoute = pathname === '/' ? '/admin' : pathname;
+            if (!subRoute.startsWith('/admin')) subRoute = `/admin${subRoute}`;
+            return NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${localePrefix}${subRoute}`, request.url));
+        }
+
+        if (isAppSubdomain) {
+            let targetPath = pathname === '/' ? '/dashboard' : pathname;
+            return NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${localePrefix}${targetPath}`, request.url));
+        }
+
+        if (isWaitlistSubdomain) {
+            let targetPath = pathname === '/' ? '/waitlist' : pathname;
+            if (!targetPath.startsWith('/waitlist')) targetPath = `/waitlist${targetPath}`;
+            return NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${localePrefix}${targetPath}`, request.url));
+        }
+
+        if (isDocsSubdomain) {
+            let targetPath = pathname === '/' ? '/docs' : pathname;
+            if (!targetPath.startsWith('/docs')) targetPath = `/docs${targetPath}`;
+            return NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${localePrefix}${targetPath}`, request.url));
+        }
+    }
 
     // ─── Always pass through: static files, locales, and API routes early
     if (
@@ -223,24 +253,6 @@ export async function middleware(request: NextRequest) {
         return response;
     }
 
-    // ─── Docs subdomain: Redirect to main domain docs ──────────────────────────
-    if (isDocsSubdomain) {
-        let subRoute = pathname === '/' ? '/docs' : pathname;
-        if (!subRoute.startsWith('/docs')) {
-            subRoute = `/docs${subRoute}`;
-        }
-        return NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${currentLocale}-${currentRegion}${subRoute}`, request.url));
-    }
-
-    // ─── Waitlist subdomain: Redirect to main domain waitlist ──────────────────
-    if (isWaitlistSubdomain) {
-        let subRoute = pathname === '/' ? '/waitlist' : pathname;
-        if (!subRoute.startsWith('/waitlist')) {
-            subRoute = `/waitlist${subRoute}`;
-        }
-        return NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${currentLocale}-${currentRegion}${subRoute}`, request.url));
-    }
-
     // ─── JWT session resolution ───────────────────────────────────────────────
     const token = request.cookies.get('resume_forge_auth')?.value;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -256,22 +268,6 @@ export async function middleware(request: NextRequest) {
     }
 
     // ─── Admin subdomain ──────────────────────────────────────────────────────
-    // ─── Admin subdomain: Redirect to main domain ──────────────────────────────
-    if (isAdminSubdomain) {
-        let subRoute = pathname === '/' ? '/admin' : pathname;
-        if (!subRoute.startsWith('/admin')) {
-            subRoute = `/admin${subRoute}`;
-        }
-        return NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${currentLocale}-${currentRegion}${subRoute}`, request.url));
-    }
-
-    // ─── App subdomain ────────────────────────────────────────────────────────
-    // ─── App subdomain: Redirect to main dashboard ────────────────────────────
-    if (isAppSubdomain) {
-        let targetPath = pathname === '/' ? '/dashboard' : pathname;
-        return NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${currentLocale}-${currentRegion}${targetPath}`, request.url));
-    }
-
     // ─── Main domain: handle regional subfolders + geo detection ─────────────
     const isApiRoute = normalizedPath.startsWith('/api');
     if (isApiRoute) {
