@@ -172,7 +172,7 @@ export async function middleware(request: NextRequest) {
     }
 
     // 2. Redirect legacy /in/* or /en/* to default locale-region/*
-    if (!hasFullLocale && !isRootLevelPath && !isApiSubdomain && !isAdminSubdomain) {
+    if (!hasFullLocale && !isRootLevelPath && !isSubdomain) {
         if (!isSearchBot || pathname === '/') {
             const url = new URL(request.url);
             const targetLocale = `${currentLocale}-${currentRegion}`;
