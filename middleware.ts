@@ -100,7 +100,8 @@ export async function middleware(request: NextRequest) {
     const isApiSubdomain = host.startsWith('api.');
     const isAdminSubdomain = host.startsWith('admin.');
     const isDocsSubdomain = host.startsWith('docs.');
-    const isSubdomain = isAppSubdomain || isApiSubdomain || isAdminSubdomain || isDocsSubdomain;
+    const isWaitlistSubdomain = host.startsWith('waitlist.');
+    const isSubdomain = isAppSubdomain || isApiSubdomain || isAdminSubdomain || isDocsSubdomain || isWaitlistSubdomain;
 
     // ─── Always pass through: static files, locales, and API routes early
     if (
@@ -227,7 +228,6 @@ export async function middleware(request: NextRequest) {
         const localePrefix = `${currentLocale}-${currentRegion}`;
         let targetPath = pathname;
         
-        // If pathname already starts with a valid locale-region, strip it for internal routing
         const pathParts = pathname.split('/').filter(Boolean);
         const firstSegment = pathParts[0] ?? '';
         const localeMatch = firstSegment.match(/^([a-z]{2})-([a-z]{2})$/);
@@ -239,6 +239,26 @@ export async function middleware(request: NextRequest) {
 
         const nextUrl = request.nextUrl.clone();
         const finalPath = `/${localePrefix}/docs${targetPath === '/' ? '' : targetPath}`;
+        nextUrl.pathname = finalPath.replace(/\/+/g, '/');
+        return NextResponse.rewrite(nextUrl);
+    }
+
+    // ─── Waitlist subdomain: rewrite to /[locale]/waitlist ─────────────────────
+    if (isWaitlistSubdomain) {
+        const localePrefix = `${currentLocale}-${currentRegion}`;
+        let targetPath = pathname;
+
+        const pathParts = pathname.split('/').filter(Boolean);
+        const firstSegment = pathParts[0] ?? '';
+        const localeMatch = firstSegment.match(/^([a-z]{2})-([a-z]{2})$/);
+        const hasLocaleInPath = localeMatch && SUPPORTED_LOCALES.includes(localeMatch[1]) && VALID_REGIONS.has(localeMatch[2]);
+
+        if (hasLocaleInPath) {
+            targetPath = '/' + pathParts.slice(1).join('/');
+        }
+
+        const nextUrl = request.nextUrl.clone();
+        const finalPath = `/${localePrefix}/waitlist${targetPath === '/' ? '' : targetPath}`;
         nextUrl.pathname = finalPath.replace(/\/+/g, '/');
         return NextResponse.rewrite(nextUrl);
     }
@@ -264,14 +284,14 @@ export async function middleware(request: NextRequest) {
         if (!subRoute.startsWith('/admin')) {
             subRoute = `/admin${subRoute}`;
         }
-        return NextResponse.redirect(new URL(`https://www.resumeforgeai.in/${currentLocale}-${currentRegion}${subRoute}`, request.url));
+        return NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${currentLocale}-${currentRegion}${subRoute}`, request.url));
     }
 
     // ─── App subdomain ────────────────────────────────────────────────────────
     // ─── App subdomain: Redirect to main dashboard ────────────────────────────
     if (isAppSubdomain) {
         let targetPath = pathname === '/' ? '/dashboard' : pathname;
-        return NextResponse.redirect(new URL(`https://www.resumeforgeai.in/${currentLocale}-${currentRegion}${targetPath}`, request.url));
+        return NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${currentLocale}-${currentRegion}${targetPath}`, request.url));
     }
 
     // ─── Main domain: handle regional subfolders + geo detection ─────────────
