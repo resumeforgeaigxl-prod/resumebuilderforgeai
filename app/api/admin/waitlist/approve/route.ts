@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
 import { sendWaitlistApprovalEmail } from '@/lib/brevo';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
     try {
         const session = await getSession();
