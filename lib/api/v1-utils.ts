@@ -53,7 +53,7 @@ export async function validateApiKey(req: NextRequest) {
 
     // Apply Rate Limiting (100 requests per minute by default for now)
     const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';
-    const { allowed, remaining } = rateLimit({
+    const { allowed, remaining } = await rateLimit({
         key: `api_v1_${apiKey}_${ip}`,
         limit: 100,
         windowMs: 60 * 1000 // 1 minute

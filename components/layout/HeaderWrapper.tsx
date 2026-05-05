@@ -28,12 +28,15 @@ export default function HeaderWrapper({ children }: { children: ReactNode }) {
         pathname?.includes('/api-platform') || 
         pathname?.includes('/mock-interview') || 
         pathname?.includes('/interviewforge') || 
-        pathname?.includes('/jobs') || 
+        pathname?.includes('/jobforge-app') || 
         pathname?.includes('/jobforgeai') || 
         pathname?.includes('/tools') ||
         pathname?.includes('/billing') ||
         pathname?.includes('/account') ||
         pathname?.includes('/companies') ||
+        pathname?.includes('/salaryforge') ||
+        pathname?.includes('/networkforge') ||
+        pathname?.includes('/ats-live') ||
         pathname?.includes('/mock-test');
 
     if (isInternalApp || isLandingPage) {

@@ -126,8 +126,8 @@ export async function POST(req: Request) {
                 .insert({
                     user_id: userId,
                     feature: 'assistant',
-                    model: 'gemini-2.0-flash',
-                    tokens: responseData.message.length / 4, // estimate
+                    model_used: 'gemini-2.0-flash',
+                    tokens_used: Math.floor(responseData.message.length / 4), // estimate
                 });
         }
 

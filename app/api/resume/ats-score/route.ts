@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     try {
         // Rate limit: 10 requests per minute per IP
         const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
-        const { allowed, remaining } = rateLimit({ key: `ats:${ip}`, limit: 10, windowMs: 60_000 });
+        const { allowed, remaining } = await rateLimit({ key: `ats:${ip}`, limit: 10, windowMs: 60_000 });
 
         if (!allowed) {
             return NextResponse.json(

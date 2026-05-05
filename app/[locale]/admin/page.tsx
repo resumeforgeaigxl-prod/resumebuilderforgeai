@@ -75,6 +75,7 @@ export default async function AdminDashboard({ params }: { params: { locale: str
     { label: 'Resume Analyses', value: totalResumeAnalyses, icon: Zap, color: 'text-purple-400' },
     { label: 'Recent Applications', value: totalJobApps, icon: Briefcase, color: 'text-emerald-400' },
     { label: 'AI Chat Sessions', value: chatSessionsToday, icon: MessageSquare, color: 'text-blue-400' },
+    { label: 'Enterprise Forges', value: 4, icon: ShieldCheck, color: 'text-orange-400' },
   ];
 
   return (
@@ -91,13 +92,25 @@ export default async function AdminDashboard({ params }: { params: { locale: str
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
-          <div key={stat.label} className="glass-card p-8 group">
-            <div className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-              <stat.icon className={`w-6 h-6 ${stat.color}`} />
+          stat.label === 'Enterprise Forges' ? (
+            <Link key={stat.label} href={`/${locale}/admin/forges`} className="glass-card p-8 group hover:border-orange-500/30 transition-all">
+              <div className={`w-12 h-12 rounded-xl ${stat.bg || 'bg-orange-500/10'} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                <stat.icon className={`w-6 h-6 ${stat.color}`} />
+              </div>
+              <div className="text-3xl font-bold text-white mb-1">{stat.value.toLocaleString()}</div>
+              <div className="text-sm font-medium text-slate-500 flex items-center gap-2">
+                {stat.label} <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+          ) : (
+            <div key={stat.label} className="glass-card p-8 group">
+              <div className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                <stat.icon className={`w-6 h-6 ${stat.color}`} />
+              </div>
+              <div className="text-3xl font-bold text-white mb-1">{stat.value.toLocaleString()}</div>
+              <div className="text-sm font-medium text-slate-500">{stat.label}</div>
             </div>
-            <div className="text-3xl font-bold text-white mb-1">{stat.value.toLocaleString()}</div>
-            <div className="text-sm font-medium text-slate-500">{stat.label}</div>
-          </div>
+          )
         ))}
       </div>
 

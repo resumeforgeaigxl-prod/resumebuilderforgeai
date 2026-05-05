@@ -176,6 +176,7 @@ NEVER: Break character, output JSON, or use markdown formatting.`;
             // Audit Log (New production usage logs)
             supabase.from('ai_usage_logs').insert({
                 user_id: userId,
+                feature: 'jobforge',
                 conversation_id: conversationId,
                 model_used: aiResult.model,
                 tokens_used: aiResult.usage.total_tokens,

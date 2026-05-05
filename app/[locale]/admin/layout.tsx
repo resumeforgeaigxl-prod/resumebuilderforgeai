@@ -5,11 +5,17 @@ import { getSession } from '@/lib/auth/jwt';
 import AdminLayoutClient from './client-layout';
 
 async function getAdminProfile() {
-    const session = await getSession();
-    if (!session) return null;
-    const supabase = createClient();
-    const { data } = await supabase.from('users').select('role, email').eq('id', session.userId).single() as { data: { role: string; email: string } };
-    return data;
+    try {
+        const session = await getSession();
+        if (!session) return null;
+        const supabase = createClient();
+        const { data, error } = await supabase.from('users').select('role, email').eq('id', session.userId).single();
+        if (error || !data) return null;
+        return data;
+    } catch (err) {
+        console.error('Admin layout fetch error:', err);
+        return null;
+    }
 }
 
 export default function AdminLayoutWrapper({ children, params }: { children: ReactNode, params: { locale: string } }) {

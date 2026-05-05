@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { generateAIResponse } from '@/lib/ai-core/rag-engine';
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
+import { aiCache } from '@/lib/cache/redis';
 
 const ANALYSIS_PROMPT = `
 You are a professional Resume Strategist and ATS (Applicant Tracking System) Expert. 
@@ -39,14 +40,25 @@ export async function POST(req: Request) {
 
         const supabase = createClient();
 
-        // 1. Generate AI Analysis
-        const prompt = ANALYSIS_PROMPT.replace('{{RESUME_DATA}}', JSON.stringify(resumeData));
-        const aiResponse = await generateAIResponse(prompt, {
-            userId: session!.userId,
-            contextType: 'general',
-            jsonMode: true,
-            systemPrompt: "You are a Resume Intelligence AI."
-        });
+        // 1. Check Cache first
+        const cacheKey = aiCache.generateKey({ resumeData, promptType: 'resume_intelligence' });
+        let aiResponse = await aiCache.get<any>(cacheKey);
+
+        if (!aiResponse) {
+            // 2. Generate AI Analysis (if not in cache)
+            const prompt = ANALYSIS_PROMPT.replace('{{RESUME_DATA}}', JSON.stringify(resumeData));
+            aiResponse = await generateAIResponse(prompt, {
+                userId: session!.userId,
+                contextType: 'general',
+                jsonMode: true,
+                systemPrompt: "You are a Resume Intelligence AI."
+            });
+
+            // 3. Save to Cache (24h TTL)
+            if (aiResponse) {
+                await aiCache.set(cacheKey, aiResponse, 86400);
+            }
+        }
 
         if (!aiResponse || typeof aiResponse.ats_score !== 'number') {
             throw new Error("Invalid AI response");
@@ -76,8 +88,8 @@ export async function POST(req: Request) {
             .insert({
                 user_id: session.userId,
                 feature: 'resume_intelligence',
-                model: 'gemini-2.0-flash',
-                tokens: JSON.stringify(aiResponse).length / 4
+                model_used: 'gemini-2.0-flash',
+                tokens_used: Math.floor(JSON.stringify(aiResponse).length / 4)
             });
 
         return NextResponse.json({

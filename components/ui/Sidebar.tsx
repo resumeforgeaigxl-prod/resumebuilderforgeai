@@ -24,7 +24,9 @@ import {
   Brain,
   Terminal,
   PanelLeftClose,
-  PanelLeft
+  PanelLeft,
+  Wallet,
+  Network
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/hooks/use-sidebar";
@@ -37,23 +39,27 @@ export function Sidebar({ locale }: SidebarProps) {
   const { collapsed, toggle } = useSidebar();
   const pathname = usePathname();
 
+  const safeLocale = locale.toLowerCase();
   const navItems = [
-    { name: "Overview", icon: LayoutDashboard, href: `/${locale}/dashboard` },
-    { name: "ResumeForge", icon: FileText, href: `/${locale}/resumes` },
-    { name: "CodingForge", icon: Code, href: `/${locale}/codingforge` },
-    { name: "PrepForge", icon: Brain, href: `/${locale}/prepforge/app` },
-    { name: "ProjectForge", icon: Projector, href: `/${locale}/projectforge` },
-    { name: "InterviewForge", icon: MessageSquare, href: `/${locale}/mock-interview` },
-    { name: "LearnForge", icon: PlayCircle, href: `/${locale}/learnforge` },
-    { name: "KnowledgeForge", icon: GraduationCap, href: `/${locale}/knowledgeforge` },
-    { name: "ExplainForge", icon: Sparkles, href: `/${locale}/explainforge` },
-    { name: "StudyForge", icon: BookOpen, href: `/${locale}/studyforge` },
-    { name: "CareerForge", icon: Briefcase, href: `/${locale}/careerforge` },
-    { name: "MentorForge", icon: Bot, href: `/${locale}/mentorforge` },
-    { name: "JobForge", icon: Search, href: `/${locale}/jobs` },
-    { name: "Company Prep", icon: Building2, href: `/${locale}/company-prep-interview` },
-    { name: "API Platform", icon: Terminal, href: `/${locale}/api-keys` },
-    { name: "AI Tools", icon: Zap, href: `/${locale}/tools` },
+    { name: "Overview", icon: LayoutDashboard, href: `/${safeLocale}/dashboard` },
+    { name: "ResumeForge", icon: FileText, href: `/${safeLocale}/resumes` },
+    { name: "CodingForge", icon: Code, href: `/${safeLocale}/codingforge` },
+    { name: "PrepForge", icon: Brain, href: `/${safeLocale}/prepforge` },
+    { name: "ProjectForge", icon: Projector, href: `/${safeLocale}/projectforge` },
+    { name: "InterviewForge", icon: MessageSquare, href: `/${safeLocale}/mock-interview` },
+    { name: "LearnForge", icon: PlayCircle, href: `/${safeLocale}/learnforge` },
+    { name: "KnowledgeForge", icon: GraduationCap, href: `/${safeLocale}/knowledgeforge` },
+    { name: "ExplainForge", icon: Sparkles, href: `/${safeLocale}/explainforge` },
+    { name: "StudyForge", icon: BookOpen, href: `/${safeLocale}/studyforge` },
+    { name: "CareerForge", icon: Briefcase, href: `/${safeLocale}/careerforge` },
+    { name: "MentorForge", icon: Bot, href: `/${safeLocale}/mentorforge` },
+    { name: "JobForge", icon: Search, href: `/${safeLocale}/jobforge-app` },
+    { name: "Company Prep", icon: Building2, href: `/${safeLocale}/company-prep-interview` },
+    { name: "API Platform", icon: Terminal, href: `/${safeLocale}/api-keys` },
+    { name: "SalaryForge", icon: Wallet, href: `/${safeLocale}/salaryforge` },
+    { name: "NetworkForge", icon: Network, href: `/${safeLocale}/networkforge` },
+    { name: "AtsLive", icon: Zap, href: `/${safeLocale}/ats-live` },
+    { name: "AI Tools", icon: Zap, href: `/${safeLocale}/tools` },
   ];
 
   return (

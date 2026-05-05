@@ -3,7 +3,7 @@
 import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, Target, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning, Briefcase, FileHeart, Receipt, LifeBuoy, Mic, Compass, TrendingUp, Bell, BookOpen, Sparkles, Video, BookOpenCheck, Bot, GraduationCap } from 'lucide-react';
+import { Shield, ShieldCheck, Target, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning, Briefcase, FileHeart, Receipt, LifeBuoy, Mic, Compass, TrendingUp, Bell, BookOpen, Sparkles, Video, BookOpenCheck, Bot, GraduationCap } from 'lucide-react';
 import Image from 'next/image';
 
 export default function AdminLayoutClient({ children, profile, locale }: { children: ReactNode, profile: { email: string }, locale: string }) {
@@ -60,6 +60,7 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
         { href: `/${locale}/admin/posts`, label: 'Platform Posts', icon: LayoutDashboard },
         { href: `/${locale}/admin/knowledge`, label: 'Knowledge SEO', icon: BookOpenCheck },
         { href: `/${locale}/admin/waitlist`, label: 'Launch Waitlist', icon: Users },
+        { href: `/${locale}/admin/forges`, label: 'Forge Hub', icon: ShieldCheck },
         { href: `/${locale}/admin/logs`, label: 'Audit Logs', icon: ScrollText },
     ];
 
@@ -182,10 +183,10 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                     <div className="flex items-center gap-3">
                         <div className="hidden sm:flex flex-col items-end mr-2">
                             <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest leading-tight">Admin</p>
-                            <p className="text-xs text-slate-300 font-medium max-w-[150px] truncate">{profile.email}</p>
+                            <p className="text-xs text-slate-300 font-medium max-w-[150px] truncate">{profile?.email || 'Admin'}</p>
                         </div>
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs ring-2 ring-white/10 shrink-0">
-                            {profile.email.charAt(0).toUpperCase()}
+                            {profile?.email?.charAt(0).toUpperCase() || 'A'}
                         </div>
                     </div>
                 </header>

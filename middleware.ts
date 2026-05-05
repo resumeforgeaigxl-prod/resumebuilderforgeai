@@ -137,6 +137,12 @@ export async function middleware(request: NextRequest) {
         }
     }
 
+    // ─── Sanitization: Redirect paths with spaces (common typo or copy-paste error) ───
+    if (pathname.includes(' ') || pathname.includes('%20')) {
+        const sanitizedPath = pathname.replace(/ /g, '-').replace(/%20/g, '-').replace(/-+/g, '-');
+        return NextResponse.redirect(new URL(sanitizedPath, request.url));
+    }
+
     // ─── Always pass through: static files, locales, and API routes early
     if (
         pathname.startsWith('/_next') ||
@@ -155,8 +161,8 @@ export async function middleware(request: NextRequest) {
     const firstSegment = pathParts[0] ?? '';
 
     // Check for [lang]-[region] format, e.g., en-in
-    const localeMatch = firstSegment.match(/^([a-z]{2})-([a-z]{2})$/);
-    const hasFullLocale = localeMatch && SUPPORTED_LOCALES.includes(localeMatch[1]) && VALID_REGIONS.has(localeMatch[2]);
+    const localeMatch = firstSegment.match(/^([a-z]{2})-([a-z]{2})$/i);
+    const hasFullLocale = localeMatch && SUPPORTED_LOCALES.includes(localeMatch[1].toLowerCase()) && VALID_REGIONS.has(localeMatch[2].toLowerCase());
 
     // Check for legacy formats to redirect
     const isLegacyRegion = VALID_REGIONS.has(firstSegment);

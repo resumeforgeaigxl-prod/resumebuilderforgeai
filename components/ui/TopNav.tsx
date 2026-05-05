@@ -30,7 +30,7 @@ export function TopNav({ userName = "User", pageTitle, locale = "en" }: TopNavPr
   return (
     <header className={cn(
       "fixed top-0 right-0 z-30 flex h-16 items-center justify-between border-b border-[#1E2A42] bg-[#080B16]/80 px-8 backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
-      collapsed ? "w-[calc(100%-72px)]" : "w-[calc(100%-256px)]"
+      collapsed ? "left-[72px]" : "left-64"
     )}>
       {/* Breadcrumbs / Page Title */}
       <div className="flex items-center gap-2 text-sm">

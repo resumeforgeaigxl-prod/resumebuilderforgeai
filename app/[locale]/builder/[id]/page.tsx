@@ -21,6 +21,7 @@ import { JdMatcher } from '@/components/builder/JdMatcher';
 import { VersionHistory } from '@/components/builder/VersionHistory';
 import { BulletEnhancer } from '@/components/builder/BulletEnhancer';
 import { ATSScoreResult } from '@/lib/ats-score';
+import { Collaborators } from '@/components/builder/Collaborators';
 
 import posthog from '@/lib/posthog';
 import { CoverLetterModal } from '@/components/builder/cover-letter-modal';
@@ -409,6 +410,7 @@ export default function BuilderPage() {
                             <Link href="/dashboard" className="p-2 hover:bg-white/5 rounded-xl transition-colors shrink-0"><ArrowLeft className="w-5 h-5" /></Link>
                             <input value={title} onChange={e => setTitle(e.target.value)}
                                 className="bg-transparent border-none text-base sm:text-lg font-bold focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 w-full sm:w-64" />
+                            <Collaborators resumeId={id} currentUserId={currentUserId} />
                         </div>
                         <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 w-full sm:w-auto">
                             <ResumeIntelligence resumeId={id} resumeData={resumeData} />
