@@ -13,12 +13,14 @@ const geistSans = localFont({
     variable: "--font-geist-sans",
     weight: "100 900",
     display: "swap",
+    preload: true,
 });
 const geistMono = localFont({
     src: "../fonts/GeistMonoVF.woff",
     variable: "--font-geist-mono",
     weight: "100 900",
     display: "swap",
+    preload: true,
 });
 
 const BASE_URL = "https://resumeforgeai.in";
@@ -69,6 +71,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
 
 import FooterWrapper from "@/components/layout/FooterWrapper";
 import InstallBanner from "@/components/pwa/InstallBanner";
+import Script from "next/script";
 
 export default async function LocaleLayout({
     children,
@@ -95,7 +98,9 @@ export default async function LocaleLayout({
                 <CookieBanner />
                 <InstallBanner />
                 
-                <script
+                <Script
+                    id="service-worker-reg"
+                    strategy="lazyOnload"
                     dangerouslySetInnerHTML={{
                         __html: `
                         if ('serviceWorker' in navigator) {
