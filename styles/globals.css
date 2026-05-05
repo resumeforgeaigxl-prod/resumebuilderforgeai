@@ -54,40 +54,73 @@
 
 @layer components {
   .glass-card {
-    @apply border border-white/10 bg-white/[0.05] backdrop-blur-xl transition-all duration-300;
-    box-shadow: 0 22px 80px -48px rgba(8, 15, 30, 0.95);
+    @apply border border-white/10 bg-white/[0.03] backdrop-blur-xl transition-all duration-500;
+    box-shadow: 0 4px 24px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  .premium-glass {
+    @apply border border-white/[0.08] bg-[#0A0C14]/60 backdrop-blur-2xl transition-all duration-700;
+    box-shadow: 
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+        0 20px 40px -20px rgba(0, 0, 0, 0.8);
+  }
+
+  .forge-card {
+    @apply relative overflow-hidden rounded-[2rem] border border-white/5 bg-gradient-to-b from-white/[0.03] to-transparent p-6 transition-all duration-500 hover:border-indigo-500/30 hover:from-indigo-500/5 hover:to-transparent;
   }
 
   .btn-primary {
-    @apply inline-flex items-center gap-2 rounded-2xl border border-sky-300/30 bg-[linear-gradient(135deg,rgba(240,249,255,1),rgba(224,242,254,1))] px-6 py-3 text-slate-950 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_48px_-24px_rgba(56,189,248,0.55)];
+    @apply inline-flex items-center gap-2 rounded-2xl border border-sky-300/30 bg-[linear-gradient(135deg,rgba(240,249,255,1),rgba(224,242,254,1))] px-6 py-3 text-slate-950 font-bold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_48px_-24px_rgba(56,189,248,0.55)] active:scale-95;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center gap-2 rounded-2xl border border-white/[0.12] bg-white/[0.05] px-6 py-3 text-white transition-all duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.09];
-  }
-
-  .section-kicker {
-    @apply inline-flex rounded-full border border-sky-300/[0.12] bg-sky-300/[0.08] px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-sky-100/75;
-  }
-
-  .section-title {
-    @apply text-4xl font-semibold tracking-[-0.04em] text-white sm:text-5xl;
-  }
-
-  .section-copy {
-    @apply text-base leading-8 text-slate-300 sm:text-lg;
+    @apply inline-flex items-center gap-2 rounded-2xl border border-white/[0.12] bg-white/[0.05] px-6 py-3 text-white font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.09] active:scale-95;
   }
 }
 
 @layer utilities {
   .text-gradient {
-    @apply bg-gradient-to-r from-white via-sky-100 to-slate-300 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent;
+  }
+
+  .animate-premium-in {
+    animation: premium-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes premium-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
   }
 }
 
+/* ═══ Dashboard Responsive Normalization ═══ */
+
+/* Mobile: reduce dashboard padding & refine typography */
+@media (max-width: 768px) {
+  body {
+    font-size: 15px; /* Slightly larger for readability */
+    line-height: 1.6;
+  }
+
+  main {
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+    padding-top: 4.5rem !important;
+  }
+
+  h1 { font-size: 1.85rem !important; line-height: 1.1 !important; }
+  h2 { font-size: 1.5rem !important; }
+}
+
+/* Custom Scrollbar Premium */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -95,65 +128,11 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.2);
-  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.34);
-}
-
-/* ═══ Dashboard Responsive Normalization ═══ */
-
-/* Mobile: reduce dashboard padding */
-@media (max-width: 768px) {
-  main.pt-24 {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    padding-top: 5rem !important;
-  }
-}
-
-/* Small screens: auto-collapse sidebar */
-@media (max-width: 640px) {
-  [data-sidebar] {
-    width: 0 !important;
-    opacity: 0;
-    pointer-events: none;
-  }
-  header.fixed {
-    width: 100% !important;
-    left: 0 !important;
-  }
-  [data-main] {
-    margin-left: 0 !important;
-  }
-}
-
-/* Typography guard — prevent oversized text in dashboard */
-.prose h1 { font-size: 1.75rem !important; }
-.prose h2 { font-size: 1.35rem !important; }
-.prose h3 { font-size: 1.1rem !important; }
-
-/* Responsive images & overflow guard */
-img, video, canvas, svg {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Safe container for all forges */
-.forge-container {
-  max-width: 72rem;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
-}
-
-@media (min-width: 640px) {
-  .forge-container {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
+  background: rgba(255, 255, 255, 0.1);
 }
 

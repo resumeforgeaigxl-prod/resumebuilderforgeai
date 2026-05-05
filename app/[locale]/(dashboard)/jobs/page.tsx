@@ -123,23 +123,23 @@ export default function JobsPage() {
     };
 
     return (
-        <div className="space-y-8 max-w-7xl mx-auto">
+        <div className="space-y-8 max-w-7xl mx-auto animate-premium-in">
             <PaymentSuccessBanner />
 
             {/* Standardized Header */}
             <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E2A42] pb-8 mb-12">
                 <div>
-                    <div className="flex items-center gap-2 text-[#00D4A0] font-bold tracking-widest text-[10px] uppercase mb-4">
+                    <div className="flex items-center gap-2 text-[#00D4A0] font-bold tracking-widest text-[10px] uppercase mb-3">
                         <Briefcase className="w-3.5 h-3.5" /> Intelligence Core
                     </div>
-                    <h1 className="text-4xl font-bold tracking-tighter text-white uppercase">JobForge</h1>
-                    <p className="text-slate-400 mt-2 text-lg">Discover global tech opportunities curated by AI across neural networks.</p>
+                    <h1 className="text-3xl md:text-4xl font-bold tracking-tighter text-white uppercase">JobForge</h1>
+                    <p className="text-slate-400 mt-2 text-base md:text-lg max-w-2xl">Discover global tech opportunities curated by AI across neural networks.</p>
                 </div>
 
-                <div className="flex items-center gap-4">
-                    <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-[#0D1220] border border-[#1E2A42] rounded-xl text-[10px] font-black uppercase text-slate-500 tracking-widest whitespace-nowrap">
+                <div className="flex items-center gap-3 md:gap-4">
+                    <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-[#0D1220] border border-[#1E2A42] rounded-xl text-[9px] md:text-[10px] font-black uppercase text-slate-500 tracking-widest whitespace-nowrap">
                         <Globe className="w-3 h-3 text-[#00D4A0]" />
-                        Region: <span className="text-[#00D4A0]">{detectedCountry === 'IN' ? 'India' : detectedCountry === 'US' ? 'United States' : 'Global'}</span>
+                        <span className="hidden xs:inline">Region:</span> <span className="text-[#00D4A0]">{detectedCountry === 'IN' ? 'India' : detectedCountry === 'US' ? 'United States' : 'Global'}</span>
                     </div>
                     {userPlan === 'admin' && (
                         <button
@@ -156,7 +156,7 @@ export default function JobsPage() {
 
 
             {/* Filters Bar */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 bg-slate-900/40 p-6 rounded-[2.5rem] border border-white/5 backdrop-blur-md shadow-2xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 premium-glass p-5 md:p-6 rounded-3xl md:rounded-[2.5rem] border border-white/5 shadow-2xl">
                 <form onSubmit={handleSearch} className="lg:col-span-1 relative">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                     <input
@@ -312,8 +312,8 @@ function JobCard({ job }: { job: Job }) {
     const postedDate = new Date(job.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 
     return (
-        <div className="group relative p-8 bg-slate-900/40 border border-white/5 rounded-[2.5rem] hover:bg-slate-900/60 hover:border-indigo-500/30 transition-all duration-500 flex flex-col h-full">
-            <div className="absolute top-6 right-8 flex gap-2">
+        <div className="forge-card flex flex-col h-full group">
+            <div className="absolute top-4 md:top-6 right-5 md:right-8 flex gap-2">
                 <span className={`px-2 py-1 bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1 shadow-sm`}>
                     <Globe className="w-3 h-3 text-indigo-400" />
                     {job.country === 'India' ? 'IN' : 'US'}
@@ -323,13 +323,13 @@ function JobCard({ job }: { job: Job }) {
                 )}
             </div>
 
-            <div className="flex gap-5 items-start mb-6">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
-                    <span className="text-xl font-black text-indigo-400 uppercase">{job.company?.charAt(0)}</span>
+            <div className="flex gap-4 md:gap-5 items-start mb-5 md:mb-6">
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
+                    <span className="text-lg md:text-xl font-black text-indigo-400 uppercase">{job.company?.charAt(0)}</span>
                 </div>
-                <div className="min-w-0 pr-16">
-                    <h3 className="text-lg font-bold text-white group-hover:text-indigo-400 transition-colors truncate tracking-tight Otros">{job.title}</h3>
-                    <p className="text-sm text-slate-400 font-medium flex items-center gap-2 mt-1">
+                <div className="min-w-0 pr-12 md:pr-16">
+                    <h3 className="text-base md:text-lg font-bold text-white group-hover:text-indigo-400 transition-colors truncate tracking-tight">{job.title}</h3>
+                    <p className="text-xs md:text-sm text-slate-400 font-medium flex items-center gap-2 mt-1">
                         <span className="truncate">{job.company}</span>
                         <span className="w-1 h-1 rounded-full bg-slate-700" />
                         <MapPin className="w-3.5 h-3.5 text-indigo-500/60" />

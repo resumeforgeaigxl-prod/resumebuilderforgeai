@@ -79,41 +79,41 @@ export default function JobCollectorClient() {
 
     return (
         <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="glass-card p-8 border-indigo-500/20 bg-indigo-500/5 group">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                <div className="glass-card p-6 md:p-8 border-indigo-500/20 bg-indigo-500/5 group">
                     <div className="flex items-center gap-4 mb-6">
-                        <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-                            <Zap className="w-6 h-6 text-indigo-400" />
+                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+                            <Zap className="w-5 h-5 md:w-6 md:h-6 text-indigo-400" />
                         </div>
                         <div>
-                            <h3 className="text-xl font-bold text-white">Collector Run</h3>
-                            <p className="text-sm text-slate-500">Run targeted AI discovery for top tiers.</p>
+                            <h3 className="text-lg md:text-xl font-bold text-white">Collector Run</h3>
+                            <p className="text-xs md:text-sm text-slate-500">Run targeted AI discovery for top tiers.</p>
                         </div>
                     </div>
                     <button
                         onClick={() => runAction('collector', 'Collector')}
                         disabled={loading.collector}
-                        className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                        className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm md:text-base"
                     >
                         {loading.collector ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
                         Start Collector
                     </button>
                 </div>
 
-                <div className="glass-card p-8 border-white/5 bg-white/2 group">
+                <div className="glass-card p-6 md:p-8 border-white/5 bg-white/2 group">
                     <div className="flex items-center gap-4 mb-6">
-                        <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
-                            <RefreshCcw className="w-6 h-6 text-blue-400" />
+                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                            <RefreshCcw className="w-5 h-5 md:w-6 md:h-6 text-blue-400" />
                         </div>
                         <div>
-                            <h3 className="text-xl font-bold text-white">Full Global Sync</h3>
-                            <p className="text-sm text-slate-500">Sync with JSearch, Adzuna, Apify, and AI Collector.</p>
+                            <h3 className="text-lg md:text-xl font-bold text-white">Full Global Sync</h3>
+                            <p className="text-xs md:text-sm text-slate-500">Sync with all external AI APIs.</p>
                         </div>
                     </div>
                     <button
                         onClick={() => runAction('sync', 'Full Sync')}
                         disabled={loading.sync}
-                        className="w-full py-3 bg-white/5 hover:bg-white/10 text-white border border-white/10 font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                        className="w-full py-3 bg-white/5 hover:bg-white/10 text-white border border-white/10 font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm md:text-base"
                     >
                         {loading.sync ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
                         Run Global Sync
@@ -208,9 +208,9 @@ export default function JobCollectorClient() {
                     <table className="w-full text-left text-sm">
                         <thead>
                             <tr className="bg-white/2 text-slate-400 uppercase text-[10px] font-black tracking-widest">
-                                <th className="px-6 py-4">Title & Company</th>
-                                <th className="px-6 py-4">Location</th>
-                                <th className="px-6 py-4">Source</th>
+                                <th className="px-6 py-4">Intelligence</th>
+                                <th className="hidden sm:table-cell px-6 py-4">Location</th>
+                                <th className="hidden lg:table-cell px-6 py-4">Source</th>
                                 <th className="px-6 py-4 text-right">Collected</th>
                             </tr>
                         </thead>
@@ -232,22 +232,25 @@ export default function JobCollectorClient() {
                                 filteredJobs.map((job) => (
                                     <tr key={job.id} className="hover:bg-white/2 transition-colors">
                                         <td className="px-6 py-4">
-                                            <div className="font-bold text-white">{job.title}</div>
-                                            <div className="text-xs text-indigo-400">{job.company}</div>
+                                            <div className="font-bold text-white truncate max-w-[140px] xs:max-w-xs">{job.title}</div>
+                                            <div className="text-[10px] text-indigo-400">{job.company}</div>
+                                            <div className="sm:hidden text-[9px] text-slate-500 uppercase mt-1 flex items-center gap-1">
+                                                <MapPin className="w-2.5 h-2.5" /> {job.location || 'Remote'}
+                                            </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="hidden sm:table-cell px-6 py-4">
                                             <div className="flex items-center gap-1.5 text-slate-400 text-xs">
                                                 <MapPin className="w-3 h-3 text-slate-500" />
                                                 {job.location || 'Remote'}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="hidden lg:table-cell px-6 py-4">
                                             <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-[9px] font-bold uppercase tracking-tighter text-slate-400">
                                                 {job.source}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right text-slate-500 tabular-nums">
-                                            {new Date(job.created_at).toLocaleDateString()}
+                                        <td className="px-6 py-4 text-right text-slate-500 tabular-nums text-xs">
+                                            {new Date(job.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
                                         </td>
                                     </tr>
                                 ))

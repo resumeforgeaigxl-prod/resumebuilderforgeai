@@ -109,11 +109,10 @@ export default function JobsMonitorClient() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="border-b border-white/5 bg-white/[0.02]">
-                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Job Title</th>
-                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Company</th>
-                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Location</th>
-                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Source</th>
-                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Ingested</th>
+                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Job Details</th>
+                                <th className="hidden md:table-cell px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Location</th>
+                                <th className="hidden lg:table-cell px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Source</th>
+                                <th className="hidden sm:table-cell px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500">Ingested</th>
                                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-500 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -128,23 +127,25 @@ export default function JobsMonitorClient() {
                                 jobs.map((job) => (
                                     <tr key={job.id} className="hover:bg-white/[0.02] transition-colors group">
                                         <td className="px-6 py-4">
-                                            <div className="text-sm font-bold text-white truncate max-w-xs">{job.title}</div>
-                                            <div className="text-[10px] text-slate-500 uppercase mt-0.5">{job.job_type}</div>
+                                            <div className="text-sm font-bold text-white truncate max-w-[140px] xs:max-w-xs">{job.title}</div>
+                                            <div className="text-[10px] text-indigo-400 font-bold mb-1">{job.company}</div>
+                                            <div className="md:hidden text-[9px] text-slate-500 uppercase flex items-center gap-1">
+                                                <MapPin className="w-2.5 h-2.5" /> {job.location}
+                                            </div>
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-slate-400">{job.company}</td>
-                                        <td className="px-6 py-4">
+                                        <td className="hidden md:table-cell px-6 py-4">
                                             <div className="text-sm text-slate-400 flex items-center gap-1.5">
                                                 <MapPin className="w-3 h-3 text-indigo-400/50" />
                                                 {job.location}
                                             </div>
                                             <div className="text-[10px] text-slate-600 uppercase font-black">{job.country}</div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="hidden lg:table-cell px-6 py-4">
                                             <span className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/20 rounded text-[10px] font-black text-indigo-400 uppercase tracking-tighter">
                                                 {job.source}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-xs text-slate-500">
+                                        <td className="hidden sm:table-cell px-6 py-4 text-xs text-slate-500">
                                             {new Date(job.created_at).toLocaleDateString()}
                                         </td>
                                         <td className="px-6 py-4 text-right">

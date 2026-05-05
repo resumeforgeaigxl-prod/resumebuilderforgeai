@@ -28,7 +28,7 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
   const homeHref = locale === DEFAULT_LOCALE ? "/" : `/${locale}`;
 
   return (
-    <section className="px-6 pb-24 pt-6 sm:pt-8">
+    <section className="px-4 md:px-6 pb-12 md:pb-24 pt-4 md:pt-8 overflow-hidden">
       <div className="mx-auto max-w-7xl">
         <motion.header
           {...fadeInScale()}
@@ -76,7 +76,7 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
 
             <motion.h1
               {...fadeInUp(0.12)}
-              className="mt-8 max-w-4xl text-5xl font-semibold leading-[0.94] tracking-[-0.05em] text-white sm:text-6xl lg:text-7xl"
+              className="mt-6 md:mt-8 max-w-4xl text-4xl font-bold leading-[1.1] tracking-[-0.05em] text-white sm:text-6xl lg:text-7xl"
             >
               Forge Your Entire Tech Career in One Platform
             </motion.h1>
@@ -175,7 +175,7 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
 
           <motion.div
             {...fadeInScale(0.16)}
-            className="relative mx-auto flex h-[420px] w-full max-w-[560px] items-center justify-center sm:h-[520px]"
+            className="relative mx-auto flex h-[380px] w-full max-w-[560px] items-center justify-center sm:h-[520px] scale-[0.75] xs:scale-[0.85] sm:scale-100 origin-center"
           >
             <div className="absolute inset-[10%] rounded-full bg-[#00D4A0]/[0.08] blur-[90px]" />
             <div className="absolute inset-[18%] rounded-full bg-[#7C5CFC]/[0.06] blur-[110px]" />
@@ -218,15 +218,15 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
             <motion.div
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="relative z-10 flex h-40 w-40 flex-col items-center justify-center rounded-[36px] border border-white/[0.12] bg-[linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.04))] px-6 text-center shadow-[0_32px_120px_-44px_rgba(0,212,160,0.4)] backdrop-blur-2xl sm:h-48 sm:w-48"
+              className="relative z-10 flex h-32 w-32 md:h-48 md:w-48 flex-col items-center justify-center rounded-[28px] md:rounded-[36px] border border-white/[0.12] bg-[linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.04))] px-4 md:px-6 text-center shadow-[0_32px_120px_-44px_rgba(0,212,160,0.4)] backdrop-blur-2xl"
             >
-              <span className="text-xs font-semibold uppercase tracking-[0.32em] text-[#00D4A0]/70">
+              <span className="text-[9px] md:text-xs font-semibold uppercase tracking-[0.32em] text-[#00D4A0]/70">
                 Central Engine
               </span>
-              <div className="mt-4 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+              <div className="mt-2 md:mt-4 text-xl font-bold tracking-tight text-white md:text-3xl">
                 ResumeForgeAI
               </div>
-              <div className="mt-3 text-sm leading-6 text-slate-300">
+              <div className="hidden md:block mt-3 text-sm leading-6 text-slate-300">
                 One profile. Shared intelligence. Faster career momentum.
               </div>
             </motion.div>
@@ -262,12 +262,12 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
                   }}
                 >
                   <div
-                    className={`glass-card w-[112px] rounded-[24px] border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.11),rgba(255,255,255,0.05))] px-4 py-4 text-center shadow-[0_18px_40px_-25px_rgba(8,15,30,0.95)] sm:w-[126px] ${node.accent}`}
+                    className={`glass-card w-[88px] md:w-[126px] rounded-[20px] md:rounded-[24px] border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.11),rgba(255,255,255,0.05))] px-2 md:px-4 py-3 md:py-4 text-center shadow-[0_18px_40px_-25px_rgba(8,15,30,0.95)] ${node.accent}`}
                   >
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-white">
-                      <Icon className="h-5 w-5" />
+                    <div className="mx-auto flex h-9 w-9 md:h-12 md:w-12 items-center justify-center rounded-xl md:rounded-2xl border border-white/10 bg-white/[0.06] text-white">
+                      <Icon className="h-4 w-4 md:h-5 md:w-5" />
                     </div>
-                    <div className="mt-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-200">
+                    <div className="mt-2 md:mt-3 text-[9px] md:text-xs font-semibold uppercase tracking-[0.22em] text-slate-200">
                       {node.label}
                     </div>
                   </div>

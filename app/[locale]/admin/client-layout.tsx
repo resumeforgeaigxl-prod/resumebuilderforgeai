@@ -77,10 +77,10 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
             <aside
                 className={`
                     fixed inset-y-0 left-0 z-[70] 
-                    bg-[#0a0a0f] border-r border-white/5 
-                    flex flex-col transition-all duration-300 ease-in-out
-                    w-64 ${isCollapsed ? 'md:w-20' : 'md:w-64'}
-                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+                    bg-[#050508]/95 backdrop-blur-3xl border-r border-white/5 
+                    flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
+                    w-72 ${isCollapsed ? 'md:w-20' : 'md:w-72'}
+                    ${isSidebarOpen ? 'translate-x-0 shadow-[20px_0_100px_rgba(0,0,0,1)]' : '-translate-x-full md:translate-x-0'}
                 `}
             >
                 {/* Sidebar Header */}
@@ -120,19 +120,19 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                                 onClick={() => setIsSidebarOpen(false)}
                                 title={isCollapsed ? item.label : ''}
                                 className={`
-                                    flex items-center py-2.5 rounded-xl text-sm transition-all duration-200 group relative
+                                    flex items-center py-3 rounded-2xl text-sm transition-all duration-300 group relative
                                     ${isActive
-                                        ? 'bg-indigo-600/10 text-white font-semibold border border-indigo-500/20'
+                                        ? 'bg-indigo-500/10 text-white font-bold border border-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.1)]'
                                         : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'}
-                                    px-3.5 ${isCollapsed ? 'md:px-0 md:justify-center gap-3 md:gap-0' : 'gap-3'}
+                                    px-4 ${isCollapsed ? 'md:px-0 md:justify-center gap-3 md:gap-0' : 'gap-3'}
                                 `}
                             >
-                                <item.icon className={`w-5 h-5 shrink-0 transition-colors ${isActive ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300'}`} />
-                                <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isCollapsed ? 'md:opacity-0 md:w-0' : 'opacity-100 w-auto'}`}>
+                                <item.icon className={`w-5 h-5 shrink-0 transition-colors duration-300 ${isActive ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300'}`} />
+                                <span className={`transition-all duration-500 whitespace-nowrap overflow-hidden ${isCollapsed ? 'md:opacity-0 md:w-0' : 'opacity-100 w-auto'}`}>
                                     {item.label}
                                 </span>
                                 {isActive && (
-                                    <div className={`transition-all duration-300 shrink-0 ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)] ${isCollapsed ? 'md:hidden' : ''}`} />
+                                    <div className={`transition-all duration-500 shrink-0 ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.8)] ${isCollapsed ? 'md:hidden' : ''}`} />
                                 )}
                             </Link>
                         );
@@ -155,9 +155,9 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
             </aside>
 
             {/* Main Content Wrapper */}
-            <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${isCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
+            <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isCollapsed ? 'md:ml-20' : 'md:ml-72'}`}>
                 {/* Top Navigation */}
-                <header className="sticky top-0 z-50 flex items-center justify-between h-16 px-4 py-2 sm:px-6 bg-[#050508]/80 backdrop-blur-md border-b border-white/5 transition-all duration-300">
+                <header className="sticky top-0 z-50 flex items-center justify-between h-20 px-4 py-2 sm:px-8 bg-[#050508]/60 backdrop-blur-2xl border-b border-white/5 transition-all duration-300">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => {
@@ -191,8 +191,8 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                     </div>
                 </header>
 
-                <main className="flex-1 p-4 md:p-8 max-w-[1600px] w-full mx-auto">
-                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <main className="flex-1 p-5 md:p-10 max-w-[1600px] w-full mx-auto">
+                    <div className="animate-premium-in">
                         {children}
                     </div>
                 </main>
