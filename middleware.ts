@@ -223,44 +223,22 @@ export async function middleware(request: NextRequest) {
         return response;
     }
 
-    // ─── Docs subdomain: rewrite to /[locale]/docs ────────────────────────────
+    // ─── Docs subdomain: Redirect to main domain docs ──────────────────────────
     if (isDocsSubdomain) {
-        const localePrefix = `${currentLocale}-${currentRegion}`;
-        let targetPath = pathname;
-        
-        const pathParts = pathname.split('/').filter(Boolean);
-        const firstSegment = pathParts[0] ?? '';
-        const localeMatch = firstSegment.match(/^([a-z]{2})-([a-z]{2})$/);
-        const hasLocaleInPath = localeMatch && SUPPORTED_LOCALES.includes(localeMatch[1]) && VALID_REGIONS.has(localeMatch[2]);
-        
-        if (hasLocaleInPath) {
-            targetPath = '/' + pathParts.slice(1).join('/');
+        let subRoute = pathname === '/' ? '/docs' : pathname;
+        if (!subRoute.startsWith('/docs')) {
+            subRoute = `/docs${subRoute}`;
         }
-
-        const nextUrl = request.nextUrl.clone();
-        const finalPath = `/${localePrefix}/docs${targetPath === '/' ? '' : targetPath}`;
-        nextUrl.pathname = finalPath.replace(/\/+/g, '/');
-        return NextResponse.rewrite(nextUrl);
+        return NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${currentLocale}-${currentRegion}${subRoute}`, request.url));
     }
 
-    // ─── Waitlist subdomain: rewrite to /[locale]/waitlist ─────────────────────
+    // ─── Waitlist subdomain: Redirect to main domain waitlist ──────────────────
     if (isWaitlistSubdomain) {
-        const localePrefix = `${currentLocale}-${currentRegion}`;
-        let targetPath = pathname;
-
-        const pathParts = pathname.split('/').filter(Boolean);
-        const firstSegment = pathParts[0] ?? '';
-        const localeMatch = firstSegment.match(/^([a-z]{2})-([a-z]{2})$/);
-        const hasLocaleInPath = localeMatch && SUPPORTED_LOCALES.includes(localeMatch[1]) && VALID_REGIONS.has(localeMatch[2]);
-
-        if (hasLocaleInPath) {
-            targetPath = '/' + pathParts.slice(1).join('/');
+        let subRoute = pathname === '/' ? '/waitlist' : pathname;
+        if (!subRoute.startsWith('/waitlist')) {
+            subRoute = `/waitlist${subRoute}`;
         }
-
-        const nextUrl = request.nextUrl.clone();
-        const finalPath = `/${localePrefix}/waitlist${targetPath === '/' ? '' : targetPath}`;
-        nextUrl.pathname = finalPath.replace(/\/+/g, '/');
-        return NextResponse.rewrite(nextUrl);
+        return NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${currentLocale}-${currentRegion}${subRoute}`, request.url));
     }
 
     // ─── JWT session resolution ───────────────────────────────────────────────
