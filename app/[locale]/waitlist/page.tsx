@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Bot, Sparkles, CheckCircle2, Rocket, Users, ShieldCheck, Zap } from 'lucide-react';
+import { Bot, CheckCircle2, Rocket, Users, ShieldCheck, Zap, Briefcase } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import Image from 'next/image';
 
 export default function WaitlistPage({ params }: { params: { locale: string } }) {
     const [formData, setFormData] = useState({
@@ -118,9 +119,16 @@ export default function WaitlistPage({ params }: { params: { locale: string } })
                 </div>
 
                 {/* Right Side: Form */}
-                <div className="glass-card p-10 md:p-12 relative">
-                    <div className="absolute -top-6 -right-6 w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-600/30">
-                        <Sparkles className="w-6 h-6 text-white" />
+                <div className="glass-card p-10 md:p-12 relative overflow-hidden group">
+                    {/* Decorative Illustration */}
+                    <div className="absolute -top-12 -right-12 w-48 h-48 opacity-20 group-hover:opacity-40 transition-all duration-500 pointer-events-none rotate-12 group-hover:rotate-0">
+                        <Image 
+                            src="/images/waitlist-hero.png" 
+                            width={200} 
+                            height={200} 
+                            className="w-full h-full object-cover rounded-3xl shadow-2xl shadow-indigo-500/50" 
+                            alt="AI Resume Illustration" 
+                        />
                     </div>
 
                     <div className="mb-8">

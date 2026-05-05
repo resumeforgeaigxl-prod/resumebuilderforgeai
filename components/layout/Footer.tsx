@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useTranslation } from '@/lib/i18n/I18nProvider';
 import { usePathname } from 'next/navigation';
-import { Sparkles, Github, Twitter, Linkedin, Shield, FileLock } from 'lucide-react';
+import { Briefcase, Github, Twitter, Linkedin, Shield, FileLock } from 'lucide-react';
 
 const INTERNAL_APP_ROOTS = new Set([
     'dashboard',
@@ -75,7 +75,7 @@ export default function Footer() {
                     <div className="lg:col-span-2 space-y-6">
                         <div className="flex items-center gap-2">
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                                <Sparkles className="w-6 h-6 text-white" />
+                                <Briefcase className="w-6 h-6 text-white" />
                             </div>
                             <span className="text-2xl font-black tracking-tight text-white uppercase">ResumeForge<span className="text-indigo-500">AI</span></span>
                         </div>

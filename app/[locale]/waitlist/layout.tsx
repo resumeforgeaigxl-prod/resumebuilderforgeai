@@ -16,12 +16,11 @@ export default function WaitlistLayout({ children }: { children: ReactNode }) {
 
             {children}
 
-            {/* Global CSS to hide the main navigation header if it exists */}
             <style dangerouslySetInnerHTML={{ __html: `
-                header, nav { display: none !important; }
+                header, nav, .fixed.top-0 { display: none !important; }
                 .waitlist-container header, .waitlist-container nav { display: flex !important; }
                 /* Ensure our specific minimal header stays visible */
-                .z-50 { display: flex !important; }
+                .waitlist-container .z-50 { display: flex !important; }
             `}} />
         </div>
     );
