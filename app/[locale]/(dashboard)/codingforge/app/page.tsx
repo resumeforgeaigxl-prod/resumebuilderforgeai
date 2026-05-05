@@ -12,13 +12,10 @@ import {
     ChevronRight,
     Trophy,
     BookOpen,
-    Filter,
-    Zap,
-    ArrowRight
+    Filter
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 

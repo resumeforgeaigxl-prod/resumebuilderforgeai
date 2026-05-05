@@ -47,8 +47,9 @@ export async function GET(
         // console.log('[API] Response data:', JSON.stringify(resume).slice(0, 200) + '...');
 
         return NextResponse.json({ success: true, data: resume });
-    } catch (err: any) {
-        console.error('[API] Fatal error in resume fetch:', err);
-        return NextResponse.json({ error: 'Internal server error', details: err.message }, { status: 500 });
+    } catch (err: unknown) {
+        const error = err as Error;
+        console.error('[API] Fatal error in resume fetch:', error);
+        return NextResponse.json({ error: 'Internal server error', details: error.message }, { status: 500 });
     }
 }

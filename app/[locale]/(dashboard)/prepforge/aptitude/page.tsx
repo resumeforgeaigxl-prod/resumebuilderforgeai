@@ -5,10 +5,10 @@ export const dynamic = 'force-dynamic';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { 
-    ChevronRight, 
-    Divide, 
-    ArrowLeft, 
+import {
+    ChevronRight,
+    Divide,
+    ArrowLeft,
     Construction,
     Loader2,
     Calculator,
@@ -46,7 +46,7 @@ export default function AptitudeForge() {
         <div className="space-y-10 max-w-5xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E2A42] pb-8">
                 <div className="space-y-3">
-                    <Link 
+                    <Link
                         href={`/${locale}/prepforge/app`}
                         className="flex items-center gap-2 text-xs font-bold text-[#4A5568] hover:text-[#00D4A0] transition-colors mb-4"
                     >
@@ -61,7 +61,7 @@ export default function AptitudeForge() {
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
-                     <Badge variant="outline" className="px-4 py-1.5 rounded-xl border-[#00D4A0]/20 bg-[#00D4A0]/5 text-[#00D4A0] font-bold text-[10px]">
+                    <Badge variant="outline" className="px-4 py-1.5 rounded-xl border-[#00D4A0]/20 bg-[#00D4A0]/5 text-[#00D4A0] font-bold text-[10px]">
                         {questions.length} PATTERNS
                     </Badge>
                 </div>
@@ -108,10 +108,10 @@ export default function AptitudeForge() {
                         <Construction className="w-12 h-12" />
                     </div>
                     <div>
-                    <h2 className="text-xl font-bold text-white mb-2">No Patterns Yet</h2>
-                    <p className="text-sm text-[#7A8BA8] max-w-md mx-auto">
-                        Generate some aptitude patterns in the <Link href={`/${locale}/prepforge/app`} className="text-[#00D4A0] underline underline-offset-4">Logic Engine</Link> to start filling your track.
-                    </p>
+                        <h2 className="text-xl font-bold text-white mb-2">No Patterns Yet</h2>
+                        <p className="text-sm text-[#7A8BA8] max-w-md mx-auto">
+                            Generate some aptitude patterns in the <Link href={`/${locale}/prepforge/app`} className="text-[#00D4A0] underline underline-offset-4">Logic Engine</Link> to start filling your track.
+                        </p>
                     </div>
                 </div>
             )}
