@@ -121,9 +121,13 @@ export async function middleware(request: NextRequest) {
         }
 
         if (isWaitlistSubdomain) {
-            let targetPath = pathname === '/' ? '/waitlist' : pathname;
-            if (!targetPath.startsWith('/waitlist')) targetPath = `/waitlist${targetPath}`;
-            return NextResponse.redirect(new URL(`https://${MAIN_DOMAIN}/${localePrefix}${targetPath}`, request.url));
+            // Prevent infinite loops: if path already has locale + /waitlist, pass through
+            if (pathname.startsWith(`/${localePrefix}/waitlist`)) {
+                return NextResponse.next();
+            }
+            const targetPath = pathname === '/' ? '/waitlist' : pathname;
+            const finalPath = targetPath.startsWith('/waitlist') ? targetPath : `/waitlist${targetPath}`;
+            return NextResponse.rewrite(new URL(`/${localePrefix}${finalPath}`, request.url));
         }
 
         if (isDocsSubdomain) {
