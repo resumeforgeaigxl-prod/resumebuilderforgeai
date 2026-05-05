@@ -1,3 +1,5 @@
+"use client";
+
 import dynamic from "next/dynamic";
 import Hero from "@/components/Hero";
 const Problem = dynamic(() => import("@/components/Problem"), { ssr: true });
