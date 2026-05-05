@@ -180,7 +180,7 @@ export function ForgeAssistant({ locale }: { locale: string }) {
                                 <div>
                                     <h3 className="font-bold text-white leading-tight">ResumeForgeAI Assistant</h3>
                                     <div className="flex items-center gap-1.5 mt-0.5">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                                         <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Live: Career Copilot</span>
                                     </div>
                                 </div>
@@ -356,11 +356,7 @@ export function ForgeAssistant({ locale }: { locale: string }) {
             >
                 {isOpen ? <X className="w-6 h-6" /> : <MessageSquare className="w-7 h-7" />}
                 {!isOpen && (
-                    <motion.div 
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-[#070710] rounded-full"
-                    />
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-[#070710] rounded-full" />
                 )}
             </motion.button>
         </div>

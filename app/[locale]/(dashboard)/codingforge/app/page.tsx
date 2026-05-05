@@ -83,118 +83,99 @@ export default function CodingForgeDashboard() {
     }, []);
 
     return (
-        <div className="space-y-12 animate-fade-in">
-            {/* Hero / Welcome */}
-            <div className="relative p-12 lg:p-16 rounded-[3rem] bg-gradient-to-br from-indigo-500/10 via-transparent to-purple-500/5 border border-white/5 overflow-hidden group shadow-2xl">
-                {/* Visual accents */}
-                <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/10 blur-[120px] rounded-full group-hover:bg-indigo-500/20 transition-all duration-1000" />
-                <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-500/10 blur-[120px] rounded-full group-hover:bg-purple-500/20 transition-all duration-1000" />
+        <div className="space-y-12 max-w-5xl mx-auto pb-24">
+            {/* Standardized Header */}
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E2A42] pb-8 mb-12">
+                <div>
+                    <div className="flex items-center gap-2 text-[#00D4A0] font-bold tracking-widest text-[10px] uppercase mb-4">
+                        <Code2 className="w-3.5 h-3.5" /> Intelligence Core
+                    </div>
+                    <h1 className="text-4xl font-bold tracking-tighter text-white uppercase">CodingForge</h1>
+                    <p className="text-slate-400 mt-2 text-lg">Master algorithms and system patterns through our multi-language IDE ecosystem.</p>
+                </div>
 
-                <div className="relative flex flex-col lg:flex-row items-center justify-between gap-12">
-                    <div className="max-w-2xl text-center lg:text-left">
-                        <Badge variant="outline" className="px-4 py-1.5 rounded-full border-indigo-500/20 bg-indigo-500/5 text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mb-8">
-                            <Zap className="w-3.5 h-3.5 mr-2" />
-                            Active Signal: Interactive Learning
-                        </Badge>
-                        <h1 className="text-5xl md:text-7xl font-black text-white mb-8 tracking-tighter leading-[1.05]">
-                            Evolve Your <br />
-                            <span className="text-gradient">Logic Protocol.</span>
-                        </h1>
-                        <p className="text-lg md:text-xl text-slate-400 mb-10 leading-relaxed font-medium">
-                            Forge specialized interview skills through our multi-language IDE ecosystem and AI-powered architectural walkthroughs.
-                        </p>
-                        <div className="flex flex-wrap justify-center lg:justify-start gap-5">
-                            <Button asChild size="lg" variant="premium" className="px-10 h-14 rounded-2xl shadow-xl shadow-indigo-500/20 group">
-                                <Link href={`/${locale}/codingforge/questions`}>
-                                    Initialize All Problems <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
-                                </Link>
-                            </Button>
-                            <Button variant="outline" size="lg" className="px-10 h-14 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 text-white font-black">
-                                Career Roadmap
-                            </Button>
+                <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10">
+                        <BookOpen className="w-5 h-5 text-[#00D4A0]" />
+                        <div>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Repository</p>
+                            <p className="text-xs font-bold text-white uppercase tracking-tight">{stats.total}+ Problems</p>
                         </div>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-5 w-full lg:w-auto">
-                        {[
-                            { label: 'Ecosystem Size', value: stats.total, icon: <BookOpen className="w-5 h-5 text-indigo-400" /> },
-                            { label: 'Protocol Solved', value: stats.completed, icon: <Trophy className="w-5 h-5 text-amber-400" /> },
-                        ].map((item, i) => (
-                            <Card glass key={i} className="p-8 min-w-[160px] flex flex-col items-center text-center border-white/5 bg-white/[0.01]">
-                                <div className="mb-5 p-3 rounded-xl bg-white/5">{item.icon}</div>
-                                <div className="text-3xl font-black text-white tracking-tighter">{item.value}+</div>
-                                <div className="text-[10px] text-slate-500 uppercase tracking-widest font-black mt-2">{item.label}</div>
-                            </Card>
-                        ))}
+                    <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10">
+                        <Trophy className="w-5 h-5 text-[#F5A623]" />
+                        <div>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Performance</p>
+                            <p className="text-xs font-bold text-white uppercase tracking-tight">{stats.completed} Solved</p>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </header>
+
 
             {/* Sections */}
-            <div className="space-y-8">
-                <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                    <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-3 italic">
-                        <Filter className="w-6 h-6 text-indigo-500" />
-                        Learning Tracks_
+            <div className="space-y-6">
+                <div className="flex items-center justify-between border-b border-[#1E2A42] pb-4">
+                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                        <Filter className="w-5 h-5 text-[#7C5CFC]" />
+                        Learning Tracks
                     </h2>
-                    <Badge variant="secondary" className="bg-white/5 text-slate-500 px-3 py-1 font-black">4 PRIMARY CHANNELS</Badge>
+                    <Badge variant="secondary" className="bg-[#0D1220] text-[#4A5568] px-3 py-1 font-semibold text-[10px]">4 CHANNELS</Badge>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {SECTIONS.map((section) => (
                         <Link
                             key={section.id}
                             href={`/${locale}/codingforge/questions?type=${section.type}`}
                         >
-                            <Card glass className="p-8 group hover:border-white/20 transition-all flex flex-col h-full bg-white/[0.01] hover:bg-white/[0.03]">
-                                <div className={`mb-8 p-4 rounded-2xl bg-white/5 w-fit group-hover:scale-110 transition-transform duration-500 shadow-lg text-indigo-400`}>
+                            <div className="p-6 rounded-xl border border-[#1E2A42] bg-[#0D1220]/60 hover:border-[#00D4A0]/20 transition-all group h-full flex flex-col">
+                                <div className="mb-4 p-3 rounded-xl bg-white/5 w-fit text-[#00D4A0] group-hover:scale-105 transition-transform">
                                     {section.icon}
                                 </div>
-
-                                <h3 className="text-xl font-black text-white mb-3 tracking-tighter uppercase italic">
+                                <h3 className="text-base font-bold text-white mb-2">
                                     {section.title}
                                 </h3>
-                                <p className="text-sm text-slate-500 leading-relaxed mb-8 font-medium">
+                                <p className="text-sm text-[#7A8BA8] leading-relaxed mb-6">
                                     {section.description}
                                 </p>
-
-                                <div className="mt-auto flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 group-hover:gap-4 transition-all">
-                                    Enter Channel <ChevronRight className="w-4 h-4" />
+                                <div className="mt-auto flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[#00D4A0] group-hover:gap-3 transition-all">
+                                    Enter Channel <ChevronRight className="w-3.5 h-3.5" />
                                 </div>
-                            </Card>
+                            </div>
                         </Link>
                     ))}
                 </div>
             </div>
 
             {/* Company Hub */}
-            <section className="relative p-12 rounded-[3rem] bg-indigo-500/[0.02] border border-white/5 overflow-hidden">
-                <div className="absolute top-0 right-0 p-12 opacity-5">
-                    <Building2 className="w-32 h-32" />
+            <section className="p-8 rounded-2xl bg-[#0D1220]/60 border border-[#1E2A42]">
+                <div className="absolute top-0 right-0 p-8 opacity-5">
+                    <Building2 className="w-20 h-20" />
                 </div>
-                
-                <div className="flex flex-col lg:flex-row items-center justify-between gap-10 mb-12">
+
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h2 className="text-3xl font-black text-white mb-2 tracking-tight">Organization Signal Hub</h2>
-                        <p className="text-slate-500 font-medium">Focus your preparation on specific corporate logic patterns.</p>
+                        <h2 className="text-xl font-bold text-white mb-1">Company Preparation Hub</h2>
+                        <p className="text-sm text-[#7A8BA8]">Focus your preparation on specific corporate patterns.</p>
                     </div>
-                    <Button asChild variant="ghost" className="text-indigo-400 hover:text-indigo-300 font-black uppercase tracking-widest text-[10px]">
-                        <Link href={`/${locale}/codingforge/questions`}>View All Targets</Link>
+                    <Button asChild variant="ghost" className="text-[#00D4A0] hover:text-[#00D4A0]/80 font-bold text-xs">
+                        <Link href={`/${locale}/codingforge/questions`}>View All</Link>
                     </Button>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {['Google', 'Meta', 'Amazon', 'Microsoft', 'Netflix', 'Uber', 'Airbnb', 'NVIDIA'].map((company) => (
                         <Link
                             key={company}
                             href={`/${locale}/codingforge/questions?company=${company}`}
                         >
-                            <Card glass className="p-6 border-white/5 hover:border-indigo-500/30 bg-white/[0.02] hover:bg-white/[0.05] transition-all flex items-center gap-4 group">
-                                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-500 group-hover:text-indigo-400 group-hover:scale-110 transition-all">
-                                    <Building2 className="w-5 h-5" />
+                            <div className="p-4 rounded-xl border border-[#1E2A42] bg-[#080B16] hover:border-[#00D4A0]/20 transition-all flex items-center gap-3 group">
+                                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[#4A5568] group-hover:text-[#00D4A0] transition-colors">
+                                    <Building2 className="w-4 h-4" />
                                 </div>
-                                <span className="text-xs font-black text-slate-300 group-hover:text-white uppercase tracking-widest">{company}</span>
-                            </Card>
+                                <span className="text-xs font-bold text-[#7A8BA8] group-hover:text-white transition-colors">{company}</span>
+                            </div>
                         </Link>
                     ))}
                 </div>

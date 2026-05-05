@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const { data: order } = await (supabase as any)
                 .from('orders')
-                .select('id, user_id, plan_name, status, amount, country_code')
+                .select('id, user_id, plan_name, status, amount, country_code, coupon_code')
                 .eq('razorpay_order_id', razorpayOrderId)
                 .single();
 
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
             }
 
             // Activate plan
-            await activateUserPlan(order.user_id, order.plan_name as PlanName, razorpayPaymentId);
+            const subscriptionId = await activateUserPlan(order.user_id, order.plan_name as PlanName, razorpayPaymentId, order.coupon_code);
 
             // ── GENERATE INVOICE & SEND EMAIL (Fallback for missing verify flow) ──
             try {
@@ -98,12 +98,14 @@ export async function POST(req: NextRequest) {
                 // Create invoice record
                 const invoice = await createInvoice({
                     userId: order.user_id,
+                    subscriptionId,
                     plan: order.plan_name.toUpperCase(),
                     amount: order.amount,
                     currency,
                     paymentMethod: 'razorpay',
                     razorpayOrderId: razorpayOrderId,
                     razorpayPaymentId: razorpayPaymentId,
+                    couponCode: order.coupon_code,
                     status: 'paid',
                     billing: billing ? {
                         name: billing.full_name,

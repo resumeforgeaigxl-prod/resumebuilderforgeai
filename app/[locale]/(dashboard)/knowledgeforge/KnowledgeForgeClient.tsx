@@ -5,6 +5,7 @@ import { BookOpen, MessageSquare, Code, Download, ChevronRight, GraduationCap, S
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 import { useToast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import ReactMarkdown from 'react-markdown';
@@ -79,18 +80,27 @@ export default function KnowledgeForgeClient({ locale }: { locale: string }) {
     <div className="max-w-7xl mx-auto space-y-8 pb-20">
       {!selectedTopic ? (
         <>
-          <header>
-            <div className="flex items-center gap-2 text-indigo-400 font-bold tracking-widest text-[10px] uppercase mb-4">
-              <GraduationCap className="w-3.5 h-3.5" /> Encyclopedia
+          {/* Standardized Header */}
+          <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E2A42] pb-8 mb-12">
+            <div>
+              <div className="flex items-center gap-2 text-[#00D4A0] font-bold tracking-widest text-[10px] uppercase mb-4">
+                <GraduationCap className="w-3.5 h-3.5" /> Intelligence Core
+              </div>
+              <h1 className="text-4xl font-bold tracking-tighter text-white uppercase">KnowledgeForge</h1>
+              <p className="text-slate-400 mt-2 text-lg">Master technical concepts with structured, AI-curated knowledge and architectural patterns.</p>
             </div>
-            <h1 className="text-4xl font-bold tracking-tighter text-white">KnowledgeForge</h1>
-            <p className="text-slate-400 mt-2 text-lg">Master technical concepts with structured, AI-curated knowledge.</p>
+
+            <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0D1220] border border-[#1E2A42]">
+              <div className="text-[10px] text-[#4A5568] uppercase tracking-wider font-semibold">ENCYCLOPEDIA_SIGNAL</div>
+              <Badge variant="outline" className="border-[#00D4A0]/20 bg-[#00D4A0]/5 text-[#00D4A0] text-[9px] font-bold uppercase">SECURE</Badge>
+            </div>
           </header>
+
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {topics.map((topic: Topic) => (
-              <Card 
-                key={topic.id} 
+              <Card
+                key={topic.id}
                 className="p-6 bg-white/[0.02] border-white/5 hover:border-indigo-500/50 hover:bg-white/[0.04] transition-all cursor-pointer group"
                 onClick={() => fetchLesson(topic.id)}
               >
@@ -123,15 +133,15 @@ export default function KnowledgeForgeClient({ locale }: { locale: string }) {
                     </Button>
                   </div>
                   <div className="text-slate-300 leading-relaxed markdown-content prose prose-invert max-w-none">
-                    <ReactMarkdown 
+                    <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       components={{
                         code({ className, children, ...props }) {
                           const match = /language-(\w+)/.exec(className || '');
-                          
+
                           // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
                           const { node: _node, ref: _ref, ...cleanProps } = props as any;
-                          
+
                           return match ? (
                             <SyntaxHighlighter
                               // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -151,7 +161,7 @@ export default function KnowledgeForgeClient({ locale }: { locale: string }) {
                         },
                       }}
                     >
-                      {lesson.content.trim().startsWith('[') || lesson.content.trim().startsWith('{') 
+                      {lesson.content.trim().startsWith('[') || lesson.content.trim().startsWith('{')
                         ? "Educational content is still being processed. Please refresh in a moment."
                         : lesson.content}
                     </ReactMarkdown>
@@ -216,10 +226,10 @@ export default function KnowledgeForgeClient({ locale }: { locale: string }) {
                 </>
               ) : (
                 <>
-                   <div className="text-slate-500 italic">No content found for this topic.</div>
-                   <Button variant="outline" onClick={() => setSelectedTopic(null)} className="border-white/5 text-slate-400">
-                     Explore other topics
-                   </Button>
+                  <div className="text-slate-500 italic">No content found for this topic.</div>
+                  <Button variant="outline" onClick={() => setSelectedTopic(null)} className="border-white/5 text-slate-400">
+                    Explore other topics
+                  </Button>
                 </>
               )}
             </div>

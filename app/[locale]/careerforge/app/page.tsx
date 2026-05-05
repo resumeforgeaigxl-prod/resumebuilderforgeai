@@ -30,19 +30,22 @@ export default function CareerForgeHub({ params }: { params: { locale: string } 
 
     return (
         <div className="max-w-6xl mx-auto space-y-16 py-12 px-6 pt-32 pb-32">
-            {/* Hub Hero */}
-            <div className="text-center space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-2">
-                    <ShieldCheck className="w-4 h-4 text-indigo-400" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Career Acceleration Hub</span>
+            {/* Standardized Header */}
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E2A42] pb-8 mb-12">
+                <div>
+                    <div className="flex items-center gap-2 text-[#00D4A0] font-bold tracking-widest text-[10px] uppercase mb-4">
+                        <ShieldCheck className="w-3.5 h-3.5" /> Intelligence Core
+                    </div>
+                    <h1 className="text-4xl font-bold tracking-tighter text-white uppercase">CareerForge</h1>
+                    <p className="text-slate-400 mt-2 text-lg">Neural career acceleration hub featuring structured roadmaps and deep learning libraries.</p>
                 </div>
-                <h1 className="text-7xl font-black text-white leading-none uppercase tracking-tighter">
-                    Career<span className="text-indigo-500">Forge</span>
-                </h1>
-                <p className="text-xl text-slate-500 max-w-2xl mx-auto font-medium leading-relaxed">
-                    Two focused systems: structured <span className="text-white">Career Roadmaps</span> and a deep <span className="text-white">Learning Library</span> for programming mastery.
-                </p>
-            </div>
+
+                <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0D1220] border border-[#1E2A42]">
+                    <div className="text-[10px] text-[#4A5568] uppercase tracking-wider font-semibold">SIGNAL_READY</div>
+                    <div className="w-2 h-2 rounded-full bg-[#00D4A0] animate-pulse" />
+                </div>
+            </header>
+
 
             {/* Hub Action Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">

@@ -309,7 +309,7 @@ export default function AdminSubscriptionsPage() {
                                                         <FileText className="w-3 h-3" />
                                                         {s.invoice_number ?? 'View'}
                                                     </button>
-                                                ) : s.payment_method !== '—' && s.payment_method !== 'admin_override' ? (
+                                                ) : s.payment_method !== '—' ? (
                                                     <button
                                                         onClick={() => fixSubInvoice(s.id)}
                                                         disabled={fixing === s.id}

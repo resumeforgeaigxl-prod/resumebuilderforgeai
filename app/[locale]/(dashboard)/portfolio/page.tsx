@@ -40,7 +40,7 @@ function PortfolioContent() {
         try {
             const res = await fetch('/api/portfolio');
             const data = await res.json();
-            
+
             if (data.portfolio) {
                 setPortfolio(data.portfolio);
                 setLoading(false);
@@ -138,7 +138,7 @@ function PortfolioContent() {
                                         {portfolio.is_public ? 'Kill Signal' : 'Go Live_'}
                                     </button>
                                 </div>
-                                
+
                                 {portfolio.is_public && (
                                     <div className="flex items-center gap-4 p-5 bg-black/60 border border-white/5 rounded-3xl relative group/link hover:border-indigo-500/30 transition-all duration-500">
                                         <Globe className="w-6 h-6 text-indigo-500 shrink-0" />

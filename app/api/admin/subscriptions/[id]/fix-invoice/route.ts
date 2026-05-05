@@ -26,24 +26,50 @@ export async function POST(
     const { id: subId } = params;
 
     try {
-        // 1. Fetch Subscription details
+        // 1. Resolve User and Subscription details
+        let actualUserId = subId;
+        if (subId.startsWith('virtual-')) {
+            actualUserId = subId.replace('virtual-', '');
+        }
+
         let { data: sub } = await admin
             .from('subscriptions')
             .select('*')
             .eq('id', subId)
             .single();
 
-        // Fallback: search by user_id if ID lookup fails
+        // Fallback: search by user_id (or actualUserId) if ID lookup fails
         if (!sub) {
             const { data: fallback } = await admin
                 .from('subscriptions')
                 .select('*')
-                .eq('user_id', subId)
+                .eq('user_id', actualUserId)
                 .single();
             sub = fallback;
         }
 
-        if (!sub) return NextResponse.json({ error: 'Subscription not found' }, { status: 404 });
+        // If still no subscription, check if it's an Admin Override case
+        if (!sub) {
+            const { data: userOverride } = await admin
+                .from('users')
+                .select('id, email, full_name, is_free_override, free_unlimited, plan_type')
+                .eq('id', actualUserId)
+                .single();
+
+            if (userOverride && (userOverride.is_free_override || userOverride.free_unlimited)) {
+                // Create a virtual subscription object
+                sub = {
+                    id: `virtual-${userOverride.id}`,
+                    user_id: userOverride.id,
+                    plan: userOverride.free_unlimited ? 'unlimited' : (userOverride.plan_type || 'pro'),
+                    status: 'active',
+                    coupon_code: null,
+                    created_at: new Date().toISOString()
+                };
+            }
+        }
+
+        if (!sub) return NextResponse.json({ error: 'Subscription or Override not found' }, { status: 404 });
 
         // 2. Fetch User details
         const { data: user, error: userError } = await admin
@@ -69,7 +95,8 @@ export async function POST(
         const PRICE_MAP: Record<string, number> = {
             'pro': 2900,
             'premium': 19900,
-            'career': 49900
+            'career': 49900,
+            'unlimited': 0
         };
 
         const planKey = sub.plan.toLowerCase();
@@ -124,7 +151,7 @@ export async function POST(
                 userId: sub.user_id,
                 plan: sub.plan,
                 amount: amount,
-                paymentMethod: method as 'razorpay' | 'coupon',
+                paymentMethod: (subId.startsWith('virtual-') || sub.id.startsWith('virtual-')) ? 'coupon' : (method as 'razorpay' | 'coupon'),
                 couponCode: sub.coupon_code,
                 razorpayPaymentId: existingPayment?.razorpay_payment_id,
                 razorpayOrderId: existingPayment?.razorpay_order_id,
@@ -142,6 +169,12 @@ export async function POST(
                     email: user.email
                 }
             });
+            
+            // If it was an admin override, we might want to manually tag the payment method in the DB record if createInvoice didn't handle it
+            if (invoice && (subId.startsWith('virtual-') || sub.id.startsWith('virtual-'))) {
+                await admin.from('invoices').update({ payment_method: 'admin_override' }).eq('id', invoice.id);
+                invoice.payment_method = 'admin_override';
+            }
         }
 
         if (!invoice) throw new Error('Failed to ensure invoice exists');
@@ -163,8 +196,8 @@ export async function POST(
             userEmail: user.email,
             userName: user.full_name || 'User',
             plan: sub.plan,
-            amountINR: "₹0", // amount
-            paymentMethod: "Coupon (Free)",
+            amountINR: "Free (Admin)",
+            paymentMethod: "Admin Override",
             invoiceNumber: invoice.invoice_number,
             invoiceId: invoice.id,
             couponCode: sub.coupon_code,

@@ -46,7 +46,7 @@ const PLAN_CONFIG: Record<PlanName, PlanConfig> = {
  * Activates a paid plan for a user after successful payment.
  * Updates users table with plan details and upserts subscriptions for legacy access checks.
  */
-export async function activateUserPlan(userId: string, planName: PlanName, paymentId?: string): Promise<string | undefined> {
+export async function activateUserPlan(userId: string, planName: PlanName, paymentId?: string, couponCode?: string): Promise<string | undefined> {
     const supabase = createClient();
     const config = PLAN_CONFIG[planName];
 
@@ -92,6 +92,7 @@ export async function activateUserPlan(userId: string, planName: PlanName, payme
                 status: 'active',
                 expires_at: planEnd.toISOString(),
                 payment_id: paymentId ?? null,
+                coupon_code: couponCode ?? null,
             },
             { onConflict: 'user_id' }
         )

@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
         }
 
         // ── Activate user plan ────────────────────────────────────────────────
-        const subscriptionId = await activateUserPlan(session.userId, plan_name.toUpperCase() as PlanName, razorpay_payment_id);
+        const subscriptionId = await activateUserPlan(session.userId, plan_name.toUpperCase() as PlanName, razorpay_payment_id, couponCode ?? undefined);
 
         // ── Generate invoice ──────────────────────────────────────────────────
         const invoice = await createInvoice({

@@ -134,12 +134,13 @@ export async function POST(req: NextRequest) {
             coupon_code: couponCode,
         }, { onConflict: 'user_id' });
 
-        // Activate plan
-        await activateUserPlan(session.userId, planName);
+        // Activate plan and get subscription ID
+        const subscriptionId = await activateUserPlan(session.userId, planName, undefined, couponCode);
 
         // Generate ₹0 invoice
         const invoice = await createInvoice({
             userId: session.userId,
+            subscriptionId,
             plan: planName,
             amount: 0,
             currency,

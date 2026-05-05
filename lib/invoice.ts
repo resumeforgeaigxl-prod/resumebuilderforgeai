@@ -65,10 +65,13 @@ export async function createInvoice(input: InvoiceInput): Promise<InvoiceRecord 
 
         const invoiceNumber = numData ?? `INV-${Date.now()}`;
 
+        // Determine if we should upsert (to fix trigger-created basic invoices)
+        const upsertOptions = input.subscriptionId ? { onConflict: 'subscription_id' } : undefined;
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data, error } = await (supabase as any)
             .from('invoices')
-            .insert({
+            .upsert({
                 invoice_number: invoiceNumber,
                 user_id: input.userId,
                 plan: input.plan,
@@ -90,9 +93,9 @@ export async function createInvoice(input: InvoiceInput): Promise<InvoiceRecord 
                 billing_state: input.billing?.state ?? null,
                 billing_country: input.billing?.country ?? null,
                 billing_zip: input.billing?.zip ?? null,
-            })
+            }, upsertOptions)
             .select()
-            .single() as { data: InvoiceRecord | null; error: unknown };
+            .single() as { data: InvoiceRecord | null; error: any };
 
         if (error) {
             console.error('[createInvoice] DB error:', error);

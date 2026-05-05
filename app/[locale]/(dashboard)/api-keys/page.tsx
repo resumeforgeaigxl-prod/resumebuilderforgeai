@@ -3,16 +3,16 @@ export const dynamic = 'force-dynamic';
 ;
 
 import { useState, useEffect } from 'react';
-import { 
-    Key, 
-    Plus, 
-    Trash2, 
-    Copy, 
-    Check, 
-    Shield, 
-    Terminal, 
-    ExternalLink, 
-    Loader2, 
+import {
+    Key,
+    Plus,
+    Trash2,
+    Copy,
+    Check,
+    Shield,
+    Terminal,
+    ExternalLink,
+    Loader2,
     Eye,
     EyeOff,
     Info,
@@ -121,53 +121,47 @@ export default function ApiKeysPage() {
 
     return (
         <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-700">
-            {/* Header section with glassmorphism */}
-            <div className="relative p-8 rounded-[2.5rem] bg-gradient-to-br from-indigo-600/10 via-purple-600/5 to-transparent border border-white/5 overflow-hidden">
-                <div className="absolute top-0 right-0 p-8 opacity-10">
-                    <Terminal className="w-32 h-32 text-indigo-400 rotate-12" />
-                </div>
-                
-                <div className="relative z-10 space-y-4">
-                    <div className="flex items-center gap-3">
-                        <div className="p-3 bg-indigo-500/20 rounded-2xl">
-                            <Shield className="w-6 h-6 text-indigo-400" />
-                        </div>
-                        <h1 className="text-4xl font-black tracking-tight text-white italic uppercase">API Keys_</h1>
+            {/* Standardized Header */}
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E2A42] pb-8 mb-12">
+                <div>
+                    <div className="flex items-center gap-2 text-[#00D4A0] font-bold tracking-widest text-[10px] uppercase mb-4">
+                        <Terminal className="w-3.5 h-3.5" /> Intelligence Core
                     </div>
-                    <p className="max-w-2xl text-slate-400 text-sm font-medium leading-relaxed uppercase tracking-wider">
-                        Manage your secure access credentials for the ResumeForgeAI Engine. 
-                        Integration is seamless with our UniversalAI Protocol.
-                    </p>
-                    
-                    <div className="flex items-center gap-4 pt-4">
-                        <a href="https://docs.resumeforgeai.in" target="_blank" className="flex items-center gap-2 text-xs font-black text-indigo-400 hover:text-indigo-300 transition-colors uppercase tracking-widest group">
-                            <Info className="w-4 h-4" /> Documentation <ExternalLink className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                        </a>
-                        <span className="w-1 h-1 rounded-full bg-slate-700" />
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">v1.2 Platform active</span>
+                    <h1 className="text-4xl font-bold tracking-tighter text-white uppercase">ApiForge</h1>
+                    <p className="text-slate-400 mt-2 text-lg">Manage secure access credentials and neural signal integration protocols.</p>
+                </div>
+
+                <div className="flex items-center gap-4">
+                    <a href="https://docs.resumeforgeai.in" target="_blank" className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0D1220] border border-[#1E2A42] text-[10px] font-black text-[#00D4A0] hover:bg-[#00D4A0]/5 transition-all uppercase tracking-widest">
+                        <Info className="w-4 h-4" /> Documentation
+                    </a>
+                    <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0D1220] border border-[#1E2A42]">
+                        <div className="text-[10px] text-[#4A5568] uppercase tracking-wider font-semibold">V1.2_ACTIVE</div>
+                        <div className="w-2 h-2 rounded-full bg-[#00D4A0] animate-pulse" />
                     </div>
                 </div>
-            </div>
+            </header>
+
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Create Key Card */}
                 <div className="lg:col-span-1">
                     <div className="p-8 bg-white/[0.02] border border-white/5 rounded-[2rem] sticky top-24 backdrop-blur-xl">
                         <h3 className="text-lg font-black text-white mb-6 uppercase italic tracking-tight">Generate Signal_</h3>
-                        
+
                         <div className="space-y-6">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Key Description</label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     value={keyName}
                                     onChange={(e) => setKeyName(e.target.value)}
                                     placeholder="e.g. My Website Plugin"
                                     className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm text-white placeholder:text-slate-700 focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all"
                                 />
                             </div>
-                            
-                            <button 
+
+                            <button
                                 onClick={createKey}
                                 disabled={creating}
                                 className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-black rounded-2xl transition-all shadow-xl shadow-indigo-600/20 flex items-center justify-center gap-3 text-xs uppercase tracking-widest"
@@ -182,7 +176,7 @@ export default function ApiKeysPage() {
                                     <span className="text-[9px] font-black uppercase tracking-widest text-amber-500/80">Security Protocol</span>
                                 </div>
                                 <p className="text-[10px] text-amber-200/60 leading-relaxed font-bold uppercase tracking-tight">
-                                    Your keys give full access to your account tools. 
+                                    Your keys give full access to your account tools.
                                     Do not expose them on the frontend. Use a secure backend.
                                 </p>
                             </div>
@@ -202,7 +196,7 @@ export default function ApiKeysPage() {
                         </div>
                     ) : (
                         keys.map((key) => (
-                            <div 
+                            <div
                                 key={key.id}
                                 className={`p-8 bg-white/[0.02] border transition-all duration-500 rounded-[2.5rem] group ${key.status === 'revoked' ? 'opacity-50 grayscale border-white/5' : 'hover:bg-white/[0.03] border-white/10 hover:border-indigo-500/30'}`}
                             >
@@ -218,7 +212,7 @@ export default function ApiKeysPage() {
                                     </div>
 
                                     {key.status === 'active' && (
-                                        <button 
+                                        <button
                                             onClick={() => revokeKey(key.id)}
                                             className="p-3 text-slate-600 hover:text-red-400 hover:bg-red-400/5 rounded-2xl transition-all opacity-0 group-hover:opacity-100"
                                             title="Revoke Key"
@@ -232,21 +226,21 @@ export default function ApiKeysPage() {
                                     <div className="flex items-center gap-3 p-4 bg-black/60 border border-white/5 rounded-2xl relative overflow-hidden group/key">
                                         <Key className="w-4 h-4 text-indigo-500 shrink-0" />
                                         <div className="flex-1 overflow-hidden">
-                                            <input 
-                                                type={showKeyId === key.id ? "text" : "password"} 
-                                                value={key.api_key} 
-                                                readOnly 
+                                            <input
+                                                type={showKeyId === key.id ? "text" : "password"}
+                                                value={key.api_key}
+                                                readOnly
                                                 className="bg-transparent text-sm text-indigo-400 font-mono focus:outline-none w-full tracking-wider"
                                             />
                                         </div>
                                         <div className="flex items-center gap-1">
-                                            <button 
+                                            <button
                                                 onClick={() => setShowKeyId(showKeyId === key.id ? null : key.id)}
                                                 className="p-2 text-slate-600 hover:text-white transition-colors"
                                             >
                                                 {showKeyId === key.id ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                             </button>
-                                            <button 
+                                            <button
                                                 onClick={() => copyToClipboard(key.api_key, key.id)}
                                                 className="p-2 text-slate-600 hover:text-white transition-colors"
                                             >
@@ -263,7 +257,7 @@ export default function ApiKeysPage() {
                                                 <span className="text-[10px] text-slate-600 font-black mb-1">/ {key.usage_limit}</span>
                                             </div>
                                             <div className="w-full h-1 bg-white/5 rounded-full mt-3 overflow-hidden">
-                                                <div 
+                                                <div
                                                     className="h-full bg-indigo-500 transition-all duration-1000"
                                                     style={{ width: `${Math.min(100, (key.usage_count / key.usage_limit) * 100)}%` }}
                                                 />

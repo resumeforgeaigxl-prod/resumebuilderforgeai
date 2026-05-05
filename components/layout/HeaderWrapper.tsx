@@ -12,11 +12,22 @@ export default function HeaderWrapper({ children }: { children: ReactNode }) {
         pathname?.includes('/dashboard') || 
         pathname?.includes('/admin') || 
         pathname?.includes('/resumes') || 
+        pathname?.includes('/resumeforge') || 
+        pathname?.includes('/prepforge') || 
+        pathname?.includes('/learnforge') || 
+        pathname?.includes('/knowledgeforge') || 
+        pathname?.includes('/explainforge') || 
+        pathname?.includes('/mentorforge') || 
+        pathname?.includes('/jobforge') || 
+        pathname?.includes('/careerforge') || 
         pathname?.includes('/codingforge') || 
         pathname?.includes('/projectforge') || 
-        pathname?.includes('/mock-interview') || 
         pathname?.includes('/studyforge') || 
-        pathname?.includes('/careerforge') || 
+        pathname?.includes('/company-prep') || 
+        pathname?.includes('/api-keys') || 
+        pathname?.includes('/api-platform') || 
+        pathname?.includes('/mock-interview') || 
+        pathname?.includes('/interviewforge') || 
         pathname?.includes('/jobs') || 
         pathname?.includes('/jobforgeai') || 
         pathname?.includes('/tools') ||

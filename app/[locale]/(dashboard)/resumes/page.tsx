@@ -7,6 +7,7 @@ import { getSession } from '@/lib/auth/jwt'
 import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { Badge } from '@/components/ui/Badge'
 
 interface ResumeListItem {
     id: string
@@ -46,19 +47,25 @@ export default async function ResumesPage({
 
     return (
         <div className="space-y-10 animate-fade-in">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            {/* Standardized Header */}
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E2A42] pb-8 mb-12">
                 <div>
-                    <div className="flex items-center gap-2 text-indigo-400 font-bold tracking-widest text-[10px] uppercase mb-2">
-                         <FileText className="w-3.5 h-3.5" /> Resume Modules
+                    <div className="flex items-center gap-2 text-[#00D4A0] font-bold tracking-widest text-[10px] uppercase mb-4">
+                        <FileText className="w-3.5 h-3.5" /> Intelligence Core
                     </div>
-                    <h1 className="text-4xl font-bold text-white tracking-tight">
-                        My Resumes
-                    </h1>
-                    <p className="text-slate-400 mt-1 font-medium italic">Protocol-ready professional identifies ({count || 0} total)</p>
+                    <h1 className="text-4xl font-bold tracking-tighter text-white uppercase">ResumeForge</h1>
+                    <p className="text-slate-400 mt-2 text-lg">Protocol-ready professional identifiers and neural document optimization ({count || 0} active).</p>
                 </div>
 
-                <CreateResumeButton />
-            </div>
+                <div className="flex items-center gap-4">
+                    <CreateResumeButton />
+                    <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0D1220] border border-[#1E2A42]">
+                        <div className="text-[10px] text-[#4A5568] uppercase tracking-wider font-semibold">VAULT_SIGNAL</div>
+                        <Badge variant="outline" className="border-[#00D4A0]/20 bg-[#00D4A0]/5 text-[#00D4A0] text-[9px] font-bold uppercase">ENCRYPTED</Badge>
+                    </div>
+                </div>
+            </header>
+
 
             {error ? (
                 <Card glass className="p-12 text-center border-red-500/10 bg-red-500/[0.02]">

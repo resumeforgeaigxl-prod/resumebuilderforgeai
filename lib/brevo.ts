@@ -411,3 +411,38 @@ export async function sendVerificationOTPEmail(to: string, code: string): Promis
     html,
   });
 }
+// ── 9. Waitlist Approval Email ──────────────────────────────────────────────
+
+export async function sendWaitlistApprovalEmail(to: string, name: string, couponCode: string, offer: string): Promise<boolean> {
+  const html = emailWrapper(`
+      ${headingAndSub(`You're Approved, ${name}! 🚀`, `Your exclusive early access to ResumeForgeAI is here.`)}
+      <p style="color:#cbd5e1;font-size:14px;line-height:1.7;margin:0 0 20px;">
+        Congratulations! You've been selected for our early access launch. As a token of our appreciation for your patience, 
+        we've generated a unique offer just for you:
+      </p>
+      
+      <div style="background:#0d0d1c;border:2px solid #6366f1;padding:24px;text-align:center;border-radius:12px;margin-bottom:24px;">
+        <p style="margin:0 0 12px;font-size:12px;color:#94a3b8;text-transform:uppercase;font-weight:800;letter-spacing:1px;">Your Launch Offer</p>
+        <p style="margin:0 0 16px;font-size:24px;font-weight:800;color:#34d399;">${offer}</p>
+        <div style="background:#1e1b4b;padding:12px;border-radius:8px;display:inline-block;border:1px solid #312e81;">
+          <span style="font-size:20px;font-weight:800;color:#fff;letter-spacing:2px;font-family:monospace;">${couponCode}</span>
+        </div>
+      </div>
+
+      <p style="color:#cbd5e1;font-size:14px;line-height:1.7;margin:0 0 20px;">
+        Use the coupon code above at checkout to claim your reward. This offer is valid for the next 7 days.
+      </p>
+
+      ${ctaButton('Claim My Access', 'https://resumeforgeai.in/dashboard', '#34d399')}
+      
+      <p style="text-align:center;color:#64748b;font-size:12px;margin:0;">
+        Welcome to the forge. Let's build something great.
+      </p>
+    `);
+
+  return await sendEmail({
+    to: [{ email: to, name }],
+    subject: `🚀 Your Waitlist Invite is Here: ${offer} | ResumeForgeAI`,
+    html,
+  });
+}

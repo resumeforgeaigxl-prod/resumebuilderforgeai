@@ -69,76 +69,57 @@ export default function RoadmapGenerator() {
     const [skillTopicMap, setSkillTopicMap] = useState<Record<string, MappedSkillItem>>({});
 
     useEffect(() => {
-        setError(null);
-        fetch('/api/ai/roadmap/generate')
-            .then(r => r.json())
-            .then(d => {
-                if (d.success) {
-                    setRoadmaps(d.roadmaps);
-                    if (d.roadmaps.length > 0) setActiveRoadmap(d.roadmaps[0]);
-                }
-            })
-            .catch(err => {
-                console.error('Failed to fetch roadmaps', err);
-                setError('Failed to load your previously generated roadmaps.');
-            });
+        fetchRoadmaps();
     }, []);
 
     useEffect(() => {
-        if (!activeRoadmap?.roadmap_json?.steps?.length) {
-            setSkillTopicMap({});
-            return;
+        if (activeRoadmap) {
+            mapSkillsToTopics();
         }
-
-        let cancelled = false;
-        setMappingLoading(true);
-
-        fetch('/api/careerforge/skills/map', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                targetRole: activeRoadmap.target_role,
-                steps: activeRoadmap.roadmap_json.steps.map((step) => ({
-                    name: step.name,
-                    items: step.items,
-                })),
-            }),
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                if (cancelled) return;
-
-                if (data.success && Array.isArray(data.mapped_steps)) {
-                    const nextMap: Record<string, MappedSkillItem> = {};
-                    (data.mapped_steps as MappedStep[]).forEach((step) => {
-                        step.items.forEach((item) => {
-                            nextMap[`${step.step_index}:${item.item_index}`] = item;
-                        });
-                    });
-                    setSkillTopicMap(nextMap);
-                } else {
-                    setSkillTopicMap({});
-                }
-            })
-            .catch((mapError) => {
-                console.error('Failed to map roadmap skills to learning topics', mapError);
-                if (!cancelled) {
-                    setSkillTopicMap({});
-                }
-            })
-            .finally(() => {
-                if (!cancelled) {
-                    setMappingLoading(false);
-                }
-            });
-
-        return () => {
-            cancelled = true;
-        };
     }, [activeRoadmap]);
 
+    const fetchRoadmaps = async () => {
+        try {
+            const res = await fetch('/api/ai/roadmap/list');
+            const data = await res.json();
+            if (data.success) {
+                setRoadmaps(data.roadmaps);
+                if (data.roadmaps.length > 0) {
+                    setActiveRoadmap(data.roadmaps[0]);
+                }
+            }
+        } catch (err) {
+            console.error('Failed to fetch roadmaps', err);
+        }
+    };
+
+    const mapSkillsToTopics = async () => {
+        if (!activeRoadmap) return;
+        setMappingLoading(true);
+        try {
+            const res = await fetch('/api/ai/roadmap/map-skills', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ roadmap: activeRoadmap.roadmap_json })
+            });
+            const data = await res.json();
+            if (data.success && data.mapped_steps) {
+                const newMap: Record<string, MappedSkillItem> = {};
+                data.mapped_steps.forEach((step: MappedStep) => {
+                    step.items.forEach((item: MappedSkillItem) => {
+                        newMap[`${step.step_index}:${item.item_index}`] = item;
+                    });
+                });
+                setSkillTopicMap(newMap);
+            }
+        } catch (err) {
+            console.error('Failed to map skills', err);
+        } finally {
+            setMappingLoading(false);
+        }
+    };
+
     const generateRoadmap = async () => {
-        if (!targetRole) return;
         setLoading(true);
         setError(null);
         try {
@@ -169,33 +150,34 @@ export default function RoadmapGenerator() {
 
     return (
         <div className="space-y-12 animate-fade-in max-w-7xl mx-auto py-6">
-            {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-8 border-b border-white/5">
+            {/* Standardized Header */}
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E2A42] pb-8 mb-12">
                 <div>
-                    <div className="flex items-center gap-2 text-indigo-400 font-bold tracking-[0.2em] text-[10px] uppercase mb-4">
-                         <Target className="w-4 h-4" /> Strategic Planning
+                    <div className="flex items-center gap-2 text-[#00D4A0] font-bold tracking-widest text-[10px] uppercase mb-4">
+                        <Target className="w-3.5 h-3.5" /> Intelligence Core
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight">
-                        Career<span className="text-gradient">Forge</span> Roadmap
-                    </h1>
-                    <p className="text-slate-400 mt-2 font-medium italic">Neural career path synthesis based on market intelligence.</p>
+                    <h1 className="text-4xl font-bold tracking-tighter text-white uppercase">RoadmapForge</h1>
+                    <p className="text-slate-400 mt-2 text-lg">Neural career path synthesis based on market intelligence and personal skill data.</p>
                 </div>
 
                 {roadmaps.length > 0 && (
                     <div className="w-full lg:w-72">
                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Active Trajectory</label>
-                         <select
-                            className="w-full bg-white/[0.02] border border-white/5 rounded-2xl px-5 py-4 text-sm text-white font-black italic focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all appearance-none cursor-pointer"
-                            onChange={(e) => setActiveRoadmap(roadmaps.find(r => r.id === e.target.value) || null)}
-                            value={activeRoadmap?.id || ''}
-                        >
-                            {roadmaps.map(r => (
-                                <option key={r.id} value={r.id} className="bg-[#0a0a1a]">{r.target_role.toUpperCase()}</option>
-                            ))}
-                        </select>
+                         <div className="relative group">
+                            <select
+                                className="w-full bg-[#0D1220] border border-[#1E2A42] rounded-xl px-4 py-3 text-sm text-white font-bold focus:outline-none focus:ring-2 focus:ring-[#00D4A0]/20 transition-all appearance-none cursor-pointer"
+                                onChange={(e) => setActiveRoadmap(roadmaps.find(r => r.id === e.target.value) || null)}
+                                value={activeRoadmap?.id || ''}
+                            >
+                                {roadmaps.map(r => (
+                                    <option key={r.id} value={r.id} className="bg-[#080B16]">{r.target_role.toUpperCase()}</option>
+                                ))}
+                            </select>
+                            <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4A5568] rotate-90 pointer-events-none" />
+                         </div>
                     </div>
                 )}
-            </div>
+            </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                 {/* Input Panel */}

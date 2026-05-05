@@ -39,7 +39,7 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
             aria-label="ResumeForgeAI Home"
             className="flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.18em] text-white"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[linear-gradient(135deg,rgba(56,189,248,0.95),rgba(245,158,11,0.85))] text-sm text-slate-950 shadow-[0_0_30px_rgba(56,189,248,0.28)]" aria-hidden="true">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[linear-gradient(135deg,#00D4A0,#7C5CFC)] text-sm text-[#080B16] font-bold shadow-[0_0_30px_rgba(0,212,160,0.3)]" aria-hidden="true">
               RF
             </span>
             <span className="hidden sm:block">ResumeForgeAI</span>
@@ -59,7 +59,7 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
 
           <Link
             href={`/${locale}/signup`}
-            className="inline-flex items-center rounded-full border border-white/[0.12] bg-white/[0.08] px-5 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:border-white/25 hover:bg-white/[0.12]"
+            className="inline-flex items-center rounded-full border border-[#00D4A0]/20 bg-[#00D4A0] px-5 py-2.5 text-sm font-semibold text-[#080B16] transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,212,160,0.3)] hover:scale-[1.02]"
           >
             Get Started
           </Link>
@@ -69,7 +69,7 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
           <div className="max-w-3xl">
             <motion.div
               {...fadeInUp(0.06)}
-              className="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-sky-100"
+              className="inline-flex items-center gap-2 rounded-full border border-[#00D4A0]/20 bg-[#00D4A0]/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-[#00D4A0]"
             >
               AI Career Operating System
             </motion.div>
@@ -106,7 +106,7 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
             >
               <Link
                 href={`/${locale}/signup`}
-                className="btn-primary group min-w-[220px] justify-center rounded-full px-7 py-3.5 text-sm font-semibold shadow-[0_18px_60px_-25px_rgba(56,189,248,0.45)]"
+                className="btn-primary group min-w-[220px] justify-center rounded-full px-7 py-3.5 text-sm font-semibold shadow-[0_18px_60px_-25px_rgba(0,212,160,0.45)]"
               >
                 Build My Resume Free
                 <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
@@ -127,7 +127,7 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
                 href="https://peerlist.io/saivarshith8284/project/resumeforgeai"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-1.5 pr-6 transition-all duration-300 hover:border-sky-500/30 hover:bg-white/[0.06] hover:shadow-[0_0_40px_rgba(56,189,248,0.2)] hover:scale-[1.05]"
+                className="group relative flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-1.5 pr-6 transition-all duration-300 hover:border-[#00D4A0]/30 hover:bg-white/[0.06] hover:shadow-[0_0_40px_rgba(0,212,160,0.15)] hover:scale-[1.05]"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-black shadow-inner border border-white/5 overflow-hidden relative">
                   <Image 
@@ -143,13 +143,13 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 group-hover:text-slate-400 transition-colors">
                     🚀 Now Live on
                   </span>
-                  <span className="text-sm font-bold text-white group-hover:text-sky-400 transition-colors">
+                  <span className="text-sm font-bold text-white group-hover:text-[#00D4A0] transition-colors">
                     Peerlist Launchpad
                   </span>
                 </div>
                 
                 {/* Subtle glow effect on hover */}
-                <div className="absolute inset-0 -z-10 bg-sky-500/0 blur-2xl transition-all duration-300 group-hover:bg-sky-500/10" />
+                <div className="absolute inset-0 -z-10 bg-[#00D4A0]/0 blur-2xl transition-all duration-300 group-hover:bg-[#00D4A0]/8" />
               </a>
             </motion.div>
 
@@ -177,8 +177,8 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
             {...fadeInScale(0.16)}
             className="relative mx-auto flex h-[420px] w-full max-w-[560px] items-center justify-center sm:h-[520px]"
           >
-            <div className="absolute inset-[10%] rounded-full bg-sky-500/[0.08] blur-[90px]" />
-            <div className="absolute inset-[18%] rounded-full bg-amber-500/[0.08] blur-[110px]" />
+            <div className="absolute inset-[10%] rounded-full bg-[#00D4A0]/[0.08] blur-[90px]" />
+            <div className="absolute inset-[18%] rounded-full bg-[#7C5CFC]/[0.06] blur-[110px]" />
 
             <svg
               className="absolute inset-0 h-full w-full"
@@ -208,9 +208,9 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
                   x2="1"
                   y2="1"
                 >
-                  <stop offset="0%" stopColor="rgba(125,211,252,0.05)" />
-                  <stop offset="50%" stopColor="rgba(56,189,248,0.75)" />
-                  <stop offset="100%" stopColor="rgba(245,158,11,0.35)" />
+                  <stop offset="0%" stopColor="rgba(0,212,160,0.05)" />
+                  <stop offset="50%" stopColor="rgba(0,212,160,0.6)" />
+                  <stop offset="100%" stopColor="rgba(124,92,252,0.35)" />
                 </linearGradient>
               </defs>
             </svg>
@@ -218,9 +218,9 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
             <motion.div
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="relative z-10 flex h-40 w-40 flex-col items-center justify-center rounded-[36px] border border-white/[0.12] bg-[linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.04))] px-6 text-center shadow-[0_32px_120px_-44px_rgba(56,189,248,0.55)] backdrop-blur-2xl sm:h-48 sm:w-48"
+              className="relative z-10 flex h-40 w-40 flex-col items-center justify-center rounded-[36px] border border-white/[0.12] bg-[linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.04))] px-6 text-center shadow-[0_32px_120px_-44px_rgba(0,212,160,0.4)] backdrop-blur-2xl sm:h-48 sm:w-48"
             >
-              <span className="text-xs font-semibold uppercase tracking-[0.32em] text-sky-100/70">
+              <span className="text-xs font-semibold uppercase tracking-[0.32em] text-[#00D4A0]/70">
                 Central Engine
               </span>
               <div className="mt-4 text-2xl font-semibold tracking-tight text-white sm:text-3xl">

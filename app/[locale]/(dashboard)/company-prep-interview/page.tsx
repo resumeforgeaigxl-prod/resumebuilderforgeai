@@ -711,16 +711,21 @@ function CompanyPrepInterviewContent() {
   if (!session) {
     return (
       <div className="max-w-6xl mx-auto space-y-12 animate-in fade-in duration-500 pb-20">
-        <div className="text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-semibold mb-6">
-            <Mic className="w-4 h-4" />
-            AI Interview Intelligence
-          </div>
-          <h1 className="text-5xl font-black text-white mb-4 tracking-tight uppercase">Intelligence System</h1>
-          <p className="text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed">
-            Generate an &quot;Intelligence Report&quot; for your dream company. See hiring rounds, real questions, and focus areas.
-          </p>
-        </div>
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E2A42] pb-8 mb-12">
+            <div>
+                <div className="flex items-center gap-2 text-[#00D4A0] font-bold tracking-widest text-[10px] uppercase mb-4">
+                    <Mic className="w-3.5 h-3.5" /> Intelligence Core
+                </div>
+                <h1 className="text-4xl font-bold tracking-tighter text-white uppercase">CompanyPrep</h1>
+                <p className="text-slate-400 mt-2 text-lg">Generate company-specific intelligence reports and simulate high-stakes neural interviews.</p>
+            </div>
+
+            <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0D1220] border border-[#1E2A42]">
+                <div className="text-[10px] text-[#4A5568] uppercase tracking-wider font-semibold">SIGNAL_OVERRIDE</div>
+                <div className="w-2 h-2 rounded-full bg-[#00D4A0] animate-pulse" />
+            </div>
+        </header>
+
 
         <div className="bg-slate-800/40 border border-white/10 rounded-[2.5rem] p-10 backdrop-blur-xl shadow-2xl relative overflow-hidden group">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600"></div>
@@ -980,7 +985,7 @@ function CompanyPrepInterviewContent() {
             <div className="lg:col-span-8 space-y-8">
               <div className="bg-slate-800/40 border border-white/10 rounded-[2.5rem] p-10 backdrop-blur-xl relative overflow-hidden">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-10">
-                  <motion.div 
+                  <motion.div
                     initial={{ rotate: -180, opacity: 0 }}
                     animate={{ rotate: -90, opacity: 1 }}
                     transition={{ duration: 1.5, ease: "easeOut" }}

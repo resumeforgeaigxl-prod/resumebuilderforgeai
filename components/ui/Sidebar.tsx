@@ -1,17 +1,16 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Code, 
-  Projector, 
-  MessageSquare, 
-  BookOpen, 
-  Briefcase, 
+import {
+  LayoutDashboard,
+  FileText,
+  Code,
+  Projector,
+  MessageSquare,
+  BookOpen,
+  Briefcase,
   Search,
   Settings,
   ChevronLeft,
@@ -23,16 +22,19 @@ import {
   Bot,
   GraduationCap,
   Brain,
-  Terminal
+  Terminal,
+  PanelLeftClose,
+  PanelLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSidebar } from "@/hooks/use-sidebar";
 
 interface SidebarProps {
   locale: string;
 }
 
 export function Sidebar({ locale }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, toggle } = useSidebar();
   const pathname = usePathname();
 
   const navItems = [
@@ -57,56 +59,102 @@ export function Sidebar({ locale }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 h-screen border-r border-white/5 bg-[#050510]/80 backdrop-blur-xl transition-all duration-300",
-        collapsed ? "w-20" : "w-64"
+        "fixed left-0 top-0 z-40 h-screen border-r border-[#1E2A42] bg-[#0D1220]/95 backdrop-blur-xl flex flex-col",
+        "transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+        collapsed ? "w-[72px]" : "w-64"
       )}
     >
-      <div className="flex h-full flex-col p-4">
-        {/* Logo */}
-        <div className="mb-8 flex items-center justify-center min-h-[48px] px-2">
-          {!collapsed ? (
-            <Image 
-              src="/logo/resumeforge-logo-v2.svg" 
-              width={160}
-              height={34}
-              className="w-[160px] h-auto object-contain transition-all" 
-              alt="ResumeForgeAI" 
+      <div className="flex h-full flex-col p-3">
+        {/* Logo + Collapse Toggle */}
+        <div className="mb-6 flex items-center justify-between min-h-[48px] px-1">
+          <div className={cn(
+            "overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+            collapsed ? "w-0 opacity-0" : "w-[140px] opacity-100"
+          )}>
+            <Image
+              src="/logo/resumeforge-logo-v2.svg"
+              width={140}
+              height={30}
+              className="w-[140px] h-auto object-contain shrink-0"
+              alt="ResumeForgeAI"
               priority
             />
-          ) : (
-            <Image 
-              src="/logo/resumeforge-icon-v2.svg" 
-              width={32}
-              height={32}
-              className="w-8 h-8 object-contain transition-all" 
-              alt="RF" 
+          </div>
+
+          {collapsed && (
+            <Image
+              src="/logo/resumeforge-icon-v2.svg"
+              width={28}
+              height={28}
+              className="w-7 h-7 object-contain mx-auto shrink-0 animate-in fade-in duration-200"
+              alt="RF"
               priority
             />
           )}
+
+          <button
+            onClick={toggle}
+            className={cn(
+              "p-1.5 rounded-lg transition-all duration-200 text-[#4A5568] hover:text-[#00D4A0] hover:bg-[#00D4A0]/8",
+              collapsed && "absolute right-2 top-4"
+            )}
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {collapsed ? (
+              <PanelLeft className="w-4 h-4" />
+            ) : (
+              <PanelLeftClose className="w-4 h-4" />
+            )}
+          </button>
         </div>
 
         {/* Nav Items */}
-        <nav className="flex-1 space-y-1">
+        <nav className="flex-1 space-y-0.5 overflow-y-auto overflow-x-hidden scrollbar-none">
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
             return (
               <Link
                 key={item.name}
                 href={item.href}
+                title={collapsed ? item.name : undefined}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all group",
-                  isActive 
-                    ? "bg-white/10 text-white shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]" 
-                    : "text-slate-400 hover:bg-white/5 hover:text-white"
+                  "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 group",
+                  collapsed && "justify-center px-0",
+                  isActive
+                    ? "bg-[#00D4A0]/10 text-[#EFF4FB]"
+                    : "text-[#7A8BA8] hover:bg-[#121A2E] hover:text-[#EFF4FB]"
                 )}
               >
+                {/* Active indicator bar */}
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-[#00D4A0] shadow-[0_0_8px_rgba(0,212,160,0.5)] transition-all duration-300" />
+                )}
+
                 <item.icon className={cn(
-                  "h-5 w-5 shrink-0 transition-colors",
-                  isActive ? "text-indigo-400" : "group-hover:text-indigo-300"
+                  "h-[18px] w-[18px] shrink-0 transition-all duration-200",
+                  isActive ? "text-[#00D4A0]" : "text-[#4A5568] group-hover:text-[#00D4A0]",
+                  collapsed && "h-5 w-5"
                 )} />
-                {!collapsed && <span>{item.name}</span>}
+
+                {/* Label with smooth slide */}
+                <span className={cn(
+                  "whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+                  collapsed ? "w-0 opacity-0 overflow-hidden" : "w-auto opacity-100"
+                )}>
+                  {item.name}
+                </span>
+
+                {/* Active dot */}
                 {isActive && !collapsed && (
-                  <div className="ml-auto h-1.5 w-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
+                  <div className="ml-auto h-1.5 w-1.5 rounded-full bg-[#00D4A0] shadow-[0_0_8px_rgba(0,212,160,0.6)]" />
+                )}
+
+                {/* Tooltip for collapsed state */}
+                {collapsed && (
+                  <div className="absolute left-full ml-2 px-3 py-1.5 rounded-lg bg-[#121A2E] border border-[#1E2A42] text-[#EFF4FB] text-xs font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 shadow-xl z-50">
+                    {item.name}
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 rotate-45 bg-[#121A2E] border-l border-b border-[#1E2A42]" />
+                  </div>
                 )}
               </Link>
             );
@@ -114,24 +162,49 @@ export function Sidebar({ locale }: SidebarProps) {
         </nav>
 
         {/* Bottom Actions */}
-        <div className="mt-auto space-y-1 pt-4 border-t border-white/5">
+        <div className="mt-auto space-y-0.5 pt-3 border-t border-[#1E2A42]">
           <Link
             href={`/${locale}/account`}
+            title={collapsed ? "Settings" : undefined}
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all",
-              pathname?.includes("account") ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"
+              "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 group",
+              collapsed && "justify-center px-0",
+              pathname?.includes("account")
+                ? "bg-[#00D4A0]/10 text-[#EFF4FB]"
+                : "text-[#7A8BA8] hover:bg-[#121A2E] hover:text-[#EFF4FB]"
             )}
           >
-            <Settings className="h-5 w-5" />
-            {!collapsed && <span>Settings</span>}
+            <Settings className={cn("h-[18px] w-[18px] shrink-0", collapsed && "h-5 w-5")} />
+            <span className={cn(
+              "whitespace-nowrap transition-all duration-300",
+              collapsed ? "w-0 opacity-0 overflow-hidden" : "w-auto opacity-100"
+            )}>
+              Settings
+            </span>
+
+            {collapsed && (
+              <div className="absolute left-full ml-2 px-3 py-1.5 rounded-lg bg-[#121A2E] border border-[#1E2A42] text-[#EFF4FB] text-xs font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 shadow-xl z-50">
+                Settings
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 rotate-45 bg-[#121A2E] border-l border-b border-[#1E2A42]" />
+              </div>
+            )}
           </Link>
-          
+
           <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition-all hover:bg-white/5 hover:text-white"
+            onClick={toggle}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[#7A8BA8] transition-all duration-200 hover:bg-[#121A2E] hover:text-[#EFF4FB]",
+              collapsed && "justify-center px-0"
+            )}
           >
-            {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
-            {!collapsed && <span>Collapse</span>}
+            {collapsed ? (
+              <ChevronRight className="h-5 w-5 text-[#00D4A0]" />
+            ) : (
+              <>
+                <ChevronLeft className="h-[18px] w-[18px]" />
+                <span>Collapse</span>
+              </>
+            )}
           </button>
         </div>
       </div>

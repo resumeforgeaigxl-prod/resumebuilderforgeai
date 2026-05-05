@@ -126,31 +126,32 @@ export default function JobsPage() {
         <div className="space-y-8 max-w-7xl mx-auto">
             <PaymentSuccessBanner />
 
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            {/* Standardized Header */}
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E2A42] pb-8 mb-12">
                 <div>
-                    <h1 className="text-4xl font-black text-white tracking-tight flex items-center gap-3">
-                        <Briefcase className="w-10 h-10 text-indigo-500" />
-                        Job Board
-                    </h1>
-                    <p className="text-slate-400 mt-2 font-medium">Discover global tech opportunities curated by AI</p>
+                    <div className="flex items-center gap-2 text-[#00D4A0] font-bold tracking-widest text-[10px] uppercase mb-4">
+                        <Briefcase className="w-3.5 h-3.5" /> Intelligence Core
+                    </div>
+                    <h1 className="text-4xl font-bold tracking-tighter text-white uppercase">JobForge</h1>
+                    <p className="text-slate-400 mt-2 text-lg">Discover global tech opportunities curated by AI across neural networks.</p>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-slate-900 border border-white/5 rounded-xl text-[10px] font-black uppercase text-slate-500 tracking-widest whitespace-nowrap">
-                        <Globe className="w-3 h-3 text-indigo-500" />
-                        Region: <span className="text-indigo-400">{detectedCountry === 'IN' ? 'India' : detectedCountry === 'US' ? 'United States' : 'Global'}</span>
+                <div className="flex items-center gap-4">
+                    <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-[#0D1220] border border-[#1E2A42] rounded-xl text-[10px] font-black uppercase text-slate-500 tracking-widest whitespace-nowrap">
+                        <Globe className="w-3 h-3 text-[#00D4A0]" />
+                        Region: <span className="text-[#00D4A0]">{detectedCountry === 'IN' ? 'India' : detectedCountry === 'US' ? 'United States' : 'Global'}</span>
                     </div>
                     <button
                         onClick={triggerRefresh}
                         disabled={fetching}
                         className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-sm font-bold transition-all disabled:opacity-50"
                     >
-                        {fetching ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4 text-indigo-400" />}
+                        {fetching ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4 text-[#00D4A0]" />}
                         {fetching ? 'Syncing...' : 'Refresh Board'}
                     </button>
                 </div>
-            </div>
+            </header>
+
 
             {/* Filters Bar */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 bg-slate-900/40 p-6 rounded-[2.5rem] border border-white/5 backdrop-blur-md shadow-2xl">
