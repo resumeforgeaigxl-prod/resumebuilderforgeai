@@ -39,7 +39,7 @@ const INTERNAL_APP_ROOTS = new Set([
     'salaryforge',
     'networkforge',
     'ats-live',
-    'jobforge-app',
+    'jobs',
 ]);
 
 function getRouteRoot(pathname: string | null): string {
@@ -104,7 +104,7 @@ export default function Footer() {
                             <li><Link href={`/${region}/${locale}/knowledgeforge`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> KnowledgeForge</Link></li>
                             <li><Link href={`/${region}/${locale}/salaryforge`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-[#00D4A0]/50 group-hover:bg-[#00D4A0]" /> SalaryForge</Link></li>
                             <li><Link href={`/${region}/${locale}/ats-live`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-[#00D4A0]/50 group-hover:bg-[#00D4A0]" /> AtsLive</Link></li>
-                            <li><Link href={`/${region}/${locale}/jobforge-app`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-[#00D4A0]/50 group-hover:bg-[#00D4A0]" /> JobForge</Link></li>
+                            <li><Link href={`/${region}/${locale}/jobs`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-[#00D4A0]/50 group-hover:bg-[#00D4A0]" /> JobForge</Link></li>
                             <li><Link href={`/${region}/${locale}/mentorforge`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> MentorForge</Link></li>
                             <li><Link href={`/${region}/${locale}/company-prep`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> CompanyForge</Link></li>
                         </ul>

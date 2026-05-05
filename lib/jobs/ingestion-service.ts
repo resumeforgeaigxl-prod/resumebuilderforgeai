@@ -146,9 +146,13 @@ export async function ingestJobs(jobs: Partial<NormalisedJob>[]) {
         
     const recentIds = new Set(recentJobs?.map(j => j.external_id));
 
+    const skippedDetails: any[] = [];
+    const insertedDetails: any[] = [];
+
     const finalDbJobs = readyToIngest.filter(j => {
         if (recentIds.has(j.external_id)) {
             skipped++;
+            skippedDetails.push({ title: j.title, company: j.company, reason: 'Duplicate' });
             return false;
         }
         return true;
@@ -172,7 +176,14 @@ export async function ingestJobs(jobs: Partial<NormalisedJob>[]) {
 
     if (finalDbJobs.length === 0) {
         console.log(`[IngestionPipeline] All jobs duplicate/filtered. Fetched: ${totalFetched}, Skipped: ${skipped}`);
-        return { total: totalFetched, filtered: filteredCount, inserted: 0, skipped, failed: 0 };
+        return { 
+            total: totalFetched, 
+            filtered: filteredCount, 
+            inserted: 0, 
+            skipped, 
+            failed: 0,
+            skippedDetails 
+        };
     }
 
     // UPSERT with Conflict on external_id
@@ -182,13 +193,22 @@ export async function ingestJobs(jobs: Partial<NormalisedJob>[]) {
             onConflict: 'external_id', 
             ignoreDuplicates: true 
         })
-        .select('id');
+        .select('id, title, company');
 
     if (error) {
         console.error('[IngestionPipeline] UPSERT Error:', error.message);
         failed = finalDbJobs.length;
     } else {
         inserted = data?.length || 0;
+        const insertedIds = new Set(data?.map(d => d.id));
+        
+        // Track what was actually inserted vs what might have been ignored by DB unique constraint
+        finalDbJobs.forEach((job, idx) => {
+            if (data && data[idx]) {
+                insertedDetails.push({ title: job.title, company: job.company });
+            }
+        });
+        
         skipped += (finalDbJobs.length - inserted);
     }
 
@@ -199,7 +219,9 @@ export async function ingestJobs(jobs: Partial<NormalisedJob>[]) {
         filtered: filteredCount,
         inserted,
         skipped,
-        failed
+        failed,
+        skippedDetails,
+        insertedDetails
     };
 }
 

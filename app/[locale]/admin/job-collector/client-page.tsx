@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Play, Loader2, Database, Zap, Search, RefreshCcw, MapPin } from 'lucide-react';
+import { Play, Loader2, Database, Zap, Search, RefreshCcw, MapPin, CheckCircle2, XCircle } from 'lucide-react';
 
 interface StoredJob {
     id: string;
@@ -18,6 +18,7 @@ export default function JobCollectorClient() {
     const [jobs, setJobs] = useState<StoredJob[]>([]);
     const [fetchingJobs, setFetchingJobs] = useState(false);
     const [filter, setFilter] = useState('');
+    const [syncReport, setSyncReport] = useState<any>(null);
 
     const fetchJobs = async () => {
         setFetchingJobs(true);
@@ -41,6 +42,7 @@ export default function JobCollectorClient() {
     const runAction = async (action: 'collector' | 'sync' | 'dedupe', label: string) => {
         setLoading(prev => ({ ...prev, [action]: true }));
         setStatus(`Running ${label}...`);
+        setSyncReport(null);
 
         try {
             let res;
@@ -56,8 +58,9 @@ export default function JobCollectorClient() {
 
             const data = await res.json();
             if (data.success) {
-                setStatus(`Success: ${JSON.stringify(data.summary || data.stats || 'Action completed')}`);
-                // Refresh jobs list after successful run
+                const resultStats = data.summary?.unified_collector || data.stats || data.summary;
+                setSyncReport(resultStats);
+                setStatus(`${label} completed successfully.`);
                 fetchJobs();
             } else {
                 setStatus(`Error: ${data.detail || data.error}`);
@@ -123,6 +126,53 @@ export default function JobCollectorClient() {
                     <div className="flex items-center gap-3">
                         <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
                         <span className="text-sm font-mono text-indigo-200 break-all">{status}</span>
+                    </div>
+                </div>
+            )}
+
+            {/* Sync Report Section */}
+            {syncReport && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    {/* Inserted Jobs */}
+                    <div className="glass-card p-6 border-emerald-500/20 bg-emerald-500/5">
+                        <div className="flex items-center justify-between mb-4">
+                            <h4 className="font-bold text-emerald-400 flex items-center gap-2">
+                                <CheckCircle2 className="w-4 h-4" /> New Ingestions ({syncReport.inserted || 0})
+                            </h4>
+                        </div>
+                        <div className="max-h-[300px] overflow-y-auto space-y-2 custom-scrollbar pr-2">
+                            {syncReport.insertedDetails?.length > 0 ? (
+                                syncReport.insertedDetails.map((job: any, i: number) => (
+                                    <div key={i} className="p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/10">
+                                        <div className="text-xs font-bold text-emerald-100">{job.title}</div>
+                                        <div className="text-[10px] text-emerald-400 uppercase font-black tracking-widest">{job.company}</div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-xs text-slate-500 italic">No new jobs were inserted in this run.</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Skipped Jobs */}
+                    <div className="glass-card p-6 border-amber-500/20 bg-amber-500/5">
+                        <div className="flex items-center justify-between mb-4">
+                            <h4 className="font-bold text-amber-400 flex items-center gap-2">
+                                <XCircle className="w-4 h-4" /> Skipped / Duplicates ({syncReport.skipped || 0})
+                            </h4>
+                        </div>
+                        <div className="max-h-[300px] overflow-y-auto space-y-2 custom-scrollbar pr-2">
+                            {syncReport.skippedDetails?.length > 0 ? (
+                                syncReport.skippedDetails.map((job: any, i: number) => (
+                                    <div key={i} className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/10">
+                                        <div className="text-xs font-bold text-amber-100">{job.title}</div>
+                                        <div className="text-[10px] text-amber-400 uppercase font-black tracking-widest">{job.company}</div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-xs text-slate-500 italic">No duplicates were found in this run.</p>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
@@ -202,43 +252,6 @@ export default function JobCollectorClient() {
                                     </tr>
                                 ))
                             )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div className="glass-card overflow-hidden border-white/5 bg-slate-900/40">
-                <div className="p-6 border-b border-white/5 flex items-center justify-between">
-                    <h3 className="font-bold text-white">Governance & Management</h3>
-                    <div className="flex gap-2">
-                         <div className="px-3 py-1 bg-white/5 rounded-full text-[10px] text-slate-500 font-black uppercase tracking-widest">System Operational</div>
-                    </div>
-                </div>
-                <div className="p-0">
-                    <table className="w-full text-left text-sm">
-                        <thead>
-                            <tr className="bg-white/2 text-slate-400 uppercase text-[10px] font-black tracking-widest">
-                                <th className="px-6 py-4">Tool</th>
-                                <th className="px-6 py-4">Action</th>
-                                <th className="px-6 py-4 text-right">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/5">
-                            <tr>
-                                <td className="px-6 py-4 font-medium text-white">Automatic Deduplicator</td>
-                                <td className="px-6 py-4 text-slate-400 font-medium">Title + Company + Location Hash</td>
-                                <td className="px-6 py-4 text-emerald-400 font-bold text-right text-[10px] uppercase">Enforced</td>
-                            </tr>
-                            <tr>
-                                <td className="px-6 py-4 font-medium text-white">Gemini Extractors</td>
-                                <td className="px-6 py-4 text-slate-400 font-medium">Desc Extraction & Normalization</td>
-                                <td className="px-6 py-4 text-indigo-400 font-bold text-right text-[10px] uppercase">Active</td>
-                            </tr>
-                             <tr>
-                                <td className="px-6 py-4 font-medium text-white">Search Discovery</td>
-                                <td className="px-6 py-4 text-slate-400 font-medium">Serper + Tavily + DuckDuckGo</td>
-                                <td className="px-6 py-4 text-blue-400 font-bold text-right text-[10px] uppercase">Synced</td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>

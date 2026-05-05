@@ -4,6 +4,7 @@ import { ingestJobs } from '@/lib/jobs/ingestion-service';
 import { fetchJSearch } from '@/lib/jobs/sources/jsearch';
 import { fetchAdzuna } from '@/lib/jobs/sources/adzuna';
 import { fetchApify } from '@/lib/jobs/sources/apify';
+import { getSession } from '@/lib/auth/jwt';
 import { fetchJobForgeCollector } from '@/lib/jobs/sources/jobforgecollector';
 
 export async function GET(req: Request) {
@@ -15,9 +16,17 @@ export async function GET(req: Request) {
         const authHeader = req.headers.get('authorization');
         const isSecretMatch = process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`;
         
-        // Protect in production — allow Vercel Cron or manual triggers if secret matches
-        if (process.env.NODE_ENV === 'production' && !isSecretMatch && !sourceParam) {
+        const session = await getSession();
+        const isAdmin = session?.role === 'admin';
+
+        // Protect in production — allow Vercel Cron or manual triggers if secret matches OR user is Admin
+        if (process.env.NODE_ENV === 'production' && !isSecretMatch && !isAdmin && !sourceParam) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        
+        // Manual trigger from browser requires Admin role
+        if (!isSecretMatch && !isAdmin) {
+             return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
         }
         
         const summary: Record<string, unknown> = {};

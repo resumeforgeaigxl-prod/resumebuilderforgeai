@@ -28,7 +28,7 @@ export default function FooterWrapper({ children }: { children: ReactNode }) {
         pathname?.includes('/api-platform') || 
         pathname?.includes('/mock-interview') || 
         pathname?.includes('/interviewforge') || 
-        pathname?.includes('/jobforge-app') || 
+        pathname?.includes('/jobs') || 
         pathname?.includes('/jobforgeai') || 
         pathname?.includes('/tools') ||
         pathname?.includes('/billing') ||

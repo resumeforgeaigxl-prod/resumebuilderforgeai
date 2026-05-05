@@ -53,7 +53,7 @@ export function Sidebar({ locale }: SidebarProps) {
     { name: "StudyForge", icon: BookOpen, href: `/${safeLocale}/studyforge` },
     { name: "CareerForge", icon: Briefcase, href: `/${safeLocale}/careerforge` },
     { name: "MentorForge", icon: Bot, href: `/${safeLocale}/mentorforge` },
-    { name: "JobForge", icon: Search, href: `/${safeLocale}/jobforge-app` },
+    { name: "JobForge", icon: Search, href: `/${safeLocale}/jobs` },
     { name: "Company Prep", icon: Building2, href: `/${safeLocale}/company-prep-interview` },
     { name: "API Platform", icon: Terminal, href: `/${safeLocale}/api-keys` },
     { name: "SalaryForge", icon: Wallet, href: `/${safeLocale}/salaryforge` },

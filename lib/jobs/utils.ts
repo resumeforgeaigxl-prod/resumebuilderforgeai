@@ -13,22 +13,20 @@ export async function retry<T>(
 }
 
 export function isValidLocation(location: unknown): boolean {
+    if (!location) return true;
+    
     let locationStr = '';
-
     if (typeof location === 'string') {
         locationStr = location;
-    } else if (location && typeof location === 'object') {
+    } else if (typeof location === 'object') {
         const obj = location as Record<string, unknown>;
         locationStr = String(obj.name || obj.display_name || obj.location || '');
-    } else {
-        // If null/undefined, treat as potentially valid (defaulting to India in context)
-        if (!location) return true;
-        locationStr = String(location);
     }
 
-    const lower = locationStr.toLowerCase();
+    if (!locationStr || locationStr.length < 2) return false;
 
-    const validTerms = ['india', 'bangalore', 'hyderabad', 'pune', 'chennai', 'remote', 'bengaluru', 'gurgaon', 'noida', 'mumbai'];
-    return validTerms.some(term => lower.includes(term));
+    // Allow all locations except very obvious spam or empty strings
+    // This ensures USA, Europe, and Global jobs are not filtered out
+    return true;
 }
 
