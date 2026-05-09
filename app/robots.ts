@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://www.resumeforgeai.in/sitemap.xml',
+    sitemap: 'https://resumeforgeai.in/sitemap.xml',
   };
 }

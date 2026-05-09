@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSession } from '@/lib/auth/jwt';
 import { generateContentGemini } from '@/lib/gemini-service';
+import { checkDailyLimit, logUsage } from '@/lib/usage';
+
 interface StudyDocument {
     id: string;
     name: string;
@@ -22,6 +24,15 @@ export async function POST(request: NextRequest) {
 
         const supabase = createAdminClient();
         const userId = session.userId;
+
+        // Verify Credit Limit Before Doing Anything
+        const usageCheck = await checkDailyLimit(userId, 'ai_message');
+        if (!usageCheck.allowed) {
+            return NextResponse.json(
+                { error: 'AI credit limit reached. Please upgrade your plan or wait for the daily reset.' },
+                { status: 403 }
+            );
+        }
 
         // Verify ownership and fetch pre-processed text
         const { data: docRaw, error: docError } = await supabase
@@ -83,6 +94,9 @@ export async function POST(request: NextRequest) {
         }
 
         const responseText = await generateContentGemini(prompt, systemPrompt);
+
+        // Deduct AI credits for the action
+        await logUsage(userId, 'ai_message');
 
         // Save session
         const { error: sError } = await supabase

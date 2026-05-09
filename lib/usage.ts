@@ -4,7 +4,7 @@ import { checkUserAccess, PlanLevel } from '@/lib/access';
 // Usage Limits configuration based on Plan
 // Interpretation: 1 Token = 1 AI Credit
 export const USAGE_LIMITS: Record<PlanLevel | 'PRO', number> = {
-    'FREE': 20,
+    'FREE': 50,
     'DAILY': 300,
     'WEEKLY': 800,
     'MONTHLY': 2000,

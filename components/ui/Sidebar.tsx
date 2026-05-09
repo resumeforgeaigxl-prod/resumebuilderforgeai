@@ -36,7 +36,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ locale }: SidebarProps) {
-  const { collapsed, toggle } = useSidebar();
+  const { collapsed, toggle, setCollapsed, isMounted } = useSidebar();
   const pathname = usePathname();
 
   const safeLocale = locale.toLowerCase();
@@ -63,18 +63,31 @@ export function Sidebar({ locale }: SidebarProps) {
   ];
 
   return (
-    <aside
-      className={cn(
-        "fixed left-0 top-0 z-40 h-screen border-r border-[#1E2A42] bg-[#0D1220]/95 backdrop-blur-xl flex flex-col",
-        "transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
-        collapsed ? "w-[72px]" : "w-64"
+    <>
+      {/* Mobile Overlay */}
+      {!collapsed && (
+        <div 
+          className="fixed inset-0 z-30 bg-[#080B16]/80 backdrop-blur-sm md:hidden animate-in fade-in duration-300"
+          onClick={() => setCollapsed(true)}
+        />
       )}
-    >
-      <div className="flex h-full flex-col p-3">
+
+      <aside
+        className={cn(
+          "fixed left-0 top-0 z-40 h-screen border-r border-[#1E2A42] bg-[#0D1220]/95 backdrop-blur-xl flex flex-col",
+          "ease-[cubic-bezier(0.4,0,0.2,1)]",
+          isMounted ? "transition-all duration-300" : "",
+          collapsed 
+            ? "-translate-x-full md:translate-x-0 md:w-[72px]" 
+            : "translate-x-0 w-64 md:w-64"
+        )}
+      >
+        <div className="flex h-full flex-col p-3">
         {/* Logo + Collapse Toggle */}
         <div className="mb-6 flex items-center justify-between min-h-[48px] px-1">
           <div className={cn(
-            "overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+            "overflow-hidden ease-[cubic-bezier(0.4,0,0.2,1)]",
+            isMounted ? "transition-all duration-300" : "",
             collapsed ? "w-0 opacity-0" : "w-[140px] opacity-100"
           )}>
             <Image
@@ -214,6 +227,7 @@ export function Sidebar({ locale }: SidebarProps) {
           </button>
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

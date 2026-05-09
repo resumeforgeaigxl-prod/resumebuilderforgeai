@@ -298,6 +298,22 @@ export const dashboardStats = [
 
 export const pricingTiers = [
   {
+    name: "Free",
+    price: "₹0",
+    cadence: "/forever",
+    description: "Start your career journey with basic AI access.",
+    cta: "Start Free",
+    href: "/signup",
+    accent: "from-emerald-500/[0.15] to-teal-400/[0.05]",
+    featured: false,
+    features: [
+      "50 Daily AI credits",
+      "Basic Resume Builder",
+      "Standard ATS Check",
+      "Community Support",
+    ],
+  },
+  {
     name: "Daily",
     price: "₹29",
     cadence: "/day",

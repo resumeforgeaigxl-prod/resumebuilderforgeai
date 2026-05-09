@@ -96,9 +96,10 @@ export default function WhatsNew({ locale = 'en', posts = [] }: { locale: string
                                         <div className="mt-auto">
                                             <Link 
                                                 href={`/${locale}/posts/${post.slug}`}
+                                                aria-label={`Learn more about ${post.title}`}
                                                 className="inline-flex items-center justify-center gap-3 bg-white/5 hover:bg-white/10 text-white font-bold py-4 px-8 rounded-2xl border border-white/5 transition-all w-full md:w-fit group/btn"
                                             >
-                                                Learn More <ChevronRight size={18} className="group-hover/btn:translate-x-1 transition-transform text-blue-500" />
+                                                <span aria-hidden="true">Learn More</span> <ChevronRight size={18} className="group-hover/btn:translate-x-1 transition-transform text-blue-500" aria-hidden="true" />
                                             </Link>
                                         </div>
                                     </div>

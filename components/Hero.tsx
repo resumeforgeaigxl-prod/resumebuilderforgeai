@@ -3,14 +3,11 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Sparkles, FileText, Brain, Search } from "lucide-react";
 import {
   DEFAULT_LOCALE,
   fadeInScale,
   fadeInUp,
-  heroNodes,
-  heroStats,
-  hoverLift,
 } from "@/lib/constants";
 
 type HeroProps = {
@@ -28,29 +25,33 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
   const homeHref = locale === DEFAULT_LOCALE ? "/" : `/${locale}`;
 
   return (
-    <section className="px-4 md:px-6 pb-12 md:pb-24 pt-4 md:pt-8 overflow-hidden">
-      <div className="mx-auto max-w-7xl">
+    <section className="relative px-4 md:px-6 pb-20 md:pb-32 pt-6 md:pt-10 overflow-hidden">
+      {/* Dynamic Background Glows */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[400px] bg-[#00D4A0]/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-40 left-1/2 -translate-x-1/2 w-full max-w-xl h-[300px] bg-[#7C5CFC]/10 blur-[100px] rounded-full pointer-events-none" />
+
+      <div className="mx-auto max-w-7xl relative z-10">
         <motion.header
           {...fadeInScale()}
-          className="mx-auto mb-16 flex max-w-7xl items-center justify-between rounded-full border border-white/10 bg-white/[0.06] px-4 py-3 shadow-[0_24px_80px_-40px_rgba(8,15,30,0.9)] backdrop-blur-xl sm:px-6"
+          className="mx-auto mb-16 sm:mb-24 flex max-w-5xl items-center justify-between rounded-full border border-white/10 bg-white/[0.03] px-4 py-3 shadow-2xl backdrop-blur-2xl sm:px-6"
         >
           <Link
             href={homeHref}
             aria-label="ResumeForgeAI Home"
             className="flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.18em] text-white"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[linear-gradient(135deg,#00D4A0,#7C5CFC)] text-sm text-[#080B16] font-bold shadow-[0_0_30px_rgba(0,212,160,0.3)]" aria-hidden="true">
+            <span className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[linear-gradient(135deg,#00D4A0,#7C5CFC)] text-sm text-[#080B16] font-bold shadow-[0_0_30px_rgba(0,212,160,0.4)]" aria-hidden="true">
               RF
             </span>
             <span className="hidden sm:block">ResumeForgeAI</span>
           </Link>
 
-          <nav className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
+          <nav className="hidden items-center gap-8 text-sm font-medium text-slate-300 md:flex">
             {navItems.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
-                className="transition-colors duration-200 hover:text-white"
+                className="transition-all duration-200 hover:text-white hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
               >
                 {item.label}
               </a>
@@ -59,223 +60,159 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
 
           <Link
             href={`/${locale}/signup`}
-            className="inline-flex items-center rounded-full border border-[#00D4A0]/20 bg-[#00D4A0] px-5 py-2.5 text-sm font-semibold text-[#080B16] transition-all duration-200 hover:shadow-[0_8px_30px_rgba(0,212,160,0.3)] hover:scale-[1.02]"
+            className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:bg-white/10 hover:border-white/20"
           >
-            Get Started
+            Sign In
           </Link>
         </motion.header>
 
-        <div className="grid gap-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-          <div className="max-w-3xl">
-            <motion.div
-              {...fadeInUp(0.06)}
-              className="inline-flex items-center gap-2 rounded-full border border-[#00D4A0]/20 bg-[#00D4A0]/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-[#00D4A0]"
-            >
-              AI Career Operating System
-            </motion.div>
+        <div className="flex flex-col items-center text-center">
+          <motion.div
+            {...fadeInUp(0.06)}
+            className="inline-flex items-center gap-2 rounded-full border border-[#00D4A0]/30 bg-[#00D4A0]/10 px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-[#00D4A0] backdrop-blur-sm shadow-[0_0_20px_rgba(0,212,160,0.15)]"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>The Intelligence Layer for Careers</span>
+          </motion.div>
 
-            <motion.h1
-              {...fadeInUp(0.12)}
-              className="mt-6 md:mt-8 max-w-4xl text-4xl font-bold leading-[1.1] tracking-[-0.05em] text-white sm:text-6xl lg:text-7xl"
-            >
-              Forge Your Entire Tech Career in One Platform
-            </motion.h1>
+          <motion.h1
+            {...fadeInUp(0.12)}
+            className="mt-8 max-w-5xl text-[3rem] leading-[1.05] tracking-tight text-white sm:text-6xl md:text-7xl lg:text-8xl font-extrabold"
+          >
+            Forge Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4A0] to-[#7C5CFC]">Tech Career</span> <br className="hidden sm:block" /> in One Platform.
+          </motion.h1>
 
-            <motion.p
-              {...fadeInUp(0.18)}
-              className="mt-6 max-w-2xl text-lg leading-8 text-slate-300 sm:text-xl"
-            >
-              ResumeForgeAI is an AI career platform for developers built as a
-              Forge Ecosystem, where each forge solves a specific part of the
-              journey including resumes, coding practice, interview preparation,
-              and job discovery.
-            </motion.p>
-
-            <motion.p
-              {...fadeInUp(0.20)}
-              className="mt-4 max-w-2xl text-base leading-7 text-slate-400"
-            >
-              Build ATS-optimized resumes, practice coding, prepare for
-              interviews, follow AI career roadmaps, and discover job
-              opportunities inside the ResumeForgeAI ecosystem.
-            </motion.p>
-
-            <motion.div
-              {...fadeInUp(0.24)}
-              className="mt-10 flex flex-col gap-4 sm:flex-row"
-            >
-              <Link
-                href={`/${locale}/signup`}
-                className="btn-primary group min-w-[220px] justify-center rounded-full px-7 py-3.5 text-sm font-semibold shadow-[0_18px_60px_-25px_rgba(0,212,160,0.45)]"
-              >
-                Build My Resume Free
-                <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
-              </Link>
-              <a
-                href="#platform"
-                className="btn-secondary min-w-[220px] justify-center rounded-full px-7 py-3.5 text-sm font-semibold"
-              >
-                Explore Platform
-              </a>
-            </motion.div>
-
-            <motion.div
-              {...fadeInUp(0.3)}
-              className="mt-14 flex justify-center sm:justify-start"
-            >
-              <a
-                href="https://peerlist.io/saivarshith8284/project/resumeforgeai"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-1.5 pr-6 transition-all duration-300 hover:border-[#00D4A0]/30 hover:bg-white/[0.06] hover:shadow-[0_0_40px_rgba(0,212,160,0.15)] hover:scale-[1.05]"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-black shadow-inner border border-white/5 overflow-hidden relative">
-                  <Image 
-                    src="/peerlist-badge.png" 
-                    alt="Peerlist Launchpad" 
-                    fill
-                    priority
-                    sizes="48px"
-                    className="object-cover"
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 group-hover:text-slate-400 transition-colors">
-                    🚀 Now Live on
-                  </span>
-                  <span className="text-sm font-bold text-white group-hover:text-[#00D4A0] transition-colors">
-                    Peerlist Launchpad
-                  </span>
-                </div>
-                
-                {/* Subtle glow effect on hover */}
-                <div className="absolute inset-0 -z-10 bg-[#00D4A0]/0 blur-2xl transition-all duration-300 group-hover:bg-[#00D4A0]/8" />
-              </a>
-            </motion.div>
-
-            <motion.div
-              {...fadeInUp(0.36)}
-              className="mt-14 grid gap-4 sm:grid-cols-3"
-            >
-              {heroStats.map((item) => (
-                <div
-                  key={item.label}
-                  className="glass-card rounded-3xl px-5 py-5 shadow-[0_30px_60px_-45px_rgba(8,15,30,0.95)]"
-                >
-                  <div className="text-2xl font-semibold tracking-tight text-white">
-                    {item.value}
-                  </div>
-                  <div className="mt-2 text-sm leading-6 text-slate-400">
-                    {item.label}
-                  </div>
-                </div>
-              ))}
-            </motion.div>
-          </div>
+          <motion.p
+            {...fadeInUp(0.18)}
+            className="mt-8 max-w-2xl text-base sm:text-lg md:text-xl leading-relaxed text-slate-400 font-medium px-4"
+          >
+            ResumeForgeAI is an autonomous career ecosystem. Build ATS-optimized resumes, practice coding, ace AI mock interviews, and land jobs seamlessly.
+          </motion.p>
 
           <motion.div
-            {...fadeInScale(0.16)}
-            className="relative mx-auto flex h-[380px] w-full max-w-[560px] items-center justify-center sm:h-[520px] scale-[0.75] xs:scale-[0.85] sm:scale-100 origin-center"
+            {...fadeInUp(0.24)}
+            className="mt-10 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 w-full sm:w-auto px-4"
           >
-            <div className="absolute inset-[10%] rounded-full bg-[#00D4A0]/[0.08] blur-[90px]" />
-            <div className="absolute inset-[18%] rounded-full bg-[#7C5CFC]/[0.06] blur-[110px]" />
-
-            <svg
-              className="absolute inset-0 h-full w-full"
-              viewBox="0 0 100 100"
-              fill="none"
-              aria-hidden="true"
+            <Link
+              href={`/${locale}/signup`}
+              className="group relative flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-sm sm:text-base font-bold text-[#080B16] transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-[0_0_40px_rgba(255,255,255,0.3)]"
             >
-              {heroNodes.map((node, index) => (
-                <motion.line
-                  key={node.label}
-                  x1="50"
-                  y1="50"
-                  x2={node.x}
-                  y2={node.y}
-                  stroke="url(#hero-line-gradient)"
-                  strokeWidth="0.5"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 1.1, delay: 0.18 + index * 0.08 }}
+              Start Forging Free
+              <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+            <a
+              href="#platform"
+              className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-8 py-4 text-sm sm:text-base font-semibold text-white transition-all hover:bg-white/[0.08] backdrop-blur-sm"
+            >
+              Explore Ecosystem
+            </a>
+          </motion.div>
+
+          <motion.div
+            {...fadeInUp(0.3)}
+            className="mt-12 sm:mt-16"
+          >
+            <a
+              href="https://peerlist.io/saivarshith8284/project/resumeforgeai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-2 pr-6 transition-all duration-300 hover:border-[#00D4A0]/40 hover:bg-white/[0.05] hover:shadow-[0_0_30px_rgba(0,212,160,0.1)]"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black shadow-inner border border-white/10 overflow-hidden relative">
+                <Image 
+                  src="/peerlist-badge.png" 
+                  alt="Peerlist Launchpad" 
+                  fill
+                  sizes="40px"
+                  className="object-cover"
                 />
-              ))}
-              <defs>
-                <linearGradient
-                  id="hero-line-gradient"
-                  x1="0"
-                  y1="0"
-                  x2="1"
-                  y2="1"
-                >
-                  <stop offset="0%" stopColor="rgba(0,212,160,0.05)" />
-                  <stop offset="50%" stopColor="rgba(0,212,160,0.6)" />
-                  <stop offset="100%" stopColor="rgba(124,92,252,0.35)" />
-                </linearGradient>
-              </defs>
-            </svg>
-
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="relative z-10 flex h-32 w-32 md:h-48 md:w-48 flex-col items-center justify-center rounded-[28px] md:rounded-[36px] border border-white/[0.12] bg-[linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.04))] px-4 md:px-6 text-center shadow-[0_32px_120px_-44px_rgba(0,212,160,0.4)] backdrop-blur-2xl"
-            >
-              <span className="text-[9px] md:text-xs font-semibold uppercase tracking-[0.32em] text-[#00D4A0]/70">
-                Central Engine
-              </span>
-              <div className="mt-2 md:mt-4 text-xl font-bold tracking-tight text-white md:text-3xl">
-                ResumeForgeAI
               </div>
-              <div className="hidden md:block mt-3 text-sm leading-6 text-slate-300">
-                One profile. Shared intelligence. Faster career momentum.
+              <div className="flex flex-col text-left">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-400">
+                  Featured On
+                </span>
+                <span className="text-sm font-bold text-white group-hover:text-[#00D4A0]">
+                  Peerlist Launchpad
+                </span>
               </div>
-            </motion.div>
-
-            {heroNodes.map((node, index) => {
-              const Icon = node.icon;
-
-              return (
-                <motion.div
-                  key={node.label}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{
-                    opacity: 1,
-                    scale: 1,
-                    y: [0, -6, 0],
-                  }}
-                  transition={{
-                    opacity: { delay: 0.4 + index * 0.08, duration: 0.55 },
-                    scale: { delay: 0.4 + index * 0.08, duration: 0.55 },
-                    y: {
-                      duration: 4.8 + index * 0.3,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                      delay: 0.4 + index * 0.1,
-                    },
-                  }}
-                  whileHover={hoverLift}
-                  className="absolute z-20"
-                  style={{
-                    left: `${node.x}%`,
-                    top: `${node.y}%`,
-                    transform: "translate(-50%, -50%)",
-                  }}
-                >
-                  <div
-                    className={`glass-card w-[88px] md:w-[126px] rounded-[20px] md:rounded-[24px] border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.11),rgba(255,255,255,0.05))] px-2 md:px-4 py-3 md:py-4 text-center shadow-[0_18px_40px_-25px_rgba(8,15,30,0.95)] ${node.accent}`}
-                  >
-                    <div className="mx-auto flex h-9 w-9 md:h-12 md:w-12 items-center justify-center rounded-xl md:rounded-2xl border border-white/10 bg-white/[0.06] text-white">
-                      <Icon className="h-4 w-4 md:h-5 md:w-5" />
-                    </div>
-                    <div className="mt-2 md:mt-3 text-[9px] md:text-xs font-semibold uppercase tracking-[0.22em] text-slate-200">
-                      {node.label}
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
+            </a>
           </motion.div>
         </div>
+
+        {/* Hero Visual - Premium Stacked Cards */}
+        <motion.div
+          {...fadeInScale(0.35)}
+          className="relative mt-20 sm:mt-28 mx-auto max-w-5xl perspective-1000"
+        >
+          <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] rounded-[2rem] sm:rounded-[3rem] border border-white/10 bg-[#080B16] shadow-[0_40px_100px_-20px_rgba(0,0,0,1)] overflow-hidden">
+            {/* Inner Dashboard Glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[50%] bg-[#00D4A0]/20 blur-[100px] rounded-full mix-blend-screen" />
+            
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_0%,black,transparent)]" />
+
+            {/* AI Scanning Line Effect */}
+            <div className="absolute left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#00D4A0]/50 to-transparent z-20 pointer-events-none animate-scan-line" />
+
+            {/* Dashboard Mockup Header */}
+            <div className="absolute top-0 left-0 right-0 h-16 sm:h-20 border-b border-white/5 bg-white/[0.02] backdrop-blur-md flex items-center px-6 sm:px-10 gap-4 z-20">
+              <div className="flex gap-2">
+                <div className="w-3 h-3 rounded-full bg-rose-500/80" />
+                <div className="w-3 h-3 rounded-full bg-amber-500/80" />
+                <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
+              </div>
+              <div className="ml-4 h-6 w-32 sm:w-48 rounded-md bg-white/5" />
+              <div className="ml-auto h-8 w-8 rounded-full bg-gradient-to-br from-[#00D4A0] to-[#7C5CFC]" />
+            </div>
+
+            {/* Floating Forge Cards */}
+            <div className="absolute top-24 sm:top-32 left-0 right-0 bottom-0 p-6 sm:p-10 grid grid-cols-1 sm:grid-cols-3 gap-6 z-10">
+              <div className="relative flex flex-col rounded-[2rem] border border-white/10 bg-white/[0.03] p-6 shadow-2xl backdrop-blur-sm sm:-translate-y-4 transition-colors hover:border-indigo-500/30 animate-float-1">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-6 border border-indigo-500/20">
+                  <FileText className="w-6 h-6" />
+                </div>
+                <h3 className="text-white font-bold text-lg">ResumeForge</h3>
+                <p className="text-slate-400 text-sm mt-2">ATS-optimized parsing and generation.</p>
+                <div className="mt-auto pt-6 space-y-2">
+                  <div className="h-2 w-full bg-white/5 rounded-full" />
+                  <div className="h-2 w-2/3 bg-white/5 rounded-full" />
+                </div>
+              </div>
+
+              <div className="relative hidden sm:flex flex-col rounded-[2rem] border border-[#00D4A0]/30 bg-[#00D4A0]/5 p-6 shadow-[0_0_50px_rgba(0,212,160,0.15)] backdrop-blur-sm sm:-translate-y-12 transition-colors hover:border-[#00D4A0]/50 hover:shadow-[0_0_80px_rgba(0,212,160,0.25)] z-10 animate-float-2">
+                <div className="w-12 h-12 rounded-2xl bg-[#00D4A0]/20 text-[#00D4A0] flex items-center justify-center mb-6 border border-[#00D4A0]/30 shadow-[0_0_20px_rgba(0,212,160,0.3)]">
+                  <Brain className="w-6 h-6" />
+                </div>
+                <h3 className="text-white font-bold text-lg">InterviewForge</h3>
+                <p className="text-slate-400 text-sm mt-2">Real-time voice AI mock interviews.</p>
+                <div className="mt-auto pt-6 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-[#00D4A0]/20 flex items-center justify-center border border-[#00D4A0]/30 relative">
+                       <div className="absolute inset-0 rounded-full border border-[#00D4A0]/50 animate-ping" />
+                       <div className="w-2 h-2 rounded-full bg-[#00D4A0] animate-pulse" />
+                    </div>
+                    <div className="h-2 w-1/2 bg-white/10 rounded-full" />
+                  </div>
+                  <div className="h-2 w-full bg-white/5 rounded-full" />
+                </div>
+              </div>
+
+              <div className="relative hidden sm:flex flex-col rounded-[2rem] border border-white/10 bg-white/[0.03] p-6 shadow-2xl backdrop-blur-sm sm:-translate-y-4 transition-colors hover:border-amber-500/30 animate-float-3">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mb-6 border border-amber-500/20">
+                  <Search className="w-6 h-6" />
+                </div>
+                <h3 className="text-white font-bold text-lg">JobForge</h3>
+                <p className="text-slate-400 text-sm mt-2">AI-matched opportunities across tech.</p>
+                <div className="mt-auto pt-6 space-y-2">
+                  <div className="h-2 w-full bg-white/5 rounded-full" />
+                  <div className="h-2 w-4/5 bg-white/5 rounded-full" />
+                </div>
+              </div>
+            </div>
+            
+            {/* Bottom Fade Gradient */}
+            <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#080B16] via-[#080B16]/80 to-transparent pointer-events-none z-30" />
+          </div>
+        </motion.div>
       </div>
     </section>
   );

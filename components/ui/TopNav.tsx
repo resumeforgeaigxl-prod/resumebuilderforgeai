@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Bell, Search, User, LogOut, ChevronRight } from "lucide-react";
+import { Bell, Search, User, LogOut, ChevronRight, Menu } from "lucide-react";
 import { Button } from "./Button";
 import {
   DropdownMenu,
@@ -25,18 +25,25 @@ interface TopNavProps {
 
 export function TopNav({ userName = "User", pageTitle, locale = "en" }: TopNavProps) {
   const pathname = usePathname();
-  const { collapsed } = useSidebar();
+  const { collapsed, toggle, isMounted } = useSidebar();
 
   return (
     <header className={cn(
-      "fixed top-0 right-0 z-30 flex h-16 items-center justify-between border-b border-[#1E2A42] bg-[#080B16]/80 px-8 backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
-      collapsed ? "left-[72px]" : "left-64"
+      "fixed top-0 right-0 z-30 flex h-16 items-center justify-between border-b border-[#1E2A42] bg-[#080B16]/80 px-4 md:px-8 backdrop-blur-md ease-[cubic-bezier(0.4,0,0.2,1)]",
+      isMounted ? "transition-all duration-300" : "",
+      collapsed ? "left-0 md:left-[72px]" : "left-0 md:left-64"
     )}>
       {/* Breadcrumbs / Page Title */}
       <div className="flex items-center gap-2 text-sm">
-        <span className="text-[#7A8BA8] font-medium tracking-tight">Dashboard</span>
-        <ChevronRight className="h-3 w-3 text-[#4A5568]" />
-        <span className="text-[#EFF4FB] font-semibold tracking-tight">{pageTitle}</span>
+        <button 
+          onClick={toggle}
+          className="md:hidden mr-2 p-1.5 rounded-lg text-[#7A8BA8] hover:text-[#00D4A0] hover:bg-[#00D4A0]/10 transition-colors"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <span className="text-[#7A8BA8] font-medium tracking-tight hidden sm:inline-block">Dashboard</span>
+        <ChevronRight className="h-3 w-3 text-[#4A5568] hidden sm:block" />
+        <span className="text-[#EFF4FB] font-semibold tracking-tight truncate max-w-[150px] sm:max-w-none">{pageTitle}</span>
       </div>
 
       {/* Actions */}
