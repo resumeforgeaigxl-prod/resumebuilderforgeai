@@ -32,6 +32,9 @@ export default function RegionSwitcher() {
             newPathname = segments.join('/');
         }
 
+        // Set cookie for persistence
+        document.cookie = `preferred_region=${newRegion}; path=/; max-age=31536000; SameSite=Lax`;
+
         router.push(newPathname);
     };
 

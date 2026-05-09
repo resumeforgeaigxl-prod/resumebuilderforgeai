@@ -93,20 +93,19 @@ export default function Footer() {
                         </div>
                     </div>
 
-                    {/* Modules Column */}
                     <div className="space-y-6">
                         <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">Platform Modules</h4>
                         <ul className="space-y-4">
-                            <li><Link href={`/${region}/${locale}/dashboard`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> CareerForge</Link></li>
-                            <li><Link href={`/${region}/${locale}/resumes`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> ResumeForge</Link></li>
-                            <li><Link href={`/${region}/${locale}/mock-interview`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> InterviewForge</Link></li>
-                            <li><Link href={`/${region}/${locale}/learnforge`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> LearnForge</Link></li>
-                            <li><Link href={`/${region}/${locale}/knowledgeforge`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> KnowledgeForge</Link></li>
-                            <li><Link href={`/${region}/${locale}/salaryforge`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-[#00D4A0]/50 group-hover:bg-[#00D4A0]" /> SalaryForge</Link></li>
-                            <li><Link href={`/${region}/${locale}/ats-live`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-[#00D4A0]/50 group-hover:bg-[#00D4A0]" /> AtsLive</Link></li>
-                            <li><Link href={`/${region}/${locale}/jobs`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-[#00D4A0]/50 group-hover:bg-[#00D4A0]" /> JobForge</Link></li>
-                            <li><Link href={`/${region}/${locale}/mentorforge`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> MentorForge</Link></li>
-                            <li><Link href={`/${region}/${locale}/company-prep`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> CompanyForge</Link></li>
+                            <li><Link href={`/${locale}-${region}/dashboard`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> CareerForge</Link></li>
+                            <li><Link href={`/${locale}-${region}/resumes`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> ResumeForge</Link></li>
+                            <li><Link href={`/${locale}-${region}/mock-interview`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> InterviewForge</Link></li>
+                            <li><Link href={`/${locale}-${region}/learnforge`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> LearnForge</Link></li>
+                            <li><Link href={`/${locale}-${region}/knowledgeforge`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> KnowledgeForge</Link></li>
+                            <li><Link href={`/${locale}-${region}/salaryforge`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-[#00D4A0]/50 group-hover:bg-[#00D4A0]" /> SalaryForge</Link></li>
+                            <li><Link href={`/${locale}-${region}/ats-live`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-[#00D4A0]/50 group-hover:bg-[#00D4A0]" /> AtsLive</Link></li>
+                            <li><Link href={`/${locale}-${region}/jobs`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-[#00D4A0]/50 group-hover:bg-[#00D4A0]" /> JobForge</Link></li>
+                            <li><Link href={`/${locale}-${region}/mentorforge`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> MentorForge</Link></li>
+                            <li><Link href={`/${locale}-${region}/company-prep`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> CompanyForge</Link></li>
                         </ul>
                     </div>
 
@@ -125,10 +124,10 @@ export default function Footer() {
                     <div className="space-y-6">
                         <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Legal & Policy</h4>
                         <ul className="space-y-4">
-                            <li><Link href={`/${region}/${locale}/privacy-policy`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2"><Shield className="w-3 h-3 text-emerald-500/50" /> {t('privacy_policy')}</Link></li>
-                            <li><Link href={`/${region}/${locale}/terms-of-service`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2"><FileLock className="w-3 h-3 text-amber-500/50" /> {t('terms_of_service')}</Link></li>
-                            <li><Link href={`/${region}/${locale}/cookie-policy`} className="text-sm font-medium text-slate-500 hover:text-white transition-all">Cookie Policy</Link></li>
-                            <li><Link href={`/${region}/${locale}/data-deletion`} className="text-sm font-medium text-slate-500 hover:text-white transition-all">Data Deletion</Link></li>
+                            <li><Link href={`/${locale}-${region}/privacy-policy`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2"><Shield className="w-3 h-3 text-emerald-500/50" /> {t('privacy_policy')}</Link></li>
+                            <li><Link href={`/${locale}-${region}/terms-of-service`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2"><FileLock className="w-3 h-3 text-amber-500/50" /> {t('terms_of_service')}</Link></li>
+                            <li><Link href={`/${locale}-${region}/cookie-policy`} className="text-sm font-medium text-slate-500 hover:text-white transition-all">Cookie Policy</Link></li>
+                            <li><Link href={`/${locale}-${region}/data-deletion`} className="text-sm font-medium text-slate-500 hover:text-white transition-all">Data Deletion</Link></li>
                         </ul>
                     </div>
                 </div>

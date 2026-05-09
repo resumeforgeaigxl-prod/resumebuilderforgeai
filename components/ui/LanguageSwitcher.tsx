@@ -39,7 +39,7 @@ export default function LanguageSwitcher() {
         }
 
         // 1. Set cookie for persistence (guest & fallback)
-        document.cookie = `preferred_language=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
+        document.cookie = `preferred_lang=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
 
         // 2. If logged in, sync with Supabase
         try {
