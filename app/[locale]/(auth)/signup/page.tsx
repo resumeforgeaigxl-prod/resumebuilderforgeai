@@ -3,17 +3,18 @@ export const dynamic = 'force-dynamic';
 ;
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { UserPlus, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { OAuthButtons } from '@/components/auth/oauth-buttons';
 
-export default function SignupPage({ searchParams }: { searchParams: { error?: string; message?: string } }) {
+export default function SignupPage() {
     const params = useParams() as { locale: string };
     const { locale } = params;
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(searchParams.error || null);
-    const [message, setMessage] = useState(searchParams.message || null);
+    const [error, setError] = useState<string | null>(searchParams?.get('error') || null);
+    const [message, setMessage] = useState<string | null>(searchParams?.get('message') || null);
     const [tcChecked, setTcChecked] = useState(false);
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {

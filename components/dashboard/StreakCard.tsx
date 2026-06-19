@@ -40,8 +40,8 @@ export default function StreakCard() {
     };
 
     if (loading) return (
-        <div className="h-48 rounded-[2rem] bg-[#0a0a16] border border-white/5 animate-pulse flex items-center justify-center">
-            <Loader2 className="w-6 h-6 text-indigo-500 animate-spin" />
+        <div className="h-48 rounded-xl bg-white border border-[#EBEBEB] animate-pulse flex items-center justify-center">
+            <Loader2 className="w-6 h-6 text-[#171717] animate-spin" />
         </div>
     );
 
@@ -49,47 +49,44 @@ export default function StreakCard() {
     const progress = nextReward ? (currentStreak / nextReward.streak_day) * 100 : 100;
 
     return (
-        <div className="group relative p-8 rounded-[2rem] bg-[#0a0a16] border border-white/5 overflow-hidden transition-all hover:border-indigo-500/30">
-            {/* Background Glow */}
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/5 rounded-full blur-[80px] group-hover:bg-indigo-500/10 transition-all duration-1000"></div>
-
+        <div className="group relative p-6 rounded-xl bg-white border border-[#EBEBEB] overflow-hidden transition-all hover:shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.06)]">
             <div className="relative z-10 space-y-6">
                 <div className="flex items-start justify-between">
                     <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                            <Flame className={`w-5 h-5 ${currentStreak > 0 ? 'text-orange-500 fill-orange-500 animate-pulse' : 'text-slate-700'}`} />
-                            <h3 className="text-xl font-black text-white uppercase tracking-tight">Daily Streak</h3>
+                            <Flame className={`w-5 h-5 ${currentStreak > 0 ? 'text-[#0070F3] fill-[#0070F3]/10' : 'text-[#8F8F8F]'}`} />
+                            <h3 className="text-base font-semibold text-[#171717] tracking-tight">Daily Streak</h3>
                         </div>
-                        <p className="text-slate-500 text-xs font-medium">Keep forging daily to unlock rewards.</p>
+                        <p className="text-[#8F8F8F] text-xs font-normal">Keep forging daily to unlock rewards.</p>
                     </div>
-                    <div className="text-4xl font-black text-white italic tracking-tighter">
-                        {currentStreak}<span className="text-indigo-500 text-lg not-italic ml-1">Days</span>
+                    <div className="text-3xl font-bold text-[#171717] tracking-tight">
+                        {currentStreak}<span className="text-[#8F8F8F] text-sm font-normal not-italic ml-1">Days</span>
                     </div>
                 </div>
 
                 {nextReward ? (
                     <div className="space-y-4">
-                        <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        <div className="flex items-center justify-between text-[11px] font-mono text-[#8F8F8F]">
                             <span>Next Reward: {nextReward.streak_day} Days</span>
-                            <span className="text-indigo-400">{(progress).toFixed(0)}% Complete</span>
+                            <span className="text-[#0070F3]">{(progress).toFixed(0)}% Complete</span>
                         </div>
-                        <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div className="h-1.5 w-full bg-[#F2F2F2] rounded-full overflow-hidden">
                             <div 
-                                className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-1000"
+                                className="h-full bg-[#171717] rounded-full transition-all duration-1000"
                                 style={{ width: `${Math.min(100, progress)}%` }}
                             ></div>
                         </div>
-                        <div className="flex items-center gap-3 p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
-                            <Award className="w-5 h-5 text-indigo-400" />
-                            <p className="text-xs font-bold text-slate-300">
+                        <div className="flex items-center gap-3 p-4 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB]">
+                            <Award className="w-5 h-5 text-[#171717]" />
+                            <p className="text-xs font-medium text-[#4D4D4D]">
                                 {nextReward.description}
                             </p>
                         </div>
                     </div>
                 ) : (
-                    <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 border-dashed">
-                        <Star className="w-5 h-5 text-emerald-400" />
-                        <p className="text-xs font-bold text-emerald-400 lowercase tracking-tight">
+                    <div className="flex items-center gap-3 p-4 rounded-lg bg-emerald-50 border border-emerald-100 border-dashed">
+                        <Star className="w-5 h-5 text-emerald-600" />
+                        <p className="text-xs font-medium text-emerald-600 tracking-tight">
                             You&apos;ve reached the ultimate streak! Legend status.
                         </p>
                     </div>
@@ -98,12 +95,12 @@ export default function StreakCard() {
                 <div className="flex items-center justify-between pt-2">
                     <div className="flex -space-x-2">
                         {[1, 2, 3].map(i => (
-                            <div key={i} className={`w-8 h-8 rounded-full border-2 border-[#0a0a16] flex items-center justify-center ${i <= currentStreak ? 'bg-indigo-500' : 'bg-slate-800'}`}>
-                                <Zap className={`w-3 h-3 ${i <= currentStreak ? 'text-white' : 'text-slate-600'}`} />
+                            <div key={i} className={`w-8 h-8 rounded-full border-2 border-white flex items-center justify-center ${i <= currentStreak ? 'bg-[#171717]' : 'bg-[#F2F2F2]'}`}>
+                                <Zap className={`w-3 h-3 ${i <= currentStreak ? 'text-white' : 'text-[#8F8F8F]'}`} />
                             </div>
                         ))}
                     </div>
-                    <button className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-colors">
+                    <button className="flex items-center gap-1 text-[11px] font-mono text-[#8F8F8F] hover:text-[#171717] transition-colors">
                         View Rewards <ChevronRight className="w-3 h-3" />
                     </button>
                 </div>

@@ -112,30 +112,30 @@ export default function ApiKeysPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+                <Loader2 className="w-8 h-8 animate-spin text-[#171717]" />
             </div>
         );
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-700">
+        <div className="max-w-6xl mx-auto space-y-8 animate-premium-in pb-20 text-[#171717]">
             {/* Standardized Header */}
-            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E2A42] pb-8 mb-12">
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#EBEBEB] pb-8 mb-12">
                 <div>
-                    <div className="flex items-center gap-2 text-[#00D4A0] font-bold tracking-widest text-[10px] uppercase mb-4">
-                        <Terminal className="w-3.5 h-3.5" /> Intelligence Core
+                    <div className="flex items-center gap-2 text-[#8F8F8F] font-bold tracking-wider text-[10px] uppercase mb-3 font-mono">
+                        <Terminal className="w-3.5 h-3.5 text-[#171717]" /> Intelligence Core
                     </div>
-                    <h1 className="text-4xl font-bold tracking-tighter text-white uppercase">ApiForge</h1>
-                    <p className="text-slate-400 mt-2 text-lg">Manage secure access credentials and neural signal integration protocols.</p>
+                    <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-[#171717]">ApiForge</h1>
+                    <p className="text-[#4D4D4D] mt-2 text-sm md:text-base">Manage secure access credentials and neural signal integration protocols.</p>
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <a href="https://docs.resumeforgeai.in" target="_blank" className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0D1220] border border-[#1E2A42] text-[10px] font-black text-[#00D4A0] hover:bg-[#00D4A0]/5 transition-all uppercase tracking-widest">
+                    <a href="https://docs.resumeforgeai.in" target="_blank" className="flex items-center gap-2 px-4 py-2 rounded-md bg-[#FFFFFF] border border-[#EBEBEB] text-xs font-semibold text-[#171717] hover:bg-[#FAFAFA] transition-all shadow-sm">
                         <Info className="w-4 h-4" /> Documentation
                     </a>
-                    <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0D1220] border border-[#1E2A42]">
-                        <div className="text-[10px] text-[#4A5568] uppercase tracking-wider font-semibold">V1.2_ACTIVE</div>
-                        <div className="w-2 h-2 rounded-full bg-[#00D4A0] animate-pulse" />
+                    <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FFFFFF] border border-[#EBEBEB] shadow-sm">
+                        <div className="text-[10px] text-[#8F8F8F] font-mono uppercase tracking-normal">V1.2 Active</div>
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     </div>
                 </div>
             </header>
@@ -144,36 +144,36 @@ export default function ApiKeysPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Create Key Card */}
                 <div className="lg:col-span-1">
-                    <div className="p-8 bg-white/[0.02] border border-white/5 rounded-[2rem] sticky top-24 backdrop-blur-xl">
-                        <h3 className="text-lg font-black text-white mb-6 uppercase italic tracking-tight">Generate Signal_</h3>
+                    <div className="p-6 bg-[#FFFFFF] border border-[#EBEBEB] rounded-xl sticky top-24 shadow-sm">
+                        <h3 className="text-base font-semibold text-[#171717] mb-6 uppercase tracking-wider font-mono">Generate Signal</h3>
 
                         <div className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Key Description</label>
+                                <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider ml-1">Key Description</label>
                                 <input
                                     type="text"
                                     value={keyName}
                                     onChange={(e) => setKeyName(e.target.value)}
                                     placeholder="e.g. My Website Plugin"
-                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm text-white placeholder:text-slate-700 focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all"
+                                    className="w-full bg-[#FFFFFF] border border-[#EBEBEB] rounded-md px-4 py-2.5 text-sm text-[#171717] placeholder-[#8F8F8F] focus:border-[#171717] outline-none transition-all"
                                 />
                             </div>
 
                             <button
                                 onClick={createKey}
                                 disabled={creating}
-                                className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-black rounded-2xl transition-all shadow-xl shadow-indigo-600/20 flex items-center justify-center gap-3 text-xs uppercase tracking-widest"
+                                className="w-full py-2.5 bg-[#171717] hover:bg-[#333333] disabled:opacity-50 text-white font-semibold rounded-md transition-all shadow-sm flex items-center justify-center gap-2 text-xs uppercase tracking-wider"
                             >
-                                {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                                {creating ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <Plus className="w-4 h-4" />}
                                 {creating ? 'Initialising...' : 'Create New Key'}
                             </button>
 
-                            <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl space-y-2">
-                                <div className="flex items-center gap-2 text-amber-400">
+                            <div className="p-4 bg-[#FFEFCF]/30 border border-[#FFE0B2] rounded-lg space-y-2">
+                                <div className="flex items-center gap-2 text-[#AB570A]">
                                     <Lock className="w-3.5 h-3.5" />
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-amber-500/80">Security Protocol</span>
+                                    <span className="text-[9px] font-bold uppercase tracking-wider">Security Protocol</span>
                                 </div>
-                                <p className="text-[10px] text-amber-200/60 leading-relaxed font-bold uppercase tracking-tight">
+                                <p className="text-[10px] text-[#AB570A] leading-relaxed font-semibold">
                                     Your keys give full access to your account tools.
                                     Do not expose them on the frontend. Use a secure backend.
                                 </p>
@@ -185,34 +185,34 @@ export default function ApiKeysPage() {
                 {/* Keys List */}
                 <div className="lg:col-span-2 space-y-6">
                     {keys.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center p-20 border border-dashed border-white/10 rounded-[2.5rem] bg-white/[0.01]">
-                            <div className="w-16 h-16 bg-white/[0.02] rounded-full flex items-center justify-center mb-6">
-                                <Key className="w-8 h-8 text-slate-700" />
+                        <div className="flex flex-col items-center justify-center p-20 border border-dashed border-[#EBEBEB] rounded-xl bg-[#FAFAFA]">
+                            <div className="w-12 h-12 bg-[#FFFFFF] border border-[#EBEBEB] rounded-full flex items-center justify-center mb-6 shadow-sm">
+                                <Key className="w-6 h-6 text-[#8F8F8F]" />
                             </div>
-                            <h4 className="text-xl font-black text-slate-500 uppercase italic tracking-tighter">No Active Signals</h4>
-                            <p className="text-[10px] text-slate-600 mt-2 font-black uppercase tracking-widest">Create a key to start integrating AI</p>
+                            <h4 className="text-base font-semibold text-[#8F8F8F] uppercase tracking-wider font-mono">No Active Signals</h4>
+                            <p className="text-[10px] text-[#8F8F8F] mt-2 font-bold uppercase tracking-wider font-mono">Create a key to start integrating AI</p>
                         </div>
                     ) : (
                         keys.map((key) => (
                             <div
                                 key={key.id}
-                                className={`p-8 bg-white/[0.02] border transition-all duration-500 rounded-[2.5rem] group ${key.status === 'revoked' ? 'opacity-50 grayscale border-white/5' : 'hover:bg-white/[0.03] border-white/10 hover:border-indigo-500/30'}`}
+                                className={`p-8 bg-[#FFFFFF] border border-[#EBEBEB] transition-all duration-500 rounded-xl shadow-sm group ${key.status === 'revoked' ? 'opacity-50 grayscale' : 'hover:border-[#171717]/30'}`}
                             >
                                 <div className="flex items-start justify-between mb-8">
                                     <div className="space-y-1">
                                         <div className="flex items-center gap-3">
-                                            <h4 className="text-xl font-black text-white italic uppercase tracking-tight">{key.name}</h4>
-                                            <Badge className={key.status === 'active' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}>
+                                            <h4 className="text-lg font-semibold text-[#171717] tracking-tight">{key.name}</h4>
+                                            <Badge className={key.status === 'active' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}>
                                                 {key.status.toUpperCase()}
                                             </Badge>
                                         </div>
-                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">Created on {new Date(key.created_at).toLocaleDateString()}</p>
+                                        <p className="text-[10px] text-[#8F8F8F] font-bold uppercase tracking-wider mt-1 font-mono">Created on {new Date(key.created_at).toLocaleDateString()}</p>
                                     </div>
 
                                     {key.status === 'active' && (
                                         <button
                                             onClick={() => revokeKey(key.id)}
-                                            className="p-3 text-slate-600 hover:text-red-400 hover:bg-red-400/5 rounded-2xl transition-all opacity-0 group-hover:opacity-100"
+                                            className="p-2 hover:bg-[#FAFAFA] rounded-md border border-transparent hover:border-[#EBEBEB] text-[#8F8F8F] hover:text-red-600 transition-all opacity-0 group-hover:opacity-100 shadow-sm"
                                             title="Revoke Key"
                                         >
                                             <Trash2 className="w-4 h-4" />
@@ -221,49 +221,49 @@ export default function ApiKeysPage() {
                                 </div>
 
                                 <div className="space-y-6">
-                                    <div className="flex items-center gap-3 p-4 bg-black/60 border border-white/5 rounded-2xl relative overflow-hidden group/key">
-                                        <Key className="w-4 h-4 text-indigo-500 shrink-0" />
+                                    <div className="flex items-center gap-3 p-4 bg-[#FAFAFA] border border-[#EBEBEB] rounded-lg relative overflow-hidden group/key">
+                                        <Key className="w-4 h-4 text-[#171717] shrink-0" />
                                         <div className="flex-1 overflow-hidden">
                                             <input
                                                 type={showKeyId === key.id ? "text" : "password"}
                                                 value={key.api_key}
                                                 readOnly
-                                                className="bg-transparent text-sm text-indigo-400 font-mono focus:outline-none w-full tracking-wider"
+                                                className="bg-transparent text-sm text-[#171717] font-mono focus:outline-none w-full tracking-wider"
                                             />
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <button
                                                 onClick={() => setShowKeyId(showKeyId === key.id ? null : key.id)}
-                                                className="p-2 text-slate-600 hover:text-white transition-colors"
+                                                className="p-1.5 hover:bg-[#FFFFFF] border border-transparent hover:border-[#EBEBEB] rounded text-[#8F8F8F] hover:text-[#171717] transition-all"
                                             >
                                                 {showKeyId === key.id ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                             </button>
                                             <button
                                                 onClick={() => copyToClipboard(key.api_key, key.id)}
-                                                className="p-2 text-slate-600 hover:text-white transition-colors"
+                                                className="p-1.5 hover:bg-[#FFFFFF] border border-transparent hover:border-[#EBEBEB] rounded text-[#8F8F8F] hover:text-[#171717] transition-all"
                                             >
-                                                {copiedId === key.id ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                                                {copiedId === key.id ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                                             </button>
                                         </div>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-1">Usage Today</span>
-                                            <div className="flex items-end gap-2">
-                                                <span className="text-xl font-black text-white italic tracking-tighter">{key.usage_count}</span>
-                                                <span className="text-[10px] text-slate-600 font-black mb-1">/ {key.usage_limit}</span>
+                                        <div className="p-4 bg-[#FAFAFA] rounded-lg border border-[#EBEBEB]">
+                                            <span className="text-[9px] font-bold text-[#8F8F8F] uppercase tracking-wider block mb-1 font-mono">Usage Today</span>
+                                            <div className="flex items-end gap-2 mt-1">
+                                                <span className="text-xl font-bold text-[#171717] tracking-tight leading-none">{key.usage_count}</span>
+                                                <span className="text-[10px] text-[#8F8F8F] font-semibold mb-0.5 leading-none">/ {key.usage_limit}</span>
                                             </div>
-                                            <div className="w-full h-1 bg-white/5 rounded-full mt-3 overflow-hidden">
+                                            <div className="w-full h-1 bg-[#FFFFFF] border border-[#EBEBEB] rounded-full mt-3 overflow-hidden">
                                                 <div
-                                                    className="h-full bg-indigo-500 transition-all duration-1000"
+                                                    className="h-full bg-[#171717] transition-all duration-1000"
                                                     style={{ width: `${Math.min(100, (key.usage_count / key.usage_limit) * 100)}%` }}
                                                 />
                                             </div>
                                         </div>
-                                        <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex flex-col justify-center">
-                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-1">Latency Peak</span>
-                                            <div className="text-xl font-black text-indigo-400 italic tracking-tighter">142ms <span className="text-[10px] text-emerald-500 opacity-50 ml-1">Stable</span></div>
+                                        <div className="p-4 bg-[#FAFAFA] rounded-lg border border-[#EBEBEB] flex flex-col justify-center">
+                                            <span className="text-[9px] font-bold text-[#8F8F8F] uppercase tracking-wider block mb-1 font-mono">Latency Peak</span>
+                                            <div className="text-xl font-bold text-[#0070F3] tracking-tight mt-1 leading-none">142ms <span className="text-[10px] text-emerald-600 font-semibold ml-1">Stable</span></div>
                                         </div>
                                     </div>
                                 </div>

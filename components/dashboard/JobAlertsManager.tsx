@@ -65,35 +65,35 @@ export default function JobAlertsManager() {
 
     if (loading) return (
         <div className="h-48 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+            <Loader2 className="animate-spin h-6 w-6 text-[#171717]" />
         </div>
     );
 
     return (
-        <div className="space-y-8">
-            <div className="flex items-center justify-between">
+        <div className="space-y-6 text-[#171717] max-w-5xl mx-auto">
+            <div className="flex items-center justify-between pb-6 border-b border-[#EBEBEB]">
                 <div>
-                    <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                        <Bell className="w-6 h-6 text-indigo-400" /> Daily Job Alerts
+                    <h2 className="text-2xl font-semibold tracking-tight text-[#171717] flex items-center gap-2">
+                        <Bell className="w-5 h-5 text-[#171717]" /> Daily Job Alerts
                     </h2>
-                    <p className="text-slate-400 text-sm mt-1">Get notified about jobs matching your profile.</p>
+                    <p className="text-[#8F8F8F] text-xs mt-1">Get notified about jobs matching your profile.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Active</span>
+                    <span className="text-[10px] font-semibold text-[#8F8F8F] uppercase tracking-wider">Active</span>
                     <button
                         onClick={() => setAlert({ ...alert, is_active: !alert.is_active })}
-                        className={`w-12 h-6 rounded-full transition-all relative ${alert.is_active ? 'bg-indigo-500' : 'bg-slate-700'}`}
+                        className={`w-10 h-5 rounded-full transition-all relative ${alert.is_active ? 'bg-[#171717]' : 'bg-[#EBEBEB]'}`}
                     >
-                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${alert.is_active ? 'left-7' : 'left-1'}`} />
+                        <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${alert.is_active ? 'left-5.5' : 'left-0.5'}`} />
                     </button>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Keywords / Skills */}
-                <div className="space-y-4">
-                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2 ml-1">
-                        <Briefcase className="w-3.5 h-3.5" /> Target Skills
+                <div className="space-y-3">
+                    <label className="text-[10px] font-semibold text-[#8F8F8F] uppercase tracking-wider flex items-center gap-1.5 ml-1">
+                        <Briefcase className="w-3.5 h-3.5 text-[#171717]" /> Target Skills
                     </label>
                     <div className="relative">
                         <input
@@ -102,13 +102,13 @@ export default function JobAlertsManager() {
                             onChange={(e) => setSkillInput(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && addSkill()}
                             placeholder="e.g. React, Python, Product Management"
-                            className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white text-sm focus:border-indigo-500 transition-all outline-none"
+                            className="w-full px-4 h-10 bg-white border border-[#EBEBEB] rounded-md text-[#171717] text-xs focus:ring-1 focus:ring-[#171717] focus:border-[#171717] transition-all outline-none placeholder:text-[#8F8F8F]"
                         />
                         <button
                             onClick={addSkill}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-white/10 rounded-xl transition-all"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-[#FAFAFA] rounded-md transition-all text-[#171717]"
                         >
-                            <Plus className="w-4 h-4 text-indigo-400" />
+                            <Plus className="w-4 h-4" />
                         </button>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -119,10 +119,10 @@ export default function JobAlertsManager() {
                                     animate={{ scale: 1, opacity: 1 }}
                                     exit={{ scale: 0.8, opacity: 0 }}
                                     key={skill}
-                                    className="px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold flex items-center gap-1.5 group"
+                                    className="px-2.5 py-1 rounded bg-[#FAFAFA] border border-[#EBEBEB] text-[#171717] text-xs font-medium flex items-center gap-1.5 group"
                                 >
                                     {skill}
-                                    <button onClick={() => removeSkill(skill)} className="hover:text-white">
+                                    <button onClick={() => removeSkill(skill)} className="text-[#8F8F8F] hover:text-[#EE0000]">
                                         <X className="w-3 h-3" />
                                     </button>
                                 </motion.span>
@@ -132,9 +132,9 @@ export default function JobAlertsManager() {
                 </div>
 
                 {/* Locations */}
-                <div className="space-y-4">
-                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2 ml-1">
-                        <MapPin className="w-3.5 h-3.5" /> Preferred Locations
+                <div className="space-y-3">
+                    <label className="text-[10px] font-semibold text-[#8F8F8F] uppercase tracking-wider flex items-center gap-1.5 ml-1">
+                        <MapPin className="w-3.5 h-3.5 text-[#171717]" /> Preferred Locations
                     </label>
                     <div className="relative">
                         <input
@@ -143,13 +143,13 @@ export default function JobAlertsManager() {
                             onChange={(e) => setLocationInput(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && addLocation()}
                             placeholder="e.g. Remote, Bangalore, London"
-                            className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white text-sm focus:border-indigo-500 transition-all outline-none"
+                            className="w-full px-4 h-10 bg-white border border-[#EBEBEB] rounded-md text-[#171717] text-xs focus:ring-1 focus:ring-[#171717] focus:border-[#171717] transition-all outline-none placeholder:text-[#8F8F8F]"
                         />
                         <button
                             onClick={addLocation}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-white/10 rounded-xl transition-all"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-[#FAFAFA] rounded-md transition-all text-[#171717]"
                         >
-                            <Plus className="w-4 h-4 text-emerald-400" />
+                            <Plus className="w-4 h-4" />
                         </button>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -160,10 +160,10 @@ export default function JobAlertsManager() {
                                     animate={{ scale: 1, opacity: 1 }}
                                     exit={{ scale: 0.8, opacity: 0 }}
                                     key={loc}
-                                    className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center gap-1.5 group"
+                                    className="px-2.5 py-1 rounded bg-[#FAFAFA] border border-[#EBEBEB] text-[#171717] text-xs font-medium flex items-center gap-1.5 group"
                                 >
                                     {loc}
-                                    <button onClick={() => removeLocation(loc)} className="hover:text-white">
+                                    <button onClick={() => removeLocation(loc)} className="text-[#8F8F8F] hover:text-[#EE0000]">
                                         <X className="w-3 h-3" />
                                     </button>
                                 </motion.span>
@@ -173,7 +173,7 @@ export default function JobAlertsManager() {
                 </div>
             </div>
 
-            <div className="pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="pt-6 border-t border-[#EBEBEB] flex flex-col sm:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-6">
                     <div className="flex items-center gap-2">
                         <input
@@ -182,9 +182,9 @@ export default function JobAlertsManager() {
                             name="freq"
                             checked={alert.frequency === 'daily'}
                             onChange={() => setAlert({ ...alert, frequency: 'daily' })}
-                            className="accent-indigo-500"
+                            className="accent-[#171717]"
                         />
-                        <label htmlFor="daily" className="text-xs font-bold text-slate-400 cursor-pointer">Daily Summary</label>
+                        <label htmlFor="daily" className="text-xs font-semibold text-[#4D4D4D] cursor-pointer">Daily Summary</label>
                     </div>
                     <div className="flex items-center gap-2">
                         <input
@@ -193,26 +193,26 @@ export default function JobAlertsManager() {
                             name="freq"
                             checked={alert.frequency === 'weekly'}
                             onChange={() => setAlert({ ...alert, frequency: 'weekly' })}
-                            className="accent-indigo-500"
+                            className="accent-[#171717]"
                         />
-                        <label htmlFor="weekly" className="text-xs font-bold text-slate-400 cursor-pointer">Weekly Digest</label>
+                        <label htmlFor="weekly" className="text-xs font-semibold text-[#4D4D4D] cursor-pointer">Weekly Digest</label>
                     </div>
                 </div>
 
                 <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-indigo-500/25 hover:opacity-90 transition-all flex items-center gap-3 disabled:opacity-50"
+                    className="px-6 h-10 rounded-md bg-[#171717] hover:bg-[#171717]/90 text-white font-semibold text-xs transition-all flex items-center gap-2 disabled:opacity-50 shadow-sm"
                 >
-                    {saving ? <>Saving... <Loader2 className="w-4 h-4 animate-spin" /></> : <>Update Preferences <CheckCircle2 className="w-4 h-4" /></>}
+                    {saving ? <>Saving... <Loader2 className="w-3.5 h-3.5 animate-spin" /></> : <>Update Preferences <CheckCircle2 className="w-3.5 h-3.5" /></>}
                 </button>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-900/50 border border-white/5 flex gap-4 items-center">
-                <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-indigo-400" />
+            <div className="p-4 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex gap-4 items-center">
+                <div className="w-8 h-8 rounded-full bg-white border border-[#EBEBEB] flex items-center justify-center shrink-0">
+                    <Mail className="w-4 h-4 text-[#171717]" />
                 </div>
-                <p className="text-xs text-slate-500 italic">
+                <p className="text-xs text-[#8F8F8F] italic">
                     Alerts will be sent to the email associated with your account. You can unsubscribe at any time.
                 </p>
             </div>

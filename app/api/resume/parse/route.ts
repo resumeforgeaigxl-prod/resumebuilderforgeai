@@ -41,9 +41,9 @@ export async function POST(request: Request) {
       rawText = (await mammoth.extractRawText({ buffer })).value;
       parseMethod = 'mammoth';
     } else {
-      // PDF: using Python Extraction Service (PyMuPDF / fitz)
+      // PDF: using Go PDF Parser Binary
       rawText = await parsePdf(buffer, file.name);
-      parseMethod = 'python-service-fitz';
+      parseMethod = 'go-binary-parser';
     }
 
     console.log(`[Parse] Extraction method: ${parseMethod} | chars: ${rawText?.trim().length ?? 0}`);

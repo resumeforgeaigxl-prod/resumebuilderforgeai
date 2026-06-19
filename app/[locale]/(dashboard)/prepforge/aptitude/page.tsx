@@ -1,6 +1,5 @@
 "use client"
 export const dynamic = 'force-dynamic';
-;
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
@@ -43,25 +42,25 @@ export default function AptitudeForge() {
     }, []);
 
     return (
-        <div className="space-y-10 max-w-5xl mx-auto">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E2A42] pb-8">
+        <div className="space-y-10 max-w-5xl mx-auto text-[#171717]">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#EBEBEB] pb-8">
                 <div className="space-y-3">
                     <Link
-                        href={`/${locale}/prepforge/app`}
-                        className="flex items-center gap-2 text-xs font-bold text-[#4A5568] hover:text-[#00D4A0] transition-colors mb-4"
+                        href={`/${locale}/prepforge`}
+                        className="flex items-center gap-2 text-xs font-semibold text-[#8F8F8F] hover:text-[#171717] transition-colors mb-4"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         Back to Hub
                     </Link>
-                    <h1 className="text-4xl font-bold tracking-tight text-white">
+                    <h1 className="text-3xl font-semibold tracking-tight text-[#171717]">
                         AptitudeForge
                     </h1>
-                    <p className="text-slate-400 mt-2">
+                    <p className="text-[#4D4D4D] mt-2 text-sm md:text-base">
                         Master quantitative analysis and mathematical logic shortcuts for TCS NQT.
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
-                    <Badge variant="outline" className="px-4 py-1.5 rounded-xl border-[#00D4A0]/20 bg-[#00D4A0]/5 text-[#00D4A0] font-bold text-[10px]">
+                    <Badge variant="outline" className="px-4 py-1.5 rounded-lg border-[#EBEBEB] bg-[#FFFFFF] text-[#171717] font-semibold text-[10px]">
                         {questions.length} PATTERNS
                     </Badge>
                 </div>
@@ -69,60 +68,60 @@ export default function AptitudeForge() {
 
             {isLoading ? (
                 <div className="p-12 flex flex-col items-center justify-center text-center">
-                    <Loader2 className="w-8 h-8 text-[#00D4A0] animate-spin mb-3" />
-                    <p className="text-[#4A5568] font-semibold text-xs">Loading questions...</p>
+                    <Loader2 className="w-8 h-8 text-[#171717] animate-spin mb-3" />
+                    <p className="text-[#8F8F8F] font-semibold text-xs">Loading questions...</p>
                 </div>
             ) : questions.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {questions.map((q) => (
-                        <Link key={q.id} href={`/${locale}/prepforge/app?slug=${q.slug}`}>
-                            <div className="p-6 h-full flex flex-col rounded-xl border border-[#1E2A42] bg-[#0D1220]/60 hover:border-[#00D4A0]/20 transition-all group">
+                        <Link key={q.id} href={`/${locale}/prepforge/app?slug=${q.slug}`} className="group">
+                            <div className="p-6 h-full flex flex-col rounded-xl border border-[#EBEBEB] bg-[#FFFFFF] hover:border-[#171717]/25 hover:shadow-[0_2px_4px_rgba(0,0,0,0.02),0_8px_16px_rgba(0,0,0,0.04)] transition-all">
                                 <div className="flex items-start justify-between mb-4">
-                                    <div className="p-3 rounded-xl bg-white/5 text-[#00D4A0] group-hover:scale-105 transition-transform">
+                                    <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] text-[#171717] group-hover:scale-105 transition-transform">
                                         <Calculator className="w-5 h-5" />
                                     </div>
-                                    <Badge variant="outline" className="px-2.5 py-1 font-bold text-[10px] text-[#7C5CFC] border-[#7C5CFC]/20 bg-[#7C5CFC]/5">
+                                    <Badge variant="outline" className="px-2.5 py-1 font-semibold text-[10px] text-purple-700 border-purple-100 bg-purple-50">
                                         {q.topic}
                                     </Badge>
                                 </div>
-                                <h3 className="text-base font-bold text-white mb-2 group-hover:text-[#00D4A0] transition-colors">
+                                <h3 className="text-base font-semibold text-[#171717] mb-2 group-hover:text-[#0070F3] transition-colors">
                                     {q.title}
                                 </h3>
-                                <p className="text-sm text-[#7A8BA8] leading-relaxed line-clamp-2 mb-6">
+                                <p className="text-sm text-[#4D4D4D] leading-relaxed line-clamp-2 mb-6">
                                     {q.problem}
                                 </p>
-                                <div className="mt-auto flex items-center justify-between pt-4 border-t border-[#1E2A42]">
-                                    <div className="flex items-center gap-2 text-[10px] font-bold text-[#4A5568] uppercase tracking-wider">
-                                        <Target className="w-3.5 h-3.5 text-[#00D4A0]" />
+                                <div className="mt-auto flex items-center justify-between pt-4 border-t border-[#EBEBEB]">
+                                    <div className="flex items-center gap-2 text-[10px] font-semibold text-[#8F8F8F] uppercase tracking-wider">
+                                        <Target className="w-3.5 h-3.5 text-[#171717]" />
                                         Pattern Study
                                     </div>
-                                    <ChevronRight className="w-3.5 h-3.5 text-[#4A5568] group-hover:text-[#00D4A0] transition-all" />
+                                    <ChevronRight className="w-3.5 h-3.5 text-[#8F8F8F] group-hover:text-[#0070F3] transition-all" />
                                 </div>
                             </div>
                         </Link>
                     ))}
                 </div>
             ) : (
-                <div className="p-12 rounded-2xl flex flex-col items-center text-center space-y-6 bg-[#0D1220]/60 border border-[#1E2A42]">
-                    <div className="p-6 rounded-full bg-[#00D4A0]/10 text-[#00D4A0]">
+                <div className="p-12 rounded-xl flex flex-col items-center text-center space-y-6 bg-[#FFFFFF] border border-[#EBEBEB] shadow-sm animate-fade-in">
+                    <div className="p-6 rounded-lg bg-blue-50 border border-blue-100 text-[#0070F3]">
                         <Construction className="w-12 h-12" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-white mb-2">No Patterns Yet</h2>
-                        <p className="text-sm text-[#7A8BA8] max-w-md mx-auto">
-                            Generate some aptitude patterns in the <Link href={`/${locale}/prepforge/app`} className="text-[#00D4A0] underline underline-offset-4">Logic Engine</Link> to start filling your track.
+                        <h2 className="text-lg font-semibold text-[#171717] mb-2">No Patterns Yet</h2>
+                        <p className="text-sm text-[#8F8F8F] max-w-md mx-auto">
+                            Generate some aptitude patterns in the <Link href={`/${locale}/prepforge/app`} className="text-[#0070F3] underline underline-offset-4 font-semibold">Logic Engine</Link> to start filling your track.
                         </p>
                     </div>
                 </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 opacity-30 pointer-events-none grayscale">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 opacity-35 pointer-events-none grayscale">
                 {['Time & Work', 'Profit & Loss', 'Percentage'].map((topic) => (
-                    <div key={topic} className="p-6 rounded-xl border border-[#1E2A42] bg-[#0D1220]/60">
-                        <div className="p-3 rounded-xl bg-white/5 w-fit mb-4 text-[#4A5568]"><Divide className="w-5 h-5" /></div>
-                        <h3 className="text-base font-bold text-white mb-1">{topic}</h3>
-                        <p className="text-xs text-[#4A5568] mb-4">Coming soon...</p>
-                        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[#4A5568]">Locked</div>
+                    <div key={topic} className="p-6 rounded-xl border border-[#EBEBEB] bg-[#FFFFFF]">
+                        <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] w-fit mb-4 text-[#8F8F8F]"><Divide className="w-5 h-5" /></div>
+                        <h3 className="text-base font-semibold text-[#171717] mb-1">{topic}</h3>
+                        <p className="text-xs text-[#8F8F8F] mb-4">Coming soon...</p>
+                        <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-[#8F8F8F]">Locked</div>
                     </div>
                 ))}
             </div>

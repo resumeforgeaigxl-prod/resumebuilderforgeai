@@ -28,62 +28,62 @@ export const PreviewLayer: React.FC<Props> = ({
     };
 
     return (
-        <div className="h-full flex flex-col bg-[#0d0d1a] border-l border-white/5 overflow-hidden">
+        <div className="h-full flex flex-col bg-[#FAFAFA] border-l border-[#EBEBEB] overflow-hidden">
             {/* Toolbar */}
-            <div className="px-5 py-3 border-b border-white/5 bg-[#0a0a15] flex items-center justify-between">
+            <div className="px-5 py-3 border-b border-[#EBEBEB] bg-[#FFFFFF] flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="p-1.5 bg-blue-500/10 rounded-lg">
-                        <Layout className="w-4 h-4 text-blue-400" />
+                    <div className="p-1.5 bg-blue-50 border border-blue-100 rounded-md">
+                        <Layout className="w-4 h-4 text-blue-600" />
                     </div>
                     <div>
-                        <h3 className="text-sm font-bold text-white tracking-wide">Live Preview</h3>
-                        <p className="text-[10px] text-slate-500 font-medium uppercase tracking-tighter">React-Based Rendering</p>
+                        <h3 className="text-sm font-bold text-[#171717] tracking-wide">Live Preview</h3>
+                        <p className="text-[10px] text-[#8F8F8F] font-medium uppercase tracking-tighter">React-Based Rendering</p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-4">
                     {/* View Switch */}
-                    <div className="flex items-center bg-black/40 p-1 rounded-xl border border-white/5">
+                    <div className="flex items-center bg-[#FAFAFA] p-1 rounded-lg border border-[#EBEBEB]">
                         <button 
                             onClick={() => setViewMode('desktop')}
-                            className={`p-1.5 rounded-lg transition-all ${viewMode === 'desktop' ? 'bg-blue-600/20 text-blue-400 shadow-lg shadow-blue-600/10' : 'text-slate-500 hover:text-slate-300'}`}
+                            className={`p-1.5 rounded-md transition-all ${viewMode === 'desktop' ? 'bg-[#FFFFFF] text-[#171717] shadow-sm border border-[#EBEBEB]' : 'text-[#8F8F8F] hover:text-[#171717] border border-transparent'}`}
                         >
                             <Monitor className="w-4 h-4" />
                         </button>
                         <button 
                             onClick={() => setViewMode('mobile')}
-                            className={`p-1.5 rounded-lg transition-all ${viewMode === 'mobile' ? 'bg-blue-600/20 text-blue-400 shadow-lg shadow-blue-600/10' : 'text-slate-500 hover:text-slate-300'}`}
+                            className={`p-1.5 rounded-md transition-all ${viewMode === 'mobile' ? 'bg-[#FFFFFF] text-[#171717] shadow-sm border border-[#EBEBEB]' : 'text-[#8F8F8F] hover:text-[#171717] border border-transparent'}`}
                         >
                             <Phone className="w-4 h-4" />
                         </button>
                     </div>
 
-                    <div className="h-6 w-px bg-white/5" />
+                    <div className="h-6 w-px bg-[#EBEBEB]" />
 
                     {/* Zoom Controls */}
-                    <div className="flex items-center gap-3 px-3 py-1.5 bg-black/20 rounded-xl border border-white/5">
-                        <button onClick={() => setZoom(Math.max(0.4, zoom - 0.1))} className="text-slate-400 hover:text-white transition-colors">
+                    <div className="flex items-center gap-3 px-3 py-1.5 bg-[#FAFAFA] rounded-lg border border-[#EBEBEB]">
+                        <button onClick={() => setZoom(Math.max(0.4, zoom - 0.1))} className="text-[#8F8F8F] hover:text-[#171717] transition-colors">
                             <ZoomOut className="w-4 h-4" />
                         </button>
-                        <span className="text-[10px] font-black text-slate-500 w-10 text-center">{Math.round(zoom * 100)}%</span>
-                        <button onClick={() => setZoom(Math.min(1.5, zoom + 0.1))} className="text-slate-400 hover:text-white transition-colors">
+                        <span className="text-[10px] font-black text-[#8F8F8F] w-10 text-center">{Math.round(zoom * 100)}%</span>
+                        <button onClick={() => setZoom(Math.min(1.5, zoom + 0.1))} className="text-[#8F8F8F] hover:text-[#171717] transition-colors">
                             <ZoomIn className="w-4 h-4" />
                         </button>
                     </div>
 
-                    <button onClick={handleRefresh} className={`p-2 hover:bg-white/5 rounded-xl transition-all ${isRefreshing ? 'animate-spin text-blue-400' : 'text-slate-500'}`}>
+                    <button onClick={handleRefresh} className={`p-2 hover:bg-[#FAFAFA] rounded-md transition-all ${isRefreshing ? 'animate-spin text-blue-600' : 'text-[#8F8F8F] hover:text-[#171717]'}`}>
                         <RefreshCw className="w-4 h-4" />
                     </button>
                 </div>
             </div>
 
             {/* Preview Area */}
-            <div className="flex-1 overflow-auto bg-[#070710] relative custom-scrollbar">
+            <div className="flex-1 overflow-auto bg-[#F2F2F2] relative custom-scrollbar">
                 {isRefreshing && (
-                    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="absolute inset-0 z-50 flex items-center justify-center bg-[#FFFFFF]/60 backdrop-blur-sm animate-in fade-in duration-300">
                         <div className="flex flex-col items-center gap-2">
-                            <RefreshCw className="w-8 h-8 text-blue-500 animate-spin" />
-                            <p className="text-[10px] text-blue-400 font-black uppercase tracking-widest">Updating Template</p>
+                            <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
+                            <p className="text-[10px] text-blue-600 font-black uppercase tracking-widest">Updating Template</p>
                         </div>
                     </div>
                 )}
@@ -103,16 +103,16 @@ export const PreviewLayer: React.FC<Props> = ({
             </div>
 
             {/* Footer / Info */}
-            <div className="px-5 py-4 bg-[#0a0a15] border-t border-white/5 flex items-center justify-between">
+            <div className="px-5 py-4 bg-[#FFFFFF] border-t border-[#EBEBEB] flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Live Syncing</span>
+                    <span className="text-[10px] font-black text-[#8F8F8F] uppercase tracking-widest">Live Syncing</span>
                 </div>
                 {onDownload && (
                     <button 
                         onClick={onDownload}
                         disabled={isDownloading}
-                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-emerald-600/20"
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-md transition-all disabled:opacity-50 shadow-sm"
                     >
                         {isDownloading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
                         Download PDF
@@ -128,11 +128,11 @@ export const PreviewLayer: React.FC<Props> = ({
                     background: transparent;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: rgba(255, 255, 255, 0.05);
+                    background: rgba(0, 0, 0, 0.05);
                     border-radius: 10px;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: rgba(255, 255, 255, 0.1);
+                    background: rgba(0, 0, 0, 0.1);
                 }
             `}</style>
         </div>

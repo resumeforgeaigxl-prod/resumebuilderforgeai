@@ -106,8 +106,8 @@ export default function LearnForge() {
     if (loading) {
         return (
             <div className="min-h-[80vh] flex flex-col items-center justify-center gap-4">
-                <Loader2 className="w-10 h-10 text-[#00D4A0] animate-spin" />
-                <p className="text-[#4A5568] font-semibold text-xs">Loading workspace...</p>
+                <Loader2 className="w-10 h-10 text-[#171717] animate-spin" />
+                <p className="text-[#8F8F8F] font-medium text-xs">Loading workspace...</p>
             </div>
         );
     }
@@ -116,21 +116,21 @@ export default function LearnForge() {
         <FeatureGate task="learn">
             <div className="max-w-5xl mx-auto space-y-8">
                 {/* Standardized Header */}
-                <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E2A42] pb-8 mb-12">
+                <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#EBEBEB] pb-8 mb-12">
                     <div>
-                        <div className="flex items-center gap-2 text-[#00D4A0] font-bold tracking-widest text-[10px] uppercase mb-4">
+                        <div className="flex items-center gap-2 text-[#8F8F8F] font-medium tracking-normal text-xs uppercase mb-3 font-mono">
                             <Zap className="w-3.5 h-3.5" /> Intelligence Core
                         </div>
-                        <h1 className="text-4xl font-bold tracking-tighter text-white uppercase">LearnForge</h1>
-                        <p className="text-slate-400 mt-2 text-lg">Master skills with AI-powered video explanations and interactive neural notes.</p>
+                        <h1 className="text-3xl md:text-4xl font-semibold tracking-tighter text-[#171717]">LearnForge</h1>
+                        <p className="text-[#4D4D4D] mt-2 text-base">Master skills with AI-powered video explanations and interactive neural notes.</p>
                     </div>
 
                     {roadmapName && (
-                        <div className="flex items-center gap-3 p-4 rounded-xl bg-[#0D1220] border border-[#1E2A42]">
-                            <Target className="w-6 h-6 text-[#00D4A0]" />
+                        <div className="flex items-center gap-3 p-4 rounded-xl bg-[#FFFFFF] border border-[#EBEBEB] shadow-sm">
+                            <Target className="w-5 h-5 text-[#171717]" />
                             <div>
-                                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#4A5568]">Active Trajectory</p>
-                                <p className="text-sm font-bold text-white">{roadmapName.toUpperCase()}</p>
+                                <p className="text-[10px] font-mono uppercase tracking-wider text-[#8F8F8F]">Active Trajectory</p>
+                                <p className="text-sm font-semibold text-[#171717]">{roadmapName.toUpperCase()}</p>
                             </div>
                         </div>
                     )}
@@ -143,7 +143,7 @@ export default function LearnForge() {
                         {selectedVideo ? (
                             <>
                                 {/* Video Player Box */}
-                                <div className="aspect-video w-full rounded-2xl bg-black border border-[#1E2A42] overflow-hidden relative group">
+                                <div className="aspect-video w-full rounded-xl bg-black border border-[#EBEBEB] overflow-hidden relative group shadow-sm">
                                     <iframe
                                         ref={videoRef}
                                         src={getEmbedUrl(selectedVideo.video_url)}
@@ -154,29 +154,29 @@ export default function LearnForge() {
                                 </div>
 
                                 {/* Info & AI Notes Section */}
-                                <div className="p-6 rounded-2xl bg-[#0D1220]/60 border border-[#1E2A42] space-y-6">
+                                <div className="p-6 rounded-xl bg-[#FFFFFF] border border-[#EBEBEB] space-y-6 shadow-sm">
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="space-y-1">
-                                            <h2 className="text-xl font-bold text-white">{selectedVideo.title}</h2>
-                                            <p className="text-sm text-[#7A8BA8] leading-relaxed">{selectedVideo.description}</p>
+                                            <h2 className="text-xl font-semibold text-[#171717]">{selectedVideo.title}</h2>
+                                            <p className="text-sm text-[#4D4D4D] leading-relaxed">{selectedVideo.description}</p>
                                         </div>
                                         <div className="flex gap-2 shrink-0">
-                                            <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${selectedVideo.video_type === 'technical' ? 'bg-[#7C5CFC]/10 text-[#7C5CFC] border-[#7C5CFC]/20' : 'bg-[#00D4A0]/10 text-[#00D4A0] border-[#00D4A0]/20'}`}>
+                                            <div className={`px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider border ${selectedVideo.video_type === 'technical' ? 'bg-[#EFF6FF] text-[#1E40AF] border-[#DBEAFE]' : 'bg-[#ECFDF5] text-[#065F46] border-[#D1FAE5]'}`}>
                                                 {selectedVideo.video_type}
                                             </div>
                                         </div>
                                     </div>
 
                                     <div className="space-y-4">
-                                        <div className="flex items-center gap-2 pb-3 border-b border-[#1E2A42]">
-                                            <Sparkles className="w-5 h-5 text-[#7C5CFC]" />
-                                            <h3 className="text-base font-bold text-white">AI Learning Notes</h3>
+                                        <div className="flex items-center gap-2 pb-3 border-b border-[#EBEBEB]">
+                                            <Sparkles className="w-5 h-5 text-[#171717]" />
+                                            <h3 className="text-base font-semibold text-[#171717]">AI Learning Notes</h3>
                                         </div>
 
                                         {explaining ? (
                                             <div className="py-12 flex flex-col items-center justify-center gap-3">
-                                                <Loader2 className="w-8 h-8 text-[#7C5CFC] animate-spin" />
-                                                <p className="text-[#4A5568] font-semibold text-xs">Analyzing transcript...</p>
+                                                <Loader2 className="w-8 h-8 text-[#171717] animate-spin" />
+                                                <p className="text-[#8F8F8F] font-medium text-xs">Analyzing transcript...</p>
                                             </div>
                                         ) : notes && notes.ai_explanation ? (
                                             <div className="space-y-4">
@@ -184,36 +184,36 @@ export default function LearnForge() {
                                                     <div
                                                         key={idx}
                                                         onClick={() => seekTo(item.time.split(' - ')[0])}
-                                                        className="group p-4 rounded-xl bg-[#080B16] border border-[#1E2A42] hover:border-[#7C5CFC]/30 transition-all cursor-pointer"
+                                                        className="group p-4 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] hover:border-[#171717] hover:bg-[#FFFFFF] transition-all cursor-pointer shadow-sm"
                                                     >
                                                         <div className="flex items-center justify-between mb-2">
                                                             <div className="flex items-center gap-3">
-                                                                 <div className="px-2.5 py-1 rounded-lg bg-[#7C5CFC] text-white text-[10px] font-bold">
+                                                                 <div className="px-2.5 py-0.5 rounded-md bg-[#171717] text-white text-[10px] font-mono">
                                                                     {item.time}
                                                                 </div>
-                                                                <span className="text-sm font-bold text-white group-hover:text-[#7C5CFC] transition-colors">
+                                                                <span className="text-sm font-semibold text-[#171717] group-hover:text-[#0070F3] transition-colors">
                                                                     {item.topic}
                                                                 </span>
                                                             </div>
-                                                            <Play className="w-4 h-4 text-slate-600 group-hover:text-white transition-all group-hover:scale-110" />
+                                                            <Play className="w-4 h-4 text-[#8F8F8F] group-hover:text-[#171717] transition-all group-hover:scale-110" />
                                                         </div>
-                                                        <p className="text-[#7A8BA8] text-sm leading-relaxed pl-16">
+                                                        <p className="text-[#4D4D4D] text-sm leading-relaxed pl-16">
                                                             {item.explanation}
                                                         </p>
                                                     </div>
                                                 ))}
                                             </div>
                                         ) : (
-                                            <p className="text-[#4A5568] text-sm py-8 text-center">Unable to generate notes for this video.</p>
+                                            <p className="text-[#8F8F8F] text-sm py-8 text-center">Unable to generate notes for this video.</p>
                                         )}
                                     </div>
                                 </div>
                             </>
                         ) : (
-                            <div className="aspect-video w-full rounded-2xl bg-[#0D1220]/60 border border-[#1E2A42] flex flex-col items-center justify-center gap-3 text-center p-8">
-                                <VideoIcon className="w-12 h-12 text-[#1E2A42]" />
-                                <h3 className="text-lg font-bold text-white">Select a video to start learning</h3>
-                                <p className="text-sm text-[#7A8BA8] max-w-sm">Explore your roadmap or professional skills from the library.</p>
+                            <div className="aspect-video w-full rounded-xl bg-[#FAFAFA] border border-[#EBEBEB] flex flex-col items-center justify-center gap-3 text-center p-8">
+                                <VideoIcon className="w-12 h-12 text-[#8F8F8F]" />
+                                <h3 className="text-lg font-semibold text-[#171717]">Select a video to start learning</h3>
+                                <p className="text-sm text-[#8F8F8F] max-w-sm">Explore your roadmap or professional skills from the library.</p>
                             </div>
                         )}
                     </div>
@@ -223,13 +223,13 @@ export default function LearnForge() {
                         {/* Technical Skills Section */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-2 px-2">
-                                <Target className="w-4 h-4 text-[#00D4A0]" />
-                                <h4 className="text-xs font-bold text-[#7A8BA8] uppercase tracking-wider">Roadmap Skills</h4>
+                                <Target className="w-4 h-4 text-[#8F8F8F]" />
+                                <h4 className="text-xs font-mono text-[#8F8F8F] uppercase tracking-wider">Roadmap Skills</h4>
                             </div>
                             <div className="space-y-3">
                                 {technicalVideos.length === 0 ? (
-                                    <div className="p-4 rounded-xl bg-[#0D1220]/60 border border-[#1E2A42] border-dashed text-center">
-                                        <p className="text-xs text-[#4A5568] pt-1">
+                                    <div className="p-4 rounded-xl bg-[#FFFFFF] border border-[#EBEBEB] border-dashed text-center">
+                                        <p className="text-xs text-[#8F8F8F] pt-1">
                                             No learning videos available for this roadmap yet.
                                         </p>
                                     </div>
@@ -238,24 +238,24 @@ export default function LearnForge() {
                                         <div key={video.id} className="group relative">
                                             <button
                                                 onClick={() => handleVideoSelect(video)}
-                                                className={`w-full p-4 rounded-xl border transition-all text-left flex items-start gap-3 ${selectedVideo?.id === video.id ? 'bg-[#00D4A0]/10 border-[#00D4A0]/30' : 'bg-[#0D1220]/60 border-[#1E2A42] hover:border-[#00D4A0]/20'}`}
+                                                className={`w-full p-4 rounded-xl border transition-all text-left flex items-start gap-3 ${selectedVideo?.id === video.id ? 'bg-[#FAFAFA] border-[#171717] shadow-sm' : 'bg-[#FFFFFF] border-[#EBEBEB] hover:border-[#171717] hover:bg-[#FAFAFA]'}`}
                                             >
-                                                <div className={`w-9 h-9 shrink-0 rounded-lg flex items-center justify-center ${selectedVideo?.id === video.id ? 'bg-[#00D4A0]/20' : 'bg-white/5'}`}>
-                                                    <Play className={`w-3.5 h-3.5 ${selectedVideo?.id === video.id ? 'text-[#00D4A0]' : 'text-[#4A5568]'}`} />
+                                                <div className={`w-9 h-9 shrink-0 rounded-lg flex items-center justify-center border ${selectedVideo?.id === video.id ? 'bg-[#171717] border-[#171717] text-white' : 'bg-[#FAFAFA] border-[#EBEBEB] text-[#8F8F8F]'}`}>
+                                                    <Play className={`w-3.5 h-3.5 ${selectedVideo?.id === video.id ? 'text-white' : 'text-[#8F8F8F]'}`} />
                                                 </div>
                                                 <div className="flex-1 min-w-0 space-y-1">
                                                     <div className="flex items-center gap-2">
-                                                        <p className={`text-xs font-bold truncate ${selectedVideo?.id === video.id ? 'text-[#00D4A0]' : 'text-[#EFF4FB] group-hover:text-[#00D4A0] transition-colors'}`}>
+                                                        <p className={`text-xs font-semibold truncate ${selectedVideo?.id === video.id ? 'text-[#171717] font-bold' : 'text-[#4D4D4D] group-hover:text-[#171717] transition-colors'}`}>
                                                             {video.title}
                                                         </p>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <span className={`text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md border ${selectedVideo?.id === video.id ? 'bg-white/10 border-white/20 text-white/80' : 'bg-[#7C5CFC]/5 border-[#7C5CFC]/10 text-[#7C5CFC]/70'}`}>
+                                                        <span className={`text-[9px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded border ${selectedVideo?.id === video.id ? 'bg-[#FFFFFF] border-[#EBEBEB] text-[#171717]' : 'bg-[#FAFAFA] border-[#EBEBEB] text-[#4D4D4D]'}`}>
                                                             {video.career_path}
                                                         </span>
-                                                        <div className="w-1 h-1 rounded-full bg-slate-700" />
-                                                        <Clock className={`w-3 h-3 ${selectedVideo?.id === video.id ? 'text-white/60' : 'text-slate-500'}`} />
-                                                        <span className={`text-[10px] font-bold ${selectedVideo?.id === video.id ? 'text-white/60' : 'text-slate-500'}`}>10:24</span>
+                                                        <div className="w-1 h-1 rounded-full bg-[#EBEBEB]" />
+                                                        <Clock className={`w-3 h-3 ${selectedVideo?.id === video.id ? 'text-[#171717]' : 'text-[#8F8F8F]'}`} />
+                                                        <span className={`text-[10px] font-mono ${selectedVideo?.id === video.id ? 'text-[#171717]' : 'text-[#8F8F8F]'}`}>10:24</span>
                                                     </div>
                                                 </div>
                                             </button>
@@ -263,7 +263,7 @@ export default function LearnForge() {
                                                 href={video.video_url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all opacity-0 group-hover:opacity-100 ${selectedVideo?.id === video.id ? 'hover:bg-white/20 text-white' : 'hover:bg-white/10 text-slate-500 hover:text-white'}`}
+                                                className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all opacity-0 group-hover:opacity-100 ${selectedVideo?.id === video.id ? 'hover:bg-[#FAFAFA] text-[#171717]' : 'hover:bg-[#FAFAFA] text-[#8F8F8F] hover:text-[#171717]'}`}
                                                 title="View on YouTube"
                                             >
                                                 <Globe className="w-3.5 h-3.5" />
@@ -277,25 +277,25 @@ export default function LearnForge() {
                         {/* Professional Skills Section */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-2 px-2">
-                                <Globe className="w-4 h-4 text-[#00D4A0]" />
-                                <h4 className="text-xs font-bold text-[#7A8BA8] uppercase tracking-wider">Professional</h4>
+                                <Globe className="w-4 h-4 text-[#8F8F8F]" />
+                                <h4 className="text-xs font-mono text-[#8F8F8F] uppercase tracking-wider">Professional</h4>
                             </div>
                             <div className="space-y-3">
                                 {professionalVideos.map(video => (
                                     <div key={video.id} className="group relative">
                                         <button
                                             onClick={() => handleVideoSelect(video)}
-                                            className={`w-full p-4 rounded-xl border transition-all text-left flex items-start gap-3 ${selectedVideo?.id === video.id ? 'bg-[#00D4A0]/10 border-[#00D4A0]/30' : 'bg-[#0D1220]/60 border-[#1E2A42] hover:border-[#00D4A0]/20'}`}
+                                            className={`w-full p-4 rounded-xl border transition-all text-left flex items-start gap-3 ${selectedVideo?.id === video.id ? 'bg-[#FAFAFA] border-[#171717] shadow-sm' : 'bg-[#FFFFFF] border-[#EBEBEB] hover:border-[#171717] hover:bg-[#FAFAFA]'}`}
                                         >
-                                            <div className={`w-9 h-9 shrink-0 rounded-lg flex items-center justify-center ${selectedVideo?.id === video.id ? 'bg-[#00D4A0]/20' : 'bg-white/5'}`}>
-                                                <Play className={`w-3.5 h-3.5 ${selectedVideo?.id === video.id ? 'text-[#00D4A0]' : 'text-[#4A5568]'}`} />
+                                            <div className={`w-9 h-9 shrink-0 rounded-lg flex items-center justify-center border ${selectedVideo?.id === video.id ? 'bg-[#171717] border-[#171717] text-white' : 'bg-[#FAFAFA] border-[#EBEBEB] text-[#8F8F8F]'}`}>
+                                                <Play className={`w-3.5 h-3.5 ${selectedVideo?.id === video.id ? 'text-white' : 'text-[#8F8F8F]'}`} />
                                             </div>
                                             <div className="flex-1 min-w-0 space-y-1">
-                                                <p className={`text-xs font-bold truncate ${selectedVideo?.id === video.id ? 'text-[#00D4A0]' : 'text-[#EFF4FB] group-hover:text-[#00D4A0] transition-colors'}`}>
+                                                <p className={`text-xs font-semibold truncate ${selectedVideo?.id === video.id ? 'text-[#171717] font-bold' : 'text-[#4D4D4D] group-hover:text-[#171717] transition-colors'}`}>
                                                     {video.title}
                                                 </p>
                                                 <div className="flex items-center gap-2">
-                                                    <span className={`text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md border ${selectedVideo?.id === video.id ? 'bg-white/10 border-white/20 text-white/80' : 'bg-[#00D4A0]/5 border-[#00D4A0]/10 text-[#00D4A0]/70'}`}>
+                                                    <span className={`text-[9px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded border ${selectedVideo?.id === video.id ? 'bg-[#FFFFFF] border-[#EBEBEB] text-[#171717]' : 'bg-[#FAFAFA] border-[#EBEBEB] text-[#4D4D4D]'}`}>
                                                         {video.category}
                                                     </span>
                                                 </div>
@@ -305,7 +305,7 @@ export default function LearnForge() {
                                             href={video.video_url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all opacity-0 group-hover:opacity-100 ${selectedVideo?.id === video.id ? 'hover:bg-white/20 text-white' : 'hover:bg-white/10 text-slate-500 hover:text-white'}`}
+                                            className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all opacity-0 group-hover:opacity-100 ${selectedVideo?.id === video.id ? 'hover:bg-[#FAFAFA] text-[#171717]' : 'hover:bg-[#FAFAFA] text-[#8F8F8F] hover:text-[#171717]'}`}
                                             title="View on YouTube"
                                         >
                                             <Globe className="w-3.5 h-3.5" />
@@ -316,19 +316,19 @@ export default function LearnForge() {
                         </div>
 
                         {/* AI Assistant Quick Access */}
-                        <div className="p-6 rounded-2xl bg-gradient-to-br from-[#7C5CFC] to-[#00D4A0] border border-white/10 space-y-4 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                        <div className="p-6 rounded-xl bg-[#171717] border border-[#171717] space-y-4 relative overflow-hidden shadow-md">
+                            <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
                                 <MessageSquare className="w-24 h-24 text-white" />
                             </div>
                             <div className="relative z-10 space-y-3">
-                                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                                <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
                                     <Sparkles className="w-5 h-5 text-white" />
                                 </div>
-                                <h4 className="text-base font-bold text-white">Need Help?</h4>
+                                <h4 className="text-base font-semibold text-white">Need Help?</h4>
                                 <p className="text-white/80 text-xs leading-relaxed">
                                     Ask Forge AI about this video or tricky concepts.
                                 </p>
-                                <button className="w-full py-2.5 rounded-xl bg-white text-[#080B16] text-xs font-bold hover:bg-white/90 transition-all active:scale-95">
+                                <button className="w-full py-2 rounded-md bg-white text-[#171717] text-xs font-semibold hover:bg-white/90 transition-all active:scale-95 shadow-sm">
                                     Launch Forge Assistant
                                 </button>
                             </div>

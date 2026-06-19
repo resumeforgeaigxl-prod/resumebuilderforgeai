@@ -1,0 +1,34 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="r_forge_gradient" x1="128" y1="128" x2="400" y2="400" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A855F7"/>
+      <stop offset="0.5" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <filter id="r_glow" x="0" y="0" width="512" height="512" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="15" result="blur"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="blur" result="shape"/>
+    </filter>
+  </defs>
+  
+  <!-- Anvil Base (Subtle Forge Foundation) -->
+  <path d="M100 420H412" stroke="#3B82F6" stroke-width="24" stroke-linecap="round" stroke-opacity="0.2"/>
+  
+  <!-- Stylized "R" (Forged Line) -->
+  <path d="M160 420V128H300C360 128 400 168 400 228C400 288 360 328 300 328H160M250 328L380 420" 
+        stroke="url(#r_forge_gradient)" 
+        stroke-width="56" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+        filter="url(#r_glow)"/>
+  
+  <!-- AI Nodes -->
+  <circle cx="160" cy="128" r="10" fill="#A855F7" stroke="#0B0F1A" stroke-width="4"/>
+  <circle cx="400" cy="228" r="10" fill="#22D3EE" stroke="#0B0F1A" stroke-width="4"/>
+  <circle cx="160" cy="420" r="12" fill="#3B82F6" stroke="#0B0F1A" stroke-width="4"/>
+  <circle cx="380" cy="420" r="10" fill="#22D3EE" stroke="#0B0F1A" stroke-width="4"/>
+  
+  <!-- Connection Lines (Subtle) -->
+  <path d="M400 228L430 258" stroke="#22D3EE" stroke-width="3" stroke-linecap="round" stroke-opacity="0.4"/>
+  <path d="M160 128L130 98" stroke="#A855F7" stroke-width="3" stroke-linecap="round" stroke-opacity="0.4"/>
+</svg>

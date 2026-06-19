@@ -1,6 +1,5 @@
 "use client"
 export const dynamic = 'force-dynamic';
-;
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -77,13 +76,12 @@ export default function ProjectViewer() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#070710] flex items-center justify-center">
+            <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
                 <div className="flex flex-col items-center gap-6">
                     <div className="relative">
-                        <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full scale-150 animate-pulse"></div>
-                        <Loader2 className="w-12 h-12 text-blue-500 animate-spin relative" />
+                        <Loader2 className="w-12 h-12 text-[#171717] animate-spin relative" />
                     </div>
-                    <p className="text-blue-400 font-black uppercase tracking-[0.2em] text-xs">Assembling Your Vision...</p>
+                    <p className="text-[#171717] font-semibold uppercase tracking-wider text-xs">Assembling Your Vision...</p>
                 </div>
             </div>
         );
@@ -92,20 +90,20 @@ export default function ProjectViewer() {
     if (!project) return null;
 
     return (
-        <div className="h-screen bg-[#070710] text-slate-200 flex flex-col overflow-hidden">
+        <div className="h-screen bg-[#FAFAFA] text-[#171717] flex flex-col overflow-hidden">
             {/* Top Toolbar */}
-            <header className="h-16 px-6 border-b border-white/5 bg-[#0a0a15] flex items-center justify-between sticky top-0 z-50">
+            <header className="h-16 px-6 border-b border-[#EBEBEB] bg-[#FFFFFF] flex items-center justify-between sticky top-0 z-50">
                 <div className="flex items-center gap-6">
                     <button
                         onClick={() => router.back()}
-                        className="p-2 mr-2 rounded-xl border border-white/5 hover:bg-white/5 text-slate-400 transition-all active:scale-90"
+                        className="p-2 mr-2 rounded-lg border border-[#EBEBEB] hover:bg-[#FAFAFA] text-[#4D4D4D] transition-all active:scale-95"
                     >
-                        <ChevronLeft className="w-5 h-5" />
+                        <ChevronLeft className="w-4 h-4" />
                     </button>
                     <div>
-                        <h1 className="text-lg font-black text-white flex items-center gap-3">
+                        <h1 className="text-base font-semibold text-[#171717] flex items-center gap-3">
                             {project.project_name}
-                            <span className="px-2 py-0.5 rounded-full bg-blue-500/10 text-[10px] text-blue-400 font-black uppercase tracking-widest border border-blue-500/20">
+                            <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-[10px] text-blue-700 font-semibold uppercase tracking-wider border border-blue-100">
                                 Starter Template
                             </span>
                         </h1>
@@ -113,15 +111,15 @@ export default function ProjectViewer() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <div className="hidden md:flex items-center gap-2 mr-6 text-[10px] font-black uppercase tracking-widest text-slate-500 bg-white/5 px-4 py-2 rounded-full border border-white/5">
-                        <Terminal className="w-3.5 h-3.5" />
+                    <div className="hidden md:flex items-center gap-2 mr-6 text-[10px] font-semibold uppercase tracking-wider text-[#8F8F8F] bg-[#FAFAFA] px-4 py-2 rounded-full border border-[#EBEBEB] font-mono">
+                        <Terminal className="w-3.5 h-3.5 text-[#171717]" />
                         Forged with Gemini Flash
                     </div>
-                    <button className="px-5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white text-xs font-black transition-all flex items-center gap-2">
+                    <button className="px-4 h-9 rounded-md bg-white border border-[#EBEBEB] hover:bg-[#FAFAFA] text-[#171717] text-xs font-semibold transition-all flex items-center gap-2 shadow-sm">
                         <Download className="w-4 h-4" />
                         Export
                     </button>
-                    <button className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black transition-all flex items-center gap-2">
+                    <button className="px-4 h-9 rounded-md bg-[#171717] hover:bg-[#333333] text-white text-xs font-semibold transition-all flex items-center gap-2 shadow-sm">
                         <Share2 className="w-4 h-4" />
                         Publish
                     </button>
@@ -130,8 +128,8 @@ export default function ProjectViewer() {
 
             <div className="flex-1 flex overflow-hidden">
                 {/* Sidebar: File Tree */}
-                <aside className="w-72 border-r border-white/5 flex flex-col bg-[#0a0a15]">
-                    <div className="flex-1">
+                <aside className="w-72 border-r border-[#EBEBEB] flex flex-col bg-[#FFFFFF]">
+                    <div className="flex-1 overflow-y-auto">
                         <FileTree
                             files={project.files}
                             onFileSelect={handleFileSelect}
@@ -140,11 +138,11 @@ export default function ProjectViewer() {
                     </div>
 
                     {/* Tech Stack Footer */}
-                    <div className="p-6 border-t border-white/5 bg-[#070710]">
-                        <h3 className="text-[10px] uppercase font-black text-slate-500 tracking-widest mb-4">Tech Stack</h3>
+                    <div className="p-6 border-t border-[#EBEBEB] bg-[#FAFAFA]">
+                        <h3 className="text-[10px] uppercase font-semibold text-[#8F8F8F] tracking-wider mb-4 font-mono">Tech Stack</h3>
                         <div className="flex flex-wrap gap-2">
                             {project.tech_stack.map((tech, i) => (
-                                <span key={i} className="px-3 py-1 rounded-lg bg-white/5 border border-white/5 text-[10px] text-slate-300 font-bold hover:bg-white/10 transition-colors cursor-default">
+                                <span key={i} className="px-3 py-1 rounded-md bg-white border border-[#EBEBEB] text-[10px] text-[#4D4D4D] font-semibold hover:bg-[#FAFAFA] transition-colors cursor-default shadow-sm">
                                     {tech}
                                 </span>
                             ))}
@@ -153,9 +151,9 @@ export default function ProjectViewer() {
                 </aside>
 
                 {/* Main View Area */}
-                <main className="flex-1 flex flex-col overflow-hidden bg-[#0d0d1a]">
+                <main className="flex-1 flex flex-col overflow-hidden bg-[#FAFAFA]">
                     {/* View Switcher Tabs */}
-                    <div className="p-2 border-b border-white/5 bg-[#0a0a15] flex gap-2">
+                    <div className="p-2 border-b border-[#EBEBEB] bg-[#FFFFFF] flex gap-2">
                         {[
                             { id: 'code', label: 'Code Explorer', icon: <Code className="w-4 h-4" /> },
                             { id: 'preview', label: 'UI Preview', icon: <Layout className="w-4 h-4" /> },
@@ -164,9 +162,9 @@ export default function ProjectViewer() {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as 'code' | 'preview' | 'explanation')}
-                                className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-3 transition-all ${activeTab === tab.id
-                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                                    : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'
+                                className={`px-5 py-2 rounded-md text-xs font-semibold uppercase tracking-wider flex items-center gap-2.5 transition-all ${activeTab === tab.id
+                                    ? 'bg-[#171717] text-white shadow-sm'
+                                    : 'text-[#4D4D4D] hover:bg-[#FAFAFA] hover:text-[#171717]'
                                     }`}
                             >
                                 {tab.icon}
@@ -181,9 +179,9 @@ export default function ProjectViewer() {
                                 {activeFilePath ? (
                                     <CodeViewer code={activeFileCode} path={activeFilePath} />
                                 ) : (
-                                    <div className="h-full flex items-center justify-center text-slate-500 flex-col gap-4">
+                                    <div className="h-full flex items-center justify-center text-[#8F8F8F] flex-col gap-4">
                                         <Code className="w-12 h-12 opacity-20" />
-                                        <p className="font-bold tracking-widest uppercase text-xs">Select a file to view code</p>
+                                        <p className="font-semibold tracking-wider uppercase text-xs font-mono">Select a file to view code</p>
                                     </div>
                                 )}
                             </div>
@@ -194,25 +192,25 @@ export default function ProjectViewer() {
                         )}
 
                         {activeTab === 'explanation' && (
-                            <div className="h-full p-8 md:p-16 overflow-y-auto custom-scrollbar prose prose-invert prose-blue max-w-4xl mx-auto">
-                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest mb-8">
+                            <div className="h-full p-8 md:p-16 overflow-y-auto custom-scrollbar max-w-4xl mx-auto prose text-[#4D4D4D] font-normal leading-relaxed">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-[10px] font-semibold uppercase tracking-wider mb-8">
                                     <Sparkles className="w-3.5 h-3.5" />
                                     Beginner Friendly Explanation
                                 </div>
-                                <h1 className="text-4xl font-black text-white mb-8 tracking-tighter">How This Project Works</h1>
-                                <div className="text-lg text-slate-400 leading-relaxed font-medium space-y-6">
+                                <h1 className="text-3xl font-semibold text-[#171717] mb-8 tracking-tight">How This Project Works</h1>
+                                <div className="text-base text-[#4D4D4D] space-y-6">
                                     {project.explanation.split('\n').map((para, i) => (
                                         <p key={i}>{para}</p>
                                     ))}
                                 </div>
 
-                                <div className="mt-16 p-8 rounded-[40px] bg-white/5 border border-white/5">
-                                    <h3 className="text-xl font-bold text-white mb-6 tracking-tight flex items-center gap-3">
-                                        <FileText className="w-6 h-6 text-blue-500" />
+                                <div className="mt-16 p-8 rounded-xl bg-white border border-[#EBEBEB] shadow-sm">
+                                    <h3 className="text-lg font-semibold text-[#171717] mb-6 tracking-tight flex items-center gap-3">
+                                        <FileText className="w-6 h-6 text-[#171717]" />
                                         Project Manifest
                                     </h3>
-                                    <div className="bg-[#070710] p-6 rounded-2xl border border-white/5">
-                                        <pre className="text-sm font-mono text-blue-400/80 leading-relaxed overflow-x-auto whitespace-pre-wrap">
+                                    <div className="bg-[#FAFAFA] p-6 rounded-lg border border-[#EBEBEB]">
+                                        <pre className="text-xs font-mono text-[#171717] leading-relaxed overflow-x-auto whitespace-pre-wrap">
                                             {project.folder_structure}
                                         </pre>
                                     </div>

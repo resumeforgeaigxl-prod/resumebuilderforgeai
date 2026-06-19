@@ -16,18 +16,18 @@ export function Accordion({ title, icon, children, className, defaultOpen = fals
   const [isOpen, setIsOpen] = React.useState(defaultOpen);
 
   return (
-    <div className={cn("border border-white/5 rounded-2xl overflow-hidden bg-white/[0.02] transition-all", className)}>
+    <div className={cn("border border-[#EBEBEB] rounded-xl overflow-hidden bg-white transition-all", className)}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-14 px-6 flex items-center justify-between text-left hover:bg-white/[0.03] transition-colors"
+        className="w-full h-12 px-6 flex items-center justify-between text-left hover:bg-[#FAFAFA] transition-colors"
       >
         <div className="flex items-center gap-3">
-          {icon && <div className="text-slate-400">{icon}</div>}
-          <span className="text-[10px] font-black uppercase tracking-widest text-white italic">{title}</span>
+          {icon && <div className="text-[#8F8F8F]">{icon}</div>}
+          <span className="text-xs font-semibold uppercase tracking-wider text-[#171717]">{title}</span>
         </div>
         <ChevronDown 
           className={cn(
-            "w-4 h-4 text-slate-500 transition-transform duration-300",
+            "w-4 h-4 text-[#8F8F8F] transition-transform duration-300",
             isOpen && "rotate-180"
           )} 
         />
@@ -39,7 +39,7 @@ export function Accordion({ title, icon, children, className, defaultOpen = fals
           isOpen ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0 overflow-hidden"
         )}
       >
-        <div className="pt-4 border-t border-white/5">
+        <div className="pt-4 border-t border-[#EBEBEB] text-[#4D4D4D]">
           {children}
         </div>
       </div>

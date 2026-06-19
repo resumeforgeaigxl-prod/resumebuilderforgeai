@@ -47,7 +47,11 @@ const nextConfig = {
     },
     experimental: {
         serverComponentsExternalPackages: ["@sparticuz/chromium", "@napi-rs/canvas", "pdf-parse", "googlethis", "mammoth"],
-        optimizePackageImports: ['lucide-react']
+        optimizePackageImports: ['lucide-react'],
+        outputFileTracingIncludes: {
+            '/api/resume/parse': ['./bin/pdf-parser-linux'],
+            '/api/studyforge/upload': ['./bin/pdf-parser-linux']
+        }
     },
     transpilePackages: ['react-pdf', 'pdfjs-dist', 'react-markdown', 'remark-gfm'],
     async headers() {

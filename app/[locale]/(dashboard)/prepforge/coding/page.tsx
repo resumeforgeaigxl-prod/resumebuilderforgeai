@@ -1,6 +1,5 @@
 "use client"
 export const dynamic = 'force-dynamic';
-;
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
@@ -70,26 +69,26 @@ export default function CodingForgeListing() {
     ];
 
     return (
-        <div className="space-y-10 max-w-5xl mx-auto">
+        <div className="space-y-10 max-w-5xl mx-auto text-[#171717]">
             {/* Header section */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E2A42] pb-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#EBEBEB] pb-8">
                 <div className="space-y-3">
                     <Link 
-                        href={`/${locale}/prepforge/app`}
-                        className="flex items-center gap-2 text-xs font-bold text-[#4A5568] hover:text-[#00D4A0] transition-colors mb-4"
+                        href={`/${locale}/prepforge`}
+                        className="flex items-center gap-2 text-xs font-semibold text-[#8F8F8F] hover:text-[#171717] transition-colors mb-4"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         Back to Hub
                     </Link>
-                    <h1 className="text-4xl font-bold tracking-tight text-white">
+                    <h1 className="text-3xl font-semibold tracking-tight text-[#171717]">
                         CodingForge
                     </h1>
-                    <p className="text-slate-400 mt-2">
+                    <p className="text-[#4D4D4D] mt-2 text-sm md:text-base">
                         Master the most frequent TCS NQT coding patterns with line-by-line logic walkthroughs.
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
-                     <Badge variant="outline" className="px-4 py-1.5 rounded-xl border-[#00D4A0]/20 bg-[#00D4A0]/5 text-[#00D4A0] font-bold text-[10px]">
+                     <Badge variant="outline" className="px-4 py-1.5 rounded-lg border-[#EBEBEB] bg-[#FFFFFF] text-[#171717] font-semibold text-[10px]">
                         {allProblems.length} PROBLEMS
                     </Badge>
                 </div>
@@ -97,47 +96,47 @@ export default function CodingForgeListing() {
 
             {isLoading ? (
                 <div className="p-12 flex flex-col items-center justify-center text-center">
-                    <Loader2 className="w-8 h-8 text-[#00D4A0] animate-spin mb-3" />
-                    <p className="text-[#4A5568] font-semibold text-xs">Loading problems...</p>
+                    <Loader2 className="w-8 h-8 text-[#171717] animate-spin mb-3" />
+                    <p className="text-[#8F8F8F] font-semibold text-xs">Loading problems...</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {allProblems.map((problem: UIProblem) => (
                         <Link 
                             key={problem.id} 
-                            href={problem.isDynamic ? `/${locale}/prepforge/app?slug=${problem.slug}` : `/${locale}/prepforge/coding/${problem.slug}`}
-                            className="group"
+                            href={problem.isDynamic ? `/${locale}/prepforge?slug=${problem.slug}` : `/${locale}/prepforge/coding/${problem.slug}`}
+                            className="group animate-fade-in"
                         >
-                            <div className="p-6 h-full flex flex-col rounded-xl border border-[#1E2A42] bg-[#0D1220]/60 hover:border-[#00D4A0]/20 transition-all">
+                            <div className="p-6 h-full flex flex-col rounded-xl border border-[#EBEBEB] bg-[#FFFFFF] hover:border-[#171717]/25 hover:shadow-[0_2px_4px_rgba(0,0,0,0.02),0_8px_16px_rgba(0,0,0,0.04)] transition-all">
                                 <div className="flex items-start justify-between mb-4">
-                                    <div className="p-3 rounded-xl bg-white/5 text-[#00D4A0] group-hover:scale-105 transition-transform">
+                                    <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] text-[#171717] group-hover:scale-105 transition-transform">
                                         <Code2 className="w-5 h-5" />
                                     </div>
-                                    <Badge variant="outline" className={`px-2.5 py-1 font-bold text-[10px] ${
-                                        problem.difficulty === 'Easy' ? 'text-[#00D4A0] border-[#00D4A0]/20 bg-[#00D4A0]/5' :
-                                        problem.difficulty === 'Medium' ? 'text-[#F5A623] border-[#F5A623]/20 bg-[#F5A623]/5' :
-                                        'text-rose-400 border-rose-500/20 bg-rose-500/5'
+                                    <Badge variant="outline" className={`px-2.5 py-1 font-semibold text-[10px] ${
+                                        problem.difficulty === 'Easy' ? 'text-emerald-700 border-emerald-100 bg-emerald-50' :
+                                        problem.difficulty === 'Medium' ? 'text-amber-700 border-amber-100 bg-amber-50' :
+                                        'text-rose-700 border-rose-100 bg-rose-50'
                                     }`}>
                                         {problem.difficulty}
                                         {problem.isDynamic && " (AI)"}
                                     </Badge>
                                 </div>
                                 
-                                <h3 className="text-base font-bold text-white mb-2 group-hover:text-[#00D4A0] transition-colors">
+                                <h3 className="text-base font-semibold text-[#171717] mb-2 group-hover:text-[#0070F3] transition-colors">
                                     {problem.title}
                                 </h3>
                                 
-                                <p className="text-sm text-[#7A8BA8] leading-relaxed line-clamp-2 mb-6">
+                                <p className="text-sm text-[#4D4D4D] leading-relaxed line-clamp-2 mb-6">
                                     {problem.question}
                                 </p>
 
-                                <div className="mt-auto pt-4 border-t border-[#1E2A42] flex items-center gap-4">
-                                    <div className="flex items-center gap-2 text-[10px] font-bold text-[#4A5568] uppercase tracking-wider">
-                                        <Target className="w-3.5 h-3.5 text-[#00D4A0]" />
+                                <div className="mt-auto pt-4 border-t border-[#EBEBEB] flex items-center gap-4">
+                                    <div className="flex items-center gap-2 text-[10px] font-semibold text-[#8F8F8F] uppercase tracking-wider">
+                                        <Target className="w-3.5 h-3.5 text-[#171717]" />
                                         {problem.approach.length} Steps
                                     </div>
-                                    <div className="flex items-center gap-1 text-[10px] font-bold text-[#4A5568] uppercase tracking-wider">
-                                        <ChevronRight className="w-3.5 h-3.5 group-hover:text-[#00D4A0] transition-all" />
+                                    <div className="flex items-center gap-1 text-[10px] font-semibold text-[#8F8F8F] uppercase tracking-wider ml-auto">
+                                        <ChevronRight className="w-3.5 h-3.5 group-hover:text-[#0070F3] transition-all" />
                                         View
                                     </div>
                                 </div>
@@ -148,18 +147,18 @@ export default function CodingForgeListing() {
             )}
 
             {/* Pattern Focus Tip */}
-            <div className="p-8 rounded-2xl bg-[#0D1220]/60 border border-[#1E2A42]">
+            <div className="p-8 rounded-xl bg-[#FFFFFF] border border-[#EBEBEB] shadow-sm">
                 <div className="flex flex-col md:flex-row gap-6 items-center">
-                    <div className="shrink-0 p-4 rounded-full bg-[#F5A623]/10 text-[#F5A623]">
+                    <div className="shrink-0 p-4 rounded-lg bg-amber-50 border border-amber-100 text-[#B76E00]">
                         <Flame className="w-8 h-8" />
                     </div>
                     <div>
-                        <h4 className="text-lg font-bold text-white mb-2">Pro Tip: The Symmetry Pattern</h4>
-                        <p className="text-sm text-[#7A8BA8] leading-relaxed max-w-3xl border-l-2 border-[#00D4A0]/30 pl-4">
+                        <h4 className="text-lg font-semibold text-[#171717] mb-2">Pro Tip: The Symmetry Pattern</h4>
+                        <p className="text-sm text-[#4D4D4D] leading-relaxed max-w-3xl border-l-2 border-[#171717]/40 pl-4">
                            Notice how Palindrome, Armstrong, and Reverse Number all share the same atomic logic—extracting digits using modulo and building a new number using division. Master this one pattern, and you've solved 30% of TCS NQT coding problems.
                         </p>
                     </div>
-                    <Button variant="ghost" className="ml-auto text-xs font-bold text-[#4A5568] hover:text-white border border-[#1E2A42] px-4 h-9 rounded-xl">
+                    <Button variant="ghost" className="ml-auto text-xs font-semibold text-[#171717] hover:bg-[#FAFAFA] border border-[#EBEBEB] px-4 h-9 rounded-md">
                         View More Tips
                     </Button>
                 </div>

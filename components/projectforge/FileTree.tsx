@@ -30,13 +30,13 @@ function FileTreeNode({ node, depth, onFileSelect, activeFile }: FileTreeNodePro
         return (
             <div key={node.path} className="select-none">
                 <div
-                    className="flex items-center gap-2 px-4 py-2 hover:bg-white/5 cursor-pointer text-slate-400 group"
+                    className="flex items-center gap-2 px-4 py-2 hover:bg-[#171717]/5 cursor-pointer text-[#4D4D4D] group transition-colors"
                     onClick={() => setIsOpen(!isOpen)}
                     style={{ paddingLeft: `${depth * 1.5 + 1}rem` }}
                 >
-                    {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                    <Folder className="w-4 h-4 text-blue-400 group-hover:text-blue-300" />
-                    <span className="text-sm font-medium">{node.name}</span>
+                    {isOpen ? <ChevronDown className="w-4 h-4 text-[#8F8F8F]" /> : <ChevronRight className="w-4 h-4 text-[#8F8F8F]" />}
+                    <Folder className="w-4 h-4 text-[#0070F3]" />
+                    <span className="text-sm font-medium text-[#171717]">{node.name}</span>
                 </div>
                 {isOpen && node.children && (
                     <div>
@@ -60,13 +60,13 @@ function FileTreeNode({ node, depth, onFileSelect, activeFile }: FileTreeNodePro
     return (
         <div
             key={node.path}
-            className={`flex items-center gap-2 px-4 py-2 hover:bg-white/5 cursor-pointer group ${isActive ? 'bg-blue-500/10 text-blue-400 border-r-2 border-blue-500' : 'text-slate-400'}`}
+            className={`flex items-center gap-2 px-4 py-2 hover:bg-[#171717]/5 cursor-pointer group transition-all ${isActive ? 'bg-blue-50 text-[#0070F3] border-r-2 border-[#0070F3]' : 'text-[#4D4D4D]'}`}
             onClick={() => onFileSelect(node.path)}
             style={{ paddingLeft: `${depth * 1.5 + 1}rem` }}
         >
             <div className="w-4" /> {/* Spacer instead of chevron */}
-            <FileCode className={`w-4 h-4 ${isActive ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-300'}`} />
-            <span className="text-sm font-medium">{node.name}</span>
+            <FileCode className={`w-4 h-4 ${isActive ? 'text-[#0070F3]' : 'text-[#8F8F8F] group-hover:text-[#171717]'}`} />
+            <span className="text-sm font-medium text-[#171717]">{node.name}</span>
         </div>
     );
 }
@@ -99,9 +99,9 @@ export default function FileTree({ files, onFileSelect, activeFile }: FileTreePr
     });
 
     return (
-        <div className="py-4 h-full overflow-y-auto border-r border-white/5 bg-[#0a0a15]">
+        <div className="py-4 h-full overflow-y-auto border-r border-[#EBEBEB] bg-[#FFFFFF]">
             <div className="px-4 mb-4">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Explorer</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-[#8F8F8F] font-mono">Explorer</h3>
             </div>
             {root.children && Object.values(root.children).map(child => (
                 <FileTreeNode
@@ -115,4 +115,3 @@ export default function FileTree({ files, onFileSelect, activeFile }: FileTreePr
         </div>
     );
 }
-

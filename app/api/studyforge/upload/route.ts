@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 
         try {
             if (resolvedFileType === 'application/pdf' || lowerName.endsWith('.pdf')) {
-                // Use the new Python PDF Extraction Service
+                // Use the Go PDF parser binary
                 textContent = await extractTextFromPdf(buffer, file.name);
 
                 // Simple chunking for StudyForge (approx 1200 chars as before)
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
                 for (let i = 0; i < textContent.length; i += 1200) {
                     textChunks.push(textContent.slice(i, i + 1200));
                 }
-                pdfType = 'fitz-extracted'; // Special marker for Python service success
+                pdfType = 'go-extracted'; // Special marker for Go binary success
             } else if (resolvedFileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || lowerName.endsWith('.docx')) {
                 const result = await mammoth.extractRawText({ buffer });
                 textContent = result.value;

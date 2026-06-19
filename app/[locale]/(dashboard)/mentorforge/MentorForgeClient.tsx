@@ -122,25 +122,22 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
   const showWelcome = messages.length < 2 && !isLoading;
 
   return (
-    <div className="flex flex-col h-full bg-[#080B16] text-[#EFF4FB] overflow-hidden relative">
+    <div className="flex flex-col h-full bg-[#FAFAFA] text-[#171717] overflow-hidden relative">
       {/* Standardized Header */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E2A42] p-8 bg-[#080B16]/80 backdrop-blur-md z-20 sticky top-0">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#EBEBEB] p-8 bg-white/80 backdrop-blur-md z-20 sticky top-0 shadow-sm">
         <div>
-          <div className="flex items-center gap-2 text-[#00D4A0] font-bold tracking-widest text-[10px] uppercase mb-4">
-            <Bot className="w-3.5 h-3.5" /> Intelligence Core
+          <div className="flex items-center gap-2 text-[#8F8F8F] font-mono text-xs uppercase tracking-wider mb-2">
+            <Bot className="w-3.5 h-3.5 text-[#171717]" /> Intelligence Core
           </div>
-          <h1 className="text-4xl font-bold tracking-tighter text-white uppercase">MentorForge</h1>
-          <p className="text-slate-400 mt-2 text-lg">Neural career guidance and technical mentorship via high-fidelity AI protocols.</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-[#171717] uppercase">MentorForge</h1>
+          <p className="text-[#4D4D4D] mt-1.5 text-base">Neural career guidance and technical mentorship via high-fidelity AI protocols.</p>
         </div>
 
-        <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0D1220] border border-[#1E2A42]">
-          <div className="text-[10px] text-[#4A5568] uppercase tracking-wider font-semibold">SIGNAL_LOCK</div>
-          <Badge variant="outline" className="border-[#00D4A0]/20 bg-[#00D4A0]/5 text-[#00D4A0] text-[9px] font-bold uppercase">LIVE</Badge>
+        <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-md bg-white border border-[#EBEBEB]">
+          <div className="text-[10px] text-[#8F8F8F] uppercase tracking-wider font-semibold">SIGNAL_LOCK</div>
+          <Badge variant="outline" className="border-none bg-[#FAFAFA] text-[#171717] text-[9px] font-bold uppercase">LIVE</Badge>
         </div>
       </header>
-
-      {/* Ambient background glows (static, no animation) */}
-
 
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto custom-scrollbar relative" ref={scrollRef}>
@@ -158,26 +155,26 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
             >
               {/* Avatar */}
               <div className={cn(
-                "w-9 h-9 rounded-xl shrink-0 flex items-center justify-center border transition-all",
+                "w-9 h-9 rounded-lg shrink-0 flex items-center justify-center border transition-all",
                 msg.role === 'user'
-                  ? "bg-[#00D4A0]/15 border-[#00D4A0]/30 shadow-[0_0_16px_rgba(0,212,160,0.15)]"
-                  : "bg-[#0D1220] border-[#1E2A42]"
+                  ? "bg-[#FAFAFA] border-[#EBEBEB] shadow-sm"
+                  : "bg-[#171717] border-[#171717]"
               )}>
                 {msg.role === 'user'
-                  ? <User className="w-4 h-4 text-[#00D4A0]" />
-                  : <Bot className="w-4 h-4 text-[#7C5CFC]" />
+                  ? <User className="w-4 h-4 text-[#171717]" />
+                  : <Bot className="w-4 h-4 text-white" />
                 }
               </div>
 
               {/* Bubble */}
               <div className={cn("flex flex-col gap-2.5 max-w-[82%]", msg.role === 'user' && "items-end")}>
                 <div className={cn(
-                  "px-5 py-4 rounded-2xl text-sm leading-relaxed transition-all relative",
+                  "px-5 py-4 rounded-xl text-sm leading-relaxed transition-all relative border",
                   msg.role === 'user'
-                    ? "bg-[#00D4A0]/8 text-[#EFF4FB] border border-[#00D4A0]/12"
-                    : "bg-[#0D1220]/80 text-[#C0C9D6] border border-[#1E2A42] backdrop-blur-sm"
+                    ? "bg-[#FAFAFA] text-[#171717] border-[#EBEBEB]"
+                    : "bg-white text-[#171717] border-[#EBEBEB] shadow-sm"
                 )}>
-                  <article className="prose prose-sm prose-invert max-w-none prose-headings:text-[#EFF4FB] prose-strong:text-[#00D4A0] prose-code:text-[#00D4A0] prose-code:bg-[#121A2E] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-[#080B16] prose-pre:border prose-pre:border-[#1E2A42] prose-pre:rounded-xl prose-li:text-[#7A8BA8] prose-p:my-2 prose-a:text-[#00D4A0] prose-a:no-underline hover:prose-a:underline">
+                  <article className="prose prose-sm max-w-none text-[#171717] prose-headings:text-[#171717] prose-strong:text-[#171717] prose-code:text-[#171717] prose-code:bg-[#FAFAFA] prose-code:border prose-code:border-[#EBEBEB] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-[#FAFAFA] prose-pre:border prose-pre:border-[#EBEBEB] prose-pre:rounded-lg prose-p:my-1.5 prose-a:text-[#0070F3] hover:prose-a:underline">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {msg.content}
                     </ReactMarkdown>
@@ -191,7 +188,7 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
                       <Button
                         onClick={() => navigateToForge(msg.suggestedAction!)}
                         size="sm"
-                        className="h-8 rounded-lg bg-[#00D4A0]/12 hover:bg-[#00D4A0] text-[#00D4A0] hover:text-[#080B16] border border-[#00D4A0]/20 text-[11px] font-bold px-3.5 transition-all duration-300"
+                        className="h-8 rounded bg-[#171717] hover:bg-[#171717]/90 text-white text-[10px] font-medium px-3.5 transition-all shadow-sm"
                       >
                         Try in {msg.suggestedAction}
                       </Button>
@@ -199,7 +196,7 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
                     <Button
                       onClick={() => router.push(`/${locale}/studyforge`)}
                       size="sm"
-                      className="h-8 rounded-lg bg-[#0D1220] hover:bg-[#121A2E] text-[#7A8BA8] hover:text-[#EFF4FB] border border-[#1E2A42] text-[11px] font-bold px-3.5 transition-all duration-300"
+                      className="h-8 rounded bg-white hover:bg-[#FAFAFA] text-[#171717] border border-[#EBEBEB] text-[10px] font-medium px-3.5 transition-all shadow-sm"
                     >
                       Open StudyForge
                     </Button>
@@ -216,13 +213,13 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
               animate={{ opacity: 1 }}
               className="flex gap-4"
             >
-              <div className="w-9 h-9 rounded-xl bg-[#0D1220] border border-[#1E2A42] flex items-center justify-center">
-                <BrainCircuit className="w-4 h-4 text-[#7C5CFC] animate-pulse" />
+              <div className="w-9 h-9 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center">
+                <BrainCircuit className="w-4 h-4 text-[#8F8F8F] animate-pulse" />
               </div>
               <div className="space-y-3 flex-1 max-w-md">
-                <div className="w-2/3 h-4 rounded-lg bg-[#121A2E] animate-pulse" />
-                <div className="w-full h-24 rounded-xl bg-[#121A2E] animate-pulse" />
-                <div className="w-1/2 h-4 rounded-lg bg-[#121A2E] animate-pulse" />
+                <div className="w-2/3 h-4 rounded bg-[#EBEBEB] animate-pulse" />
+                <div className="w-full h-24 rounded-lg bg-[#EBEBEB] animate-pulse" />
+                <div className="w-1/2 h-4 rounded bg-[#EBEBEB] animate-pulse" />
               </div>
             </motion.div>
           )}
@@ -232,9 +229,9 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
       {/* Bottom input area */}
       <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
         {/* Gradient fade */}
-        <div className="h-32 bg-gradient-to-t from-[#080B16] via-[#080B16]/95 to-transparent" />
+        <div className="h-32 bg-gradient-to-t from-[#FAFAFA] via-[#FAFAFA]/95 to-transparent" />
 
-        <div className="bg-[#080B16] pb-6 px-6 sm:px-8 pointer-events-auto">
+        <div className="bg-[#FAFAFA] pb-6 px-6 sm:px-8 pointer-events-auto">
           <div className="max-w-3xl mx-auto space-y-4">
             {/* Suggestion cards — only on initial state */}
             <AnimatePresence>
@@ -250,15 +247,15 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
                     <button
                       key={s.text}
                       onClick={() => sendMessage(s.text, s.mode)}
-                      className="group flex items-center justify-between p-4 rounded-xl border border-[#1E2A42] bg-[#0D1220]/80 backdrop-blur-sm text-xs text-[#7A8BA8] hover:text-[#EFF4FB] hover:bg-[#121A2E] hover:border-[#00D4A0]/20 transition-all duration-300 text-left hover:shadow-[0_0_30px_rgba(0,212,160,0.04)]"
+                      className="group flex items-center justify-between p-4 rounded-xl border border-[#EBEBEB] bg-white text-xs text-[#4D4D4D] hover:text-[#171717] hover:bg-[#FAFAFA] hover:border-[#171717] transition-all duration-200 text-left shadow-sm"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#00D4A0]/8 flex items-center justify-center group-hover:bg-[#00D4A0]/15 transition-colors">
-                          <s.icon className="w-3.5 h-3.5 text-[#00D4A0]" />
+                        <div className="w-8 h-8 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center group-hover:bg-white transition-colors">
+                          <s.icon className="w-3.5 h-3.5 text-[#171717]" />
                         </div>
                         <span className="font-semibold line-clamp-1">{s.text}</span>
                       </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-[#4A5568] group-hover:translate-x-1 group-hover:text-[#00D4A0] transition-all" />
+                      <ChevronRight className="w-3.5 h-3.5 text-[#8F8F8F] group-hover:translate-x-0.5 group-hover:text-[#171717] transition-all" />
                     </button>
                   ))}
                 </motion.div>

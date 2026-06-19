@@ -24,7 +24,7 @@ function DashboardContent({
     const formattedTitle = pageTitle.charAt(0).toUpperCase() + pageTitle.slice(1);
 
     return (
-        <div className="min-h-screen bg-[#080B16] flex overflow-hidden relative">
+        <div className="min-h-screen bg-[#FAFAFA] flex overflow-hidden relative landing-light">
             <Sidebar locale={locale} />
 
             <div className={cn(

@@ -41,14 +41,14 @@ export default function PDFViewer({ fileUrl, onLoadSuccess, numPages }: PDFViewe
             }}
             loading={
                 <div className="flex flex-col items-center justify-center p-20 gap-4 min-w-[300px]">
-                    <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
-                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest leading-none">Initializing PDF Engine</p>
+                    <Loader2 className="w-8 h-8 text-[#171717] animate-spin" />
+                    <p className="text-[#8F8F8F] text-[10px] font-semibold uppercase tracking-wider font-mono">Initializing PDF Engine</p>
                 </div>
             }
             error={
-                <div className="p-10 text-center border border-dashed border-rose-500/20 rounded-3xl bg-rose-500/5">
-                    <p className="text-rose-400 font-bold mb-2">Failed to load PDF</p>
-                    <p className="text-slate-500 text-xs text-balance leading-relaxed">
+                <div className="p-10 text-center border border-rose-100 rounded-xl bg-rose-50/50">
+                    <p className="text-rose-700 font-semibold mb-2">Failed to load PDF</p>
+                    <p className="text-[#8F8F8F] text-xs text-balance leading-relaxed">
                         {loadError || 'This could be due to a corrupted file or network issue.'}
                     </p>
                 </div>
@@ -59,7 +59,7 @@ export default function PDFViewer({ fileUrl, onLoadSuccess, numPages }: PDFViewe
                     key={`page_${index + 1}`}
                     pageNumber={index + 1}
                     scale={1.2}
-                    className="mb-8 shadow-[0_0_50px_rgba(0,0,0,0.5)] rounded-sm overflow-hidden border border-white/5"
+                    className="mb-8 shadow-sm rounded-sm overflow-hidden border border-[#EBEBEB]"
                     renderTextLayer={true}
                     renderAnnotationLayer={true}
                 />

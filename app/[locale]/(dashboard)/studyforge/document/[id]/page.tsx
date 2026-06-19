@@ -1,6 +1,5 @@
 'use client'
 export const dynamic = 'force-dynamic';
-;
 
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
@@ -27,8 +26,8 @@ const PDFViewer = NextDynamic(() => import('@/components/studyforge/PDFViewer'),
     ssr: false,
     loading: () => (
         <div className="flex flex-col items-center justify-center p-20 gap-4 min-h-[400px]">
-            <Loader2 className="w-6 h-6 text-indigo-500 animate-spin" />
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Loading PDF Engine</p>
+            <Loader2 className="w-6 h-6 text-[#171717] animate-spin" />
+            <p className="text-[#8F8F8F] text-[10px] font-semibold uppercase tracking-wider font-mono">Loading PDF Engine</p>
         </div>
     )
 });
@@ -38,7 +37,7 @@ const PDFViewer = NextDynamic(() => import('@/components/studyforge/PDFViewer'),
  */
 const AISidebar = NextDynamic(() => import('@/components/studyforge/AISidebar'), {
     ssr: false,
-    loading: () => <div className="w-80 border-l border-white/5 bg-[#070710]/50" />
+    loading: () => <div className="w-80 border-l border-[#EBEBEB] bg-[#FFFFFF]" />
 });
 
 /**
@@ -79,46 +78,46 @@ export default function DocumentDetailPage() {
                 // Handle Quiz format [ {question, options, answer}, ... ]
                 if (Array.isArray(parsed) && parsed.length > 0 && (parsed[0].question || parsed[0].title)) {
                     return (
-                        <div className="space-y-10">
-                            <div className="flex items-center gap-3 text-rose-400 mb-8 px-2">
-                                <div className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/20">
+                        <div className="space-y-10 text-[#171717]">
+                            <div className="flex items-center gap-3 text-rose-700 mb-8 px-2">
+                                <div className="p-2 rounded-lg bg-rose-50 border border-rose-100 text-rose-700">
                                     <HelpCircle className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h3 className="text-xs font-black uppercase tracking-[0.2em]">Neural Quiz Engine</h3>
-                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Synthesized from Document Protocol</p>
+                                    <h3 className="text-xs font-semibold uppercase tracking-wider font-mono">Neural Quiz Engine</h3>
+                                    <p className="text-[10px] text-[#8F8F8F] font-semibold uppercase tracking-wider mt-0.5">Synthesized from Document Protocol</p>
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 gap-6">
                                 {parsed.map((item: any, idx: number) => (
-                                    <div key={idx} className="p-10 rounded-[3rem] bg-white/[0.02] border border-white/5 space-y-8 hover:bg-white/[0.04] transition-all duration-500 group relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity">
-                                            <HelpCircle className="w-24 h-24" />
+                                    <div key={idx} className="p-8 rounded-xl bg-white border border-[#EBEBEB] space-y-6 hover:shadow-sm transition-all group relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 p-8 opacity-[0.01] group-hover:opacity-[0.03] transition-opacity">
+                                            <HelpCircle className="w-24 h-24 text-[#171717]" />
                                         </div>
                                         
-                                        <h3 className="text-white text-xl font-bold leading-tight relative z-10">
-                                            <span className="text-rose-500/40 font-black mr-4 text-2xl italic">Q{idx + 1}</span>
+                                        <h3 className="text-[#171717] text-lg font-semibold leading-tight relative z-10">
+                                            <span className="text-rose-500/40 font-bold mr-4 text-xl italic">Q{idx + 1}</span>
                                             {item.question || item.title}
                                         </h3>
 
                                         {item.options && Array.isArray(item.options) && (
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
                                                 {item.options.map((opt: string, i: number) => (
-                                                    <div key={i} className="p-5 rounded-2xl bg-black/40 border border-white/5 text-sm text-slate-400 font-medium group/opt hover:border-white/20 transition-all">
-                                                        <span className="text-slate-600 mr-3 font-black group-hover/opt:text-rose-500 transition-colors">{String.fromCharCode(65 + i)}</span>
+                                                    <div key={i} className="p-4 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] text-sm text-[#4D4D4D] font-medium group/opt hover:border-[#171717]/30 transition-all">
+                                                        <span className="text-[#8F8F8F] mr-3 font-semibold group-hover/opt:text-rose-600 transition-colors">{String.fromCharCode(65 + i)}</span>
                                                         {opt}
                                                     </div>
                                                 ))}
                                             </div>
                                         )}
 
-                                        <div className="pt-8 border-t border-white/5 flex flex-col gap-3 relative z-10">
+                                        <div className="pt-6 border-t border-[#EBEBEB] flex flex-col gap-3 relative z-10">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-                                                <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em]">Solution Protocol</p>
+                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                                <p className="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider font-mono">Solution Protocol</p>
                                             </div>
-                                            <div className="p-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
-                                                <p className="text-base text-slate-200 font-bold italic leading-relaxed">
+                                            <div className="p-5 rounded-lg bg-emerald-50/50 border border-emerald-100">
+                                                <p className="text-sm text-emerald-950 font-semibold italic leading-relaxed">
                                                     {item.answer || item.correct_answer || item.solution}
                                                 </p>
                                             </div>
@@ -138,26 +137,24 @@ export default function DocumentDetailPage() {
 
                 if (summaryData && Array.isArray(summaryData)) {
                     return (
-                        <div className="space-y-10">
-                            <div className="flex items-center gap-3 text-blue-400 mb-8 px-2">
-                                <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                        <div className="space-y-10 text-[#171717]">
+                            <div className="flex items-center gap-3 text-[#0070F3] mb-8 px-2">
+                                <div className="p-2 rounded-lg bg-blue-50 border border-blue-100 text-[#0070F3]">
                                     <Sparkles className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h3 className="text-xs font-black uppercase tracking-[0.2em]">Intelligence Summary</h3>
-                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Neural Pattern Recognition Active</p>
+                                    <h3 className="text-xs font-semibold uppercase tracking-wider font-mono">Intelligence Summary</h3>
+                                    <p className="text-[10px] text-[#8F8F8F] font-semibold uppercase tracking-wider mt-0.5">Neural Pattern Recognition Active</p>
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 gap-5">
                                 {summaryData.map((item: any, idx: number) => (
-                                    <div key={idx} className="flex gap-8 p-10 rounded-[3.5rem] bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all duration-500 group relative overflow-hidden">
-                                        <div className="absolute -left-4 -top-4 w-24 h-24 bg-blue-500/5 blur-3xl rounded-full group-hover:bg-blue-500/10 transition-all" />
-                                        
-                                        <div className="w-14 h-14 rounded-[1.5rem] bg-blue-500/10 text-blue-400 flex items-center justify-center text-lg font-black shrink-0 border border-blue-500/20 shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                                    <div key={idx} className="flex gap-6 p-8 rounded-xl bg-white border border-[#EBEBEB] hover:shadow-sm transition-all group relative overflow-hidden">
+                                        <div className="w-10 h-10 rounded-lg bg-blue-50 text-[#0070F3] flex items-center justify-center text-base font-semibold shrink-0 border border-blue-100 shadow-sm group-hover:scale-105 transition-all">
                                             {idx + 1}
                                         </div>
                                         
-                                        <div className="prose prose-invert prose-indigo max-w-none text-slate-300 text-lg leading-relaxed font-medium">
+                                        <div className="prose max-w-none text-[#4D4D4D] text-sm leading-relaxed font-medium">
                                             <Markdown>{item.point || item.content || item.text || (typeof item === 'string' ? item : JSON.stringify(item))}</Markdown>
                                         </div>
                                     </div>
@@ -172,17 +169,17 @@ export default function DocumentDetailPage() {
                 if (directText && typeof directText === 'string') {
                     const isLong = directText.length > 300;
                     return (
-                        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                            <div className="flex items-center gap-3 text-amber-400 mb-8 px-2">
-                                <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                        <div className="space-y-8 animate-in fade-in duration-300 text-[#171717]">
+                            <div className="flex items-center gap-3 text-[#B76E00] mb-8 px-2">
+                                <div className="p-2 rounded-lg bg-amber-50 border border-amber-100 text-[#B76E00]">
                                     <Lightbulb className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h3 className="text-xs font-black uppercase tracking-[0.2em]">Neural Insight</h3>
-                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Contextual Logic Extraction</p>
+                                    <h3 className="text-xs font-semibold uppercase tracking-wider font-mono">Neural Insight</h3>
+                                    <p className="text-[10px] text-[#8F8F8F] font-semibold uppercase tracking-wider mt-0.5">Contextual Logic Extraction</p>
                                 </div>
                             </div>
-                            <div className={`prose prose-invert prose-indigo max-w-none text-slate-300 leading-relaxed font-medium bg-white/[0.02] border border-white/5 p-10 rounded-[3rem] shadow-2xl ${isLong ? 'text-base' : 'text-lg'}`}>
+                            <div className={`prose max-w-none text-[#4D4D4D] leading-relaxed font-medium bg-white border border-[#EBEBEB] p-8 rounded-xl shadow-sm ${isLong ? 'text-xs md:text-sm' : 'text-sm md:text-base'}`}>
                                 <Markdown>{directText}</Markdown>
                             </div>
                         </div>
@@ -194,44 +191,43 @@ export default function DocumentDetailPage() {
                     const objectsToRender = Array.isArray(parsed) ? parsed : [parsed];
                     
                     return (
-                        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                             <div className="flex items-center gap-3 text-emerald-400 mb-8 px-2">
-                                <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                        <div className="space-y-8 animate-in fade-in duration-300 text-[#171717]">
+                             <div className="flex items-center gap-3 text-emerald-700 mb-8 px-2">
+                                <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700">
                                     <BookOpen className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h3 className="text-xs font-black uppercase tracking-[0.2em]">Neural Documentation</h3>
-                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Synthesized Protocol View</p>
+                                    <h3 className="text-xs font-semibold uppercase tracking-wider font-mono">Neural Documentation</h3>
+                                    <p className="text-[10px] text-[#8F8F8F] font-semibold uppercase tracking-wider mt-0.5">Synthesized Protocol View</p>
                                 </div>
                             </div>
                             <div className="grid gap-8">
                                 {objectsToRender.map((obj: any, index: number) => (
-                                    <div key={index} className="prose prose-invert prose-indigo max-w-none text-slate-300 leading-relaxed font-medium bg-white/[0.02] border border-white/5 p-12 rounded-[3.5rem] shadow-2xl overflow-hidden relative">
-                                        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/[0.02] blur-[100px] rounded-full" />
+                                    <div key={index} className="prose max-w-none text-[#4D4D4D] leading-relaxed font-medium bg-white border border-[#EBEBEB] p-10 rounded-xl shadow-sm overflow-hidden relative">
                                         {typeof obj === 'object' && obj !== null ? (
                                             Object.entries(obj).map(([key, value]: [string, any]) => (
                                                 <div key={key} className="mb-10 last:mb-0 relative z-10">
-                                                    <h3 className="text-white text-xl font-bold mb-6 uppercase tracking-tight border-l-4 border-emerald-500/30 pl-6">{key.replace(/_/g, ' ')}</h3>
+                                                    <h3 className="text-[#171717] text-lg font-semibold mb-6 uppercase tracking-tight border-l-4 border-emerald-500/60 pl-4">{key.replace(/_/g, ' ')}</h3>
                                                     {typeof value === 'object' && value !== null ? (
-                                                         <div className="pl-6 space-y-6">
+                                                         <div className="pl-4 space-y-4">
                                                              {Object.entries(value).map(([k, v]: [string, any]) => (
-                                                                 <div key={k} className="p-6 rounded-3xl bg-white/[0.02] border border-white/5">
-                                                                     <h4 className="text-emerald-400 text-xs font-black mb-3 uppercase tracking-widest italic">{k.replace(/_/g, ' ')}</h4>
-                                                                     <div className="text-slate-400 text-sm leading-relaxed">
+                                                                 <div key={k} className="p-5 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB]">
+                                                                     <h4 className="text-emerald-700 text-xs font-semibold mb-3 uppercase tracking-wider italic font-mono">{k.replace(/_/g, ' ')}</h4>
+                                                                     <div className="text-[#4D4D4D] text-xs md:text-sm leading-relaxed">
                                                                         {typeof v === 'string' ? <Markdown>{v}</Markdown> : JSON.stringify(v)}
                                                                      </div>
                                                                  </div>
                                                              ))}
                                                          </div>
                                                     ) : (
-                                                        <div className="text-slate-300 text-base leading-relaxed pl-6">
+                                                        <div className="text-[#4D4D4D] text-sm md:text-base leading-relaxed pl-4">
                                                             <Markdown>{String(value)}</Markdown>
                                                         </div>
                                                     )}
                                                 </div>
                                             ))
                                         ) : (
-                                            <div className="text-slate-300 text-base leading-relaxed relative z-10">
+                                            <div className="text-[#4D4D4D] text-sm md:text-base leading-relaxed relative z-10">
                                                 <Markdown>{String(obj)}</Markdown>
                                             </div>
                                         )}
@@ -250,18 +246,17 @@ export default function DocumentDetailPage() {
         const isLikelyNotes = content.includes('#') || content.includes('##') || content.length > 1000;
         
         return (
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <div className="flex items-center gap-3 text-emerald-400 mb-8 px-2">
-                    <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+            <div className="space-y-8 animate-in fade-in duration-300 text-[#171717]">
+                <div className="flex items-center gap-3 text-emerald-700 mb-8 px-2">
+                    <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700">
                         {isLikelyNotes ? <BookOpen className="w-5 h-5" /> : <Sparkles className="w-5 h-5" />}
                     </div>
                     <div>
-                        <h3 className="text-xs font-black uppercase tracking-[0.2em]">{isLikelyNotes ? 'Research Notes' : 'AI Response'}</h3>
-                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">{isLikelyNotes ? 'Structured Document Protocol' : 'Neural Signal Received'}</p>
+                        <h3 className="text-xs font-semibold uppercase tracking-wider font-mono">{isLikelyNotes ? 'Research Notes' : 'AI Response'}</h3>
+                        <p className="text-[10px] text-[#8F8F8F] font-semibold uppercase tracking-wider mt-0.5">{isLikelyNotes ? 'Structured Document Protocol' : 'Neural Signal Received'}</p>
                     </div>
                 </div>
-                <div className="prose prose-invert prose-indigo max-w-none text-slate-300 text-sm md:text-base leading-relaxed font-medium bg-white/[0.02] border border-white/5 p-8 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/[0.02] blur-[100px] rounded-full" />
+                <div className="prose max-w-none text-[#4D4D4D] text-xs md:text-sm leading-relaxed font-medium bg-white border border-[#EBEBEB] p-8 md:p-10 rounded-xl shadow-sm relative overflow-hidden">
                     <Markdown>{content}</Markdown>
                 </div>
             </div>
@@ -298,18 +293,18 @@ export default function DocumentDetailPage() {
 
     if (isLoading) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 bg-[#030308]">
-                <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
-                <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Accessing Vault</p>
+            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 bg-[#FAFAFA]">
+                <Loader2 className="w-10 h-10 text-[#171717] animate-spin" />
+                <p className="text-[#8F8F8F] font-semibold uppercase tracking-wider text-xs font-mono">Accessing Vault</p>
             </div>
         );
     }
 
     if (error || !document) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] bg-[#030308] text-center p-8">
-                <h1 className="text-2xl font-bold text-rose-500 mb-4">{error || '404: Not Found'}</h1>
-                <Link href={`/${locale}/studyforge`} className="px-6 py-2 bg-white/5 border border-white/10 rounded-xl text-indigo-400 font-bold hover:bg-white/10 transition-all">
+            <div className="flex flex-col items-center justify-center min-h-[60vh] bg-[#FAFAFA] text-center p-8">
+                <h1 className="text-xl font-semibold text-rose-600 mb-4">{error || '404: Not Found'}</h1>
+                <Link href={`/${locale}/studyforge`} className="px-6 h-10 flex items-center justify-center bg-white border border-[#EBEBEB] rounded-md text-[#171717] hover:bg-[#FAFAFA] font-semibold text-xs transition-all shadow-sm">
                     Return to Library
                 </Link>
             </div>
@@ -320,48 +315,48 @@ export default function DocumentDetailPage() {
     const isPdf = document.file_type === 'application/pdf' || document.name.toLowerCase().endsWith('.pdf');
 
     return (
-        <div className="flex bg-[#030308] -m-8 h-[calc(100vh-5rem)] overflow-hidden">
+        <div className="flex bg-[#FAFAFA] -m-8 h-[calc(100vh-5rem)] overflow-hidden text-[#171717]">
             <div className="flex-1 flex flex-col min-w-0">
                 {/* Header */}
-                <div className="h-16 border-b border-white/5 flex items-center justify-between px-6 bg-[#070710]/80">
+                <div className="h-16 border-b border-[#EBEBEB] flex items-center justify-between px-6 bg-[#FFFFFF] z-10">
                     <div className="flex items-center gap-4">
-                        <Link href={`/${locale}/studyforge`} className="p-2 hover:bg-white/5 rounded-xl text-slate-400 transition-all">
-                            <ChevronLeft className="w-5 h-5" />
+                        <Link href={`/${locale}/studyforge`} className="p-2 hover:bg-[#FAFAFA] rounded-md text-[#4D4D4D] transition-all">
+                            <ChevronLeft className="w-4 h-4" />
                         </Link>
                         <div className="flex items-center gap-3">
-                            <FileText className="w-5 h-5 text-indigo-400" />
-                            <h1 className="text-sm font-bold text-white truncate max-w-[300px]">{document.name}</h1>
+                            <FileText className="w-5 h-5 text-[#0070F3]" />
+                            <h1 className="text-sm font-semibold text-[#171717] truncate max-w-[200px] md:max-w-[400px]">{document.name}</h1>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
+                        <div className="flex bg-[#F2F2F2] p-1 rounded-lg border border-[#EBEBEB]">
                             <button
                                 onClick={() => setViewMode('preview')}
-                                className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'preview' ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                                className={`px-4 py-1.5 rounded-md text-[10px] font-semibold uppercase tracking-wider transition-all ${viewMode === 'preview' ? 'bg-white text-[#171717] shadow-sm font-bold' : 'text-[#4D4D4D] hover:text-[#171717]'}`}
                             >
                                 Preview
                             </button>
                             <button
                                 onClick={() => setViewMode('text')}
-                                className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'text' ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                                className={`px-4 py-1.5 rounded-md text-[10px] font-semibold uppercase tracking-wider transition-all ${viewMode === 'text' ? 'bg-white text-[#171717] shadow-sm font-bold' : 'text-[#4D4D4D] hover:text-[#171717]'}`}
                             >
                                 Text
                             </button>
                         </div>
-                        <a href={fileUrl} target="_blank" download className="p-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-white transition-all border border-white/5">
+                        <a href={fileUrl} target="_blank" download className="p-2.5 rounded-md bg-white text-[#4D4D4D] hover:text-[#171717] transition-all border border-[#EBEBEB] shadow-sm">
                             <Download className="w-4 h-4" />
                         </a>
                     </div>
                 </div>
 
                 {/* Main Viewport */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-[#FAFAFA]">
                     {/* AI Response Bubble */}
                     {aiResponse && (
-                        <div className="max-w-4xl mx-auto mb-8 animate-in fade-in slide-in-from-bottom-4">
-                            <div className="bg-indigo-600/10 border border-indigo-500/20 rounded-3xl p-8 relative">
-                                <button onClick={() => setAiResponse(null)} className="absolute top-4 right-4 text-slate-500 hover:text-white text-[10px] font-black uppercase tracking-widest">
+                        <div className="max-w-4xl mx-auto mb-8 animate-in fade-in duration-300">
+                            <div className="bg-blue-50/30 border border-blue-100 rounded-xl p-8 relative shadow-sm">
+                                <button onClick={() => setAiResponse(null)} className="absolute top-4 right-4 text-[#8F8F8F] hover:text-[#171717] text-[10px] font-semibold uppercase tracking-wider font-mono">
                                     Close
                                 </button>
                                 <div className="animate-fade-in">
@@ -371,13 +366,13 @@ export default function DocumentDetailPage() {
                         </div>
                     )}
 
-                    <div className="max-w-4xl mx-auto min-h-[600px] border border-white/5 rounded-[40px] bg-black/40 overflow-hidden relative shadow-2xl shadow-black/50">
+                    <div className="max-w-4xl mx-auto min-h-[600px] border border-[#EBEBEB] rounded-xl bg-white overflow-hidden relative shadow-sm">
                         {viewMode === 'preview' && isPdf ? (
-                            <div className="w-full flex justify-center p-8 bg-[#050510]">
+                            <div className="w-full flex justify-center p-8 bg-[#FAFAFA]">
                                 <PDFViewer fileUrl={fileUrl} onLoadSuccess={(n) => setNumPages(n)} numPages={numPages} />
                             </div>
                         ) : (
-                            <div className="p-12 text-slate-300 font-medium leading-[2] text-lg whitespace-pre-wrap selection:bg-indigo-500/30">
+                            <div className="p-12 text-[#4D4D4D] font-normal leading-[1.8] text-sm whitespace-pre-wrap selection:bg-[#0070F3]/25">
                                 {document.extracted_text || document.text_content || 'No text extracted. Please try re-uploading this document.'}
                             </div>
                         )}

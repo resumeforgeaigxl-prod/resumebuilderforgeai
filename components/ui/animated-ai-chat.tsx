@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback, useTransition } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import {
@@ -17,7 +17,6 @@ import {
     Briefcase,
     GraduationCap,
     Rocket,
-    Terminal,
     MessageSquare,
     BrainCircuit,
 } from "lucide-react";
@@ -85,7 +84,7 @@ function TypingDots() {
             {[1, 2, 3].map((dot) => (
                 <motion.div
                     key={dot}
-                    className="w-1.5 h-1.5 bg-[#00D4A0] rounded-full mx-0.5"
+                    className="w-1.5 h-1.5 bg-[#171717] rounded-full mx-0.5"
                     initial={{ opacity: 0.3 }}
                     animate={{
                         opacity: [0.3, 0.9, 0.3],
@@ -96,9 +95,6 @@ function TypingDots() {
                         repeat: Infinity,
                         delay: dot * 0.15,
                         ease: "easeInOut",
-                    }}
-                    style={{
-                        boxShadow: "0 0 6px rgba(0, 212, 160, 0.4)",
                     }}
                 />
             ))}
@@ -145,8 +141,6 @@ export function MentorForgeChatInput({
     const [attachments, setAttachments] = useState<string[]>([]);
     const [showCommandPalette, setShowCommandPalette] = useState(false);
     const [activeSuggestion, setActiveSuggestion] = useState<number>(-1);
-    const [inputFocused, setInputFocused] = useState(false);
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const commandPaletteRef = useRef<HTMLDivElement>(null);
     const { textareaRef, adjustHeight } = useAutoResizeTextarea({
         minHeight: 56,
@@ -154,11 +148,11 @@ export function MentorForgeChatInput({
     });
 
     const MODES: ForgeMode[] = [
-        { id: "General", icon: Sparkles, color: "text-[#00D4A0]" },
-        { id: "Career", icon: Rocket, color: "text-[#F5A623]" },
-        { id: "Coding", icon: Code2, color: "text-[#00D4A0]" },
-        { id: "Interview", icon: MessageSquare, color: "text-[#7C5CFC]" },
-        { id: "Learning", icon: GraduationCap, color: "text-[#00D4A0]" },
+        { id: "General", icon: Sparkles, color: "text-[#171717]" },
+        { id: "Career", icon: Rocket, color: "text-[#171717]" },
+        { id: "Coding", icon: Code2, color: "text-[#171717]" },
+        { id: "Interview", icon: MessageSquare, color: "text-[#171717]" },
+        { id: "Learning", icon: GraduationCap, color: "text-[#171717]" },
     ];
 
     const commandSuggestions: CommandSuggestion[] = [
@@ -200,13 +194,6 @@ export function MentorForgeChatInput({
             setShowCommandPalette(false);
         }
     }, [value]);
-
-    useEffect(() => {
-        const handleMouseMove = (e: MouseEvent) =>
-            setMousePosition({ x: e.clientX, y: e.clientY });
-        window.addEventListener("mousemove", handleMouseMove);
-        return () => window.removeEventListener("mousemove", handleMouseMove);
-    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -275,14 +262,14 @@ export function MentorForgeChatInput({
                         key={mode.id}
                         onClick={() => onModeChange(mode.id)}
                         className={cn(
-                            "flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-300 border",
+                            "flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-semibold uppercase tracking-[0.15em] transition-all duration-200 border",
                             activeMode === mode.id
-                                ? "bg-[#00D4A0]/12 border-[#00D4A0]/30 text-[#EFF4FB] shadow-[0_0_20px_rgba(0,212,160,0.08)]"
-                                : "bg-[#0D1220] border-[#1E2A42] text-[#4A5568] hover:border-[#1E2A42]/80 hover:text-[#7A8BA8]"
+                                ? "bg-[#171717] border-[#171717] text-white shadow-sm"
+                                : "bg-white border-[#EBEBEB] text-[#4D4D4D] hover:bg-[#FAFAFA] hover:text-[#171717]"
                         )}
                     >
                         <mode.icon
-                            className={cn("w-3 h-3", mode.color)}
+                            className={cn("w-3.5 h-3.5", mode.color)}
                         />
                         {mode.id}
                     </button>
@@ -291,20 +278,17 @@ export function MentorForgeChatInput({
 
             {/* Chat input container */}
             <motion.div
-                className="relative backdrop-blur-2xl bg-[#0D1220]/80 rounded-2xl border border-[#1E2A42] shadow-[0_0_80px_-20px_rgba(0,212,160,0.06)]"
+                className="relative bg-white rounded-xl border border-[#EBEBEB] shadow-sm"
                 initial={{ scale: 0.98 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.1 }}
             >
-                {/* Animated top edge light */}
-                <div className="absolute top-0 left-[8%] right-[8%] h-[1px] bg-gradient-to-r from-transparent via-[#00D4A0]/25 to-transparent" />
-
                 {/* Command palette */}
                 <AnimatePresence>
                     {showCommandPalette && (
                         <motion.div
                             ref={commandPaletteRef}
-                            className="absolute left-4 right-4 bottom-full mb-2 backdrop-blur-xl bg-[#0D1220]/95 rounded-xl z-50 shadow-2xl border border-[#1E2A42] overflow-hidden"
+                            className="absolute left-4 right-4 bottom-full mb-2 bg-white rounded-lg z-50 shadow-lg border border-[#EBEBEB] overflow-hidden text-[#171717]"
                             initial={{ opacity: 0, y: 5 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 5 }}
@@ -315,10 +299,10 @@ export function MentorForgeChatInput({
                                     <motion.div
                                         key={s.prefix}
                                         className={cn(
-                                            "flex items-center gap-3 px-4 py-2.5 text-xs cursor-pointer transition-colors",
+                                            "flex items-center gap-3 px-4 py-2 text-xs cursor-pointer transition-colors",
                                             activeSuggestion === i
-                                                ? "bg-[#00D4A0]/10 text-[#EFF4FB]"
-                                                : "text-[#7A8BA8] hover:bg-[#121A2E]"
+                                                ? "bg-[#FAFAFA] text-[#171717]"
+                                                : "text-[#4D4D4D] hover:bg-[#FAFAFA]"
                                         )}
                                         onClick={() => selectCommand(i)}
                                         initial={{ opacity: 0 }}
@@ -329,16 +313,16 @@ export function MentorForgeChatInput({
                                             className={cn(
                                                 "w-5 h-5 flex items-center justify-center",
                                                 activeSuggestion === i
-                                                    ? "text-[#00D4A0]"
-                                                    : "text-[#4A5568]"
+                                                    ? "text-[#171717]"
+                                                    : "text-[#8F8F8F]"
                                             )}
                                         >
                                             {s.icon}
                                         </div>
-                                        <div className="font-semibold">
+                                        <div className="font-medium">
                                             {s.label}
                                         </div>
-                                        <div className="text-[#4A5568] text-[10px] ml-auto font-mono">
+                                        <div className="text-[#8F8F8F] text-[10px] ml-auto font-mono">
                                             {s.prefix}
                                         </div>
                                     </motion.div>
@@ -358,8 +342,6 @@ export function MentorForgeChatInput({
                             adjustHeight();
                         }}
                         onKeyDown={handleKeyDown}
-                        onFocus={() => setInputFocused(true)}
-                        onBlur={() => setInputFocused(false)}
                         placeholder={
                             placeholder ||
                             `Message ${activeMode} AI Assistant...`
@@ -369,8 +351,8 @@ export function MentorForgeChatInput({
                             "resize-none",
                             "bg-transparent",
                             "border-none outline-none",
-                            "text-[#EFF4FB] text-sm leading-relaxed",
-                            "placeholder:text-[#4A5568]",
+                            "text-[#171717] text-sm leading-relaxed",
+                            "placeholder:text-[#8F8F8F]",
                             "min-h-[56px]",
                             "focus:ring-0 focus:outline-none"
                         )}
@@ -390,7 +372,7 @@ export function MentorForgeChatInput({
                             {attachments.map((file, i) => (
                                 <motion.div
                                     key={i}
-                                    className="flex items-center gap-2 text-xs bg-[#121A2E] py-1.5 px-3 rounded-lg text-[#7A8BA8] border border-[#1E2A42]"
+                                    className="flex items-center gap-2 text-xs bg-[#FAFAFA] py-1.5 px-3 rounded-md text-[#4D4D4D] border border-[#EBEBEB]"
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.9 }}
@@ -398,7 +380,7 @@ export function MentorForgeChatInput({
                                     <span>{file}</span>
                                     <button
                                         onClick={() => removeAttachment(i)}
-                                        className="text-[#4A5568] hover:text-[#E04040] transition-colors"
+                                        className="text-[#8F8F8F] hover:text-[#EE0000] transition-colors"
                                     >
                                         <XIcon className="w-3 h-3" />
                                     </button>
@@ -415,7 +397,7 @@ export function MentorForgeChatInput({
                             type="button"
                             onClick={handleAttachFile}
                             whileTap={{ scale: 0.94 }}
-                            className="p-2 text-[#4A5568] hover:text-[#00D4A0] rounded-lg transition-colors hover:bg-[#121A2E]"
+                            className="p-2 text-[#8F8F8F] hover:text-[#171717] rounded-md transition-colors hover:bg-[#FAFAFA]"
                         >
                             <Paperclip className="w-4 h-4" />
                         </motion.button>
@@ -428,10 +410,10 @@ export function MentorForgeChatInput({
                             }}
                             whileTap={{ scale: 0.94 }}
                             className={cn(
-                                "p-2 rounded-lg transition-colors hover:bg-[#121A2E]",
+                                "p-2 rounded-md transition-colors hover:bg-[#FAFAFA]",
                                 showCommandPalette
-                                    ? "bg-[#00D4A0]/10 text-[#00D4A0]"
-                                    : "text-[#4A5568] hover:text-[#00D4A0]"
+                                    ? "bg-[#FAFAFA] text-[#171717]"
+                                    : "text-[#8F8F8F] hover:text-[#171717]"
                             )}
                         >
                             <Command className="w-4 h-4" />
@@ -441,19 +423,19 @@ export function MentorForgeChatInput({
                     <motion.button
                         type="button"
                         onClick={() => onSend()}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.97 }}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
                         disabled={isLoading || !value.trim()}
                         className={cn(
-                            "px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300",
+                            "px-4 py-2 rounded-md text-xs font-medium transition-all duration-200",
                             "flex items-center gap-2",
                             value.trim()
-                                ? "bg-[#00D4A0] text-[#080B16] shadow-[0_8px_32px_rgba(0,212,160,0.25)] hover:shadow-[0_12px_40px_rgba(0,212,160,0.35)]"
-                                : "bg-[#121A2E] text-[#4A5568] border border-[#1E2A42]"
+                                ? "bg-[#171717] text-white shadow-sm hover:bg-[#171717]/90"
+                                : "bg-[#FAFAFA] text-[#8F8F8F] border border-[#EBEBEB]"
                         )}
                     >
                         {isLoading ? (
-                            <LoaderIcon className="w-4 h-4 animate-[spin_2s_linear_infinite]" />
+                            <LoaderIcon className="w-4 h-4 animate-spin text-[#8F8F8F]" />
                         ) : (
                             <SendIcon className="w-4 h-4" />
                         )}
@@ -464,30 +446,13 @@ export function MentorForgeChatInput({
 
             {/* Version tag */}
             <div className="flex items-center justify-center gap-4 pt-1">
-                <div className="h-px bg-[#1E2A42] flex-1" />
-                <p className="text-[8px] text-[#4A5568] font-bold uppercase tracking-[0.4em] flex items-center gap-2">
-                    <Sparkles className="w-2.5 h-2.5 text-[#00D4A0]" />
+                <div className="h-px bg-[#EBEBEB] flex-1" />
+                <p className="text-[8px] text-[#8F8F8F] font-bold uppercase tracking-[0.4em] flex items-center gap-2">
+                    <Sparkles className="w-2.5 h-2.5 text-[#171717]" />
                     MentorForge Pro v3.1
                 </p>
-                <div className="h-px bg-[#1E2A42] flex-1" />
+                <div className="h-px bg-[#EBEBEB] flex-1" />
             </div>
-
-            {/* Mouse follow glow */}
-            {inputFocused && (
-                <motion.div
-                    className="fixed w-[50rem] h-[50rem] rounded-full pointer-events-none z-0 opacity-[0.015] bg-gradient-to-r from-[#00D4A0] via-[#7C5CFC] to-[#00D4A0] blur-[96px]"
-                    animate={{
-                        x: mousePosition.x - 400,
-                        y: mousePosition.y - 400,
-                    }}
-                    transition={{
-                        type: "spring",
-                        damping: 25,
-                        stiffness: 150,
-                        mass: 0.5,
-                    }}
-                />
-            )}
         </div>
     );
 }
@@ -499,16 +464,16 @@ export function MentorForgeTypingIndicator({ isTyping }: { isTyping: boolean }) 
         <AnimatePresence>
             {isTyping && (
                 <motion.div
-                    className="fixed bottom-6 left-1/2 -translate-x-1/2 backdrop-blur-2xl bg-[#0D1220]/90 rounded-full px-5 py-2.5 shadow-2xl border border-[#1E2A42] z-50"
+                    className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white rounded-full px-5 py-2.5 shadow-lg border border-[#EBEBEB] z-50 text-[#171717]"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 20 }}
                 >
                     <div className="flex items-center gap-3">
-                        <div className="w-7 h-7 rounded-full bg-[#00D4A0]/10 flex items-center justify-center border border-[#00D4A0]/20">
-                            <BrainCircuit className="w-3.5 h-3.5 text-[#00D4A0]" />
+                        <div className="w-7 h-7 rounded-full bg-[#FAFAFA] flex items-center justify-center border border-[#EBEBEB]">
+                            <BrainCircuit className="w-3.5 h-3.5 text-[#171717]" />
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-[#7A8BA8]">
+                        <div className="flex items-center gap-2 text-xs text-[#4D4D4D] font-medium">
                             <span>Thinking</span>
                             <TypingDots />
                         </div>

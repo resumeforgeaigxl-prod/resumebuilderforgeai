@@ -1,6 +1,5 @@
 "use client"
 export const dynamic = 'force-dynamic';
-;
 
 import React, { useState, useEffect, useRef } from 'react';
 import {
@@ -237,7 +236,7 @@ export default function ExplainForgePage() {
             let y = 20;
 
             // Header
-            doc.setFillColor(16, 185, 129); // Emerald-500
+            doc.setFillColor(23, 23, 23); // Primary Ink
             doc.rect(0, 0, pageWidth, 40, 'F');
             doc.setTextColor(255, 255, 255);
             doc.setFontSize(22);
@@ -248,7 +247,7 @@ export default function ExplainForgePage() {
             doc.text(`Generated on ${new Date().toLocaleDateString()}`, margin, 32);
 
             y = 50;
-            doc.setTextColor(30, 41, 59); // Slate-800
+            doc.setTextColor(23, 23, 23);
 
             // Project Summary
             doc.setFontSize(16);
@@ -351,35 +350,34 @@ export default function ExplainForgePage() {
 
     const getFileIcon = (name: string) => {
         const ext = name.split('.').pop()?.toLowerCase();
-        if (['ts', 'tsx', 'js', 'jsx'].includes(ext || '')) return <FileCode2 className="w-4 h-4 text-blue-400" />;
-        if (['json'].includes(ext || '')) return <FileJson className="w-4 h-4 text-yellow-400" />;
-        if (['md', 'txt'].includes(ext || '')) return <FileText className="w-4 h-4 text-slate-400" />;
-        return <FileText className="w-4 h-4 text-slate-500" />;
+        if (['ts', 'tsx', 'js', 'jsx'].includes(ext || '')) return <FileCode2 className="w-4 h-4 text-blue-500" />;
+        if (['json'].includes(ext || '')) return <FileJson className="w-4 h-4 text-amber-500" />;
+        if (['md', 'txt'].includes(ext || '')) return <FileText className="w-4 h-4 text-neutral-500" />;
+        return <FileText className="w-4 h-4 text-neutral-500" />;
     };
 
     return (
         <FeatureGate task="explain">
-            <div className="space-y-12 animate-fade-in py-8 max-w-7xl mx-auto px-4">
+            <div className="space-y-8 animate-fade-in py-6 max-w-7xl mx-auto px-4 text-[#171717]">
                 {/* Standardized Header */}
-                <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E2A42] pb-8 mb-12">
+                <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#EBEBEB] pb-6 mb-8">
                     <div>
-                        <div className="flex items-center gap-2 text-[#00D4A0] font-bold tracking-widest text-[10px] uppercase mb-4">
-                            <Sparkles className="w-3.5 h-3.5" /> Intelligence Core
+                        <div className="flex items-center gap-2 text-[#8F8F8F] font-mono text-xs uppercase tracking-wider mb-2">
+                            <Sparkles className="w-3.5 h-3.5 text-[#171717]" /> Intelligence Core
                         </div>
-                        <h1 className="text-4xl font-bold tracking-tighter text-white uppercase">ExplainForge</h1>
-                        <p className="text-slate-400 mt-2 text-lg">Transform source code into professional interview-ready narratives and logic flows.</p>
+                        <h1 className="text-3xl font-semibold tracking-tight text-[#171717] uppercase">ExplainForge</h1>
+                        <p className="text-[#4D4D4D] mt-1.5 text-base">Transform source code into professional interview-ready narratives and logic flows.</p>
                     </div>
 
                     <Button
                         variant="outline"
                         onClick={() => setShowHistory(!showHistory)}
-                        className={`rounded-2xl px-6 border-white/10 hover:bg-white/5 text-[9px] font-black uppercase tracking-widest h-14 flex items-center gap-3 transition-all ${showHistory ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-400' : 'text-slate-400'}`}
+                        className={`rounded-md px-4 h-10 border-[#EBEBEB] hover:bg-[#FAFAFA] text-xs font-medium flex items-center gap-2.5 transition-all bg-white text-[#171717] ${showHistory ? 'bg-[#FAFAFA] border-[#171717]' : ''}`}
                     >
-                        <History className="w-4 h-4" />
+                        <History className="w-4 h-4 text-[#4D4D4D]" />
                         {showHistory ? 'Close History' : 'View History'}
                     </Button>
                 </header>
-
 
                 <AnimatePresence>
                     {showHistory && (
@@ -389,49 +387,48 @@ export default function ExplainForgePage() {
                             exit={{ opacity: 0, height: 0 }}
                             className="overflow-hidden"
                         >
-                            <Card glass className="p-8 border-indigo-500/10 bg-indigo-500/[0.02]">
-                                <div className="flex items-center justify-between mb-8">
-                                    <h3 className="text-sm font-black text-white uppercase italic tracking-widest flex items-center gap-2">
-                                        <History className="w-4 h-4 text-indigo-500" /> Recent Logic Materializations
+                            <Card className="p-6 border-[#EBEBEB] bg-white shadow-sm mb-6">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-xs font-semibold text-[#171717] uppercase tracking-wider flex items-center gap-2">
+                                        <History className="w-4 h-4 text-[#4D4D4D]" /> Recent Logic Materializations
                                     </h3>
                                 </div>
 
                                 {isLoadingHistory ? (
-                                    <div className="flex justify-center py-12">
-                                        <Loader2 className="w-8 h-8 animate-spin text-indigo-500/50" />
+                                    <div className="flex justify-center py-10">
+                                        <Loader2 className="w-6 h-6 animate-spin text-[#8F8F8F]" />
                                     </div>
                                 ) : history.length === 0 ? (
-                                    <div className="text-center py-12 space-y-4">
-                                        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto">
-                                            <Search className="w-6 h-6 text-slate-600" />
+                                    <div className="text-center py-10 space-y-3">
+                                        <div className="w-12 h-12 rounded-full bg-[#FAFAFA] flex items-center justify-center mx-auto border border-[#EBEBEB]">
+                                            <Search className="w-5 h-5 text-[#8F8F8F]" />
                                         </div>
-                                        <p className="text-slate-500 text-sm font-medium uppercase tracking-widest">No history found</p>
+                                        <p className="text-[#8F8F8F] text-xs uppercase tracking-wider">No history found</p>
                                     </div>
                                 ) : (
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {history.map((item) => (
                                             <Card
                                                 key={item.id}
-                                                glass
                                                 onClick={() => loadFromHistory(item.id)}
-                                                className="p-6 border-white/5 hover:border-indigo-500/30 cursor-pointer group transition-all"
+                                                className="p-5 border-[#EBEBEB] hover:border-[#171717] cursor-pointer group transition-all bg-white hover:shadow-sm"
                                             >
-                                                <div className="flex items-start justify-between mb-4">
-                                                    <Badge className="bg-white/5 text-slate-400 text-[9px] uppercase font-black tracking-widest border-none">
-                                                        {item.input_type === 'file' ? <FileUp className="w-3 h-3 mr-1.5" /> : item.input_type === 'github' ? <Github className="w-3 h-3 mr-1.5" /> : <FileText className="w-3 h-3 mr-1.5" />}
+                                                <div className="flex items-start justify-between mb-3">
+                                                    <Badge className="bg-[#FAFAFA] text-[#4D4D4D] text-[9px] uppercase tracking-wider border border-[#EBEBEB]">
+                                                        {item.input_type === 'file' ? <FileUp className="w-2.5 h-2.5 mr-1" /> : item.input_type === 'github' ? <Github className="w-2.5 h-2.5 mr-1" /> : <FileText className="w-2.5 h-2.5 mr-1" />}
                                                         {item.input_type}
                                                     </Badge>
-                                                    <div className="text-[10px] text-slate-500 font-bold flex items-center gap-1.5">
+                                                    <div className="text-[10px] text-[#8F8F8F] font-mono flex items-center gap-1.5">
                                                         <Calendar className="w-3 h-3" />
                                                         {new Date(item.created_at).toLocaleDateString()}
                                                     </div>
                                                 </div>
-                                                <p className="text-sm text-slate-300 font-bold line-clamp-2 mb-4 group-hover:text-white transition-colors">
+                                                <p className="text-xs text-[#4D4D4D] font-medium line-clamp-2 mb-3 group-hover:text-[#171717] transition-colors">
                                                     {item.input_content || item.github_url || "System Analysis"}
                                                 </p>
-                                                <div className="flex items-center justify-between pt-4 border-t border-white/5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest italic">Reload Results</span>
-                                                    <ExternalLink className="w-3 h-3 text-indigo-500" />
+                                                <div className="flex items-center justify-between pt-3 border-t border-[#EBEBEB] opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <span className="text-[9px] font-semibold text-[#0070F3] uppercase tracking-wider">Reload Results</span>
+                                                    <ExternalLink className="w-3 h-3 text-[#0070F3]" />
                                                 </div>
                                             </Card>
                                         ))}
@@ -443,44 +440,44 @@ export default function ExplainForgePage() {
                 </AnimatePresence>
 
                 {!result ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Input Section */}
-                        <Card glass className="p-10 space-y-10 border-white/5 bg-[#0c0c1b]/80 backdrop-blur-3xl rounded-[3rem]">
-                            <div className="space-y-4">
-                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2">
-                                    <FileText className="w-3.5 h-3.5" /> Project Context
+                        <Card className="p-8 space-y-6 border-[#EBEBEB] bg-white rounded-xl shadow-sm">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-semibold uppercase tracking-wider text-[#8F8F8F] flex items-center gap-2">
+                                    <FileText className="w-3.5 h-3.5 text-[#171717]" /> Project Context
                                 </label>
                                 <textarea
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
-                                    placeholder="The more context you provide, the better the interview prep. Paste your description or features here..."
-                                    className="w-full h-56 bg-white/5 border border-white/10 rounded-[2.5rem] p-8 text-slate-300 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all resize-none font-medium leading-relaxed"
+                                    placeholder="Paste your description or features here. The more context you provide, the better the interview prep..."
+                                    className="w-full h-48 bg-white border border-[#EBEBEB] rounded-lg p-4 text-[#171717] placeholder:text-[#8F8F8F] focus:outline-none focus:ring-1 focus:ring-[#171717] focus:border-[#171717] transition-all resize-none text-sm font-normal leading-relaxed"
                                 />
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="p-6 rounded-[2rem] bg-white/5 border border-white/10 space-y-4">
-                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
-                                        <Github className="w-3 h-3" /> Repository Link
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="p-4 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] space-y-2">
+                                    <label className="text-[9px] font-semibold uppercase tracking-wider text-[#8F8F8F] flex items-center gap-1.5">
+                                        <Github className="w-3 h-3 text-[#171717]" /> Repository Link
                                     </label>
                                     <input
                                         type="text"
                                         value={githubUrl}
                                         onChange={(e) => setGithubUrl(e.target.value)}
                                         placeholder="Paste URL..."
-                                        className="w-full bg-transparent border-none p-0 text-slate-300 placeholder:text-slate-700 focus:outline-none text-sm font-bold"
+                                        className="w-full bg-transparent border-none p-0 text-[#171717] placeholder:text-[#8F8F8F] focus:outline-none text-xs font-medium"
                                     />
                                 </div>
 
-                                <div className="p-6 rounded-[2rem] bg-emerald-500/5 border border-emerald-500/10 space-y-4 group cursor-pointer hover:bg-emerald-500/10 transition-all" onClick={() => fileInputRef.current?.click()}>
-                                    <label className="text-[9px] font-black uppercase tracking-widest text-emerald-500/70 flex items-center gap-2">
-                                        <FileUp className="w-3 h-3" /> Source Code / Docs
+                                <div className="p-4 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] space-y-2 group cursor-pointer hover:bg-white transition-all" onClick={() => fileInputRef.current?.click()}>
+                                    <label className="text-[9px] font-semibold uppercase tracking-wider text-[#8F8F8F] flex items-center gap-1.5">
+                                        <FileUp className="w-3 h-3 text-[#171717]" /> Source Code / Docs
                                     </label>
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs font-bold text-slate-400">
+                                        <span className="text-xs font-medium text-[#4D4D4D]">
                                             {files.length > 0 ? `${files.length} Files Ready` : 'Upload ZIP/Files'}
                                         </span>
-                                        <FileUp className="w-4 h-4 text-emerald-500 group-hover:translate-y-[-2px] transition-transform" />
+                                        <FileUp className="w-4 h-4 text-[#4D4D4D] group-hover:translate-y-[-1px] transition-transform" />
                                     </div>
                                     <input
                                         type="file"
@@ -494,54 +491,54 @@ export default function ExplainForgePage() {
 
                             {error && (
                                 <motion.div
-                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    initial={{ opacity: 0, scale: 0.98 }}
                                     animate={{ opacity: 1, scale: 1 }}
-                                    className="p-5 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-[11px] font-bold uppercase tracking-wider flex items-center gap-3 italic"
+                                    className="p-4 rounded-lg bg-red-50 border border-red-100 text-red-600 text-xs font-medium flex items-center gap-2.5"
                                 >
                                     <AlertCircle className="w-4 h-4 shrink-0" />
-                                    SYSTEM_ERROR: {error}
+                                    Error: {error}
                                 </motion.div>
                             )}
 
                             <Button
                                 onClick={handleAnalyze}
                                 disabled={isAnalyzing}
-                                className="w-full py-10 rounded-[2.5rem] bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black uppercase tracking-[0.2em] text-xs hover:scale-[1.01] active:scale-[0.99] transition-all relative overflow-hidden group shadow-[0_20px_60px_-15px_rgba(16,185,129,0.3)]"
+                                className="w-full py-6 rounded-md bg-[#171717] hover:bg-[#171717]/90 text-white font-medium text-sm transition-all shadow-sm flex items-center justify-center gap-2.5"
                             >
                                 {isAnalyzing ? (
-                                    <div className="flex items-center gap-4">
-                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
                                         Synthesizing Knowledge...
-                                    </div>
+                                    </>
                                 ) : (
-                                    <div className="flex items-center gap-4 px-8">
-                                        <Zap className="w-5 h-5 fill-slate-950" />
+                                    <>
+                                        <Zap className="w-4 h-4" />
                                         Generate Interview Material
-                                    </div>
+                                    </>
                                 )}
                             </Button>
                         </Card>
 
                         {/* Features Preview */}
-                        <div className="flex flex-col justify-center space-y-8">
-                            <header className="space-y-4">
-                                <h3 className="text-3xl font-black text-white italic leading-none">MASTER YOUR INTERVIEW</h3>
-                                <p className="text-slate-500 font-medium">ExplainForge transforms raw complexity into speech-ready interview answers.</p>
+                        <div className="flex flex-col justify-center space-y-6">
+                            <header className="space-y-2">
+                                <h3 className="text-2xl font-semibold text-[#171717] tracking-tight">Master Your Technical Interview</h3>
+                                <p className="text-[#4D4D4D] text-sm">ExplainForge transforms raw codebase complexity into speech-ready interview answers.</p>
                             </header>
 
                             <div className="grid grid-cols-1 gap-4">
                                 {[
-                                    { title: 'Human Summary', desc: 'A clean, step-by-step breakdown of your project logic.', icon: BookOpen, color: 'text-emerald-400' },
-                                    { title: 'Interview Pitch', desc: 'A natural 30-second speech to explain your project as an impact-oriented story.', icon: Mic2, color: 'text-blue-400' },
-                                    { title: 'Code Review', desc: 'Deep dive into individual files with AI-powered line explanations.', icon: Code, color: 'text-purple-400' }
+                                    { title: 'Human Summary', desc: 'A clean, step-by-step breakdown of your project logic.', icon: BookOpen },
+                                    { title: 'Interview Pitch', desc: 'A natural 30-second speech to explain your project as an impact-oriented story.', icon: Mic2 },
+                                    { title: 'Code Review', desc: 'Deep dive into individual files with AI-powered line explanations.', icon: Code }
                                 ].map((f, i) => (
-                                    <Card glass key={i} className="p-8 border-white/5 flex gap-6 items-start hover:bg-white/[0.03] transition-all">
-                                        <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center shrink-0 border border-white/5 shadow-inner">
-                                            <f.icon className={`w-5 h-5 ${f.color}`} />
+                                    <Card key={i} className="p-5 border-[#EBEBEB] bg-white flex gap-4 items-start hover:shadow-md transition-shadow">
+                                        <div className="w-10 h-10 rounded-lg bg-[#FAFAFA] flex items-center justify-center shrink-0 border border-[#EBEBEB]">
+                                            <f.icon className="w-4 h-4 text-[#171717]" />
                                         </div>
-                                        <div className="space-y-1">
-                                            <h4 className="text-sm font-black text-white uppercase italic tracking-wider">{f.title}</h4>
-                                            <p className="text-xs text-slate-500 leading-relaxed font-medium">{f.desc}</p>
+                                        <div className="space-y-0.5">
+                                            <h4 className="text-sm font-semibold text-[#171717]">{f.title}</h4>
+                                            <p className="text-xs text-[#8F8F8F] leading-normal">{f.desc}</p>
                                         </div>
                                     </Card>
                                 ))}
@@ -552,71 +549,71 @@ export default function ExplainForgePage() {
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="space-y-10 pb-20"
+                        className="space-y-6 pb-20"
                     >
                         {/* Results Nav */}
-                        <div className="flex items-center justify-between gap-8 p-6 glass-card border-white/5 bg-white/[0.02] rounded-[2rem]">
+                        <div className="flex items-center justify-between gap-6 p-4 bg-white border border-[#EBEBEB] rounded-xl shadow-sm">
                             <Tabs defaultValue="interview" className="w-full">
-                                <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-                                    <TabsList className="bg-black/50 p-1.5 rounded-2xl border border-white/10">
-                                        <TabsTrigger value="interview" className="data-[state=active]:bg-emerald-500 data-[state=active]:text-slate-950 rounded-xl px-8 py-2.5 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                                            <Mic2 className="w-3.5 h-3.5" /> Interview Prep
+                                <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+                                    <TabsList className="bg-[#F2F2F2] p-1 rounded-lg flex">
+                                        <TabsTrigger value="interview" className="data-[state=active]:bg-white data-[state=active]:text-[#171717] data-[state=active]:shadow-sm text-[#4D4D4D] hover:text-[#171717] rounded-md px-6 py-1.5 text-xs font-medium flex items-center gap-2 transition-all">
+                                            <Mic2 className="w-3.5 h-3.5 text-[#4D4D4D]" /> Interview Prep
                                         </TabsTrigger>
-                                        <TabsTrigger value="review" className="data-[state=active]:bg-purple-500 data-[state=active]:text-white rounded-xl px-8 py-2.5 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                                            <Code className="w-3.5 h-3.5" /> Code Review
+                                        <TabsTrigger value="review" className="data-[state=active]:bg-white data-[state=active]:text-[#171717] data-[state=active]:shadow-sm text-[#4D4D4D] hover:text-[#171717] rounded-md px-6 py-1.5 text-xs font-medium flex items-center gap-2 transition-all">
+                                            <Code className="w-3.5 h-3.5 text-[#4D4D4D]" /> Code Review
                                         </TabsTrigger>
                                     </TabsList>
 
-                                    <div className="flex items-center gap-4">
-                                        <Button variant="outline" onClick={() => setResult(null)} className="rounded-xl px-6 border-white/10 hover:bg-white/5 text-[9px] font-black uppercase tracking-widest h-12">
+                                    <div className="flex items-center gap-3">
+                                        <Button variant="outline" onClick={() => setResult(null)} className="rounded-md px-4 h-10 border-[#EBEBEB] hover:bg-[#FAFAFA] text-xs font-medium bg-white text-[#171717]">
                                             Start Over
                                         </Button>
-                                        <Button onClick={exportToPDF} className="rounded-xl px-6 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[9px] font-black uppercase tracking-widest h-12 flex items-center gap-3">
+                                        <Button onClick={exportToPDF} className="rounded-md px-4 h-10 bg-[#171717] hover:bg-[#171717]/90 text-white text-xs font-medium flex items-center gap-2">
                                             <Download className="w-3.5 h-3.5" /> Export Report
                                         </Button>
                                     </div>
                                 </div>
 
-                                <div className="mt-12">
-                                    <TabsContent value="interview" className="space-y-10">
+                                <div className="mt-8">
+                                    <TabsContent value="interview" className="space-y-8">
                                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                            <div className="lg:col-span-2 space-y-8">
-                                                <Card glass className="p-10 border-white/5 space-y-8 rounded-[3rem]">
-                                                    <div className="space-y-6">
+                                            <div className="lg:col-span-2 space-y-6">
+                                                <Card className="p-8 border-[#EBEBEB] space-y-6 rounded-xl bg-white shadow-sm">
+                                                    <div className="space-y-4">
                                                         <div className="flex items-center justify-between">
-                                                            <div className="flex items-center gap-3 text-emerald-400">
-                                                                <div className="p-2 rounded-lg bg-emerald-500/10">
-                                                                    <Languages className="w-5 h-5" />
+                                                            <div className="flex items-center gap-2.5 text-[#171717]">
+                                                                <div className="p-1.5 rounded bg-[#FAFAFA] border border-[#EBEBEB]">
+                                                                    <Languages className="w-4 h-4 text-[#171717]" />
                                                                 </div>
-                                                                <h3 className="text-lg font-black uppercase italic tracking-tight">Project Summary</h3>
+                                                                <h3 className="text-base font-semibold">Project Summary</h3>
                                                             </div>
-                                                            <Badge className="bg-emerald-500 text-slate-950 font-black">CAREER READY</Badge>
+                                                            <Badge className="bg-[#EBEBEB] text-[#171717] font-semibold border-none rounded px-2.5 py-0.5 text-[10px]">CAREER READY</Badge>
                                                         </div>
-                                                        <div className="prose prose-invert prose-emerald max-w-none text-slate-300 leading-relaxed font-medium">
+                                                        <div className="prose max-w-none text-[#171717] leading-relaxed font-normal text-sm">
                                                             <ReactMarkdown>{result.summary}</ReactMarkdown>
                                                         </div>
                                                     </div>
 
-                                                    <div className="pt-10 border-t border-white/5 space-y-8">
-                                                        <div className="flex items-center gap-3 text-indigo-400">
-                                                            <div className="p-2 rounded-lg bg-indigo-500/10">
-                                                                <Workflow className="w-5 h-5" />
+                                                    <div className="pt-6 border-t border-[#EBEBEB] space-y-6">
+                                                        <div className="flex items-center gap-2.5 text-[#171717]">
+                                                            <div className="p-1.5 rounded bg-[#FAFAFA] border border-[#EBEBEB]">
+                                                                    <Workflow className="w-4 h-4 text-[#171717]" />
                                                             </div>
-                                                            <h3 className="text-lg font-black uppercase italic tracking-tight">System Flow</h3>
+                                                            <h3 className="text-base font-semibold">System Flow</h3>
                                                         </div>
-                                                        <div className="space-y-4">
+                                                        <div className="space-y-3">
                                                             {(result.flowSteps || []).map((step, i) => (
-                                                                <div key={i} className="flex gap-6 group">
+                                                                <div key={i} className="flex gap-4 group">
                                                                     <div className="flex flex-col items-center">
-                                                                        <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-[10px] font-black text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-lg">
+                                                                        <div className="w-7 h-7 rounded-full bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center text-xs font-mono text-[#171717] group-hover:bg-[#171717] group-hover:text-white transition-all shadow-sm">
                                                                             {i + 1}
                                                                         </div>
                                                                         {i !== (result.flowSteps?.length || 0) - 1 && (
-                                                                            <div className="w-px h-full bg-gradient-to-b from-indigo-500/30 to-transparent my-2" />
+                                                                            <div className="w-px h-full bg-[#EBEBEB] my-1" />
                                                                         )}
                                                                     </div>
-                                                                    <div className="pb-8">
-                                                                        <p className="text-slate-300 font-bold text-sm tracking-tight">{step}</p>
+                                                                    <div className="pb-4">
+                                                                        <p className="text-[#4D4D4D] font-medium text-xs tracking-normal pt-1.5">{step}</p>
                                                                     </div>
                                                                 </div>
                                                             ))}
@@ -625,22 +622,22 @@ export default function ExplainForgePage() {
                                                 </Card>
 
                                                 {/* Q&A Section */}
-                                                <div className="space-y-8">
-                                                    <div className="flex items-center gap-3 text-white px-2">
-                                                        <MessageSquare className="w-5 h-5 text-purple-400" />
-                                                        <h3 className="text-xl font-black uppercase italic tracking-wider">Project Q&A</h3>
+                                                <div className="space-y-4">
+                                                    <div className="flex items-center gap-2.5 text-[#171717] px-1">
+                                                        <MessageSquare className="w-4 h-4 text-[#4D4D4D]" />
+                                                        <h3 className="text-base font-semibold">Project Q&A</h3>
                                                     </div>
-                                                    <div className="grid grid-cols-1 gap-6">
+                                                    <div className="grid grid-cols-1 gap-4">
                                                         {(result.questions || []).map((q, i) => (
-                                                            <Card glass key={i} className="p-8 border-white/5 hover:bg-white/[0.02] transition-all rounded-[2rem]">
-                                                                <div className="space-y-6">
-                                                                    <div className="flex items-start gap-4">
-                                                                        <Badge className="bg-purple-500/10 text-purple-400 border-none shrink-0 font-mono">Q{i + 1}</Badge>
-                                                                        <h4 className="text-base font-bold text-white uppercase italic tracking-tight">{q}</h4>
+                                                            <Card key={i} className="p-6 border-[#EBEBEB] hover:shadow-md transition-shadow bg-white rounded-xl">
+                                                                <div className="space-y-4">
+                                                                    <div className="flex items-start gap-3">
+                                                                        <Badge className="bg-[#FAFAFA] text-[#171717] border border-[#EBEBEB] shrink-0 font-mono text-[10px] rounded px-2">Q{i + 1}</Badge>
+                                                                        <h4 className="text-sm font-semibold text-[#171717] tracking-tight">{q}</h4>
                                                                     </div>
-                                                                    <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/5 border-l-purple-500 border-l-4">
-                                                                        <p className="text-sm text-slate-400 leading-relaxed font-medium italic">
-                                                                            <span className="text-[10px] font-black text-purple-500 uppercase block mb-3 tracking-widest">Expert Answer</span>
+                                                                    <div className="p-4 rounded bg-[#FAFAFA] border border-[#EBEBEB] border-l-[#171717] border-l-4">
+                                                                        <p className="text-xs text-[#4D4D4D] leading-relaxed font-normal">
+                                                                            <span className="text-[9px] font-semibold text-[#8F8F8F] uppercase block mb-1.5 tracking-wider">Expert Answer</span>
                                                                             {result.answers?.[i] || "Answer not generated."}
                                                                         </p>
                                                                     </div>
@@ -651,40 +648,38 @@ export default function ExplainForgePage() {
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-8">
-                                                <Card glass className="p-8 space-y-6 border-blue-500/20 bg-blue-500/[0.02] rounded-[2.5rem] sticky top-8">
-                                                    <div className="flex items-center gap-3 text-blue-400">
-                                                        <Mic2 className="w-5 h-5" />
-                                                        <h3 className="text-sm font-black uppercase italic tracking-widest">Interview Pitch</h3>
+                                            <div className="space-y-6">
+                                                <Card className="p-6 space-y-4 border-[#EBEBEB] bg-[#FAFAFA] rounded-xl sticky top-8">
+                                                    <div className="flex items-center gap-2 text-[#171717]">
+                                                        <Mic2 className="w-4 h-4 text-[#4D4D4D]" />
+                                                        <h3 className="text-xs font-semibold uppercase tracking-wider">Interview Pitch</h3>
                                                     </div>
-                                                    <div className="space-y-6">
-                                                        <div className="p-6 rounded-2xl bg-black border border-white/5 italic text-slate-400 text-sm leading-relaxed relative font-serif">
-                                                            <span className="text-blue-500/40 text-2xl mr-1">&ldquo;</span>
-                                                            {result.interviewExplanation}
-                                                            <span className="text-blue-500/40 text-2xl ml-1">&rdquo;</span>
+                                                    <div className="space-y-4">
+                                                        <div className="p-4 rounded border border-[#EBEBEB] bg-white italic text-[#4D4D4D] text-xs leading-relaxed font-sans">
+                                                            &ldquo;{result.interviewExplanation}&rdquo;
                                                         </div>
-                                                        <Button className="w-full bg-blue-500 hover:bg-blue-400 text-slate-950 font-black uppercase text-[11px] tracking-widest h-14 rounded-2xl shadow-xl shadow-blue-500/20 flex items-center gap-3 italic">
-                                                            <Play className="w-4 h-4 fill-slate-950" /> Speak Practice
+                                                        <Button className="w-full bg-[#171717] hover:bg-[#171717]/90 text-white font-medium text-xs h-10 rounded shadow-sm flex items-center justify-center gap-2">
+                                                            <Play className="w-3.5 h-3.5 fill-white" /> Speak Practice
                                                         </Button>
                                                     </div>
                                                 </Card>
 
-                                                <Card glass className="p-8 space-y-6 border-orange-500/10 rounded-[2.5rem]">
-                                                    <div className="flex items-center gap-3 text-orange-400">
-                                                        <Zap className="w-5 h-5" />
-                                                        <h3 className="text-sm font-black uppercase italic tracking-widest">Core Insights</h3>
+                                                <Card className="p-6 space-y-4 border-[#EBEBEB] bg-[#FAFAFA] rounded-xl">
+                                                    <div className="flex items-center gap-2 text-[#171717]">
+                                                        <Zap className="w-4 h-4 text-[#4D4D4D]" />
+                                                        <h3 className="text-xs font-semibold uppercase tracking-wider">Core Insights</h3>
                                                     </div>
-                                                    <div className="p-6 rounded-2xl bg-white/5 border border-white/5 text-slate-400 text-xs leading-relaxed font-semibold">
+                                                    <div className="p-4 rounded border border-[#EBEBEB] bg-white text-[#4D4D4D] text-xs leading-normal font-medium">
                                                         {result.insights || "Deep logic insights materialized successfully."}
                                                     </div>
                                                 </Card>
 
                                                 <Accordion title="Visual System Diagrams" icon={<Workflow className="w-4 h-4" />}>
-                                                    <div className="space-y-8 mt-6">
+                                                    <div className="space-y-4 mt-4">
                                                         {result.diagrams && Object.entries(result.diagrams).map(([name, code], i) => (
-                                                            <div key={i} className="space-y-3">
-                                                                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{name.replace(/([A-Z])/g, ' $1')}</h4>
-                                                                <div className="p-6 rounded-2xl bg-black border border-white/5 font-mono text-[9px] text-emerald-500 overflow-x-auto custom-scrollbar">
+                                                            <div key={i} className="space-y-2">
+                                                                <h4 className="text-[9px] font-semibold text-[#8F8F8F] uppercase tracking-wider">{name.replace(/([A-Z])/g, ' $1')}</h4>
+                                                                <div className="p-4 rounded bg-[#FAFAFA] border border-[#EBEBEB] font-mono text-[10px] text-[#171717] overflow-x-auto">
                                                                     {code}
                                                                 </div>
                                                             </div>
@@ -695,14 +690,14 @@ export default function ExplainForgePage() {
                                         </div>
                                     </TabsContent>
 
-                                    <TabsContent value="review" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 h-[750px] overflow-hidden">
+                                    <TabsContent value="review">
+                                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[750px] overflow-hidden">
                                             {/* File Explorer */}
-                                            <Card glass className="lg:col-span-1 p-6 border-white/5 overflow-y-auto custom-scrollbar rounded-[2.5rem] bg-black/40">
-                                                <div className="space-y-6">
-                                                    <div className="flex items-center gap-3 px-2">
-                                                        <FolderOpen className="w-4 h-4 text-purple-400" />
-                                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-white italic">Project Files</h3>
+                                            <Card className="lg:col-span-1 p-5 border-[#EBEBEB] overflow-y-auto rounded-xl bg-[#FAFAFA] shadow-sm">
+                                                <div className="space-y-4">
+                                                    <div className="flex items-center gap-2 px-1">
+                                                        <FolderOpen className="w-4 h-4 text-[#171717]" />
+                                                        <h3 className="text-[10px] font-semibold uppercase tracking-wider text-[#171717] italic">Project Files</h3>
                                                     </div>
 
                                                     <div className="space-y-1">
@@ -711,19 +706,19 @@ export default function ExplainForgePage() {
                                                                 <button
                                                                     key={file.name}
                                                                     onClick={() => handleFileReview(file.name)}
-                                                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all group ${selectedFile === file.name ? 'bg-purple-500/20 border-purple-500/30' : 'hover:bg-white/5 border border-transparent'}`}
+                                                                    className={`w-full flex items-center gap-2 px-3 py-2 rounded text-left transition-all group border ${selectedFile === file.name ? 'bg-white border-[#EBEBEB] text-[#171717] shadow-sm font-semibold' : 'hover:bg-white hover:border-[#EBEBEB] border-transparent text-[#4D4D4D]'}`}
                                                                 >
                                                                     {getFileIcon(file.name)}
-                                                                    <span className={`text-xs font-medium truncate ${selectedFile === file.name ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'}`}>
+                                                                    <span className="text-xs truncate flex-1">
                                                                         {file.name}
                                                                     </span>
-                                                                    {fileReviews[file.name] && <CheckCircle2 className="w-3 h-3 text-emerald-500 ml-auto shrink-0" />}
+                                                                    {fileReviews[file.name] && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
                                                                 </button>
                                                             ))
                                                         ) : (
-                                                            <div className="p-10 text-center space-y-4 opacity-50">
-                                                                <FileText className="w-8 h-8 mx-auto text-slate-600" />
-                                                                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">No source files detected</p>
+                                                            <div className="p-6 text-center space-y-2 opacity-50">
+                                                                <FileText className="w-6 h-6 mx-auto text-[#8F8F8F]" />
+                                                                <p className="text-[9px] font-semibold uppercase tracking-wider text-[#8F8F8F]">No files detected</p>
                                                             </div>
                                                         )}
                                                     </div>
@@ -731,94 +726,93 @@ export default function ExplainForgePage() {
                                             </Card>
 
                                             {/* Analysis Panel */}
-                                            <Card glass className="lg:col-span-3 p-10 border-white/5 overflow-y-auto custom-scrollbar rounded-[2.5rem] bg-black/20">
+                                            <Card className="lg:col-span-3 p-8 border-[#EBEBEB] overflow-y-auto rounded-xl bg-white shadow-sm">
                                                 {!selectedFile ? (
-                                                    <div className="h-full flex flex-col items-center justify-center text-center space-y-6">
-                                                        <div className="w-24 h-24 rounded-[2rem] bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
-                                                            <Search className="w-10 h-10 text-purple-400" />
+                                                    <div className="h-full flex flex-col items-center justify-center text-center space-y-4">
+                                                        <div className="w-16 h-16 rounded-full bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center">
+                                                            <Search className="w-6 h-6 text-[#8F8F8F]" />
                                                         </div>
-                                                        <div className="space-y-2">
-                                                            <h3 className="text-xl font-black text-white italic uppercase tracking-wider">Select a file to review</h3>
-                                                            <p className="text-slate-500 font-medium max-w-sm">Get line-by-line logic explanations and interview-ready context for individual files.</p>
+                                                        <div className="space-y-1">
+                                                            <h3 className="text-base font-semibold text-[#171717] uppercase tracking-wide">Select a file to review</h3>
+                                                            <p className="text-[#8F8F8F] text-xs max-w-xs mx-auto">Get line-by-line logic explanations and interview-ready context for individual files.</p>
                                                         </div>
                                                     </div>
                                                 ) : isAnalyzingFile ? (
-                                                    <div className="h-full flex flex-col items-center justify-center space-y-6">
+                                                    <div className="h-full flex flex-col items-center justify-center space-y-4">
                                                         <div className="relative">
-                                                            <Loader2 className="w-16 h-16 animate-spin text-purple-500" />
+                                                            <Loader2 className="w-12 h-12 animate-spin text-[#171717]" />
                                                             <div className="absolute inset-0 flex items-center justify-center">
-                                                                <Code className="w-6 h-6 text-purple-400" />
+                                                                <Code className="w-4 h-4 text-[#8F8F8F]" />
                                                             </div>
                                                         </div>
-                                                        <div className="space-y-2 text-center">
-                                                            <p className="text-sm font-black text-white uppercase tracking-[0.2em] italic animate-pulse">Analyzing logic flows...</p>
-                                                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Gemini is reviewing {selectedFile}</p>
+                                                        <div className="space-y-1 text-center">
+                                                            <p className="text-xs font-semibold text-[#171717] uppercase tracking-wider animate-pulse">Analyzing logic flows...</p>
+                                                            <p className="text-[9px] text-[#8F8F8F] uppercase tracking-wider">Reviewing {selectedFile}</p>
                                                         </div>
                                                     </div>
                                                 ) : fileReviews[selectedFile] ? (
-                                                    <div className="space-y-10 animate-fade-in">
-                                                        <header className="flex items-start justify-between gap-6 pb-8 border-b border-white/5">
-                                                            <div className="space-y-2">
-                                                                <div className="flex items-center gap-3">
+                                                    <div className="space-y-8 animate-fade-in text-[#171717]">
+                                                        <header className="flex items-start justify-between gap-6 pb-6 border-b border-[#EBEBEB]">
+                                                            <div className="space-y-1.5">
+                                                                <div className="flex items-center gap-2">
                                                                     {getFileIcon(selectedFile)}
-                                                                    <h2 className="text-2xl font-black text-white italic uppercase">{selectedFile}</h2>
+                                                                    <h2 className="text-xl font-semibold text-[#171717]">{selectedFile}</h2>
                                                                 </div>
-                                                                <p className="text-slate-400 font-medium italic">{fileReviews[selectedFile].summary}</p>
+                                                                <p className="text-xs text-[#4D4D4D] italic">{fileReviews[selectedFile].summary}</p>
                                                             </div>
-                                                            <Badge className="bg-purple-500 text-white font-black uppercase tracking-widest text-[9px] px-3 py-1">CODE REVIEWED</Badge>
+                                                            <Badge className="bg-[#EBEBEB] text-[#171717] font-semibold uppercase tracking-wider text-[9px] px-2.5 py-0.5 rounded">CODE REVIEWED</Badge>
                                                         </header>
 
                                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                                             {/* Logic Steps */}
-                                                            <div className="space-y-6">
-                                                                <div className="flex items-center gap-3 text-purple-400">
-                                                                    <FileLineChart className="w-4 h-4" />
-                                                                    <h4 className="text-[10px] font-black uppercase tracking-widest">Logic Progression</h4>
+                                                            <div className="space-y-4">
+                                                                <div className="flex items-center gap-2 text-[#171717]">
+                                                                    <FileLineChart className="w-4 h-4 text-[#4D4D4D]" />
+                                                                    <h4 className="text-xs font-semibold uppercase tracking-wider">Logic Progression</h4>
                                                                 </div>
-                                                                <div className="space-y-3">
+                                                                <div className="space-y-2.5">
                                                                     {fileReviews[selectedFile].logicSteps.map((step, i) => (
-                                                                        <div key={i} className="flex gap-4 p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.05] transition-colors">
-                                                                            <span className="text-[9px] font-black text-purple-500 font-mono mt-1 shrink-0">{String(i + 1).padStart(2, '0')}</span>
-                                                                            <p className="text-xs text-slate-300 font-medium leading-relaxed">{step}</p>
+                                                                        <div key={i} className="flex gap-3 p-3.5 rounded border border-[#EBEBEB] bg-[#FAFAFA] hover:bg-white transition-colors">
+                                                                            <span className="text-[9px] font-semibold text-[#0070F3] font-mono mt-0.5 shrink-0">{String(i + 1).padStart(2, '0')}</span>
+                                                                            <p className="text-xs text-[#4D4D4D] font-medium leading-relaxed">{step}</p>
                                                                         </div>
                                                                     ))}
                                                                 </div>
                                                             </div>
 
                                                             {/* Key Lines */}
-                                                            <div className="space-y-6">
-                                                                <div className="flex items-center gap-3 text-blue-400">
-                                                                    <Settings className="w-4 h-4" />
-                                                                    <h4 className="text-[10px] font-black uppercase tracking-widest">Critical Code Segments</h4>
+                                                            <div className="space-y-4">
+                                                                <div className="flex items-center gap-2 text-[#171717]">
+                                                                    <Settings className="w-4 h-4 text-[#4D4D4D]" />
+                                                                    <h4 className="text-xs font-semibold uppercase tracking-wider">Critical Code Segments</h4>
                                                                 </div>
-                                                                <div className="space-y-3">
+                                                                <div className="space-y-2.5">
                                                                     {fileReviews[selectedFile].keyLines && fileReviews[selectedFile].keyLines.length > 0 ? (
                                                                         fileReviews[selectedFile].keyLines.map((line, i) => (
-                                                                            <div key={i} className="space-y-2 group">
-                                                                                <div className="flex items-center justify-between px-2">
-                                                                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest italic group-hover:text-blue-400 transition-colors">Line {line.line}</span>
-                                                                                    <span className="text-[9px] font-black text-blue-500 italic opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest">Logic Explanation</span>
+                                                                            <div key={i} className="space-y-1.5 group">
+                                                                                <div className="flex items-center justify-between px-1">
+                                                                                    <span className="text-[9px] font-semibold text-[#8F8F8F] uppercase tracking-wider">Line {line.line}</span>
                                                                                 </div>
-                                                                                <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 border-l-blue-500 border-l-2">
-                                                                                    <p className="text-[11px] text-slate-400 font-semibold leading-relaxed italic">{line.explanation}</p>
+                                                                                <div className="p-3.5 rounded border border-[#EBEBEB] bg-[#FAFAFA] border-l-[#0070F3] border-l-2">
+                                                                                    <p className="text-xs text-[#4D4D4D] font-normal leading-relaxed">{line.explanation}</p>
                                                                                 </div>
                                                                             </div>
                                                                         ))
                                                                     ) : (
-                                                                        <div className="p-8 text-center bg-white/5 rounded-2xl border border-dashed border-white/10">
-                                                                            <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest italic">No complex code blocks identified</p>
+                                                                        <div className="p-6 text-center bg-[#FAFAFA] rounded border border-dashed border-[#EBEBEB]">
+                                                                            <p className="text-[10px] font-semibold text-[#8F8F8F] uppercase tracking-wider">No complex code blocks identified</p>
                                                                         </div>
                                                                     )}
                                                                 </div>
                                                             </div>
                                                         </div>
 
-                                                        <div className="pt-8 border-t border-white/5">
-                                                            <div className="flex items-center gap-3 text-emerald-400 mb-6">
-                                                                <Sparkles className="w-4 h-4" />
-                                                                <h4 className="text-[10px] font-black uppercase tracking-widest">Interview Material for this Module</h4>
+                                                        <div className="pt-6 border-t border-[#EBEBEB]">
+                                                            <div className="flex items-center gap-2 text-[#171717] mb-4">
+                                                                <Sparkles className="w-4 h-4 text-[#4D4D4D]" />
+                                                                <h4 className="text-xs font-semibold uppercase tracking-wider">Interview Material for this Module</h4>
                                                             </div>
-                                                            <div className="p-8 rounded-[2rem] bg-emerald-500/[0.02] border border-emerald-500/10 italic text-slate-300 text-sm leading-relaxed font-medium">
+                                                            <div className="p-6 rounded border border-[#EBEBEB] bg-[#FAFAFA] italic text-[#4D4D4D] text-xs leading-relaxed">
                                                                 &ldquo;{fileReviews[selectedFile].interviewExplanation}&rdquo;
                                                             </div>
                                                         </div>

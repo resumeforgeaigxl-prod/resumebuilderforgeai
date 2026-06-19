@@ -65,12 +65,12 @@ export function CreateResumeButton({ variant = 'primary' }: { variant?: 'primary
                     onClick={handleCreate}
                     disabled={isCreating}
                     variant="outline"
-                    className="gap-2 px-8 rounded-xl border-white/5 bg-white/5 hover:bg-white/10"
+                    className="gap-2 px-6 h-10 rounded-md border-[#EBEBEB] bg-white text-[#171717] hover:bg-[#FAFAFA] transition-colors"
                 >
-                    {isCreating ? <Loader2 className="w-4 h-4 animate-spin text-indigo-400" /> : <PlusCircle className="w-4 h-4 text-indigo-400" />}
+                    {isCreating ? <Loader2 className="w-4 h-4 animate-spin text-[#171717]" /> : <PlusCircle className="w-4 h-4 text-[#171717]" />}
                     Initialize New Profile
                 </Button>
-                {error && <p className="text-red-400 text-[10px] font-black uppercase tracking-widest mt-3">{error}</p>}
+                {error && <p className="text-rose-600 text-xs font-medium mt-2">{error}</p>}
             </div>
         )
     }
@@ -80,13 +80,12 @@ export function CreateResumeButton({ variant = 'primary' }: { variant?: 'primary
             <Button
                 onClick={handleCreate}
                 disabled={isCreating}
-                variant="premium"
-                className="gap-2 px-8 rounded-xl shadow-lg shadow-indigo-500/20"
+                className="gap-2 px-6 h-10 rounded-full bg-[#171717] hover:bg-[#2e2e2e] text-white border border-[#171717] font-medium text-sm transition-colors shadow-sm"
             >
-                {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlusCircle className="w-4 h-4" />}
+                {isCreating ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <PlusCircle className="w-4 h-4 text-white" />}
                 Forge New Resume
             </Button>
-            {error && <p className="text-red-400 text-[10px] font-black uppercase tracking-widest mt-2">{error}</p>}
+            {error && <p className="text-rose-600 text-xs font-medium mt-2">{error}</p>}
         </div>
     )
 }

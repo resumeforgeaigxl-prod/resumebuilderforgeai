@@ -29,7 +29,7 @@ export const FeatureGate: React.FC<FeatureGateProps> = ({ task, children, fallba
     const hasPricingAccess = checkAccess(task);
     const lockedPreview = fallback ?? children;
 
-    if (isLoading || !accessResult) return <div className="animate-pulse">{children}</div>;
+    if (isLoading || !accessResult) return <>{children}</>;
 
     // Soft paywall if limit reached
     if (accessResult.reason === 'limit_reached') {

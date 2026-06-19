@@ -38,35 +38,36 @@ export default async function DashboardPage({ params }: { params: { locale: stri
         const plan = isAdmin ? 'ADMIN' : (user?.plan_type?.toUpperCase() || 'FREE');
 
         return (
-            <div className="space-y-10 animate-fade-in">
+            <div className="space-y-10 animate-fade-in text-[#171717]">
                 <PaymentSuccessBanner />
 
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                        <div className="flex items-center gap-2 text-indigo-400 font-bold tracking-widest text-[10px] uppercase mb-2">
-                             <Activity className="w-3.5 h-3.5" /> Intelligence Center
+                        <div className="flex items-center gap-2 text-[#8F8F8F] font-mono text-[11px] uppercase tracking-wider mb-2 font-medium">
+                             <Activity className="w-3.5 h-3.5 text-[#171717]" /> Intelligence Center
                         </div>
-                        <h1 className="text-4xl font-bold tracking-tight text-white">
+                        <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-[#171717]">
                             Welcome, {displayName}
                         </h1>
-                        <p className="text-slate-400 mt-1">Manage your professional evolution across the ecosystem.</p>
+                        <p className="text-[#4D4D4D] mt-1 text-sm md:text-base">Manage your professional evolution across the ecosystem.</p>
                     </div>
                     {isAdmin ? (
-                        <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
-                            <ShieldCheck className="w-5 h-5 text-indigo-400" />
-                            <span className="text-sm font-bold text-indigo-400 uppercase tracking-widest leading-none">System Admin</span>
+                        <div className="flex items-center gap-2.5 bg-white border border-[#EBEBEB] px-3.5 py-1.5 rounded-full shadow-sm">
+                            <ShieldCheck className="w-4 h-4 text-[#171717]" />
+                            <span className="text-xs font-semibold text-[#171717] uppercase tracking-wider leading-none">System Admin</span>
                         </div>
                     ) : plan === 'FREE' ? (
-                       <Button asChild variant="premium" size="lg" className="rounded-xl group shadow-indigo-500/20 shadow-lg">
-                          <Link href={`/${locale}/dashboard/billing?plan=monthly`}>
-                            Upgrade to Pro <Sparkles className="ml-2 w-4 h-4 group-hover:rotate-12 transition-transform" />
-                          </Link>
-                       </Button>
+                        <Link 
+                           href={`/${locale}/dashboard/billing?plan=monthly`}
+                           className="inline-flex items-center justify-center gap-2 px-6 h-10 rounded-full bg-[#171717] hover:bg-[#2e2e2e] text-white text-sm font-medium transition-colors border border-[#171717] shadow-sm shrink-0"
+                        >
+                          Upgrade to Pro <Sparkles className="w-4 h-4 text-white" />
+                        </Link>
                     ) : (
-                        <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
-                            <Crown className="w-5 h-5 text-amber-400" />
-                            <span className="text-sm font-bold text-amber-400 uppercase tracking-widest leading-none">{plan} Member</span>
+                        <div className="flex items-center gap-2.5 bg-white border border-[#EBEBEB] px-3.5 py-1.5 rounded-full shadow-sm">
+                            <Crown className="w-4 h-4 text-[#0070F3]" />
+                            <span className="text-xs font-semibold text-[#171717] uppercase tracking-wider leading-none">{plan} Member</span>
                         </div>
                     )}
                 </div>
@@ -77,19 +78,19 @@ export default async function DashboardPage({ params }: { params: { locale: stri
                     <MetricCard 
                         label="Total Resumes" 
                         value={resumesRes.count || 0} 
-                        icon={<FileText className="text-indigo-400" />} 
+                        icon={<FileText className="text-[#171717] w-5 h-5" />} 
                         trend="+1 this month"
                     />
                     <MetricCard 
                         label="AI Optimization" 
                         value={`${scoreRes.count ? '98%' : '0'}`} 
-                        icon={<Zap className="text-yellow-400" />} 
+                        icon={<Zap className="text-[#171717] w-5 h-5" />} 
                         trend="Top 2% Globally"
                     />
                     <MetricCard 
                         label="Scheduled Events" 
                         value={interviewRes.count || 0} 
-                        icon={<Calendar className="text-emerald-400" />} 
+                        icon={<Calendar className="text-[#171717] w-5 h-5" />} 
                         trend="Upcoming activities"
                     />
                 </div>
@@ -98,51 +99,51 @@ export default async function DashboardPage({ params }: { params: { locale: stri
                 <div className="grid lg:grid-cols-3 gap-8">
                     {/* Module Grid */}
                     <div className="lg:col-span-2 space-y-6">
-                        <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                            <h2 className="text-xl font-bold text-white tracking-tight">Forge Ecosystem</h2>
-                            <Badge variant="secondary" className="bg-white/5 text-slate-400 px-3 py-1 font-bold">10 ACTIVE MODULES</Badge>
+                        <div className="flex items-center justify-between border-b border-[#EBEBEB] pb-4">
+                            <h2 className="text-xl font-semibold text-[#171717] tracking-tight">Forge Ecosystem</h2>
+                            <span className="bg-white border border-[#EBEBEB] text-[#4D4D4D] px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider">10 ACTIVE MODULES</span>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <ModuleCard 
                                 title="ResumeForge" 
                                 desc="ATS-optimized generation with AI semantic layering." 
                                 href={`/${locale}/resumes`} 
-                                icon={<FileText />} 
+                                icon={<FileText className="w-5 h-5" />} 
                                 color="indigo"
                             />
                             <ModuleCard 
                                 title="LearnForge" 
                                 desc="AI-powered video learning and roadmap insights." 
                                 href={`/${locale}/learnforge`} 
-                                icon={<BrainCircuit />} 
+                                icon={<BrainCircuit className="w-5 h-5" />} 
                                 color="blue"
                             />
                             <ModuleCard 
                                 title="CodingForge" 
                                 desc="AI-driven IDE with precision problem sets." 
                                 href={`/${locale}/codingforge`} 
-                                icon={<Zap />} 
+                                icon={<Zap className="w-5 h-5" />} 
                                 color="pink"
                             />
                             <ModuleCard 
                                 title="ProjectForge" 
                                 desc="Architecture blueprints and cloud deployment." 
                                 href={`/${locale}/projectforge`} 
-                                icon={<Layout />} 
+                                icon={<Layout className="w-5 h-5" />} 
                                 color="orange"
                             />
                             <ModuleCard 
                                 title="KnowledgeForge" 
                                 desc="Structured technical encyclopedia for masters." 
                                 href={`/${locale}/knowledgeforge`} 
-                                icon={<GraduationCap />} 
+                                icon={<GraduationCap className="w-5 h-5" />} 
                                 color="emerald"
                             />
                             <ModuleCard 
                                 title="MentorForge" 
                                 desc="AI career coaching and strategic guidance." 
                                 href={`/${locale}/mentorforge`} 
-                                icon={<Bot />} 
+                                icon={<Bot className="w-5 h-5" />} 
                                 color="purple"
                             />
                         </div>
@@ -151,135 +152,135 @@ export default async function DashboardPage({ params }: { params: { locale: stri
                     {/* Secondary Panel */}
                     <div className="space-y-6">
                          <StreakCard />
-                         <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                            <h2 className="text-xl font-bold text-white tracking-tight">System Intel</h2>
+                         <div className="flex items-center justify-between border-b border-[#EBEBEB] pb-4">
+                            <h2 className="text-xl font-semibold text-[#171717] tracking-tight">System Intel</h2>
                         </div>
-                        <Card glass className="bg-white/[0.01]">
-                            <CardHeader className="pb-4">
-                                <CardTitle className="text-sm font-bold flex items-center gap-2">
-                                    <Activity className="w-4 h-4 text-emerald-400" />
-                                    Operational Status
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
+                        <div className="bg-white border border-[#EBEBEB] rounded-xl p-6 hover:shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.06)] transition-all">
+                            <div className="flex items-center gap-2 font-semibold text-sm text-[#171717] mb-6">
+                                <Activity className="w-4 h-4 text-[#0070F3]" />
+                                Operational Status
+                            </div>
+                            <div className="space-y-4">
                                 <StatusItem label="Intelligence Engine" status="Active" color="emerald" />
                                 <StatusItem label="Market Signal Sync" status="Synced" color="blue" />
                                 <StatusItem label="Global CDN" status="Verified" color="indigo" />
-                                <div className="pt-4 border-t border-white/5 flex flex-col gap-4">
+                                <div className="pt-4 border-t border-[#EBEBEB] flex flex-col gap-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center">
-                                            <ShieldCheck className="w-5 h-5 text-indigo-400" />
+                                        <div className="w-10 h-10 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center">
+                                            <ShieldCheck className="w-5 h-5 text-[#171717]" />
                                         </div>
-                                        <div className="text-[10px] text-slate-500 uppercase font-black leading-tight tracking-wider">
+                                        <div className="text-[11px] font-mono text-[#8F8F8F] uppercase tracking-normal leading-tight">
                                             Enterprise Security Enabled
                                         </div>
                                     </div>
-                                    <Button asChild variant="outline" size="sm" className="w-full text-xs font-bold border-white/5 bg-white/5">
-                                        <Link href={`/${locale}/tools`}>Access Advanced Tools</Link>
-                                    </Button>
+                                    <Link 
+                                        href={`/${locale}/tools`}
+                                        className="inline-flex items-center justify-center h-9 px-4 rounded-md border border-[#EBEBEB] bg-white hover:bg-[#FAFAFA] text-[#171717] text-xs font-medium transition-colors w-full"
+                                    >
+                                        Access Advanced Tools
+                                    </Link>
                                 </div>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 {/* Recent Intelligence Feed */}
                 <section className="space-y-6">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-xl font-bold text-white tracking-tight">Recent Activity Intelligence</h3>
-                        <Button variant="ghost" size="sm" className="text-slate-500 hover:text-white font-bold">
+                        <h3 className="text-xl font-semibold text-[#171717] tracking-tight">Recent Activity Intelligence</h3>
+                        <button className="text-xs font-mono text-[#8F8F8F] hover:text-[#171717] transition-colors uppercase tracking-normal">
                             Advanced Analytics Tracking
-                        </Button>
+                        </button>
                     </div>
-                    <Card glass className="bg-white/[0.01] overflow-hidden border-white/5">
-                        <div className="divide-y divide-white/5">
+                    <div className="bg-white border border-[#EBEBEB] rounded-xl overflow-hidden shadow-sm">
+                        <div className="divide-y divide-[#EBEBEB]">
                            {[
-                              { title: 'Resume Intelligence Calibration', date: '2h ago', status: 'Enhanced', icon: <TrendingUp className="text-indigo-400" /> },
-                              { title: 'Coding Protocol Completion', date: 'Yesterday', status: 'Verified', icon: <Briefcase className="text-emerald-400" /> },
-                              { title: 'Cloud Infrastructure Design', date: 'Feb 12', status: 'Live', icon: <Compass className="text-purple-400" /> }
+                              { title: 'Resume Intelligence Calibration', date: '2h ago', status: 'Enhanced', icon: <TrendingUp className="text-[#171717]" /> },
+                              { title: 'Coding Protocol Completion', date: 'Yesterday', status: 'Verified', icon: <Briefcase className="text-[#171717]" /> },
+                              { title: 'Cloud Infrastructure Design', date: 'Feb 12', status: 'Live', icon: <Compass className="text-[#171717]" /> }
                            ].map((item, i) => (
-                              <div key={i} className="p-5 flex items-center justify-between hover:bg-white/[0.02] transition-all group cursor-default">
+                              <div key={i} className="p-5 flex items-center justify-between hover:bg-[#FAFAFA] transition-all group cursor-default">
                                  <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
-                                       <div className="w-5 h-5 opacity-60 group-hover:opacity-100 transition-opacity">{item.icon}</div>
+                                    <div className="w-10 h-10 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center group-hover:border-[#171717] transition-colors">
+                                       <div className="w-5 h-5 flex items-center justify-center">{item.icon}</div>
                                     </div>
                                     <div>
-                                       <h4 className="font-bold text-sm text-white group-hover:text-indigo-400 transition-colors">{item.title}</h4>
-                                       <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-1">
+                                       <h4 className="font-semibold text-sm text-[#171717] group-hover:text-[#0070F3] transition-colors">{item.title}</h4>
+                                       <div className="flex items-center gap-2 text-xs text-[#8F8F8F] mt-1">
                                           <Clock className="w-3 h-3" />
                                           {item.date}
                                        </div>
                                     </div>
                                  </div>
-                                 <Badge variant="outline" className="text-[10px] font-black uppercase tracking-widest border-white/5 bg-white/[0.05] text-slate-400 py-1">
+                                 <span className="text-[10px] font-bold uppercase tracking-wider border border-[#EBEBEB] bg-white text-[#4D4D4D] px-2.5 py-0.5 rounded-full">
                                     {item.status}
-                                 </Badge>
+                                 </span>
                               </div>
                            ))}
                         </div>
-                    </Card>
+                    </div>
                 </section>
             </div>
         );
     } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Unknown error';
-        return <div className="p-10 text-rose-500 font-bold glass-card">Ecosystem Linkage Error: {message}</div>;
+        return <div className="p-10 text-rose-600 font-medium bg-white border border-[#EBEBEB] rounded-xl shadow-sm">Ecosystem Linkage Error: {message}</div>;
     }
 }
 
 function MetricCard({ label, value, icon, trend }: { label: string, value: string | number, icon: React.ReactNode, trend: string }) {
     return (
-        <Card glass className="p-8 border-white/5 hover:border-white/10 transition-all group overflow-hidden relative">
-            <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/[0.02] rounded-full blur-2xl group-hover:bg-white/[0.04] transition-colors" />
-            <div className="flex items-start justify-between mb-6">
-                <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">{icon}</div>
-                <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest">{trend}</div>
+        <div className="bg-white border border-[#EBEBEB] rounded-xl p-6 hover:shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.06)] transition-all group relative overflow-hidden">
+            <div className="flex items-start justify-between mb-4">
+                <div className="w-10 h-10 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center">{icon}</div>
+                <div className="text-[11px] text-[#8F8F8F] font-mono uppercase tracking-normal">{trend}</div>
             </div>
-            <p className="text-[10px] text-slate-600 uppercase tracking-widest font-black mb-1">{label}</p>
-            <p className="text-4xl font-black text-white tracking-tighter leading-none">{value}</p>
-        </Card>
+            <p className="text-xs text-[#8F8F8F] uppercase tracking-wider font-semibold mb-1">{label}</p>
+            <p className="text-3xl md:text-4xl font-semibold text-[#171717] tracking-tight leading-none">{value}</p>
+        </div>
     );
 }
 
 function ModuleCard({ title, desc, href, icon, color }: { title: string, desc: string, href: string, icon: React.ReactNode, color: string }) {
     const colorStyles: Record<string, string> = {
-        indigo: 'text-indigo-400 bg-indigo-400/10 border-indigo-400/20 shadow-indigo-500/10',
-        blue: 'text-blue-400 bg-blue-400/10 border-blue-400/20 shadow-blue-500/10',
-        pink: 'text-pink-400 bg-pink-400/10 border-pink-400/20 shadow-pink-500/10',
-        orange: 'text-orange-400 bg-orange-400/10 border-orange-400/20 shadow-orange-500/10',
-        emerald: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20 shadow-emerald-500/10',
-        purple: 'text-purple-400 bg-purple-400/10 border-purple-400/20 shadow-purple-500/10',
+        indigo: 'text-indigo-600 bg-indigo-50 border-indigo-100',
+        blue: 'text-blue-600 bg-blue-50 border-blue-100',
+        pink: 'text-pink-600 bg-pink-50 border-pink-100',
+        orange: 'text-orange-600 bg-orange-50 border-orange-100',
+        emerald: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+        purple: 'text-purple-600 bg-purple-50 border-purple-100',
     };
 
     return (
-        <Link href={href}>
-            <Card glass className="p-6 group border-white/5 hover:border-white/10 hover:bg-white/[0.03] transition-all h-full">
+        <Link href={href} className="block h-full">
+            <div className="bg-white border border-[#EBEBEB] rounded-xl p-6 group hover:shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.06)] hover:border-[#171717]/25 transition-all h-full flex flex-col">
                 <div className="flex items-start gap-4 mb-4">
-                    <div className={`p-3 rounded-xl border ${colorStyles[color]} group-hover:scale-110 transition-transform shadow-lg`}>
+                    <div className={`p-3 rounded-lg border ${colorStyles[color]} transition-colors`}>
                         <div className="w-5 h-5">{icon}</div>
                     </div>
                 </div>
-                <h3 className="font-black text-white group-hover:text-indigo-400 transition-colors uppercase tracking-tight text-sm mb-2">{title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed font-medium mb-6">{desc}</p>
-                <div className="flex items-center gap-2 text-[10px] font-black text-slate-700 group-hover:text-indigo-400 uppercase tracking-widest transition-colors mt-auto">
-                    Initialize Protocol <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                <h3 className="font-semibold text-[#171717] group-hover:text-[#0070F3] transition-colors tracking-tight text-base mb-1">{title}</h3>
+                <p className="text-sm text-[#4D4D4D] leading-relaxed font-normal mb-5">{desc}</p>
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-[#8F8F8F] group-hover:text-[#0070F3] transition-colors mt-auto">
+                    Initialize Module <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                 </div>
-            </Card>
+            </div>
         </Link>
     );
 }
 
 function StatusItem({ label, status, color }: { label: string, status: string, color: string }) {
     const colors: Record<string, string> = {
-        emerald: 'text-emerald-400 bg-emerald-400/10',
-        blue: 'text-blue-400 bg-blue-400/10',
-        indigo: 'text-indigo-400 bg-indigo-400/10',
+        emerald: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+        blue: 'text-blue-600 bg-blue-50 border-blue-100',
+        indigo: 'text-indigo-600 bg-indigo-50 border-indigo-100',
     };
     
     return (
-        <div className="flex items-center justify-between py-1">
-            <span className="text-xs text-slate-400 font-medium">{label}</span>
-            <div className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${colors[color]} flex items-center gap-1.5`}>
+        <div className="flex items-center justify-between py-1.5">
+            <span className="text-sm text-[#4D4D4D] font-normal">{label}</span>
+            <div className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${colors[color]} flex items-center gap-1.5`}>
                 <div className={`w-1 h-1 rounded-full bg-current ${status === 'Active' ? 'animate-pulse' : ''}`} />
                 {status}
             </div>

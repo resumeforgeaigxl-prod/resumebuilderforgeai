@@ -1,6 +1,6 @@
 'use client'
 export const dynamic = 'force-dynamic';
-;
+
 import { useParams } from 'next/navigation';
 import { Brain, Globe, MessageSquareWarning, Sparkles, Wrench, ArrowRight, Code2, Building2 } from 'lucide-react';
 import Link from 'next/link';
@@ -12,11 +12,10 @@ const TOOLS = [
         description: 'Practice high-stakes technical and behavioral interviews with real-time AI feedback.',
         icon: Brain,
         href: '/mock-interview',
-        color: 'text-purple-400',
-        bg: 'bg-purple-500/10',
-        border: 'border-purple-500/20',
-        hoverBorder: 'hover:border-purple-400/40',
-        gradient: 'from-purple-600/15 to-blue-600/15'
+        color: 'text-purple-600',
+        bg: 'bg-purple-50',
+        border: 'border-purple-100',
+        hoverBorder: 'hover:border-purple-300'
     },
     {
         id: 'mock-test',
@@ -24,11 +23,10 @@ const TOOLS = [
         description: 'Generate 50+ role-specific MCQs and aptitude questions from any job description.',
         icon: Sparkles,
         href: '/mock-test',
-        color: 'text-blue-400',
-        bg: 'bg-blue-500/10',
-        border: 'border-blue-500/20',
-        hoverBorder: 'hover:border-blue-400/40',
-        gradient: 'from-blue-600/15 to-indigo-600/15'
+        color: 'text-blue-600',
+        bg: 'bg-blue-50',
+        border: 'border-blue-100',
+        hoverBorder: 'hover:border-blue-300'
     },
     {
         id: 'portfolio',
@@ -36,11 +34,10 @@ const TOOLS = [
         description: 'Instantly convert your resume into a premium, hosted web portfolio with custom themes.',
         icon: Globe,
         href: '/portfolio',
-        color: 'text-emerald-400',
-        bg: 'bg-emerald-500/10',
-        border: 'border-emerald-500/20',
-        hoverBorder: 'hover:border-emerald-400/40',
-        gradient: 'from-emerald-600/15 to-teal-600/15'
+        color: 'text-emerald-600',
+        bg: 'bg-emerald-50',
+        border: 'border-emerald-100',
+        hoverBorder: 'hover:border-emerald-300'
     },
     {
         id: 'jobforge',
@@ -48,11 +45,10 @@ const TOOLS = [
         description: 'Your strict AI career coach for optimization, problem solving, and preparation.',
         icon: MessageSquareWarning,
         href: '/jobforgeai',
-        color: 'text-orange-400',
-        bg: 'bg-orange-500/10',
-        border: 'border-orange-500/20',
-        hoverBorder: 'hover:border-orange-400/40',
-        gradient: 'from-orange-600/15 to-red-600/15'
+        color: 'text-orange-600',
+        bg: 'bg-orange-50',
+        border: 'border-orange-100',
+        hoverBorder: 'hover:border-orange-300'
     },
     {
         id: 'codingforge',
@@ -60,11 +56,10 @@ const TOOLS = [
         description: 'Master data structures and algorithms in an integrated Monaco-powered environment.',
         icon: Code2,
         href: '/codingforge',
-        color: 'text-blue-500',
-        bg: 'bg-blue-500/10',
-        border: 'border-blue-500/20',
-        hoverBorder: 'hover:border-blue-400/40',
-        gradient: 'from-blue-600/15 to-cyan-600/15'
+        color: 'text-blue-600',
+        bg: 'bg-blue-50',
+        border: 'border-blue-100',
+        hoverBorder: 'hover:border-blue-300'
     },
     {
         id: 'companyprep',
@@ -72,11 +67,10 @@ const TOOLS = [
         description: 'Generate intelligence reports for target companies and practice realistic mock interviews.',
         icon: Building2,
         href: '/company-prep-interview',
-        color: 'text-indigo-400',
-        bg: 'bg-indigo-500/10',
-        border: 'border-indigo-500/20',
-        hoverBorder: 'hover:border-indigo-400/40',
-        gradient: 'from-indigo-600/15 to-blue-600/15'
+        color: 'text-indigo-600',
+        bg: 'bg-indigo-50',
+        border: 'border-indigo-100',
+        hoverBorder: 'hover:border-indigo-300'
     },
     {
         id: 'explainforge',
@@ -84,11 +78,10 @@ const TOOLS = [
         description: 'Human-style project explanation engine & professional documentation generator.',
         icon: Sparkles,
         href: '/explainforge',
-        color: 'text-emerald-500',
-        bg: 'bg-emerald-500/10',
-        border: 'border-emerald-500/20',
-        hoverBorder: 'hover:border-emerald-400/40',
-        gradient: 'from-emerald-600/15 to-teal-600/15'
+        color: 'text-emerald-600',
+        bg: 'bg-emerald-50',
+        border: 'border-emerald-100',
+        hoverBorder: 'hover:border-emerald-300'
     }
 ];
 
@@ -97,15 +90,15 @@ export default function ToolsPage() {
     const { locale } = params;
 
     return (
-        <div className="space-y-12 max-w-7xl mx-auto pb-20">
-            <header>
-                <div className="flex items-center gap-2 text-indigo-400 font-bold tracking-widest text-[10px] uppercase mb-4">
-                    <Wrench className="w-3.5 h-3.5" /> Platform Utilities
+        <div className="space-y-12 max-w-7xl mx-auto pb-20 text-[#171717] animate-premium-in">
+            <header className="border-b border-[#EBEBEB] pb-8 mb-12">
+                <div className="flex items-center gap-2 text-[#8F8F8F] font-bold tracking-wider text-[10px] uppercase mb-3 font-mono">
+                    <Wrench className="w-3.5 h-3.5 text-[#171717]" /> Platform Utilities
                 </div>
-                <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-white">
+                <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-[#171717]">
                     Power Up Tools
                 </h1>
-                <p className="text-slate-400 mt-2 text-lg">Specialized modules to accelerate your career trajectory.</p>
+                <p className="text-[#4D4D4D] mt-2 text-sm md:text-base">Specialized modules to accelerate your career trajectory.</p>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -113,33 +106,33 @@ export default function ToolsPage() {
                     <Link 
                         key={tool.id} 
                         href={`/${locale}${tool.href}`} 
-                        className="glass-card p-10 group flex flex-col h-full hover:-translate-y-2"
+                        className="bg-[#FFFFFF] border border-[#EBEBEB] rounded-xl p-8 group flex flex-col h-full hover:border-[#171717]/25 transition-all shadow-sm"
                     >
-                        <div className={`w-16 h-16 rounded-2xl ${tool.bg} border ${tool.border} flex items-center justify-center mb-8 shrink-0 group-hover:scale-110 transition-transform`}>
-                            <tool.icon className={`w-8 h-8 ${tool.color}`} />
+                        <div className={`w-14 h-14 rounded-xl ${tool.bg} border ${tool.border} flex items-center justify-center mb-6 shrink-0 group-hover:scale-105 transition-transform`}>
+                            <tool.icon className={`w-6 h-6 ${tool.color}`} />
                         </div>
 
-                        <div className="flex-1 space-y-4">
-                            <h3 className="text-2xl font-bold text-white group-hover:text-indigo-400 transition-colors tracking-tight">
+                        <div className="flex-1 space-y-2">
+                            <h3 className="text-base font-semibold text-[#171717] transition-colors tracking-tight">
                                 {tool.title}
                             </h3>
-                            <p className="text-slate-400 text-sm leading-relaxed">
+                            <p className="text-[#4D4D4D] text-xs leading-relaxed">
                                 {tool.description}
                             </p>
                         </div>
 
-                        <div className="pt-8 mt-8 border-t border-white/5 flex items-center justify-between">
-                            <span className={`text-[10px] font-bold uppercase tracking-widest ${tool.color}`}>Initialize Module</span>
-                            <ArrowRight className={`w-5 h-5 ${tool.color} group-hover:translate-x-1 transition-transform`} />
+                        <div className="pt-6 mt-6 border-t border-[#EBEBEB] flex items-center justify-between">
+                            <span className={`text-[10px] font-bold uppercase tracking-wider ${tool.color}`}>Initialize Module</span>
+                            <ArrowRight className={`w-4 h-4 ${tool.color} group-hover:translate-x-1 transition-transform`} />
                         </div>
                     </Link>
                 ))}
             </div>
 
-            <div className="p-16 text-center glass-card border-none bg-indigo-500/[0.02] relative overflow-hidden">
-                <Sparkles className="w-12 h-12 text-indigo-400 mx-auto mb-6 animate-pulse" />
-                <h4 className="text-2xl font-bold text-white mb-2">Expanding the Forge</h4>
-                <p className="text-slate-500 text-sm max-w-md mx-auto leading-relaxed">
+            <div className="p-12 text-center bg-[#FFFFFF] border border-[#EBEBEB] rounded-xl shadow-sm relative overflow-hidden">
+                <Sparkles className="w-10 h-10 text-[#171717] mx-auto mb-4" />
+                <h4 className="text-base font-semibold text-[#171717] mb-2">Expanding the Forge</h4>
+                <p className="text-[#4D4D4D] text-xs max-w-sm mx-auto leading-relaxed">
                     We&apos;re constantly engineering new modules to give you an unfair advantage in the market. 
                     Upcoming: AI Salary Negotiator & System Design Forge.
                 </p>

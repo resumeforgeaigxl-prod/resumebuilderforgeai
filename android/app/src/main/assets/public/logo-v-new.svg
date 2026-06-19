@@ -1,0 +1,46 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="v_gradient" x1="100" y1="150" x2="450" y2="350" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A855F7"/> <!-- Purple/Magenta -->
+      <stop offset="0.6" stop-color="#3B82F6"/> <!-- Blue/Cyan -->
+      <stop offset="1" stop-color="#22D3EE"/> <!-- Neon Cyan -->
+    </linearGradient>
+    <filter id="soft_glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" fill="#000000"/>
+
+  <!-- The "AI Forge V" Branding -->
+  <g filter="url(#soft_glow)">
+    <!-- The thick V-shape stroke -->
+    <path d="M160 160C160 160 200 320 256 400C312 320 380 200 380 200" stroke="url(#v_gradient)" stroke-width="80" stroke-linecap="round" stroke-linejoin="round" />
+    
+    <!-- Connector paths from the right arm to the nodes -->
+    <path d="M340 250C360 220 380 160 410 120" stroke="url(#v_gradient)" stroke-width="12" stroke-linecap="round"/>
+    <path d="M360 220C380 200 410 180 440 160" stroke="url(#v_gradient)" stroke-width="12" stroke-linecap="round"/>
+    <path d="M370 200C390 190 420 200 440 220" stroke="url(#v_gradient)" stroke-width="12" stroke-linecap="round"/>
+
+    <!-- The 3 distinct nodes (representing AI intelligence/branches) -->
+    <!-- Node 1 (Top) -->
+    <circle cx="410" cy="120" r="16" fill="#D8B4FE"/> <!-- Light purple -->
+    <circle cx="410" cy="120" r="6" fill="#FFFFFF"/> <!-- Inner glow -->
+    
+    <!-- Node 2 (Center) -->
+    <circle cx="440" cy="160" r="12" fill="#3B82F6"/>
+    
+    <!-- Node 3 (Bottom) -->
+    <circle cx="440" cy="220" r="10" fill="#22D3EE"/>
+  </g>
+
+  <!-- High-contrast central spark on the main node -->
+  <circle cx="410" cy="120" r="4" fill="#FFFFFF">
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" />
+  </circle>
+</svg>

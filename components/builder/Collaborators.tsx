@@ -64,22 +64,22 @@ export function Collaborators({ resumeId, currentUserId }: { resumeId: string; c
     if (onlineUsers.length <= 1) return null;
 
     return (
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-500">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FAFAFA] border border-[#EBEBEB] animate-in fade-in slide-in-from-top-2 duration-500">
             <div className="flex -space-x-2 overflow-hidden">
                 {onlineUsers.map((user) => (
                     <div
                         key={user.presence_ref}
                         className={cn(
-                            "inline-block h-6 w-6 rounded-full ring-2 ring-[#080B16] flex items-center justify-center text-[10px] font-bold text-white uppercase",
+                            "inline-block h-6 w-6 rounded-full ring-2 ring-white flex items-center justify-center text-[10px] font-bold text-white uppercase",
                         )}
                         style={{ backgroundColor: user.color }}
                         title={user.name}
                     >
-                        {user.name.charAt(0)}
+                         {user.name.charAt(0)}
                     </div>
                 ))}
             </div>
-            <div className="text-[10px] font-bold text-[#7A8BA8] uppercase tracking-widest flex items-center gap-1.5">
+            <div className="text-[10px] font-bold text-[#4D4D4D] uppercase tracking-widest flex items-center gap-1.5">
                 <Users className="w-3 h-3" />
                 {onlineUsers.length} Active Editors
             </div>

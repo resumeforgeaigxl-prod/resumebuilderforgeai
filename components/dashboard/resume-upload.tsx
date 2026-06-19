@@ -79,15 +79,15 @@ export function ResumeUpload({ onUploadSuccess, onUploadError }: ResumeUploadPro
         <div className="mb-8">
             <div
                 {...getRootProps()}
-                className={`relative group cursor-pointer rounded-2xl border-2 border-dashed transition-all p-8 text-center
-                    ${isDragActive ? 'border-blue-500 bg-blue-500/5' : 'border-white/10 hover:border-white/20 bg-white/5'}
+                className={`relative group cursor-pointer rounded-xl border-2 border-dashed transition-all p-8 text-center
+                    ${isDragActive ? 'border-[#0070F3] bg-[#0070F3]/5' : 'border-[#EBEBEB] hover:border-[#171717]/25 bg-white'}
                     ${isUploading ? 'pointer-events-none opacity-60' : ''}`}
             >
                 <input {...getInputProps()} />
 
                 <div className="flex flex-col items-center justify-center space-y-4">
-                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all
-                        ${isDragActive ? 'bg-blue-500 text-white scale-110' : 'bg-white/5 text-slate-400 group-hover:bg-white/10'}`}>
+                    <div className={`w-16 h-16 rounded-xl flex items-center justify-center transition-all border
+                        ${isDragActive ? 'bg-[#0070F3] text-white scale-110 border-[#0070F3]' : 'bg-[#FAFAFA] border-[#EBEBEB] text-[#4D4D4D] group-hover:border-[#171717] group-hover:text-[#171717]'}`}>
                         {isUploading ? (
                             <Loader2 className="w-8 h-8 animate-spin" />
                         ) : (
@@ -96,22 +96,22 @@ export function ResumeUpload({ onUploadSuccess, onUploadError }: ResumeUploadPro
                     </div>
 
                     <div className="space-y-1">
-                        <p className="text-lg font-semibold text-white">
+                        <p className="text-lg font-semibold text-[#171717]">
                             {isUploading ? 'Parsing Resume...' : 'Upload Existing Resume'}
                         </p>
-                        <p className="text-sm text-slate-400">
+                        <p className="text-sm text-[#4D4D4D]">
                             Drag and drop your PDF or DOCX file here, or click to browse
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-[#8F8F8F]">
                             Max size: 5MB (PDF or DOCX)
                         </p>
                     </div>
                 </div>
 
                 {isUploading && (
-                    <div className="absolute inset-x-0 bottom-0 h-1 bg-white/5 overflow-hidden rounded-b-2xl">
+                    <div className="absolute inset-x-0 bottom-0 h-1 bg-[#FAFAFA] border-t border-[#EBEBEB] overflow-hidden rounded-b-xl">
                         <div
-                            className="h-full bg-blue-500 transition-all duration-300 ease-out"
+                            className="h-full bg-[#0070F3] transition-all duration-300 ease-out"
                             style={{ width: `${uploadProgress}%` }}
                         />
                     </div>

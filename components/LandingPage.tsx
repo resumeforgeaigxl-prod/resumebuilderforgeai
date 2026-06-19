@@ -1,35 +1,33 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Hero from "@/components/Hero";
-const Problem = dynamic(() => import("@/components/Problem"), { ssr: true });
-const Solution = dynamic(() => import("@/components/Solution"), { ssr: true });
-const Ecosystem = dynamic(() => import("@/components/Ecosystem"), { ssr: true });
-const ForgeGrid = dynamic(() => import("@/components/ForgeGrid"), { ssr: true });
-const WhatsNew = dynamic(() => import("@/components/WhatsNew"), { ssr: true });
-const AITools = dynamic(() => import("@/components/AITools"), { ssr: false });
-const CareerPaths = dynamic(() => import("@/components/CareerPaths"), { ssr: false });
-const Workflow = dynamic(() => import("@/components/Workflow"), { ssr: false });
-const Pricing = dynamic(() => import("@/components/Pricing"), { ssr: false });
-const DashboardPreview = dynamic(() => import("@/components/DashboardPreview"), { ssr: false });
-const CTA = dynamic(() => import("@/components/CTA"), { ssr: false });
-const Footer = dynamic(() => import("@/components/Footer"), { ssr: false });
+import { DEFAULT_LOCALE } from "@/lib/constants";
+import { useEffect, useState } from "react";
+
+/* ── Eagerly loaded (above the fold) ── */
+import Navbar from "@/components/landing-v2/Navbar";
+import HeroSection from "@/components/landing-v2/HeroSection";
+
+/* ── Lazily loaded (below the fold) ── */
+const TrustBar = dynamic(() => import("@/components/landing-v2/TrustBar"), { ssr: true });
+const FeaturesGrid = dynamic(() => import("@/components/landing-v2/FeaturesGrid"), { ssr: true });
+const WorkflowTimeline = dynamic(() => import("@/components/landing-v2/WorkflowTimeline"), { ssr: true });
+const TemplatesShowcase = dynamic(() => import("@/components/landing-v2/TemplatesShowcase"), { ssr: true });
+const ATSDashboard = dynamic(() => import("@/components/landing-v2/ATSDashboard"), { ssr: false });
+const PricingSection = dynamic(() => import("@/components/landing-v2/PricingSection"), { ssr: false });
+const FinalCTA = dynamic(() => import("@/components/landing-v2/FinalCTA"), { ssr: false });
+const FooterSection = dynamic(() => import("@/components/landing-v2/FooterSection"), { ssr: false });
 const CookieBanner = dynamic(() => import("@/components/ui/CookieBanner"), { ssr: false });
 const InstallBanner = dynamic(() => import("@/components/pwa/InstallBanner"), { ssr: false });
 
-import { DEFAULT_LOCALE } from "@/lib/constants";
-import { BlogPost } from "@/lib/seo-service";
-import { EtheralShadow } from "@/components/ui/etheral-shadow";
-import { useEffect, useState } from "react";
-
 type LandingPageProps = {
   locale?: string;
-  posts?: BlogPost[];
+  posts?: any;
 };
 
 export default function LandingPage({
   locale = DEFAULT_LOCALE,
-  posts = [],
+  posts,
 }: LandingPageProps) {
   const [showBanners, setShowBanners] = useState(false);
 
@@ -40,41 +38,22 @@ export default function LandingPage({
   }, []);
 
   return (
-    <div className="relative overflow-hidden bg-[#080B16]">
-      {/* Ethereal Shadow — animated hero background */}
-      <div className="pointer-events-none absolute inset-0 h-[110vh]">
-        <EtheralShadow
-          color="rgba(0, 212, 160, 0.3)"
-          animation={{ scale: 60, speed: 40 }}
-          noise={{ opacity: 0.4, scale: 1.0 }}
-          sizing="fill"
-          style={{ opacity: 0.6 }}
-        />
-      </div>
+    <div className="landing-light">
+      <Navbar locale={locale} />
 
-      {/* Subtle grid overlay */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:120px_120px] opacity-15 [mask-image:radial-gradient(circle_at_center,black,transparent_85%)]" />
-
-      {/* Bottom fade to solid bg */}
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-[40vh] bg-gradient-to-t from-[#080B16] to-transparent" />
-
-      <main className="relative z-10">
-        <Hero locale={locale} />
-        <Problem />
-        <Solution />
-        <Ecosystem />
-        <ForgeGrid locale={locale} />
-        <WhatsNew locale={locale} posts={posts} />
-        <AITools />
-        <CareerPaths />
-        <Workflow />
-        <Pricing locale={locale} />
-        <DashboardPreview />
-        <CTA locale={locale} />
+      <main>
+        <HeroSection locale={locale} />
+        <TrustBar />
+        <FeaturesGrid />
+        <WorkflowTimeline />
+        <TemplatesShowcase />
+        <ATSDashboard />
+        <PricingSection locale={locale} />
+        <FinalCTA locale={locale} />
       </main>
 
-      <Footer locale={locale} />
-      
+      <FooterSection locale={locale} />
+
       {showBanners && (
         <>
           <CookieBanner />

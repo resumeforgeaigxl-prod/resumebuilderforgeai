@@ -65,19 +65,19 @@ function NetworkForgeLogic() {
     }
 
     return (
-        <div className="space-y-12 max-w-5xl mx-auto pb-24">
+        <div className="space-y-12 max-w-5xl mx-auto pb-24 text-[#171717] animate-premium-in">
             {/* Standardized Header */}
-            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E2A42] pb-8 mb-12">
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#EBEBEB] pb-8 mb-12">
                 <div>
-                    <div className="flex items-center gap-2 text-[#00D4A0] font-bold tracking-widest text-[10px] uppercase mb-4">
-                        <Share2 className="w-3.5 h-3.5" /> Relationship Intelligence
+                    <div className="flex items-center gap-2 text-[#8F8F8F] font-bold tracking-wider text-[10px] uppercase mb-3 font-mono">
+                        <Share2 className="w-3.5 h-3.5 text-[#171717]" /> Relationship Intelligence
                     </div>
-                    <h1 className="text-4xl font-bold tracking-tighter text-white uppercase">NetworkForge</h1>
-                    <p className="text-slate-400 mt-2 text-lg">Build a high-authority professional network with AI-optimized outreach and profile SEO.</p>
+                    <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-[#171717]">NetworkForge</h1>
+                    <p className="text-[#4D4D4D] mt-2 text-sm md:text-base">Build a high-authority professional network with AI-optimized outreach and profile SEO.</p>
                 </div>
 
-                <div className="flex items-center gap-4">
-                    <Button onClick={generateOutreach} disabled={isGenerating} className="px-6 h-12 rounded-xl bg-[#00D4A0] hover:bg-[#00D4A0]/90 text-[#080B16] font-bold text-sm shadow-lg shadow-[#00D4A0]/10 transition-all">
+                <div className="flex items-center gap-3">
+                    <Button onClick={generateOutreach} disabled={isGenerating} className="px-5 h-10 rounded-md bg-[#171717] hover:bg-[#333333] text-white font-semibold text-xs uppercase tracking-wider transition-all">
                         {isGenerating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Linkedin className="w-4 h-4 mr-2" />}
                         Scan LinkedIn Profile
                     </Button>
@@ -86,29 +86,29 @@ function NetworkForgeLogic() {
 
             {/* AI Generator Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-1 p-6 rounded-xl border border-[#1E2A42] bg-[#0D1220]/60 space-y-6">
+                <div className="lg:col-span-1 p-6 rounded-xl border border-[#EBEBEB] bg-[#FFFFFF] space-y-6 shadow-sm">
                     <div className="space-y-2">
-                        <h2 className="text-base font-bold text-white flex items-center gap-2">
-                            <Target className="w-4 h-4 text-[#7C5CFC]" />
+                        <h2 className="text-sm font-semibold text-[#171717] flex items-center gap-2">
+                            <Target className="w-4 h-4 text-[#171717]" />
                             Outreach Engine
                         </h2>
-                        <p className="text-xs text-[#7A8BA8]">Generate hyper-personalized messages for your target network.</p>
+                        <p className="text-xs text-[#4D4D4D]">Generate hyper-personalized messages for your target network.</p>
                     </div>
 
                     <div className="space-y-4">
-                        <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">Outreach Signal</div>
+                        <div className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider pl-1 font-mono">Outreach Signal</div>
                         <div className="grid grid-cols-1 gap-2">
                             {['Recruiter Outreach', 'Referral Request', 'Alumni Connection', 'Mentorship Ask'].map(target => (
                                 <button
                                     key={target}
                                     onClick={() => setSelectedTarget(target)}
-                                    className={`px-4 py-3 rounded-xl border text-sm font-bold transition-all text-left flex items-center justify-between group ${selectedTarget === target
-                                        ? 'bg-blue-600/10 border-blue-500/50 text-blue-400'
-                                        : 'bg-white/5 border-white/5 text-slate-400 hover:bg-white/10'
+                                    className={`px-4 py-3 rounded-lg border text-xs font-semibold transition-all text-left flex items-center justify-between group ${selectedTarget === target
+                                        ? 'bg-[#171717]/5 border-[#171717] text-[#171717]'
+                                        : 'bg-[#FFFFFF] border-[#EBEBEB] text-[#4D4D4D] hover:bg-[#FAFAFA]'
                                         }`}
                                 >
                                     {target}
-                                    {selectedTarget === target && <CheckCircle2 className="w-4 h-4" />}
+                                    {selectedTarget === target && <CheckCircle2 className="w-4 h-4 text-[#171717]" />}
                                 </button>
                             ))}
                         </div>
@@ -117,7 +117,7 @@ function NetworkForgeLogic() {
                     <Button
                         onClick={generateOutreach}
                         disabled={isGenerating}
-                        className="w-full h-11 rounded-xl bg-[#00D4A0] hover:bg-[#00D4A0]/90 text-[#080B16] font-bold text-sm"
+                        className="w-full h-10 rounded-md bg-[#171717] hover:bg-[#333333] text-white font-semibold text-xs uppercase tracking-wider transition-all"
                     >
                         {isGenerating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
                         Generate Outreach
@@ -125,42 +125,42 @@ function NetworkForgeLogic() {
                 </div>
 
                 <div className="lg:col-span-2">
-                    <div className="h-full flex flex-col items-center justify-center p-12 text-center rounded-2xl border border-dashed border-[#1E2A42] bg-transparent">
-                        <div className="p-4 rounded-full bg-white/5 text-[#4A5568] mb-4">
-                            <Globe className="w-8 h-8" />
+                    <div className="h-full min-h-[320px] flex flex-col items-center justify-center p-12 text-center rounded-xl border border-dashed border-[#EBEBEB] bg-[#FAFAFA]">
+                        <div className="p-4 rounded-full bg-[#FFFFFF] border border-[#EBEBEB] text-[#8F8F8F] mb-4 shadow-sm">
+                            <Globe className="w-6 h-6 text-[#171717]" />
                         </div>
-                        <h3 className="text-base font-bold text-[#7A8BA8] mb-1">No Active Campaign</h3>
-                        <p className="text-sm text-[#4A5568] max-w-sm">Initialize the Outreach Engine to generate high-conversion networking signals.</p>
+                        <h3 className="text-sm font-semibold text-[#171717] mb-1">No Active Campaign</h3>
+                        <p className="text-xs text-[#8F8F8F] max-w-xs leading-relaxed font-medium">Initialize the Outreach Engine to generate high-conversion networking signals.</p>
                     </div>
                 </div>
             </div>
 
             {/* Preparation Modules */}
             <div className="space-y-6">
-                <div className="flex items-center justify-between border-b border-[#1E2A42] pb-4">
-                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                        <Filter className="w-5 h-5 text-[#7C5CFC]" />
+                <div className="flex items-center justify-between border-b border-[#EBEBEB] pb-4">
+                    <h2 className="text-sm font-semibold text-[#171717] flex items-center gap-2">
+                        <Filter className="w-4.5 h-4.5 text-[#171717]" />
                         Growth Tracks
                     </h2>
-                    <Badge variant="secondary" className="bg-[#0D1220] text-[#4A5568] px-3 py-1 font-semibold text-[10px]">NETWORKING MODULES</Badge>
+                    <Badge variant="outline" className="border-[#EBEBEB] bg-[#FFFFFF] text-[#8F8F8F] px-3 py-1 font-bold text-[9px] uppercase font-mono">NETWORKING MODULES</Badge>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     {NETWORK_SECTIONS.map((section) => (
                         <div
                             key={section.id}
-                            className="p-6 rounded-xl border border-[#1E2A42] bg-[#0D1220]/60 hover:border-[#00D4A0]/20 transition-all group h-full flex flex-col cursor-pointer"
+                            className="p-6 rounded-xl border border-[#EBEBEB] bg-[#FFFFFF] hover:border-[#171717]/25 transition-all group h-full flex flex-col cursor-pointer shadow-sm"
                         >
-                            <div className="mb-4 p-3 rounded-xl bg-white/5 w-fit text-[#00D4A0] group-hover:scale-105 transition-transform">
+                            <div className="mb-4 p-3 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] w-fit text-[#171717] group-hover:scale-105 transition-transform">
                                 {section.icon}
                             </div>
-                            <h3 className="text-base font-bold text-white mb-2">
+                            <h3 className="text-sm font-semibold text-[#171717] mb-2">
                                 {section.title}
                             </h3>
-                            <p className="text-sm text-[#7A8BA8] leading-relaxed mb-6">
+                            <p className="text-xs text-[#4D4D4D] leading-relaxed mb-6">
                                 {section.description}
                             </p>
-                            <div className="mt-auto flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[#00D4A0] group-hover:gap-3 transition-all">
+                            <div className="mt-auto flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[#171717] group-hover:gap-3 transition-all">
                                 Initialize Track <ChevronRight className="w-3.5 h-3.5" />
                             </div>
                         </div>
@@ -169,23 +169,23 @@ function NetworkForgeLogic() {
             </div>
 
             {/* LinkedIn Strategy Section */}
-            <section className="p-8 rounded-2xl bg-[#0D1220]/60 border border-[#1E2A42]">
+            <section className="p-8 rounded-xl bg-[#FFFFFF] border border-[#EBEBEB] shadow-sm">
                 <div className="max-w-3xl">
-                    <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <ExternalLink className="w-5 h-5 text-[#7C5CFC]" />
+                    <h2 className="text-sm font-semibold text-[#171717] mb-4 flex items-center gap-2">
+                        <ExternalLink className="w-4.5 h-4.5 text-[#171717]" />
                         The Referral Advantage
                     </h2>
-                    <p className="text-[#7A8BA8] text-sm leading-relaxed mb-6">
+                    <p className="text-[#4D4D4D] text-xs leading-relaxed mb-6">
                         Statistically, 85% of jobs are filled through networking. A single high-quality referral is worth 100 cold applications. NetworkForge helps you bridge the gap between "Applying" and "Landing."
                     </p>
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="p-5 rounded-xl border border-[#1E2A42] bg-[#080B16]">
-                            <div className="text-[10px] text-[#4A5568] uppercase tracking-wider font-semibold mb-1">Outreach Conversion</div>
-                            <div className="text-xl font-bold text-white">22.5%</div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="p-5 rounded-xl border border-[#EBEBEB] bg-[#FAFAFA]">
+                            <div className="text-[9px] text-[#8F8F8F] uppercase tracking-wider font-bold font-mono mb-1">Outreach Conversion</div>
+                            <div className="text-xl font-bold text-[#171717]">22.5%</div>
                         </div>
-                        <div className="p-5 rounded-xl border border-[#1E2A42] bg-[#080B16]">
-                            <div className="text-[10px] text-[#4A5568] uppercase tracking-wider font-semibold mb-1">LinkedIn Visibility</div>
-                            <div className="text-xl font-bold text-[#7C5CFC]">+340%</div>
+                        <div className="p-5 rounded-xl border border-[#EBEBEB] bg-[#FAFAFA]">
+                            <div className="text-[9px] text-[#8F8F8F] uppercase tracking-wider font-bold font-mono mb-1">LinkedIn Visibility</div>
+                            <div className="text-xl font-bold text-[#171717]">+340%</div>
                         </div>
                     </div>
                 </div>
@@ -197,8 +197,8 @@ function NetworkForgeLogic() {
 export default function NetworkForgeApp() {
     return (
         <Suspense fallback={
-            <div className="flex items-center justify-center min-h-screen bg-[#070710]">
-                <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+            <div className="flex items-center justify-center min-h-screen bg-[#FAFAFA]">
+                <Loader2 className="w-12 h-12 text-[#171717] animate-spin" />
             </div>
         }>
             <NetworkForgeLogic />

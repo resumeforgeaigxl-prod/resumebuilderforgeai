@@ -65,13 +65,28 @@ const config: Config = {
         "glow": {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.5" },
-        }
+        },
+        "float-gentle": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
+        "fade-up": {
+          "0%": { opacity: "0", transform: "translateY(20px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "blur-reveal": {
+          "0%": { opacity: "0", filter: "blur(4px)" },
+          "100%": { opacity: "1", filter: "blur(0px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.5s ease-out forwards",
         "glow": "glow 2s ease-in-out infinite",
+        "float-gentle": "float-gentle 5s ease-in-out infinite",
+        "fade-up": "fade-up 0.6s cubic-bezier(0.16,1,0.3,1) forwards",
+        "blur-reveal": "blur-reveal 0.5s cubic-bezier(0.16,1,0.3,1) forwards",
       },
     },
   },

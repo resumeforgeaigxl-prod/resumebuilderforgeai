@@ -61,29 +61,29 @@ export function VersionHistory({ resumeId, onRestore }: Props) {
         <div className="mb-6">
             <button
                 onClick={() => setOpen(!open)}
-                className="flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-slate-200 transition-colors"
+                className="flex items-center gap-2 text-sm font-medium text-[#8F8F8F] hover:text-[#171717] transition-colors"
             >
                 <History className="w-4 h-4" /> Version History
             </button>
 
             {open && (
-                <div className="mt-3 p-4 bg-black/20 border border-white/5 rounded-xl space-y-3">
+                <div className="mt-3 p-4 bg-[#FAFAFA] border border-[#EBEBEB] rounded-lg space-y-3">
                     {loading ? (
-                        <div className="flex justify-center p-4"><Loader2 className="w-5 h-5 animate-spin text-slate-500" /></div>
+                        <div className="flex justify-center p-4"><Loader2 className="w-5 h-5 animate-spin text-[#8F8F8F]" /></div>
                     ) : versions.length === 0 ? (
-                        <p className="text-xs text-slate-500 text-center py-2">No previous versions saved yet. Versions are auto-saved occasionally.</p>
+                        <p className="text-xs text-[#8F8F8F] text-center py-2">No previous versions saved yet. Versions are auto-saved occasionally.</p>
                     ) : (
                         <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                             {versions.map(v => (
-                                <div key={v.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 bg-white/5 hover:bg-white/10 rounded-lg transition-colors border border-transparent hover:border-white/10">
+                                <div key={v.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 bg-[#FFFFFF] hover:bg-[#FAFAFA] rounded-md transition-colors border border-[#EBEBEB] hover:border-[#171717]/25">
                                     <div>
-                                        <p className="text-sm font-bold text-slate-300">Version {v.version_number}</p>
-                                        <p className="text-xs text-slate-500">{new Date(v.created_at).toLocaleString()}</p>
+                                        <p className="text-sm font-bold text-[#171717]">Version {v.version_number}</p>
+                                        <p className="text-xs text-[#8F8F8F]">{new Date(v.created_at).toLocaleString()}</p>
                                     </div>
                                     <button
                                         onClick={() => restoreVersion(v.id)}
                                         disabled={restoringId === v.id}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#0070f3] border border-blue-100 text-xs font-semibold rounded-md transition-colors disabled:opacity-50"
                                     >
                                         {restoringId === v.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <RotateCcw className="w-3 h-3" />}
                                         Restore

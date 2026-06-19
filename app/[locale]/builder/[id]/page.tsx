@@ -34,6 +34,7 @@ type Step = 'edit' | 'template' | 'optimize' | 'download';
 export default function BuilderPage() {
     const params = useParams();
     const id = params?.id as string;
+    const locale = (params?.locale as string) || 'en-in';
     const router = useRouter();
     const supabase = createClient();
 
@@ -147,9 +148,12 @@ export default function BuilderPage() {
                 experience: Array.isArray(rData?.experience) ? rData.experience : [],
                 projects: Array.isArray(rData?.projects) ? rData.projects : [],
                 education: Array.isArray(rData?.education) ? rData.education : [],
-                skills: (rData?.skills && typeof rData.skills === 'object' && !Array.isArray(rData.skills)) 
-                    ? rData.skills 
-                    : { languages: [], frameworks: [], tools: [], other: [] },
+                skills: {
+                    languages: Array.isArray(rData?.skills?.languages) ? rData.skills.languages : [],
+                    frameworks: Array.isArray(rData?.skills?.frameworks) ? rData.skills.frameworks : [],
+                    tools: Array.isArray(rData?.skills?.tools) ? rData.skills.tools : [],
+                    other: Array.isArray(rData?.skills?.other) ? rData.skills.other : []
+                },
                 certifications: Array.isArray(rData?.certifications) ? rData.certifications : []
             };
 
@@ -249,7 +253,12 @@ export default function BuilderPage() {
                     experience: Array.isArray(raw.experience) ? raw.experience : (resumeData.experience || []),
                     projects: Array.isArray(raw.projects) ? raw.projects : (resumeData.projects || []),
                     education: Array.isArray(raw.education) ? raw.education : (resumeData.education || []),
-                    skills: (raw.skills && typeof raw.skills === 'object' && !Array.isArray(raw.skills)) ? (raw.skills as ResumeSkills) : (resumeData.skills || { languages: [], frameworks: [], tools: [], other: [] }),
+                    skills: {
+                        languages: Array.isArray(raw.skills?.languages) ? raw.skills.languages : (resumeData.skills?.languages || []),
+                        frameworks: Array.isArray(raw.skills?.frameworks) ? raw.skills.frameworks : (resumeData.skills?.frameworks || []),
+                        tools: Array.isArray(raw.skills?.tools) ? raw.skills.tools : (resumeData.skills?.tools || []),
+                        other: Array.isArray(raw.skills?.other) ? raw.skills.other : (resumeData.skills?.other || []),
+                    },
                 };
                 setOriginalResumeData(JSON.parse(JSON.stringify(resumeData)));
                 setOptimizedResumeData(normalized);
@@ -383,14 +392,14 @@ export default function BuilderPage() {
     const hasChanges = initialData !== JSON.stringify(resumeData);
     const isResumeEmpty = !resumeData?.name?.trim() && !resumeData?.experience?.length;
 
-    if (authLoading || loading) return <div className="flex items-center justify-center min-h-screen"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /></div>;
+    if (authLoading || loading) return <div className="flex items-center justify-center min-h-screen bg-[#FAFAFA]"><Loader2 className="w-8 h-8 animate-spin text-[#171717]" /></div>;
     if (isNotFound) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-[#070710] text-center p-4">
-                <AlertCircle className="w-16 h-16 text-red-500 mb-6" />
-                <h1 className="text-3xl font-bold text-white mb-2">Resume Not Found</h1>
-                <p className="text-slate-400 mb-8 max-w-md">The resume you are looking for does not exist or you do not have permission to view it.</p>
-                <Link href="/dashboard" className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-all font-medium">
+            <div className="flex flex-col items-center justify-center min-h-screen bg-[#FAFAFA] text-center p-4">
+                <AlertCircle className="w-12 h-12 text-red-600 mb-6" />
+                <h1 className="text-2xl font-semibold tracking-tight text-[#171717] mb-2">Resume Not Found</h1>
+                <p className="text-[#8F8F8F] mb-8 max-w-sm text-xs font-medium">The resume you are looking for does not exist or you do not have permission to view it.</p>
+                <Link href="/dashboard" className="px-5 py-2.5 bg-[#171717] hover:bg-[#333333] text-white rounded-md transition-all font-semibold text-xs uppercase tracking-wider">
                     Return to Dashboard
                 </Link>
             </div>
@@ -402,103 +411,141 @@ export default function BuilderPage() {
 
     return (
         <FeatureGate task="resume">
-            <div className="min-h-screen bg-[#070710] text-slate-200 pt-20">
-                {/* ── Header ── */}
-                <header className="sticky top-0 z-20 bg-slate-900/80 backdrop-blur-md border-b border-white/5 px-4 sm:px-6 py-3">
-                    <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-between sm:justify-start">
-                            <Link href="/dashboard" className="p-2 hover:bg-white/5 rounded-xl transition-colors shrink-0"><ArrowLeft className="w-5 h-5" /></Link>
-                            <input value={title} onChange={e => setTitle(e.target.value)}
-                                className="bg-transparent border-none text-base sm:text-lg font-bold focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-2 w-full sm:w-64" />
+            <div className="min-h-screen bg-[#FAFAFA] text-[#171717] pt-0">
+                {/* ── Top Navigation Bar (Not sticky, transparent/borderless) ── */}
+                <div className={`mx-auto px-4 sm:px-6 pt-6 pb-2 transition-all duration-500 ${preview_enabled ? 'max-w-full' : 'max-w-7xl'}`}>
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 relative w-full">
+                        {/* Left Side: Back Arrow, Title, Saved, Collaborators */}
+                        <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start shrink-0">
+                            <div className="flex items-center gap-1">
+                                <Link href="/dashboard" className="p-2 hover:bg-[#FFFFFF] rounded-md border border-[#EBEBEB] text-[#8F8F8F] hover:text-[#171717] transition-all bg-[#FFFFFF]/50 shrink-0">
+                                    <ArrowLeft className="w-4 h-4" />
+                                </Link>
+                                <input value={title} onChange={e => setTitle(e.target.value)}
+                                    className="bg-transparent border-none text-base sm:text-lg font-semibold text-[#171717] focus:outline-none focus:ring-0 rounded pl-1.5 pr-2 w-[140px] sm:w-[170px]" />
+                                {!hasChanges && (
+                                    <span className="text-xs text-[#8F8F8F] font-medium hidden md:inline shrink-0 flex items-center gap-1 select-none bg-emerald-50 border border-emerald-100 rounded-full px-2 py-0.5">
+                                        <CheckCircle className="w-3.5 h-3.5 text-emerald-600" /> Saved
+                                    </span>
+                                )}
+                            </div>
                             <Collaborators resumeId={id} currentUserId={currentUserId} />
                         </div>
-                        <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 w-full sm:w-auto">
-                            <ResumeIntelligence resumeId={id} resumeData={resumeData} />
-                            <button onClick={() => setShowOptimizer(true)} disabled={isResumeEmpty}
-                                className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-700 to-blue-700 hover:from-purple-600 hover:to-blue-600 text-white rounded-lg text-sm font-medium disabled:opacity-50">
-                                <Sparkles className="w-4 h-4" /> AI Optimize
-                            </button>
-                            <button onClick={handleSave} disabled={saving || !hasChanges}
-                                className="flex items-center gap-2 px-3 py-2 bg-white text-black hover:bg-gray-100 rounded-lg text-sm font-medium disabled:opacity-50">
-                                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                                {hasChanges ? 'Save' : 'Saved'}
-                            </button>
-                            {step === 'download'
-                                ? (
-                                    <div className="relative group">
-                                        <button onClick={handleDownload} disabled={downloading}
-                                            className={`flex items-center gap-2 px-6 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium transition-all ${(userAccess === false && !couponApplied) ? 'blur-[3px] opacity-70 cursor-not-allowed group-hover:blur-sm' : 'hover:bg-emerald-500 disabled:opacity-50'}`}>
-                                            {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} Download PDF
+
+                        {/* Middle: Step Progress Pill (Hidden on mobile/tablet, centered absolutely on desktop) */}
+                        <div className="hidden lg:flex absolute left-1/2 transform -translate-x-1/2 z-0">
+                            <div className="flex items-center bg-[#FFFFFF] border border-[#EBEBEB] rounded-full p-0.5 shadow-sm">
+                                {(['edit', 'template', 'optimize', 'download'] as Step[]).map((s, i) => {
+                                    const labels = ['Fill', 'Template', 'Optimize', 'Download'];
+                                    const isActive = s === step;
+                                    return (
+                                        <button
+                                            key={s}
+                                            onClick={() => setStep(s)}
+                                            className={`px-3.5 py-1 rounded-full text-xs font-semibold transition-all ${isActive ? 'bg-[#171717] text-white shadow-sm' : 'text-[#8F8F8F] hover:text-[#171717]'}`}
+                                        >
+                                            {labels[i]}
                                         </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
 
-                                        {(userAccess === false && !couponApplied) && (
-                                            <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900/80 rounded-lg pointer-events-none">
-                                                <span className="text-xs font-bold text-emerald-400">Upgrade to Pro</span>
-                                                <span className="text-[10px] text-slate-300 leading-tight">For Clean PDF</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : (
+                        {/* Right Side: Actions & Preview toggle */}
+                        <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 w-full sm:w-auto shrink-0 z-10">
+                            {/* Save Button (Only when unsaved changes exist) */}
+                            {hasChanges && (
+                                <button onClick={handleSave} disabled={saving}
+                                    className="flex items-center gap-2 px-3 py-1.5 bg-[#FFFFFF] border border-[#EBEBEB] text-[#171717] hover:bg-[#FAFAFA] rounded-md text-xs font-semibold shadow-sm transition-all disabled:opacity-50 animate-in fade-in zoom-in-95 duration-200">
+                                    {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                                    <span>Save</span>
+                                </button>
+                            )}
+
+                            {/* Step-specific Actions */}
+                            {step === 'edit' && (
+                                <>
+                                    <ResumeIntelligence resumeId={id} resumeData={resumeData} />
                                     <button onClick={() => setStep('template')} disabled={isResumeEmpty}
-                                        className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium disabled:opacity-50">
-                                        <Layout className="w-4 h-4" /> Choose Template
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-[#171717] hover:bg-[#333333] text-white rounded-md text-xs font-semibold shadow-sm transition-all disabled:opacity-50">
+                                        <Layout className="w-3.5 h-3.5" />
+                                        <span className="hidden lg:inline">Choose Template</span>
+                                        <span className="inline lg:hidden">Templates</span>
                                     </button>
-                                )}
+                                </>
+                            )}
 
-                            <div className="h-6 w-px bg-white/10 mx-1 hidden sm:block" />
+                            {step === 'template' && (
+                                <button onClick={() => setStep('optimize')} disabled={isResumeEmpty}
+                                    className="flex items-center gap-2 px-3 py-1.5 bg-[#171717] hover:bg-[#333333] text-white rounded-md text-xs font-semibold shadow-sm transition-all disabled:opacity-50 animate-in fade-in duration-200">
+                                    <Sparkles className="w-3.5 h-3.5" />
+                                    <span>Next: AI Optimize</span>
+                                </button>
+                            )}
 
+                            {step === 'optimize' && (
+                                <>
+                                    <button onClick={() => setShowOptimizer(true)} disabled={isResumeEmpty}
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-[#FFFFFF] border border-[#EBEBEB] text-[#171717] hover:bg-[#FAFAFA] rounded-md text-xs font-semibold shadow-sm transition-all disabled:opacity-50 animate-in fade-in duration-200">
+                                        <Sparkles className="w-3.5 h-3.5 text-[#0070F3]" />
+                                        <span>AI Optimize</span>
+                                    </button>
+                                    <button onClick={() => setStep('download')} disabled={isResumeEmpty}
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-[#171717] hover:bg-[#333333] text-white rounded-md text-xs font-semibold shadow-sm transition-all disabled:opacity-50 animate-in fade-in duration-200">
+                                        <Download className="w-3.5 h-3.5" />
+                                        <span>Next: Download</span>
+                                    </button>
+                                </>
+                            )}
+
+                            {step === 'download' && (
+                                <div className="flex flex-col items-start gap-1 animate-in fade-in duration-200">
+                                    <button onClick={handleDownload} disabled={downloading}
+                                        className="flex items-center gap-2 px-5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-semibold shadow-sm transition-all disabled:opacity-50">
+                                        {downloading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />} Download PDF
+                                    </button>
+                                    {(userAccess === false && !couponApplied) && (
+                                        <span className="text-[9px] text-[#8F8F8F] leading-tight mt-1">
+                                            Free download with brand footer. <Link href={`/${locale}/dashboard/billing?plan=monthly`} className="text-[#0070F3] hover:underline font-semibold">Remove footer</Link>
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="h-5 w-px bg-[#EBEBEB] mx-2 hidden sm:block" />
+
+                            {/* Preview Toggle Button (Always visible) */}
                             <button
                                 onClick={() => setPreviewEnabled(!previewEnabled)}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${previewEnabled ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' : 'bg-white/5 text-slate-400 border border-white/5 hover:bg-white/10'}`}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${previewEnabled ? 'bg-[#171717] text-white border border-[#171717]' : 'bg-[#FFFFFF] text-[#4D4D4D] border border-[#EBEBEB] hover:bg-[#FAFAFA]'}`}
                             >
-                                {previewEnabled ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                                <span className="hidden sm:inline">{previewEnabled ? 'Preview On' : 'Preview Off'}</span>
+                                {previewEnabled ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                                <span>{previewEnabled ? 'Preview On' : 'Preview Off'}</span>
                             </button>
                         </div>
                     </div>
-
-                    {/* Progress Bar */}
-                    <div className="max-w-7xl mx-auto mt-2 flex items-center gap-1.5 text-xs overflow-x-auto">
-                        {(['edit', 'template', 'optimize', 'download'] as Step[]).map((s, i) => {
-                            const labels = ['1. Fill Resume', '2. Template', '3. AI Optimize', '4. Download'];
-                            const idx = ['edit', 'template', 'optimize', 'download'].indexOf(step);
-                            const isActive = s === step, isDone = idx > i;
-                            return (
-                                <button
-                                    key={s}
-                                    onClick={() => setStep(s)}
-                                    className="flex items-center gap-1.5 shrink-0 hover:bg-white/5 rounded-full transition-all px-1 py-0.5"
-                                >
-                                    <span className={`px-2.5 py-1 rounded-full font-medium whitespace-nowrap ${isActive ? 'bg-blue-600 text-white' : isDone ? 'bg-emerald-700/40 text-emerald-400' : 'text-slate-600'}`}>
-                                        {isDone ? '✓ ' : ''}{labels[i]}
-                                    </span>
-                                    {i < 3 && <ChevronRight className="w-3 h-3 text-slate-700" />}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </header>
+                </div>
 
                 {/* ── Template Selection ── */}
                 {step === 'template' && (
                     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12">
-                        <h2 className="text-3xl font-bold text-center mb-2">Choose Your ATS Template</h2>
-                        <p className="text-slate-400 text-center mb-10 text-sm">All templates are single-column, black & white, print-optimised documents</p>
+                        <h2 className="text-3xl font-semibold tracking-tight text-[#171717] text-center mb-2">Choose Your ATS Template</h2>
+                        <p className="text-[#4D4D4D] text-center mb-10 text-xs font-medium">All templates are single-column, black & white, print-optimised documents</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             {ALL_TEMPLATES.map(t => (
                                 <button key={t.id} onClick={() => handleSelectTemplate(t.id)}
-                                    className={`group p-5 rounded-2xl border text-left transition-all hover:scale-[1.02] ${selectedTemplate === t.id ? 'border-blue-500 bg-blue-600/10' : 'border-white/10 bg-white/5 hover:border-white/30'}`}>
-                                    <div className="w-full h-24 rounded-xl bg-gradient-to-br from-slate-700 to-slate-800 mb-4 flex items-center justify-center border border-white/5">
-                                        <Layout className="w-8 h-8 text-white/30" />
+                                    className={`group p-5 rounded-xl border text-left transition-all shadow-sm ${selectedTemplate === t.id ? 'border-[#171717] bg-[#171717]/5 text-[#171717]' : 'border-[#EBEBEB] bg-[#FFFFFF] hover:border-[#171717]/25 hover:bg-[#FAFAFA]/50'}`}>
+                                    <div className="w-full h-24 rounded-lg bg-[#FAFAFA] mb-4 flex items-center justify-center border border-[#EBEBEB]">
+                                        <Layout className="w-6 h-6 text-[#8F8F8F]" />
                                     </div>
-                                    <span className="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">{t.badge}</span>
-                                    <p className="font-semibold mt-2 text-sm">{t.name}</p>
-                                    <p className="text-xs text-slate-500 mt-1">{t.desc}</p>
+                                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full uppercase font-mono">{t.badge}</span>
+                                    <p className="font-semibold mt-2 text-sm text-[#171717]">{t.name}</p>
+                                    <p className="text-xs text-[#8F8F8F] mt-1">{t.desc}</p>
                                 </button>
                             ))}
                         </div>
                         <div className="text-center mt-8">
-                            <button onClick={() => setStep('edit')} className="text-slate-500 hover:text-slate-300 text-sm">← Back to editing</button>
+                            <button onClick={() => setStep('edit')} className="text-[#8F8F8F] hover:text-[#171717] text-xs font-semibold uppercase tracking-wider">← Back to editing</button>
                         </div>
                     </div>
                 )}
@@ -508,21 +555,21 @@ export default function BuilderPage() {
                     <main className={`mx-auto px-4 sm:px-6 py-8 transition-all duration-500 ${preview_enabled ? 'max-w-full grid grid-cols-1 lg:grid-cols-2 gap-8' : 'max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-8'}`}>
                         <div className={`${preview_enabled ? 'lg:col-span-1' : 'lg:col-span-8'} space-y-6 pb-24 w-full overflow-hidden`}>
                             {isReviewing && (
-                                <div className="p-4 bg-blue-600/10 border border-blue-500/30 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                                <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+                                        <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
                                             <Sparkles className="w-5 h-5" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold text-white">Reviewing AI Changes</p>
-                                            <p className="text-xs text-blue-300">Manually edit the optimized content or apply it to save.</p>
+                                            <p className="text-sm font-bold text-[#171717]">Reviewing AI Changes</p>
+                                            <p className="text-xs text-blue-700">Manually edit the optimized content or apply it to save.</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2 w-full sm:w-auto">
-                                        <button onClick={handleRevertToOriginal} className="flex-1 sm:flex-none px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-xs font-bold rounded-xl border border-white/10 transition-all">
+                                        <button onClick={handleRevertToOriginal} className="flex-1 sm:flex-none px-4 py-2 bg-white hover:bg-slate-50 text-[#171717] text-xs font-semibold rounded-md border border-slate-200 transition-all">
                                             Revert
                                         </button>
-                                        <button onClick={handleAcceptOptimized} className="flex-1 sm:flex-none px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-blue-600/20">
+                                        <button onClick={handleAcceptOptimized} className="flex-1 sm:flex-none px-4 py-2 bg-[#171717] hover:bg-[#333333] text-white text-xs font-bold rounded-md transition-all shadow-sm">
                                             Accept & Save
                                         </button>
                                     </div>
@@ -535,6 +582,12 @@ export default function BuilderPage() {
                                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                     const mappedData: ResumeData = {
                                         ...parsed,
+                                        skills: {
+                                            languages: Array.isArray(parsed?.skills?.languages) ? parsed.skills.languages : [],
+                                            frameworks: Array.isArray(parsed?.skills?.frameworks) ? parsed.skills.frameworks : [],
+                                            tools: Array.isArray(parsed?.skills?.tools) ? parsed.skills.tools : [],
+                                            other: Array.isArray(parsed?.skills?.other) ? parsed.skills.other : []
+                                        },
                                         // Inject IDs for local state management (Builder needs these for keys/deletion)
                                         experience: (parsed.experience || []).map((exp: ResumeExperience) => ({ ...exp, id: uid() })),
                                         projects: (parsed.projects || []).map((proj: ResumeProject) => ({ ...proj, id: uid() })),
@@ -569,7 +622,7 @@ export default function BuilderPage() {
                                     <button
                                         onClick={handleGenerateSummary}
                                         disabled={isGeneratingSummary || !rd.experience?.length}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 rounded-lg text-xs font-bold transition-all disabled:opacity-50"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-550/10 hover:bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-100 rounded-md text-xs font-bold transition-all disabled:opacity-50"
                                     >
                                         {isGeneratingSummary ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                                         AI Generate
@@ -577,7 +630,7 @@ export default function BuilderPage() {
                                 }
                             >
                                 <textarea value={rd.summary} onChange={e => setResumeData({ ...rd, summary: e.target.value })}
-                                    className="w-full h-28 bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-2 focus:ring-blue-500/50 outline-none resize-none text-sm" placeholder="Brief professional summary..." />
+                                    className="w-full h-28 bg-[#FFFFFF] border border-[#EBEBEB] rounded-md p-4 focus:border-[#171717] outline-none resize-none text-sm text-[#171717] transition-all placeholder-[#8F8F8F] shadow-sm" placeholder="Brief professional summary..." />
                             </Section>
 
                             {/* Experience */}
@@ -641,11 +694,11 @@ export default function BuilderPage() {
 
                             {/* Skills */}
                             <Section title="Technical Skills" icon={<Zap className="w-5 h-5" />}>
-                                <p className="text-xs text-slate-500 mb-4">Categorized skills for optimized ATS parsing.</p>
+                                <p className="text-xs text-[#8F8F8F] mb-4">Categorized skills for optimized ATS parsing.</p>
                                 <div className="space-y-4">
                                     {(['languages', 'frameworks', 'tools', 'other'] as const).map(cat => (
                                         <div key={cat} className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest w-24 shrink-0">{cat}</label>
+                                            <label className="text-[10px] font-bold text-[#4D4D4D] uppercase tracking-wider w-24 shrink-0">{cat}</label>
                                             <input 
                                                 value={(rd.skills[cat] || []).join(', ')} 
                                                 placeholder={`e.g. ${cat === 'languages' ? 'Java, Python' : 'React, Node.js'}`}
@@ -659,7 +712,7 @@ export default function BuilderPage() {
                                                         }
                                                     });
                                                 }}
-                                                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-1 focus:ring-blue-500/50 text-sm"
+                                                className="flex-1 bg-[#FFFFFF] border border-[#EBEBEB] rounded-md px-3 py-2 outline-none focus:border-[#171717] text-xs text-[#171717] transition-all placeholder-[#8F8F8F] shadow-sm"
                                             />
                                         </div>
                                     ))}
@@ -671,7 +724,7 @@ export default function BuilderPage() {
                         <div className={`${preview_enabled ? 'lg:col-span-1' : 'lg:col-span-4'} relative z-10 animate-in fade-in slide-in-from-right-8 duration-700`}>
                             <div className="sticky top-24 h-fit space-y-5 pb-24">
                                 {preview_enabled ? (
-                                    <div className="h-[calc(100vh-120px)] rounded-[40px] overflow-hidden border border-white/10 shadow-4xl bg-[#0a0a15] ring-1 ring-white/5 ring-inset">
+                                    <div className="h-[calc(100vh-120px)] rounded-2xl overflow-hidden border border-[#EBEBEB] shadow-sm bg-[#FFFFFF]">
                                         <PreviewLayer
                                             resumeData={rd}
                                             templateId={selectedTemplate}
@@ -683,37 +736,37 @@ export default function BuilderPage() {
                                 ) : (
                                     <>
                                         {/* Quick Info & Controls */}
-                                        <div className="p-5 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm space-y-4">
+                                        <div className="p-5 rounded-xl bg-[#FFFFFF] border border-[#EBEBEB] shadow-sm space-y-4">
                                             <div className="flex items-center justify-between">
                                                 <div>
-                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Active Template</p>
-                                                    <p className="font-bold text-sm text-white">{ALL_TEMPLATES.find(t => t.id === selectedTemplate)?.name || 'Classic'}</p>
+                                                    <p className="text-[10px] text-[#8F8F8F] font-bold uppercase tracking-wider mb-1">Active Template</p>
+                                                    <p className="font-bold text-sm text-[#171717]">{ALL_TEMPLATES.find(t => t.id === selectedTemplate)?.name || 'Classic'}</p>
                                                 </div>
-                                                <button onClick={() => setStep('template')} className="px-4 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-full text-xs font-bold transition-all border border-blue-500/20">
+                                                <button onClick={() => setStep('template')} className="px-3 py-1.5 bg-[#FFFFFF] border border-[#EBEBEB] text-[#171717] hover:bg-[#FAFAFA] rounded-md text-xs font-semibold shadow-sm transition-all">
                                                     Change
                                                 </button>
                                             </div>
 
-                                            <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                                            <div className="flex items-center justify-between pt-3 border-t border-[#EBEBEB]">
                                                 <div>
-                                                    <p className="text-[11px] font-bold text-slate-200">FAANG Mode</p>
-                                                    <p className="text-[10px] text-slate-500 italic">Optimize for top-tier tech</p>
+                                                    <p className="text-[11px] font-bold text-[#171717]">FAANG Mode</p>
+                                                    <p className="text-[10px] text-[#8F8F8F] italic">Optimize for top-tier tech</p>
                                                 </div>
                                                 <button
                                                     onClick={() => setFaangMode(!faangMode)}
-                                                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors focus:outline-none ${faangMode ? 'bg-purple-600' : 'bg-white/10'}`}
+                                                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors focus:outline-none ${faangMode ? 'bg-[#171717]' : 'bg-[#EBEBEB]'}`}
                                                 >
                                                     <span className={`pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${faangMode ? 'translate-x-4' : 'translate-x-0'}`} />
                                                 </button>
                                             </div>
 
                                             {step === 'download' && (
-                                                <div className="pt-4 border-t border-white/5">
-                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-3">Redeem Credit</p>
+                                                <div className="pt-4 border-t border-[#EBEBEB]">
+                                                    <p className="text-[10px] text-[#8F8F8F] font-bold uppercase tracking-wider mb-3">Redeem Credit</p>
                                                     {couponApplied ? (
-                                                        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-2">
-                                                            <CheckCircle className="w-4 h-4 text-emerald-400" />
-                                                            <span className="text-xs text-emerald-400 font-bold">Pro Access Active</span>
+                                                        <div className="p-3 bg-emerald-550 border border-emerald-100 rounded-md flex items-center gap-2">
+                                                            <CheckCircle className="w-4 h-4 text-emerald-600" />
+                                                            <span className="text-xs text-emerald-700 font-bold">Pro Access Active</span>
                                                         </div>
                                                     ) : (
                                                         <div className="flex gap-2">
@@ -721,9 +774,9 @@ export default function BuilderPage() {
                                                                 value={couponCode}
                                                                 onChange={e => setCouponCode(e.target.value.toUpperCase())}
                                                                 placeholder="COUPON"
-                                                                className="flex-1 bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs font-mono focus:ring-1 focus:ring-blue-500 outline-none uppercase"
+                                                                className="flex-1 bg-[#FFFFFF] border border-[#EBEBEB] rounded-md px-3 py-2 text-xs font-mono focus:border-[#171717] text-[#171717] outline-none uppercase"
                                                             />
-                                                            <button onClick={redeemCoupon} disabled={couponLoading} className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all">
+                                                            <button onClick={redeemCoupon} disabled={couponLoading} className="px-4 py-2 bg-[#171717] hover:bg-[#333333] text-white rounded-md text-xs font-bold transition-all">
                                                                 {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
                                                             </button>
                                                         </div>
@@ -733,17 +786,17 @@ export default function BuilderPage() {
                                         </div>
 
                                         {/* Stats & AI */}
-                                        <div className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                                        <div className="p-6 rounded-xl bg-[#FFFFFF] border border-[#EBEBEB] shadow-sm">
                                             <div className="flex items-center justify-between mb-4">
-                                                <h3 className="font-bold text-sm flex items-center gap-2">
-                                                    <Sparkles className="w-4 h-4 text-purple-400" /> ATS Optimization
+                                                <h3 className="font-bold text-sm flex items-center gap-2 text-[#171717]">
+                                                    <Sparkles className="w-4 h-4 text-purple-600" /> ATS Optimization
                                                 </h3>
-                                                <span className="text-2xl font-black text-blue-400">{atsResult?.score || 0}%</span>
+                                                <span className="text-2xl font-black text-[#0070f3]">{atsResult?.score || 0}%</span>
                                             </div>
 
-                                            <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden mb-5">
+                                            <div className="w-full h-2 bg-[#EBEBEB] rounded-full overflow-hidden mb-5">
                                                 <div
-                                                    className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-1000"
+                                                    className="h-full bg-gradient-to-r from-[#0070f3] to-purple-600 transition-all duration-1000"
                                                     style={{ width: `${atsResult?.score || 0}%` }}
                                                 />
                                             </div>
@@ -759,47 +812,47 @@ export default function BuilderPage() {
                                                             { label: 'Structure', val: atsResult.details.projectLinks, max: 10 },
                                                         ] as const).map(item => (
                                                             <div key={item.label} className="flex items-center gap-2">
-                                                                <span className="text-[10px] text-slate-500 w-20 shrink-0 uppercase tracking-wider font-bold">{item.label}</span>
-                                                                <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-                                                                    <div className="h-full bg-blue-500/60 rounded-full" style={{ width: `${(item.val / item.max) * 100}%` }} />
+                                                                <span className="text-[10px] text-[#8F8F8F] w-20 shrink-0 uppercase tracking-wider font-bold">{item.label}</span>
+                                                                <div className="flex-1 h-1 bg-[#EBEBEB] rounded-full overflow-hidden">
+                                                                    <div className="h-full bg-[#0070f3] rounded-full" style={{ width: `${(item.val / item.max) * 100}%` }} />
                                                                 </div>
                                                             </div>
                                                         ))}
                                                     </div>
 
-                                                    <div className="pt-4 border-t border-white/5">
+                                                    <div className="pt-4 border-t border-[#EBEBEB]">
                                                         {(atsResult.feedback || []).slice(0, 3).map((f, i) => (
-                                                            <div key={i} className="flex gap-2 text-[10px] text-slate-400 mb-2 leading-relaxed italic">
-                                                                <div className="mt-1.5 w-1 h-1 rounded-full bg-blue-500 shrink-0" />{f}
+                                                            <div key={i} className="flex gap-2 text-[10px] text-[#4D4D4D] mb-2 leading-relaxed italic">
+                                                                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#0070f3] shrink-0" />{f}
                                                             </div>
                                                         ))}
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <div className="text-center py-6 bg-black/20 rounded-2xl border border-white/5">
-                                                    <Sparkles className="w-8 h-8 text-slate-700 mx-auto mb-2" />
-                                                    <p className="text-[10px] text-slate-500 font-medium px-6 leading-relaxed italic">
+                                                <div className="text-center py-6 bg-[#FAFAFA] rounded-lg border border-[#EBEBEB]">
+                                                    <Sparkles className="w-8 h-8 text-[#8F8F8F] mx-auto mb-2" />
+                                                    <p className="text-[10px] text-[#8F8F8F] font-medium px-6 leading-relaxed italic">
                                                         Enter a Target Role or Job Description below for better scores.
                                                     </p>
                                                 </div>
                                             )}
 
-                                            <div className="mt-6 pt-4 border-t border-white/5 space-y-4">
+                                            <div className="mt-6 pt-4 border-t border-[#EBEBEB] space-y-4">
                                                 <div>
-                                                    <label className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2 block">Target Job Context</label>
+                                                    <label className="text-[10px] text-[#8F8F8F] font-bold uppercase tracking-wider mb-2 block">Target Job Context</label>
                                                     <textarea
                                                         value={jobDescription}
                                                         onChange={e => setJobDescription(e.target.value)}
                                                         placeholder="Paste Job Description for AI context..."
-                                                        className="w-full h-24 bg-black/40 border border-white/10 rounded-xl p-3 text-xs focus:ring-1 focus:ring-blue-500 outline-none resize-none placeholder:text-slate-700"
+                                                        className="w-full h-24 bg-[#FFFFFF] border border-[#EBEBEB] rounded-md p-3 text-xs focus:border-[#171717] outline-none resize-none placeholder:text-[#8F8F8F] text-[#171717]"
                                                     />
                                                 </div>
 
                                                 <div className="flex gap-2">
-                                                    <button onClick={() => setShowOptimizer(true)} className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-bold transition-all border border-white/10 flex items-center justify-center gap-2">
-                                                        <Zap className="w-3.5 h-3.5" /> AI Review
+                                                    <button onClick={() => setShowOptimizer(true)} className="flex-1 py-2.5 bg-[#FFFFFF] border border-[#EBEBEB] text-[#171717] hover:bg-[#FAFAFA] rounded-md text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
+                                                        <Zap className="w-3.5 h-3.5 text-[#171717]" /> AI Review
                                                     </button>
-                                                    <button onClick={() => setShowCoverLetter(true)} className="flex-1 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-purple-600/20 flex items-center justify-center gap-2 text-center">
+                                                    <button onClick={() => setShowCoverLetter(true)} className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-md text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-center">
                                                         Cover Letter
                                                     </button>
                                                 </div>
@@ -813,15 +866,15 @@ export default function BuilderPage() {
                                             resumeId={id as string}
                                         />
 
-                                        <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-600/10 to-blue-600/10 border border-indigo-500/20 backdrop-blur-sm relative overflow-hidden group">
-                                            <div className="absolute -top-10 -right-10 w-24 h-24 bg-indigo-500/10 rounded-full blur-3xl group-hover:bg-indigo-500/20 transition-all" />
-                                            <h3 className="text-sm font-black mb-2 flex items-center gap-2 uppercase tracking-widest text-indigo-300">
+                                        <div className="p-6 rounded-xl bg-indigo-50/50 border border-indigo-100 relative overflow-hidden group">
+                                            <div className="absolute -top-10 -right-10 w-24 h-24 bg-indigo-500/5 rounded-full blur-3xl group-hover:bg-indigo-500/10 transition-all" />
+                                            <h3 className="text-sm font-bold mb-2 flex items-center gap-2 uppercase tracking-wider text-indigo-950">
                                                 Build Personal Portfolio
                                             </h3>
-                                            <p className="text-[11px] text-slate-400 mb-4 leading-relaxed font-bold">Instantly convert this resume into a stunning professional website.</p>
+                                            <p className="text-[11px] text-indigo-900/80 mb-4 leading-relaxed font-semibold">Instantly convert this resume into a stunning professional website.</p>
                                             <Link
                                                 href={`/${params?.locale}/portfolio?generate=true`}
-                                                className="block w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-center rounded-xl text-[11px] font-black uppercase tracking-widest transition-all"
+                                                className="block w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-center rounded-md text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm"
                                             >
                                                 Launch Portfolio Builder
                                             </Link>
@@ -837,24 +890,24 @@ export default function BuilderPage() {
 
                 {/* ── Optimizer Modal ── */}
                 {showOptimizer && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md">
-                        <div className="bg-slate-900 border border-white/10 w-full max-w-2xl rounded-3xl p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-                            <button onClick={() => setShowOptimizer(false)} className="absolute top-5 right-5 p-2 hover:bg-white/5 rounded-full"><X className="w-5 h-5" /></button>
+                    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-8 overflow-y-auto bg-[#171717]/80 backdrop-blur-md animate-in fade-in duration-300">
+                        <div className="bg-[#FFFFFF] border border-[#EBEBEB] w-full max-w-2xl rounded-xl p-6 sm:p-8 shadow-2xl relative my-auto">
+                            <button onClick={() => setShowOptimizer(false)} className="absolute top-5 right-5 p-2 hover:bg-[#FAFAFA] rounded-full text-[#8F8F8F] hover:text-[#171717]"><X className="w-5 h-5" /></button>
 
                             {!optimizationSuccess ? (
                                 <>
-                                    <h2 className="text-xl font-bold mb-2 flex items-center gap-2"><Sparkles className="w-5 h-5 text-blue-400" />AI Job Optimizer</h2>
-                                    <p className="text-slate-400 mb-5 text-sm">Paste the Job Description to align your resume experience and projects.</p>
+                                    <h2 className="text-xl font-bold mb-2 flex items-center gap-2 text-[#171717]"><Sparkles className="w-5 h-5 text-[#0070f3]" />AI Job Optimizer</h2>
+                                    <p className="text-[#4D4D4D] mb-5 text-sm">Paste the Job Description to align your resume experience and projects.</p>
                                     <textarea
                                         value={jobDescription}
                                         onChange={e => setJobDescription(e.target.value)}
-                                        className="w-full h-64 bg-black/40 border border-white/10 rounded-2xl p-4 focus:ring-2 focus:ring-blue-500/50 outline-none resize-none mb-5 text-sm"
+                                        className="w-full h-64 bg-[#FFFFFF] border border-[#EBEBEB] rounded-md p-4 focus:border-[#171717] outline-none resize-none mb-5 text-sm text-[#171717] placeholder-[#8F8F8F]"
                                         placeholder="Paste Job Description here..."
                                     />
                                     <button
                                         onClick={handleOptimize}
                                         disabled={optimizing || !jobDescription}
-                                        className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-2xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                        className="w-full py-3 bg-[#171717] hover:bg-[#333333] text-white font-bold rounded-md transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                                     >
                                         {optimizing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
                                         {optimizing ? 'Optimizing...' : 'Optimize My Resume'}
@@ -863,42 +916,42 @@ export default function BuilderPage() {
                             ) : (
                                 <>
                                     <div className="text-center mb-6">
-                                        <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <CheckCircle className="w-8 h-8 text-emerald-400" />
+                                        <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-100">
+                                            <CheckCircle className="w-8 h-8 text-emerald-600" />
                                         </div>
-                                        <h2 className="text-2xl font-bold mb-1 text-white">AI optimization complete.</h2>
-                                        <p className="text-slate-400 text-sm">Review and edit before applying.</p>
+                                        <h2 className="text-2xl font-bold mb-1 text-[#171717]">AI optimization complete.</h2>
+                                        <p className="text-[#4D4D4D] text-sm">Review and edit before applying.</p>
                                     </div>
 
-                                    <div className="bg-black/40 border border-white/5 rounded-2xl p-5 mb-6">
-                                        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Optimization Preview</h3>
+                                    <div className="bg-[#FAFAFA] border border-[#EBEBEB] rounded-lg p-5 mb-6">
+                                        <h3 className="text-xs font-bold text-[#8F8F8F] uppercase tracking-wider mb-3">Optimization Preview</h3>
                                         <div className="space-y-4">
                                             {optimizedResumeData?.summary && (
                                                 <div>
-                                                    <p className="text-[10px] font-bold text-blue-400 mb-1">REWRITTEN SUMMARY</p>
-                                                    <p className="text-xs text-slate-300 line-clamp-3 italic">&quot;{optimizedResumeData.summary}&quot;</p>
+                                                    <p className="text-[10px] font-bold text-[#0070f3] mb-1">REWRITTEN SUMMARY</p>
+                                                    <p className="text-xs text-[#4D4D4D] line-clamp-3 italic">&quot;{optimizedResumeData.summary}&quot;</p>
                                                 </div>
                                             )}
-                                            <p className="text-[10px] text-slate-500">All experience bullets and project descriptions have been optimized for ATS compatibility with the provided JD.</p>
+                                            <p className="text-[10px] text-[#8F8F8F]">All experience bullets and project descriptions have been optimized for ATS compatibility with the provided JD.</p>
                                         </div>
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                         <button
                                             onClick={handleRevertToOriginal}
-                                            className="py-3 bg-white/5 hover:bg-white/10 text-white font-medium rounded-2xl transition-all border border-white/10 text-sm order-3 sm:order-1"
+                                            className="py-2.5 bg-[#FFFFFF] hover:bg-[#FAFAFA] text-[#171717] font-medium rounded-md transition-all border border-[#EBEBEB] text-sm order-3 sm:order-1"
                                         >
                                             Revert to Original
                                         </button>
                                         <button
                                             onClick={handleEditOptimized}
-                                            className="py-3 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 font-bold rounded-2xl transition-all border border-blue-500/30 text-sm order-1 sm:order-2"
+                                            className="py-2.5 bg-blue-50 hover:bg-blue-100 text-[#0070f3] font-bold rounded-md transition-all border border-blue-100 text-sm order-1 sm:order-2"
                                         >
                                             Edit Resume
                                         </button>
                                         <button
                                             onClick={handleAcceptOptimized}
-                                            className="py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-emerald-600/20 text-sm order-2 sm:order-3"
+                                            className="py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-md transition-all shadow-sm text-sm order-2 sm:order-3"
                                         >
                                             Accept Changes
                                         </button>
@@ -926,33 +979,42 @@ const uid = () => Math.random().toString(36).substr(2, 9);
 
 function Section({ title, icon, onAdd, onAction, children }: { title: string; icon: React.ReactNode; onAdd?: () => void; onAction?: React.ReactNode; children: React.ReactNode }) {
     return (
-        <section className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden backdrop-blur-sm">
-            <div className="px-7 py-5 border-b border-white/5 flex items-center justify-between">
-                <div className="flex items-center gap-3"><div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">{icon}</div><h2 className="text-lg font-bold">{title}</h2></div>
+        <section className="bg-[#FFFFFF] border border-[#EBEBEB] rounded-xl overflow-hidden shadow-sm">
+            <div className="px-6 py-4 border-b border-[#EBEBEB] flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-[#FAFAFA] border border-[#EBEBEB] rounded-md text-[#171717]">{icon}</div>
+                    <h2 className="text-sm font-semibold text-[#171717]">{title}</h2>
+                </div>
                 <div className="flex items-center gap-2">
                     {onAction}
-                    {onAdd && <button onClick={onAdd} className="p-2 hover:bg-white/10 rounded-lg transition-all text-slate-400 hover:text-white"><Plus className="w-4 h-4" /></button>}
+                    {onAdd && (
+                        <button onClick={onAdd} className="p-2 hover:bg-[#FAFAFA] rounded-md transition-all text-[#8F8F8F] hover:text-[#171717]">
+                            <Plus className="w-4 h-4" />
+                        </button>
+                    )}
                 </div>
             </div>
-            <div className="p-7">{children}</div>
+            <div className="p-6">{children}</div>
         </section>
     );
 }
 
 function FInput({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
     return (
-        <div className="space-y-1.5 flex-1">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{label}</label>
-            <input value={value} onChange={e => onChange(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500/50 text-sm transition-all" />
+        <div className="space-y-1 flex-1">
+            <label className="text-[10px] font-bold text-[#4D4D4D] uppercase tracking-wider">{label}</label>
+            <input value={value || ''} onChange={e => onChange(e.target.value)}
+                className="w-full bg-[#FFFFFF] border border-[#EBEBEB] rounded-md px-3 py-2 outline-none focus:border-[#171717] text-xs text-[#171717] transition-all placeholder-[#8F8F8F]" />
         </div>
     );
 }
 
 function ListCard({ onDelete, children }: { onDelete: () => void; children: React.ReactNode }) {
     return (
-        <div className="relative p-5 bg-black/20 border border-white/5 rounded-2xl mb-4 group/card">
-            <button onClick={onDelete} className="absolute top-3 right-3 p-1.5 text-slate-700 hover:text-red-400 transition-all opacity-0 group-hover/card:opacity-100"><Trash2 className="w-4 h-4" /></button>
+        <div className="relative p-5 bg-[#FAFAFA] border border-[#EBEBEB] rounded-lg mb-4 group/card shadow-sm">
+            <button onClick={onDelete} className="absolute top-3 right-3 p-1.5 text-[#8F8F8F] hover:text-red-600 transition-all opacity-0 group-hover/card:opacity-100">
+                <Trash2 className="w-3.5 h-3.5" />
+            </button>
             {children}
         </div>
     );
@@ -961,11 +1023,11 @@ function ListCard({ onDelete, children }: { onDelete: () => void; children: Reac
 function Bullets({ points, onChange, faangMode = false, jobDescription = '' }: { points: string[]; onChange: (p: string[]) => void; faangMode?: boolean; jobDescription?: string }) {
     return (
         <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Bullet Points</label>
+            <label className="text-[10px] font-bold text-[#4D4D4D] uppercase tracking-wider">Bullet Points</label>
             {points.map((p, idx) => (
                 <div key={idx} className="flex gap-2 group/pt items-start">
                     <textarea value={p} onChange={e => { const l = [...points]; l[idx] = e.target.value; onChange(l); }}
-                        className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-blue-500/50 min-h-[44px] resize-none text-sm" />
+                        className="flex-1 bg-[#FFFFFF] border border-[#EBEBEB] rounded-md px-3 py-2 outline-none focus:border-[#171717] min-h-[44px] resize-none text-xs text-[#171717]" />
 
                     <div className="flex flex-col gap-1 items-center justify-start pt-1 opacity-100 sm:opacity-0 group-hover/pt:opacity-100 transition-all">
                         <BulletEnhancer
@@ -974,13 +1036,13 @@ function Bullets({ points, onChange, faangMode = false, jobDescription = '' }: {
                             jobDescription={jobDescription}
                             onEnhanced={(newText) => { const l = [...points]; l[idx] = newText; onChange(l); }}
                         />
-                        <button onClick={() => onChange(points.filter((_, i) => i !== idx))} className="p-1.5 text-slate-600 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-all">
+                        <button onClick={() => onChange(points.filter((_, i) => i !== idx))} className="p-1.5 text-[#8F8F8F] hover:text-red-600 hover:bg-red-50 rounded-md transition-all">
                             <Trash2 className="w-3.5 h-3.5" />
                         </button>
                     </div>
                 </div>
             ))}
-            <button onClick={() => onChange([...points, ''])} className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 px-2 py-1 rounded hover:bg-blue-400/10 transition-all">
+            <button onClick={() => onChange([...points, ''])} className="text-xs text-[#4D4D4D] hover:text-[#171717] flex items-center gap-1 px-2 py-1 rounded hover:bg-[#FAFAFA] transition-all font-semibold">
                 <Plus className="w-3.5 h-3.5" /> Add Bullet
             </button>
         </div>

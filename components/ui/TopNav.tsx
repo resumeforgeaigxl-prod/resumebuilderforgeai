@@ -29,7 +29,7 @@ export function TopNav({ userName = "User", pageTitle, locale = "en" }: TopNavPr
 
   return (
     <header className={cn(
-      "fixed top-0 right-0 z-30 flex h-16 items-center justify-between border-b border-[#1E2A42] bg-[#080B16]/80 px-4 md:px-8 backdrop-blur-md ease-[cubic-bezier(0.4,0,0.2,1)]",
+      "fixed top-0 right-0 z-30 flex h-16 items-center justify-between border-b border-[#EBEBEB] bg-[#FAFAFA]/80 px-4 md:px-8 backdrop-blur-md ease-[cubic-bezier(0.4,0,0.2,1)]",
       isMounted ? "transition-all duration-300" : "",
       collapsed ? "left-0 md:left-[72px]" : "left-0 md:left-64"
     )}>
@@ -37,69 +37,67 @@ export function TopNav({ userName = "User", pageTitle, locale = "en" }: TopNavPr
       <div className="flex items-center gap-2 text-sm">
         <button 
           onClick={toggle}
-          className="md:hidden mr-2 p-1.5 rounded-lg text-[#7A8BA8] hover:text-[#00D4A0] hover:bg-[#00D4A0]/10 transition-colors"
+          className="md:hidden mr-2 p-1.5 rounded-lg text-[#4D4D4D] hover:text-[#171717] hover:bg-[#171717]/5 transition-colors"
         >
           <Menu className="w-5 h-5" />
         </button>
-        <span className="text-[#7A8BA8] font-medium tracking-tight hidden sm:inline-block">Dashboard</span>
-        <ChevronRight className="h-3 w-3 text-[#4A5568] hidden sm:block" />
-        <span className="text-[#EFF4FB] font-semibold tracking-tight truncate max-w-[150px] sm:max-w-none">{pageTitle}</span>
+        <span className="text-[#8F8F8F] font-medium tracking-tight hidden sm:inline-block">Dashboard</span>
+        <ChevronRight className="h-3 w-3 text-[#8F8F8F]/55 hidden sm:block" />
+        <span className="text-[#171717] font-semibold tracking-tight truncate max-w-[150px] sm:max-w-none">{pageTitle}</span>
       </div>
 
       {/* Actions */}
       <div className="flex items-center gap-4">
         {/* Search */}
         <div className="relative hidden lg:block">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8F8F8F]" />
           <input
             type="text"
             placeholder="Search anything..."
-            className="h-9 w-64 rounded-full border border-[#1E2A42] bg-[#0D1220] pl-10 pr-4 text-sm text-[#EFF4FB] placeholder:text-[#4A5568] focus:border-[#00D4A0]/30 focus:outline-none focus:ring-1 focus:ring-[#00D4A0]/20 transition-all"
+            className="h-9 w-64 rounded-full border border-[#EBEBEB] bg-white pl-10 pr-4 text-sm text-[#171717] placeholder:text-[#8F8F8F] focus:border-[#171717]/30 focus:outline-none focus:ring-1 focus:ring-[#171717]/20 transition-all"
           />
         </div>
 
         {/* Notifications */}
         <Link href={`/${locale}/job-alerts`}>
-          <Button variant="ghost" size="icon" className="relative text-slate-400 hover:text-white hover:bg-white/5">
+          <Button variant="ghost" size="icon" className="relative text-[#4D4D4D] hover:text-[#171717] hover:bg-[#171717]/5">
             <Bell className="h-5 w-5" />
-            <span className="absolute top-2.5 right-2.5 h-1.5 w-1.5 rounded-full bg-[#00D4A0] shadow-[0_0_10px_rgba(0,212,160,0.8)]" />
+            <span className="absolute top-2.5 right-2.5 h-1.5 w-1.5 rounded-full bg-[#0070F3]" />
           </Button>
         </Link>
 
         {/* User Profile */}
-        <div className="flex items-center gap-3 pl-4 border-l border-white/5">
+        <div className="flex items-center gap-3 pl-4 border-l border-[#EBEBEB]">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-semibold text-white leading-none whitespace-nowrap">{userName}</p>
-            <p className="text-[10px] text-[#00D4A0] mt-1 uppercase tracking-widest font-black">Pro Member</p>
+            <p className="text-sm font-semibold text-[#171717] leading-none whitespace-nowrap">{userName}</p>
+            <p className="text-[10px] text-[#0070F3] mt-1 uppercase tracking-widest font-semibold">Pro Member</p>
           </div>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="h-9 w-9 rounded-full bg-gradient-to-br from-[#00D4A0] via-[#7C5CFC] to-[#00D4A0] p-[1.5px] group transition-all active:scale-95 shadow-lg shadow-[#00D4A0]/10 hover:shadow-[#00D4A0]/20">
-                <div className="h-full w-full rounded-full bg-[#080B16] flex items-center justify-center overflow-hidden">
-                  <User className="h-5 w-5 text-[#00D4A0] group-hover:text-white transition-colors" />
-                </div>
+              <button className="h-9 w-9 rounded-full border border-[#EBEBEB] bg-white flex items-center justify-center text-[#4D4D4D] hover:text-[#171717] hover:border-[#171717] transition-all active:scale-95 shadow-sm">
+                <User className="h-5 w-5" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
+            <DropdownMenuContent align="end" className="w-56 bg-white border border-[#EBEBEB] text-[#171717] shadow-xl">
+              <DropdownMenuLabel className="text-[#8F8F8F] font-semibold text-[11px] tracking-wide">My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-[#EBEBEB]" />
               <Link href={`/${locale}/account`}>
-                <DropdownMenuItem className="cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
+                <DropdownMenuItem className="cursor-pointer hover:bg-[#FAFAFA] text-[#171717] focus:bg-[#FAFAFA] focus:text-[#171717]">
+                  <User className="mr-2 h-4 w-4 text-[#4D4D4D]" />
                   <span>Profile</span>
                 </DropdownMenuItem>
               </Link>
               <Link href={`/${locale}/job-alerts`}>
-                <DropdownMenuItem className="cursor-pointer">
-                  <Bell className="mr-2 h-4 w-4" />
+                <DropdownMenuItem className="cursor-pointer hover:bg-[#FAFAFA] text-[#171717] focus:bg-[#FAFAFA] focus:text-[#171717]">
+                  <Bell className="mr-2 h-4 w-4 text-[#4D4D4D]" />
                   <span>Notifications</span>
                 </DropdownMenuItem>
               </Link>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="bg-[#EBEBEB]" />
               <form action="/api/auth/signout" method="post">
                 <button type="submit" className="w-full">
-                  <DropdownMenuItem className="text-rose-400 focus:text-rose-400 focus:bg-rose-400/10 cursor-pointer">
+                  <DropdownMenuItem className="text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer hover:bg-rose-50">
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
                   </DropdownMenuItem>
@@ -112,3 +110,4 @@ export function TopNav({ userName = "User", pageTitle, locale = "en" }: TopNavPr
     </header>
   );
 }
+

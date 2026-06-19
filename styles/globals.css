@@ -52,6 +52,58 @@
   }
 }
 
+/* ═══ Vercel / Geist Light Landing Theme ═══ */
+
+.landing-light {
+  /* Surface */
+  --rf-canvas: #FAFAFA;
+  --rf-elevated: #FFFFFF;
+  --rf-hairline-soft: #F2F2F2;
+
+  /* Ink & Text */
+  --rf-ink: #171717;
+  --rf-body: #4D4D4D;
+  --rf-mute: #8F8F8F;
+  --rf-faint: #A1A1A1;
+
+  /* Border */
+  --rf-hairline: #EBEBEB;
+
+  /* Accent (links, focus) */
+  --rf-link: #0070F3;
+  --rf-link-deep: #0761D1;
+
+  /* Gradient stops */
+  --rf-gradient-develop-start: #007CF0;
+  --rf-gradient-develop-end: #00DFD8;
+  --rf-gradient-preview-start: #7928CA;
+  --rf-gradient-preview-end: #FF0080;
+  --rf-gradient-ship-start: #FF4D4D;
+  --rf-gradient-ship-end: #F9CB28;
+
+  background-color: var(--rf-canvas);
+  color: var(--rf-ink);
+}
+
+.landing-light *,
+.landing-light *::before,
+.landing-light *::after {
+  border-color: var(--rf-hairline);
+}
+
+.landing-light ::selection {
+  background-color: rgba(0, 112, 243, 0.15);
+  color: var(--rf-ink);
+}
+
+/* Scrollbar override for light page */
+.landing-light ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08);
+}
+.landing-light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.14);
+}
+
 @layer components {
   .glass-card {
     @apply border border-white/10 bg-white/[0.03] backdrop-blur-xl transition-all duration-500;
@@ -75,6 +127,108 @@
 
   .btn-secondary {
     @apply inline-flex items-center gap-2 rounded-2xl border border-white/[0.12] bg-white/[0.05] px-6 py-3 text-white font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.09] active:scale-95;
+  }
+
+  /* ── Vercel-style landing components ── */
+
+  .rf-btn-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 24px;
+    height: 44px;
+    border-radius: 100px;
+    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 20px;
+    letter-spacing: 0;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+  }
+
+  .rf-btn-pill-primary {
+    background-color: var(--rf-ink);
+    color: #FFFFFF;
+  }
+  .rf-btn-pill-primary:hover {
+    opacity: 0.85;
+  }
+
+  .rf-btn-pill-secondary {
+    background-color: var(--rf-elevated);
+    color: var(--rf-ink);
+    border: 1px solid var(--rf-hairline);
+  }
+  .rf-btn-pill-secondary:hover {
+    background-color: var(--rf-hairline-soft);
+  }
+
+  .rf-btn-square {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 12px;
+    height: 36px;
+    border-radius: 6px;
+    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    letter-spacing: 0;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .rf-btn-square-primary {
+    background-color: var(--rf-ink);
+    color: #FFFFFF;
+    border: none;
+  }
+
+  .rf-btn-square-ghost {
+    background-color: var(--rf-elevated);
+    color: var(--rf-ink);
+    border: 1px solid var(--rf-hairline);
+  }
+  .rf-btn-square-ghost:hover {
+    background-color: var(--rf-hairline-soft);
+  }
+
+  .rf-card {
+    background-color: var(--rf-elevated);
+    border: 1px solid var(--rf-hairline);
+    border-radius: 12px;
+    padding: 24px;
+    transition: box-shadow 0.25s ease;
+  }
+  .rf-card:hover {
+    box-shadow: 0 2px 2px rgba(0,0,0,0.04), 0 8px 16px -4px rgba(0,0,0,0.06);
+  }
+
+  .rf-card-pricing {
+    background-color: var(--rf-elevated);
+    border: 1px solid var(--rf-hairline);
+    border-radius: 16px;
+    padding: 32px;
+    transition: box-shadow 0.25s ease;
+  }
+  .rf-card-pricing:hover {
+    box-shadow: 0 2px 2px rgba(0,0,0,0.04), 0 8px 16px -4px rgba(0,0,0,0.06);
+  }
+
+  .rf-card-pricing-featured {
+    background-color: var(--rf-ink);
+    border: 1px solid var(--rf-ink);
+    border-radius: 16px;
+    padding: 32px;
+    color: #FFFFFF;
+    box-shadow: 0 2px 2px rgba(0,0,0,0.04), 0 8px 16px -4px rgba(0,0,0,0.12);
   }
 }
 
@@ -101,6 +255,30 @@
 
   .animate-scan-line {
     animation: scan-line 8s linear infinite;
+  }
+
+  /* Vercel mesh gradient animation */
+  .rf-mesh-gradient {
+    background: radial-gradient(ellipse 80% 60% at 30% 40%, rgba(0,124,240,0.22), transparent 60%),
+                radial-gradient(ellipse 70% 50% at 70% 30%, rgba(0,223,216,0.18), transparent 55%),
+                radial-gradient(ellipse 60% 60% at 55% 65%, rgba(121,40,202,0.16), transparent 55%),
+                radial-gradient(ellipse 50% 45% at 75% 60%, rgba(255,0,128,0.14), transparent 50%),
+                radial-gradient(ellipse 40% 40% at 20% 70%, rgba(249,203,40,0.08), transparent 45%);
+    animation: mesh-shift 12s ease-in-out infinite alternate;
+  }
+
+  @keyframes mesh-shift {
+    0% {
+      background-position: 0% 0%;
+      filter: hue-rotate(0deg);
+    }
+    50% {
+      filter: hue-rotate(8deg);
+    }
+    100% {
+      background-position: 100% 100%;
+      filter: hue-rotate(-5deg);
+    }
   }
 
   @keyframes premium-in {
@@ -133,6 +311,11 @@
     0% { top: 0%; }
     50% { top: 100%; }
     100% { top: 0%; }
+  }
+
+  @keyframes float-gentle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
   }
 }
 
@@ -172,4 +355,3 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.1);
 }
-

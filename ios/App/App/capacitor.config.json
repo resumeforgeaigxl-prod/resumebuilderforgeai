@@ -1,0 +1,13 @@
+{
+	"appId": "com.resumeforgeai.app",
+	"appName": "ResumeForgeAI",
+	"webDir": "public",
+	"server": {
+		"url": "https://app.resumeforgeai.in",
+		"allowNavigation": [
+			"app.resumeforgeai.in",
+			"resumeforgeai.in"
+		]
+	},
+	"packageClassList": []
+}

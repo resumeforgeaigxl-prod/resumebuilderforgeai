@@ -46,38 +46,38 @@ export default async function ResumesPage({
     const totalPages = count ? Math.ceil(count / limit) : 0;
 
     return (
-        <div className="space-y-10 animate-fade-in">
+        <div className="space-y-10 animate-fade-in text-[#171717]">
             {/* Standardized Header */}
-            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#1E2A42] pb-8 mb-12">
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#EBEBEB] pb-8 mb-12">
                 <div>
-                    <div className="flex items-center gap-2 text-[#00D4A0] font-bold tracking-widest text-[10px] uppercase mb-4">
-                        <FileText className="w-3.5 h-3.5" /> Intelligence Core
+                    <div className="flex items-center gap-2 text-[#8F8F8F] font-mono text-[11px] uppercase tracking-wider mb-2 font-medium">
+                        <FileText className="w-3.5 h-3.5 text-[#171717]" /> Intelligence Core
                     </div>
-                    <h1 className="text-4xl font-bold tracking-tighter text-white uppercase">ResumeForge</h1>
-                    <p className="text-slate-400 mt-2 text-lg">Protocol-ready professional identifiers and neural document optimization ({count || 0} active).</p>
+                    <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-[#171717]">ResumeForge</h1>
+                    <p className="text-[#4D4D4D] mt-2 text-sm md:text-base">Protocol-ready professional identifiers and neural document optimization ({count || 0} active).</p>
                 </div>
 
                 <div className="flex items-center gap-4">
                     <CreateResumeButton />
-                    <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0D1220] border border-[#1E2A42]">
-                        <div className="text-[10px] text-[#4A5568] uppercase tracking-wider font-semibold">VAULT_SIGNAL</div>
-                        <Badge variant="outline" className="border-[#00D4A0]/20 bg-[#00D4A0]/5 text-[#00D4A0] text-[9px] font-bold uppercase">ENCRYPTED</Badge>
+                    <div className="hidden lg:flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white border border-[#EBEBEB] shadow-sm">
+                        <div className="text-[10px] text-[#8F8F8F] font-mono uppercase tracking-normal">Vault Signal</div>
+                        <span className="border border-[#EBEBEB] bg-[#FAFAFA] text-[#0070F3] text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full">Encrypted</span>
                     </div>
                 </div>
             </header>
 
 
             {error ? (
-                <Card glass className="p-12 text-center border-red-500/10 bg-red-500/[0.02]">
-                    <p className="font-bold text-red-400 uppercase tracking-widest text-xs">Protocol Failure: Failed to sync resumes.</p>
-                </Card>
+                <div className="p-8 text-center border border-red-100 bg-red-50 text-red-600 rounded-xl">
+                    <p className="font-semibold text-sm">Protocol Failure: Failed to sync resumes.</p>
+                </div>
             ) : resumeItems.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-24 text-center glass-card border-dashed border-white/5 rounded-[3rem]">
-                    <div className="w-20 h-20 mb-8 rounded-[2rem] bg-indigo-500/10 flex items-center justify-center text-indigo-400 shadow-2xl">
-                        <FileText className="w-10 h-10" />
+                <div className="flex flex-col items-center justify-center p-20 text-center bg-white border border-[#EBEBEB] rounded-xl shadow-sm">
+                    <div className="w-16 h-16 mb-6 rounded-xl bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center text-[#171717] shadow-sm">
+                        <FileText className="w-8 h-8" />
                     </div>
-                    <h3 className="text-2xl font-black text-white mb-4 tracking-tight">Empty Repository</h3>
-                    <p className="text-slate-500 mb-10 max-w-sm mx-auto text-sm leading-relaxed font-medium">
+                    <h3 className="text-xl font-semibold text-[#171717] mb-2 tracking-tight">Empty Repository</h3>
+                    <p className="text-[#8F8F8F] mb-8 max-w-sm mx-auto text-sm leading-relaxed font-normal">
                         No resume protocols detected. Initialize your professional profile to begin the optimization cycle.
                     </p>
                     <CreateResumeButton variant="secondary" />
@@ -96,40 +96,40 @@ export default async function ResumesPage({
 
                     {/* Support Card */}
                     <Link href={`/${locale}/support`} className="group h-full">
-                        <Card glass className="h-full border-dashed border-white/5 hover:border-indigo-500/30 p-8 transition-all flex flex-col items-center justify-center text-center group-hover:bg-indigo-500/[0.02]">
-                            <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-indigo-500/10 transition-all">
-                                <HelpCircle className="w-7 h-7 text-slate-500 group-hover:text-indigo-400" />
+                        <div className="bg-white border border-[#EBEBEB] rounded-xl p-6 hover:shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.06)] hover:border-[#171717]/25 transition-all h-full flex flex-col items-center justify-center text-center">
+                            <div className="w-12 h-12 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center mb-5 group-hover:border-[#171717] transition-all">
+                                <HelpCircle className="w-6 h-6 text-[#8F8F8F] group-hover:text-[#171717] transition-colors" />
                             </div>
-                            <h3 className="font-black text-white mb-2 uppercase tracking-tight text-sm">Need Intel?</h3>
-                            <p className="text-[10px] text-slate-500 leading-relaxed font-bold uppercase tracking-widest">Connect with ecosystem support</p>
-                        </Card>
+                            <h3 className="font-semibold text-[#171717] mb-1 tracking-tight text-sm">Need Intel?</h3>
+                            <p className="text-[11px] text-[#8F8F8F] font-medium transition-colors group-hover:text-[#0070F3]">Connect with ecosystem support</p>
+                        </div>
                     </Link>
                 </div>
             )}
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-3 pt-12 border-t border-white/5">
+                <div className="flex items-center justify-center gap-2 pt-12 border-t border-[#EBEBEB]">
                     <Button
                         asChild
                         variant="ghost"
                         size="icon"
-                        className={`rounded-xl border border-white/5 bg-white/5 ${page <= 1 ? 'opacity-30 pointer-events-none' : 'hover:bg-white/10'}`}
+                        className={`rounded-lg border border-[#EBEBEB] bg-white text-[#4D4D4D] ${page <= 1 ? 'opacity-30 pointer-events-none' : 'hover:bg-[#FAFAFA] hover:text-[#171717]'}`}
                     >
                         <Link href={`/${locale}/resumes?page=${page - 1}`}>
                             <ChevronLeft className="w-5 h-5" />
                         </Link>
                     </Button>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                         {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                             <Link
                                 key={p}
                                 href={`/${locale}/resumes?page=${p}`}
-                                className={`w-10 h-10 rounded-xl flex items-center justify-center text-[10px] font-black tracking-widest transition-all border
+                                className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-medium transition-all border
                                     ${page === p
-                                        ? 'bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-500/30'
-                                        : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'
+                                        ? 'bg-[#171717] border-[#171717] text-white font-semibold'
+                                        : 'bg-white border-[#EBEBEB] text-[#4D4D4D] hover:bg-[#FAFAFA] hover:text-[#171717]'
                                     }`}
                             >
                                 {p}
@@ -141,7 +141,7 @@ export default async function ResumesPage({
                         asChild
                         variant="ghost"
                         size="icon"
-                        className={`rounded-xl border border-white/5 bg-white/5 ${page >= totalPages ? 'opacity-30 pointer-events-none' : 'hover:bg-white/10'}`}
+                        className={`rounded-lg border border-[#EBEBEB] bg-white text-[#4D4D4D] ${page >= totalPages ? 'opacity-30 pointer-events-none' : 'hover:bg-[#FAFAFA] hover:text-[#171717]'}`}
                     >
                         <Link href={`/${locale}/resumes?page=${page + 1}`}>
                             <ChevronRight className="w-5 h-5" />

@@ -37,6 +37,7 @@ export default function HeaderWrapper({ children }: { children: ReactNode }) {
         pathname?.includes('/salaryforge') ||
         pathname?.includes('/networkforge') ||
         pathname?.includes('/ats-live') ||
+        pathname?.includes('/builder') ||
         pathname?.includes('/mock-test');
 
     if (isInternalApp || isLandingPage) {
