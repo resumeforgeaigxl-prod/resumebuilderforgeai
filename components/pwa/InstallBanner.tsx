@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Download, X } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -8,11 +8,20 @@ interface BeforeInstallPromptEvent extends Event {
     userChoice: Promise<{ outcome: 'accepted' | 'dismissed', platform: string }>;
 }
 
+const DISMISS_KEY = 'pwa-banner-dismissed';
+
 export default function InstallBanner() {
     const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
+        // If already dismissed or already installed, never show
+        try {
+            if (localStorage.getItem(DISMISS_KEY)) return;
+        } catch { /* SSR / private browsing */ }
+
+        if (window.matchMedia('(display-mode: standalone)').matches) return;
+
         const handleBeforeInstallPrompt = (e: Event) => {
             e.preventDefault();
             setDeferredPrompt(e as BeforeInstallPromptEvent);
@@ -20,13 +29,13 @@ export default function InstallBanner() {
         };
 
         window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-        // Check if already installed
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            setIsVisible(false);
-        }
-
         return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    }, []);
+
+    const dismiss = useCallback(() => {
+        setIsVisible(false);
+        setDeferredPrompt(null);
+        try { localStorage.setItem(DISMISS_KEY, '1'); } catch { /* ignore */ }
     }, []);
 
     const handleInstall = async () => {
@@ -37,7 +46,6 @@ export default function InstallBanner() {
         
         if (outcome === 'accepted') {
             console.log('User accepted the install prompt');
-            // Track install in DB
             try {
                 await fetch('/api/pwa/install', { method: 'POST' });
             } catch (err) {
@@ -45,8 +53,7 @@ export default function InstallBanner() {
             }
         }
         
-        setIsVisible(false);
-        setDeferredPrompt(null);
+        dismiss();
     };
 
     if (!isVisible) return null;
@@ -58,7 +65,7 @@ export default function InstallBanner() {
                 <div className="absolute -top-12 -right-12 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all"></div>
                 
                 <button 
-                    onClick={() => setIsVisible(false)}
+                    onClick={dismiss}
                     className="absolute top-4 right-4 p-1 rounded-lg hover:bg-white/5 text-slate-500 hover:text-white transition-all"
                 >
                     <X className="w-4 h-4" />
@@ -83,7 +90,7 @@ export default function InstallBanner() {
                                 Install Now
                             </button>
                             <button 
-                                onClick={() => setIsVisible(false)}
+                                onClick={dismiss}
                                 className="px-5 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 text-[10px] font-black uppercase tracking-widest hover:text-white hover:bg-white/10 transition-all"
                             >
                                 Later
@@ -95,3 +102,4 @@ export default function InstallBanner() {
         </div>
     );
 }
+
