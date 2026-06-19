@@ -1,9 +1,9 @@
 export const dynamic = 'force-dynamic';
 import {
-    Sparkles, FileText,
+    FileText,
     Briefcase, Zap, ArrowRight, Activity, Calendar,
     Layout, BrainCircuit, TrendingUp, Compass, Clock, ShieldCheck, Crown, GraduationCap, Bot
-} from 'lucide-react'
+, Wand2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getSession } from '@/lib/auth/jwt'
 import Link from 'next/link'
@@ -62,7 +62,7 @@ export default async function DashboardPage({ params }: { params: { locale: stri
                            href={`/${locale}/dashboard/billing?plan=monthly`}
                            className="inline-flex items-center justify-center gap-2 px-6 h-10 rounded-full bg-[#171717] hover:bg-[#2e2e2e] text-white text-sm font-medium transition-colors border border-[#171717] shadow-sm shrink-0"
                         >
-                          Upgrade to Pro <Sparkles className="w-4 h-4 text-white" />
+                          Upgrade to Pro <Wand2 className="w-4 h-4 text-white" />
                         </Link>
                     ) : (
                         <div className="flex items-center gap-2.5 bg-white border border-[#EBEBEB] px-3.5 py-1.5 rounded-full shadow-sm">

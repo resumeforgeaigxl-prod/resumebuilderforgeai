@@ -2,14 +2,13 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Check, Sparkles } from "lucide-react";
+import { Check, Wand2} from 'lucide-react';
 import {
   DEFAULT_LOCALE,
   fadeInScale,
   fadeInUp,
   hoverLift,
-  pricingTiers,
-} from "@/lib/constants";
+  pricingTiers } from "@/lib/constants";
 
 type PricingProps = {
   locale?: string;
@@ -42,7 +41,7 @@ export default function Pricing({ locale = DEFAULT_LOCALE }: PricingProps) {
                 <div className="glass-card h-full rounded-[27px] xl:rounded-[31px] border-0 bg-slate-950/[0.94] p-5 xl:p-6 flex flex-col relative overflow-hidden">
                   {tier.featured ? (
                     <div className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full border border-sky-300/[0.22] bg-sky-400/[0.10] px-2 py-1 text-[9px] xl:text-[10px] font-semibold uppercase tracking-[0.2em] text-sky-100 z-10">
-                      <Sparkles className="h-3 w-3" />
+                      <Wand2 className="h-3 w-3" />
                       Popular
                     </div>
                   ) : null}

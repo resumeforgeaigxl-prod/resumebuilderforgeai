@@ -2,7 +2,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useParams } from 'next/navigation';
-import { Brain, Globe, MessageSquareWarning, Sparkles, Wrench, ArrowRight, Code2, Building2 } from 'lucide-react';
+import { Brain, Globe, MessageSquareWarning, Wrench, ArrowRight, Code2, Building2 , Wand2 } from 'lucide-react';
 import Link from 'next/link';
 
 const TOOLS = [
@@ -21,7 +21,7 @@ const TOOLS = [
         id: 'mock-test',
         title: 'InterviewForge JD-Based Test',
         description: 'Generate 50+ role-specific MCQs and aptitude questions from any job description.',
-        icon: Sparkles,
+        icon: Wand2,
         href: '/mock-test',
         color: 'text-blue-600',
         bg: 'bg-blue-50',
@@ -76,7 +76,7 @@ const TOOLS = [
         id: 'explainforge',
         title: 'ExplainForge AI',
         description: 'Human-style project explanation engine & professional documentation generator.',
-        icon: Sparkles,
+        icon: Wand2,
         href: '/explainforge',
         color: 'text-emerald-600',
         bg: 'bg-emerald-50',
@@ -130,7 +130,7 @@ export default function ToolsPage() {
             </div>
 
             <div className="p-12 text-center bg-[#FFFFFF] border border-[#EBEBEB] rounded-xl shadow-sm relative overflow-hidden">
-                <Sparkles className="w-10 h-10 text-[#171717] mx-auto mb-4" />
+                <Wand2 className="w-10 h-10 text-[#171717] mx-auto mb-4" />
                 <h4 className="text-base font-semibold text-[#171717] mb-2">Expanding the Forge</h4>
                 <p className="text-[#4D4D4D] text-xs max-w-sm mx-auto leading-relaxed">
                     We&apos;re constantly engineering new modules to give you an unfair advantage in the market. 

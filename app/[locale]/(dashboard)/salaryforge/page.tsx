@@ -9,13 +9,13 @@ import {
     Filter,
     Zap,
     Scale,
-    Sparkles,
     Loader2,
     CheckCircle2,
     Calculator,
     ShieldCheck,
     FileSearch,
     IndianRupee,
+    Wand2
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
@@ -95,7 +95,7 @@ function SalaryForgeLogic() {
 
                 <div className="flex items-center gap-4">
                     <Button onClick={generateNegotiationScript} disabled={isGenerating} className="px-6 h-10 rounded-md bg-[#171717] hover:bg-[#333333] text-white font-medium text-xs shadow-sm transition-all">
-                        {isGenerating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                        {isGenerating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Wand2 className="w-4 h-4 mr-2" />}
                         Analyze Market Rate
                     </Button>
                     <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-[#EBEBEB] shadow-sm">
@@ -161,7 +161,7 @@ function SalaryForgeLogic() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                                     <div className="space-y-4">
                                         <h4 className="text-sm font-semibold text-[#171717] flex items-center gap-2">
-                                            <Sparkles className="w-4 h-4 text-[#171717]" /> Key Tactics
+                                            <Wand2 className="w-4 h-4 text-[#171717]" /> Key Tactics
                                         </h4>
                                         <ul className="space-y-3">
                                             {negotiationData.key_points.map((point, i) => (

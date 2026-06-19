@@ -2,7 +2,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Play, Clock, Sparkles, Loader2, MessageSquare, Zap, Target, Globe } from 'lucide-react';
+import { Play, Clock, Loader2, MessageSquare, Zap, Target, Globe , Brain } from 'lucide-react';
 import { FeatureGate } from '@/components/pricing/FeatureGate';
 
 interface VideoRecord {
@@ -169,7 +169,7 @@ export default function LearnForge() {
 
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-2 pb-3 border-b border-[#EBEBEB]">
-                                            <Sparkles className="w-5 h-5 text-[#171717]" />
+                                            <Brain className="w-5 h-5 text-[#171717]" />
                                             <h3 className="text-base font-semibold text-[#171717]">AI Learning Notes</h3>
                                         </div>
 
@@ -322,7 +322,7 @@ export default function LearnForge() {
                             </div>
                             <div className="relative z-10 space-y-3">
                                 <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
-                                    <Sparkles className="w-5 h-5 text-white" />
+                                    <Brain className="w-5 h-5 text-white" />
                                 </div>
                                 <h4 className="text-base font-semibold text-white">Need Help?</h4>
                                 <p className="text-white/80 text-xs leading-relaxed">

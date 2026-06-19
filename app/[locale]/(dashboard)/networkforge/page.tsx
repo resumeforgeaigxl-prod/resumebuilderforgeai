@@ -9,7 +9,6 @@ import {
     Filter,
     Zap,
     Users,
-    Sparkles,
     Loader2,
     CheckCircle2,
     MessageSquareText,
@@ -17,7 +16,7 @@ import {
     Search,
     Globe,
     ExternalLink
-} from 'lucide-react';
+, Wand2 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';

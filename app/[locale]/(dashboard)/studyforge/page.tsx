@@ -11,9 +11,8 @@ import {
     Clock,
     Trash2,
     Search,
-    BookOpen,
-    Sparkles
-} from 'lucide-react';
+    BookOpen
+, Brain } from 'lucide-react';
 import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';

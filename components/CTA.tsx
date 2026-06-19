@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Wand2} from 'lucide-react';
 import { DEFAULT_LOCALE, fadeInScale, fadeInUp } from "@/lib/constants";
 
 type CTAProps = {
@@ -25,7 +25,7 @@ export default function CTA({ locale = DEFAULT_LOCALE }: CTAProps) {
 
           <motion.div {...fadeInUp(0.08)} className="relative z-10 max-w-3xl flex flex-col items-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#00D4A0]/30 bg-[#00D4A0]/10 px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-[#00D4A0] backdrop-blur-sm shadow-[0_0_20px_rgba(0,212,160,0.15)] mb-8">
-              <Sparkles className="w-3.5 h-3.5" />
+              <Wand2 className="w-3.5 h-3.5" />
               <span>The Next Step</span>
             </div>
             

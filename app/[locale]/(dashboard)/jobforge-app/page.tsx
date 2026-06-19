@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Briefcase, DollarSign, Zap, Loader2, Sparkles, Filter, ChevronRight, Building2 } from 'lucide-react';
+import { Search, MapPin, Briefcase, DollarSign, Zap, Loader2, Filter, ChevronRight, Building2 } from 'lucide-react';
 import { searchEngine } from '@/lib/search/mock-engine';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -110,7 +110,7 @@ export default function JobSearchApp() {
 
                 {results.length === 0 && !isSearching && (
                     <div className="p-12 text-center rounded-2xl border border-dashed border-[#1E2A42] bg-transparent">
-                        <Sparkles className="w-8 h-8 text-[#4A5568] mx-auto mb-4" />
+                        <Search className="w-8 h-8 text-[#4A5568] mx-auto mb-4" />
                         <h3 className="text-base font-bold text-[#7A8BA8] mb-1">No matches found</h3>
                         <p className="text-sm text-[#4A5568]">Try broadening your search query or adjusting your filters.</p>
                     </div>

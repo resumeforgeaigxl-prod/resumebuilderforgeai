@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, Loader2, X, Download, Save, FileText, CheckCircle } from 'lucide-react';
+import { Wand2, Loader2, X, Download, Save, FileText, CheckCircle } from 'lucide-react';
 import { ResumeData } from '@/types/resume';
 import { jsPDF } from 'jspdf';
 
@@ -138,7 +138,7 @@ export function CoverLetterModal({ resumeId, resumeData, onClose }: CoverLetterM
                 <div className="w-full md:w-1/3 p-6 sm:p-8 border-b md:border-b-0 md:border-r border-[#EBEBEB] bg-[#FAFAFA] overflow-y-auto">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-xl font-bold flex items-center gap-2 text-[#171717]">
-                            <Sparkles className="w-5 h-5 text-[#0070f3]" />
+                            <Wand2 className="w-5 h-5 text-[#0070f3]" />
                             AI Cover Letter
                         </h2>
                         <button onClick={onClose} className="md:hidden p-2 hover:bg-[#FAFAFA] rounded-full text-[#8F8F8F] hover:text-[#171717]">
@@ -207,7 +207,7 @@ export function CoverLetterModal({ resumeId, resumeData, onClose }: CoverLetterM
                             disabled={isGenerating || !jobDescription || !roleTitle}
                             className="w-full py-3 bg-[#171717] hover:bg-[#333333] text-white rounded-md font-bold flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 transition-all mt-4"
                         >
-                            {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Sparkles className="w-4 h-4" /> Generate Letter</>}
+                            {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Wand2 className="w-4 h-4" /> Generate Letter</>}
                         </button>
                     </div>
                 </div>
@@ -266,7 +266,7 @@ export function CoverLetterModal({ resumeId, resumeData, onClose }: CoverLetterM
                         ) : (
                             <div className="h-full flex flex-col items-center justify-center text-center space-y-4">
                                 <div className="p-4 bg-[#FAFAFA] rounded-lg border border-[#EBEBEB]" title="AI Memory">
-                                    <Sparkles className="w-10 h-10 text-[#8F8F8F]" />
+                                    <FileText className="w-10 h-10 text-[#8F8F8F]" />
                                 </div>
                                 <div>
                                     <h4 className="font-bold text-[#8F8F8F]">Ready to boost your application?</h4>

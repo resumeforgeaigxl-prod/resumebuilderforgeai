@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 ;
 
 import ShareExperienceForm from '@/components/interview-prep/ShareExperienceForm';
-import { Sparkles, Trophy, ShieldHalf } from 'lucide-react';
+import { Trophy, ShieldHalf , Wand2 } from 'lucide-react';
 
 export default function ShareInterviewPage() {
     return (
@@ -11,7 +11,7 @@ export default function ShareInterviewPage() {
             {/* Header Content */}
             <div className="max-w-4xl mx-auto text-center mb-12 relative">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0070F3]/5 border border-[#0070F3]/10 text-[#0070F3] text-xs font-semibold uppercase tracking-wider mb-6">
-                    <Sparkles className="w-3.5 h-3.5 text-[#0070F3]" /> Crowdsourced Intelligence
+                    <Wand2 className="w-3.5 h-3.5 text-[#0070F3]" /> Crowdsourced Intelligence
                 </div>
 
                 <h1 className="text-3xl sm:text-5xl font-semibold text-[#171717] tracking-tight mb-6 font-sans">

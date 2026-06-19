@@ -2,10 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-    Briefcase, MapPin, ExternalLink, Sparkles,
-    Loader2, Info, AlertCircle, Star, RefreshCw, Globe, GraduationCap,
-    Lock, Crown, Zap
-} from 'lucide-react';
+    Briefcase, MapPin, ExternalLink, Loader2, Info, AlertCircle, Star, RefreshCw, Globe, GraduationCap,
+    Lock, Crown, Zap, FileText} from 'lucide-react';
 import Link from 'next/link';
 
 interface Job {
@@ -179,7 +177,7 @@ function JobCard({ job }: { job: Job }) {
                     className="px-3 py-2.5 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/20 text-purple-300 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all"
                     title="Generate Cover Letter"
                 >
-                    <Sparkles className="w-3.5 h-3.5" /> Cover Letter
+                    <FileText className="w-3.5 h-3.5" /> Cover Letter
                 </button>
             </div>
 
@@ -323,8 +321,7 @@ function JobSection({
     loading,
     data,
     visible,
-    onLoadMore,
-}: {
+    onLoadMore }: {
     icon: React.ReactNode;
     title: string;
     accentClass: string;
@@ -419,8 +416,7 @@ export function JobBoard() {
             visibleCount: data.visibleCount ?? 0,
             lockedCount: data.lockedCount ?? 0,
             userPlan: data.userPlan ?? 'free',
-            planLimit: data.planLimit ?? null,
-        };
+            planLimit: data.planLimit ?? null };
     }, []);
 
     const loadMnc = useCallback(async () => {

@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 ;
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, Sparkles, Globe, Eye, Copy, Check, Layout, ArrowLeft } from 'lucide-react';
+import { Loader2, Globe, Eye, Copy, Check, Layout, ArrowLeft , Wand2 } from 'lucide-react';
 import { FeatureGate } from '@/components/pricing/FeatureGate';
 import { Portfolio, PORTFOLIO_THEMES } from '@/types/portfolio';
 import Link from 'next/link';
@@ -110,14 +110,14 @@ function PortfolioContent() {
                         <div className="text-center py-24 bg-white/[0.02] border border-white/5 rounded-[4rem] backdrop-blur-xl relative overflow-hidden group">
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
                             <div className="w-24 h-24 bg-indigo-500/10 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 group-hover:scale-110 transition-transform duration-700">
-                                <Sparkles className="w-12 h-12 text-indigo-400" />
+                                <Wand2 className="w-12 h-12 text-indigo-400" />
                             </div>
                             <h2 className="text-3xl font-black mb-3 tracking-tight italic uppercase text-white">Initialize Signal</h2>
                             <p className="text-slate-500 mb-10 max-w-sm mx-auto text-xs font-black uppercase tracking-widest leading-relaxed">Our AI will analyze your latest resume and materialize a stunning high-performance portfolio in seconds.</p>
                             {error && <p className="text-red-400 text-[10px] font-black uppercase tracking-widest mb-8 bg-red-400/5 py-3 px-6 rounded-2xl border border-red-400/10 max-w-xs mx-auto italic">ERR: {error}</p>}
                             <button onClick={generate} disabled={generating}
                                 className="px-12 py-5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-black rounded-[2rem] transition-all flex items-center gap-4 mx-auto shadow-2xl shadow-indigo-600/40 uppercase tracking-[0.2em] text-xs">
-                                {generating ? <><Loader2 className="w-5 h-5 animate-spin" />Assembling...</> : <><Sparkles className="w-5 h-5" />Construct Now</>}
+                                {generating ? <><Loader2 className="w-5 h-5 animate-spin" />Assembling...</> : <><Wand2 className="w-5 h-5" />Construct Now</>}
                             </button>
                         </div>
                     ) : (
@@ -178,7 +178,7 @@ function PortfolioContent() {
                                 </a>
                                 <button onClick={() => { setPortfolio(null); generate(); }} disabled={generating}
                                     className="flex-1 py-5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 rounded-[2rem] text-[10px] font-black flex items-center justify-center gap-4 transition-all shadow-2xl shadow-indigo-600/30 uppercase tracking-[0.2em]">
-                                    {generating ? <Loader2 className="w-6 h-6 animate-spin" /> : <Sparkles className="w-6 h-6" />}
+                                    {generating ? <Loader2 className="w-6 h-6 animate-spin" /> : <Wand2 className="w-6 h-6" />}
                                     Re-Materialize
                                 </button>
                             </div>

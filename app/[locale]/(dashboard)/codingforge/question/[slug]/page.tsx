@@ -14,8 +14,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
     ChevronLeft,
-    Sparkles,
     Building2,
+    Lightbulb
 } from 'lucide-react';
 import CodeEditor from '@/components/codingforge/CodeEditor';
 import OutputConsole from '@/components/codingforge/OutputConsole';
@@ -244,7 +244,7 @@ export default function QuestionDetailPage() {
                                     {!aiExplanation ? (
                                         <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
                                             <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100 shadow-sm">
-                                                <Sparkles size={24} />
+                                                <Lightbulb size={24} />
                                             </div>
                                             <h3 className="text-base font-semibold text-[#171717]">No AI analysis yet</h3>
                                             <p className="max-w-[300px] text-[#8F8F8F] text-xs leading-relaxed font-normal">Use the "AI Explain" button in the editor to generate a detailed breakdown of your solution or the problem.</p>

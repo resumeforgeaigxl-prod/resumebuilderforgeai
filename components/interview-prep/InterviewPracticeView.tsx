@@ -4,8 +4,7 @@ import { useState } from 'react';
 import {
     Mic, MicOff, Send, MessageSquare,
     Zap, RotateCcw, Trophy,
-    ShieldHalf, Sparkles, Loader2
-} from 'lucide-react';
+    ShieldHalf, Loader2, Award} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface PracticeProps {
@@ -146,7 +145,7 @@ export default function InterviewPracticeView({ question, onClose }: PracticePro
 
                                             <div className="p-8 rounded-[2rem] bg-white/5 border border-white/5">
                                                 <div className="flex items-center gap-2 text-[10px] font-black text-amber-400 uppercase tracking-widest mb-4">
-                                                    <Sparkles className="w-4 h-4" /> The Gold Standard (Model Answer)
+                                                    <Award className="w-4 h-4" /> The Gold Standard (Model Answer)
                                                 </div>
                                                 <p className="text-sm text-slate-400 leading-relaxed italic">
                                                     &ldquo;{feedback.model_answer}&rdquo;

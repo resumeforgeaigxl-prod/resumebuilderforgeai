@@ -19,7 +19,7 @@ import {
   Rocket,
   Search,
   ShieldCheck,
-  Sparkles,
+  Lightbulb,
   Target,
   Wand2,
   Workflow,
@@ -146,7 +146,7 @@ export const aiToolCards: LandingCard[] = [
   {
     title: "ExplainForge AI",
     description: "Break down difficult concepts, code, and interview answers into clear language.",
-    icon: Sparkles,
+    icon: Lightbulb,
     accent: "from-sky-500/20 to-cyan-400/10",
   },
   {

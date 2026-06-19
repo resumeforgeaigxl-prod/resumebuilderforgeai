@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
-import { Loader2, Zap, Sparkles, Copy, RotateCcw } from 'lucide-react';
+import { Loader2, Zap, Lightbulb, Copy, RotateCcw } from 'lucide-react';
 import type { ExecutionResult } from '../../lib/code-execution';
 import { ForgeSoftPaywall } from '../auth/ForgeSoftPaywall';
 
@@ -150,7 +150,7 @@ export default function CodeEditor({ problemId, problemContext, onResult, onExpl
                         disabled={isExplaining}
                         className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all active:scale-95 disabled:opacity-50"
                     >
-                        {isExplaining ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                        {isExplaining ? <Loader2 className="w-3 h-3 animate-spin" /> : <Lightbulb className="w-3 h-3" />}
                         {isExplaining ? 'Thinking...' : 'AI Explain'}
                     </button>
                 </div>

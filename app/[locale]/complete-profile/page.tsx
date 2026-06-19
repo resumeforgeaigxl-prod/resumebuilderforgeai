@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { UserCheck, Loader2, Sparkles } from 'lucide-react';
+import { UserCheck, Loader2 , Wand2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
@@ -186,7 +186,7 @@ export default function CompleteProfilePage() {
                                 <Loader2 className="w-4 h-4 animate-spin mx-auto" />
                             ) : (
                                 <div className="flex items-center justify-center gap-2">
-                                    <Sparkles className="w-4 h-4" />
+                                    <Wand2 className="w-4 h-4" />
                                     Complete Integration
                                 </div>
                             )}

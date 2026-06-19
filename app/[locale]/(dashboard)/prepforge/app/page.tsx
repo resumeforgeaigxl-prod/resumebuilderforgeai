@@ -10,7 +10,6 @@ import {
     Zap,
     ArrowLeftRight,
     RefreshCw,
-    Sparkles,
     Loader2,
     CheckCircle2,
     Terminal,
@@ -159,7 +158,7 @@ function PrepForgeLogic() {
 
                 <div className="flex items-center gap-4">
                     <Button onClick={() => generateDaily()} disabled={isGenerating} className="px-4 py-2 rounded-md bg-[#171717] hover:bg-[#333333] text-white text-sm font-medium transition-all shadow-sm">
-                        {isGenerating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                        {isGenerating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
                         Initialize Daily Bundle
                     </Button>
                     <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#FFFFFF] border border-[#EBEBEB] shadow-sm">
@@ -175,7 +174,7 @@ function PrepForgeLogic() {
                 <div className="lg:col-span-1 p-6 rounded-xl border border-[#EBEBEB] bg-[#FFFFFF] space-y-6 shadow-sm">
                     <div className="space-y-2">
                         <h2 className="text-base font-semibold text-[#171717] flex items-center gap-2">
-                            <Sparkles className="w-4 h-4 text-[#171717]" />
+                            <Zap className="w-4 h-4 text-[#171717]" />
                             AI Logic Engine
                         </h2>
                         <p className="text-xs text-[#8F8F8F]">Generate custom TCS NQT patterns instantly.</p>
@@ -322,7 +321,7 @@ function PrepForgeLogic() {
                     ) : (
                         <div className="h-full flex flex-col items-center justify-center p-12 text-center rounded-xl border border-dashed border-[#EBEBEB] bg-[#FFFFFF] shadow-sm">
                             <div className="p-4 rounded-full bg-[#FAFAFA] border border-[#EBEBEB] text-[#8F8F8F] mb-4">
-                                <Sparkles className="w-8 h-8" />
+                                <Zap className="w-8 h-8" />
                             </div>
                             <h3 className="text-base font-semibold text-[#171717] mb-1">No Questions Yet</h3>
                             <p className="text-sm text-[#8F8F8F] max-w-sm">Select a topic to generate AI-powered practice questions.</p>

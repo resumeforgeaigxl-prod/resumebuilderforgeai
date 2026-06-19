@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { Bot, User, Rocket, MessageSquare, Sparkles, Code, GraduationCap, BrainCircuit, Terminal, ChevronRight } from 'lucide-react';
+import { Bot, User, Rocket, MessageSquare, Code, GraduationCap, BrainCircuit, Terminal, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { useToast } from '@/components/ui/use-toast';

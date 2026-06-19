@@ -9,7 +9,6 @@ import {
     SendIcon,
     XIcon,
     LoaderIcon,
-    Sparkles,
     Command,
     FileText,
     Code2,
@@ -19,6 +18,7 @@ import {
     Rocket,
     MessageSquare,
     BrainCircuit,
+    Bot
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as React from "react";
@@ -148,7 +148,7 @@ export function MentorForgeChatInput({
     });
 
     const MODES: ForgeMode[] = [
-        { id: "General", icon: Sparkles, color: "text-[#171717]" },
+        { id: "General", icon: Bot, color: "text-[#171717]" },
         { id: "Career", icon: Rocket, color: "text-[#171717]" },
         { id: "Coding", icon: Code2, color: "text-[#171717]" },
         { id: "Interview", icon: MessageSquare, color: "text-[#171717]" },
@@ -448,7 +448,7 @@ export function MentorForgeChatInput({
             <div className="flex items-center justify-center gap-4 pt-1">
                 <div className="h-px bg-[#EBEBEB] flex-1" />
                 <p className="text-[8px] text-[#8F8F8F] font-bold uppercase tracking-[0.4em] flex items-center gap-2">
-                    <Sparkles className="w-2.5 h-2.5 text-[#171717]" />
+                    <Bot className="w-2.5 h-2.5 text-[#171717]" />
                     MentorForge Pro v3.1
                 </p>
                 <div className="h-px bg-[#EBEBEB] flex-1" />

@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { fadeInUp, fadeInScale } from '@/lib/constants';
-import { ArrowRight, Sparkles, Calendar, ChevronRight } from 'lucide-react';
+import { ArrowRight, Calendar, ChevronRight, Zap} from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { BlogPost } from '@/lib/seo-service';
@@ -21,7 +21,7 @@ export default function WhatsNew({ locale = 'en', posts = [] }: { locale: string
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
                     <motion.div {...fadeInUp()} className="max-w-2xl">
                         <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] w-fit mb-5 shadow-lg shadow-blue-500/5">
-                            <Sparkles size={12} className="animate-pulse" /> Platform Pulse
+                            <Zap size={12} className="animate-pulse" /> Platform Pulse
                         </span>
                         <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter leading-none mb-4">
                             🚀 What’s New

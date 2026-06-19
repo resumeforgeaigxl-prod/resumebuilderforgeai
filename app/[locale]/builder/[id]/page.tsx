@@ -8,10 +8,10 @@ import { createClient } from '@/lib/supabase/client';
 import { ResumeData, ResumeExperience, ResumeProject, ResumeEducation, Certification, ResumeSkills } from '@/types/resume';
 import { ALL_TEMPLATES } from '@/types/templates';
 import {
-    Save, Sparkles, ArrowLeft, Plus, Trash2, Loader2,
+    Save, ArrowLeft, Plus, Trash2, Loader2,
     Building2, GraduationCap, Lightbulb, Wand2, Zap,
     AlertCircle, CheckCircle, X, Download, ExternalLink,
-    Layout, ChevronRight, Award, Eye, EyeOff
+    Layout, ChevronRight, Award, Eye, EyeOff, FileText
 } from 'lucide-react';
 import Link from 'next/link';
 import { PreviewLayer } from '@/components/builder/preview/PreviewLayer';
@@ -478,7 +478,7 @@ export default function BuilderPage() {
                             {step === 'template' && (
                                 <button onClick={() => setStep('optimize')} disabled={isResumeEmpty}
                                     className="flex items-center gap-2 px-3 py-1.5 bg-[#171717] hover:bg-[#333333] text-white rounded-md text-xs font-semibold shadow-sm transition-all disabled:opacity-50 animate-in fade-in duration-200">
-                                    <Sparkles className="w-3.5 h-3.5" />
+                                    <Wand2 className="w-3.5 h-3.5" />
                                     <span>Next: AI Optimize</span>
                                 </button>
                             )}
@@ -487,7 +487,7 @@ export default function BuilderPage() {
                                 <>
                                     <button onClick={() => setShowOptimizer(true)} disabled={isResumeEmpty}
                                         className="flex items-center gap-2 px-3 py-1.5 bg-[#FFFFFF] border border-[#EBEBEB] text-[#171717] hover:bg-[#FAFAFA] rounded-md text-xs font-semibold shadow-sm transition-all disabled:opacity-50 animate-in fade-in duration-200">
-                                        <Sparkles className="w-3.5 h-3.5 text-[#0070F3]" />
+                                        <Wand2 className="w-3.5 h-3.5 text-[#0070F3]" />
                                         <span>AI Optimize</span>
                                     </button>
                                     <button onClick={() => setStep('download')} disabled={isResumeEmpty}
@@ -558,7 +558,7 @@ export default function BuilderPage() {
                                 <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
                                     <div className="flex items-center gap-3">
                                         <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
-                                            <Sparkles className="w-5 h-5" />
+                                            <Wand2 className="w-5 h-5" />
                                         </div>
                                         <div>
                                             <p className="text-sm font-bold text-[#171717]">Reviewing AI Changes</p>
@@ -624,7 +624,7 @@ export default function BuilderPage() {
                                         disabled={isGeneratingSummary || !rd.experience?.length}
                                         className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-550/10 hover:bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-100 rounded-md text-xs font-bold transition-all disabled:opacity-50"
                                     >
-                                        {isGeneratingSummary ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                                        {isGeneratingSummary ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
                                         AI Generate
                                     </button>
                                 }
@@ -789,7 +789,7 @@ export default function BuilderPage() {
                                         <div className="p-6 rounded-xl bg-[#FFFFFF] border border-[#EBEBEB] shadow-sm">
                                             <div className="flex items-center justify-between mb-4">
                                                 <h3 className="font-bold text-sm flex items-center gap-2 text-[#171717]">
-                                                    <Sparkles className="w-4 h-4 text-purple-600" /> ATS Optimization
+                                                    <Zap className="w-4 h-4 text-purple-600" /> ATS Optimization
                                                 </h3>
                                                 <span className="text-2xl font-black text-[#0070f3]">{atsResult?.score || 0}%</span>
                                             </div>
@@ -830,7 +830,7 @@ export default function BuilderPage() {
                                                 </div>
                                             ) : (
                                                 <div className="text-center py-6 bg-[#FAFAFA] rounded-lg border border-[#EBEBEB]">
-                                                    <Sparkles className="w-8 h-8 text-[#8F8F8F] mx-auto mb-2" />
+                                                    <FileText className="w-8 h-8 text-[#8F8F8F] mx-auto mb-2" />
                                                     <p className="text-[10px] text-[#8F8F8F] font-medium px-6 leading-relaxed italic">
                                                         Enter a Target Role or Job Description below for better scores.
                                                     </p>
@@ -896,7 +896,7 @@ export default function BuilderPage() {
 
                             {!optimizationSuccess ? (
                                 <>
-                                    <h2 className="text-xl font-bold mb-2 flex items-center gap-2 text-[#171717]"><Sparkles className="w-5 h-5 text-[#0070f3]" />AI Job Optimizer</h2>
+                                    <h2 className="text-xl font-bold mb-2 flex items-center gap-2 text-[#171717]"><Wand2 className="w-5 h-5 text-[#0070f3]" />AI Job Optimizer</h2>
                                     <p className="text-[#4D4D4D] mb-5 text-sm">Paste the Job Description to align your resume experience and projects.</p>
                                     <textarea
                                         value={jobDescription}

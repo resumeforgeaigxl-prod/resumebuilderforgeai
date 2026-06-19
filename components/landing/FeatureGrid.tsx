@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles, Zap, Target, Layout, BrainCircuit, MessageSquareWarning, Briefcase, Shield } from "lucide-react";
+import { Zap, Target, Layout, BrainCircuit, MessageSquareWarning, Briefcase, Shield, Wand2} from 'lucide-react';
 import { Card } from "@/components/ui/Card";
 
 interface FeatureGridProps {
@@ -9,7 +9,7 @@ interface FeatureGridProps {
 
 export default function FeatureGrid({ t }: FeatureGridProps) {
   const features = [
-    { icon: <Sparkles className="text-indigo-400" />, title: t('ai_builder'), desc: t('ai_builder_desc') },
+    { icon: <Wand2 className="text-indigo-400" />, title: t('ai_builder'), desc: t('ai_builder_desc') },
     { icon: <Zap className="text-blue-400" />, title: t('ats_analyzer'), desc: t('ats_analyzer_desc') },
     { icon: <Target className="text-emerald-400" />, title: t('jd_matching'), desc: t('jd_matching_desc') },
     { icon: <Layout className="text-pink-400" />, title: t('portfolio_gen'), desc: t('portfolio_gen_desc') },

@@ -4,7 +4,6 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import {
-  Sparkles,
   FileText,
   Code2,
   Mic,
@@ -13,6 +12,7 @@ import {
   ArrowUpIcon,
   Paperclip,
   PlusIcon,
+  Bot
 } from "lucide-react";
 
 interface UseAutoResizeTextareaProps {
@@ -89,7 +89,7 @@ export function MentorForgeChat() {
       {/* Heading with gradient */}
       <div className="text-center space-y-3">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#00D4A0]/15 bg-[#00D4A0]/8 text-[#00D4A0] text-xs font-semibold uppercase tracking-[0.15em]">
-          <Sparkles className="w-3.5 h-3.5" />
+          <Bot className="w-3.5 h-3.5" />
           MentorForge AI
         </div>
         <h1 className="text-4xl font-extrabold tracking-tight">

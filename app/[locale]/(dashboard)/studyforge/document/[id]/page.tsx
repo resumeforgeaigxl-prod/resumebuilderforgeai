@@ -11,11 +11,10 @@ import {
     FileText,
     Download,
     Loader2,
-    Sparkles,
     HelpCircle,
     Lightbulb,
     BookOpen
-} from 'lucide-react';
+, Brain } from 'lucide-react';
 import NextDynamic from 'next/dynamic';
 import Link from 'next/link';
 
@@ -140,7 +139,7 @@ export default function DocumentDetailPage() {
                         <div className="space-y-10 text-[#171717]">
                             <div className="flex items-center gap-3 text-[#0070F3] mb-8 px-2">
                                 <div className="p-2 rounded-lg bg-blue-50 border border-blue-100 text-[#0070F3]">
-                                    <Sparkles className="w-5 h-5" />
+                                    <Brain className="w-5 h-5" />
                                 </div>
                                 <div>
                                     <h3 className="text-xs font-semibold uppercase tracking-wider font-mono">Intelligence Summary</h3>
@@ -249,7 +248,7 @@ export default function DocumentDetailPage() {
             <div className="space-y-8 animate-in fade-in duration-300 text-[#171717]">
                 <div className="flex items-center gap-3 text-emerald-700 mb-8 px-2">
                     <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700">
-                        {isLikelyNotes ? <BookOpen className="w-5 h-5" /> : <Sparkles className="w-5 h-5" />}
+                        {isLikelyNotes ? <BookOpen className="w-5 h-5" /> : <Brain className="w-5 h-5" />}
                     </div>
                     <div>
                         <h3 className="text-xs font-semibold uppercase tracking-wider font-mono">{isLikelyNotes ? 'Research Notes' : 'AI Response'}</h3>

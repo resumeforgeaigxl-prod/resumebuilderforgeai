@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect, useRef } from 'react';
 import {
-    Sparkles,
     FileText,
     Zap,
     Github,
@@ -28,7 +27,7 @@ import {
     FolderOpen,
     FileLineChart,
     FileCode2
-} from 'lucide-react';
+, Lightbulb } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -363,7 +362,7 @@ export default function ExplainForgePage() {
                 <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#EBEBEB] pb-6 mb-8">
                     <div>
                         <div className="flex items-center gap-2 text-[#8F8F8F] font-mono text-xs uppercase tracking-wider mb-2">
-                            <Sparkles className="w-3.5 h-3.5 text-[#171717]" /> Intelligence Core
+                            <Lightbulb className="w-3.5 h-3.5 text-[#171717]" /> Intelligence Core
                         </div>
                         <h1 className="text-3xl font-semibold tracking-tight text-[#171717] uppercase">ExplainForge</h1>
                         <p className="text-[#4D4D4D] mt-1.5 text-base">Transform source code into professional interview-ready narratives and logic flows.</p>
@@ -809,7 +808,7 @@ export default function ExplainForgePage() {
 
                                                         <div className="pt-6 border-t border-[#EBEBEB]">
                                                             <div className="flex items-center gap-2 text-[#171717] mb-4">
-                                                                <Sparkles className="w-4 h-4 text-[#4D4D4D]" />
+                                                                <Lightbulb className="w-4 h-4 text-[#4D4D4D]" />
                                                                 <h4 className="text-xs font-semibold uppercase tracking-wider">Interview Material for this Module</h4>
                                                             </div>
                                                             <div className="p-6 rounded border border-[#EBEBEB] bg-[#FAFAFA] italic text-[#4D4D4D] text-xs leading-relaxed">

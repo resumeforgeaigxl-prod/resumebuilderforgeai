@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Video, Camera, Sparkles, Play, Download, Trash2, Plus, GripVertical, Save, Upload, RefreshCcw } from 'lucide-react';
+import { Video, Camera, Play, Download, Trash2, Plus, GripVertical, Save, Upload, RefreshCcw , Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
@@ -279,7 +279,7 @@ export default function DemoStudioClient() {
 
         <Card className="p-6 bg-white/[0.02] border-white/5 space-y-4">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-purple-400" /> AI Script Generator
+            <Wand2 className="w-5 h-5 text-purple-400" /> AI Script Generator
           </h2>
           <p className="text-sm text-slate-500">Generate a high-converting demo script using Gemini Flash.</p>
           <Button 
@@ -365,7 +365,7 @@ export default function DemoStudioClient() {
                   {generatingVoiceIndex === index ? (
                     <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
                   ) : (
-                    <Sparkles className="w-4 h-4" />
+                    <Wand2 className="w-4 h-4" />
                   )}
                 </Button>
                 {scene.audio && (

@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 ;
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Sparkles, Briefcase, FileText, ChevronRight, Brain, Target, BookOpen, Zap, Mic } from 'lucide-react';
+import { Loader2, Briefcase, FileText, ChevronRight, Brain, Target, BookOpen, Zap, Mic } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/I18nProvider';
 
 const FEATURES = [
@@ -62,7 +62,7 @@ export default function MockTestSetupPage() {
             <div className="max-w-4xl mx-auto px-6 py-12">
                 <div className="text-center mb-10">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-600/15 border border-blue-500/20 rounded-full text-blue-400 text-sm mb-4">
-                        <Sparkles className="w-4 h-4" /> AI-Powered Mock Interview Engine
+                        <Zap className="w-4 h-4" /> AI-Powered Mock Interview Engine
                     </div>
                     <h1 className="text-4xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
                         JD-Based Mock Test
@@ -161,7 +161,7 @@ export default function MockTestSetupPage() {
                             </>
                         ) : (
                             <>
-                                <Sparkles className="w-5 h-5" />
+                                <Zap className="w-5 h-5" />
                                 Generate Mock Test
                                 <ChevronRight className="w-5 h-5" />
                             </>

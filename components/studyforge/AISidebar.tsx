@@ -2,14 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 import {
-    Sparkles,
     FileText,
     Lightbulb,
     BookOpen,
     HelpCircle,
     Loader2,
     Send
-} from 'lucide-react';
+, Brain } from 'lucide-react';
 
 interface AISidebarProps {
     documentId: string;
@@ -85,7 +84,7 @@ export default function AISidebar({ documentId, onResponse }: AISidebarProps) {
             <div className="p-6 border-b border-[#EBEBEB]">
                 <div className="flex items-center gap-2 mb-1">
                     <div className="p-1.5 rounded-lg bg-blue-50 border border-blue-100 text-[#0070F3]">
-                        <Sparkles className="w-4 h-4" />
+                        <Brain className="w-4 h-4" />
                     </div>
                     <h2 className="text-[#171717] font-semibold uppercase tracking-wider text-xs">AI Assistant</h2>
                 </div>

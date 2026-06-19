@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Sparkles, Database, Code, Brain, Map, Search, Globe, Rocket } from "lucide-react";
+import { ArrowRight, Database, Code, Brain, Map, Search, Globe, Rocket, Wand2} from 'lucide-react';
 import { Button } from "@/components/ui/Button";
 
 interface HeroSectionProps {
@@ -23,7 +23,7 @@ export default function HeroSection({ locale }: HeroSectionProps) {
           animate={{ opacity: 1, y: 0 }}
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] backdrop-blur-md mb-10 shadow-xl"
         >
-          <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+          <Wand2 className="w-3.5 h-3.5 text-indigo-400" />
           <span className="text-[10px] font-black text-indigo-200 tracking-[0.2em] uppercase">
             Platform Ecosystem v2.0
           </span>
@@ -102,7 +102,7 @@ export default function HeroSection({ locale }: HeroSectionProps) {
                 <ModuleNode icon={<Map className="w-5 h-5" />} label="Roadmap" angle={180} />
                 <ModuleNode icon={<Search className="w-5 h-5" />} label="Jobs" angle={225} />
                 <ModuleNode icon={<Rocket className="w-5 h-5" />} label="Project" angle={270} />
-                <ModuleNode icon={<Sparkles className="w-5 h-5" />} label="AI Forge" angle={315} />
+                <ModuleNode icon={<Wand2 className="w-5 h-5" />} label="AI Forge" angle={315} />
            </div>
         </motion.div>
       </div>

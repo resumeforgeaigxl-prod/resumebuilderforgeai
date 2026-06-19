@@ -5,7 +5,6 @@ export const dynamic = 'force-dynamic';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { 
-    Sparkles, 
     FileText, 
     Activity, 
     CheckCircle2,
@@ -15,7 +14,7 @@ import {
     ChevronRight,
     Loader2,
     Database
-} from 'lucide-react';
+, Lightbulb } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -102,7 +101,7 @@ export default function ExplainForgeAdmin() {
             <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
                     <h1 className="text-3xl font-black text-white tracking-tight uppercase italic flex items-center gap-3">
-                        <Sparkles className="w-8 h-8 text-emerald-500" /> ExplainForge <span className="text-emerald-500">Monitor</span>
+                        <Lightbulb className="w-8 h-8 text-emerald-500" /> ExplainForge <span className="text-emerald-500">Monitor</span>
                     </h1>
                     <p className="text-slate-500 mt-1 font-medium">Analyze project explanation engine activity and AI orchestration usage.</p>
                 </div>

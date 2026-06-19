@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BookOpen, MessageSquare, Code, Download, ChevronRight, GraduationCap, Sparkles } from 'lucide-react';
+import { BookOpen, MessageSquare, Code, Download, ChevronRight, GraduationCap , Lightbulb } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -206,7 +206,7 @@ export default function KnowledgeForgeClient({ locale }: { locale: string }) {
                 <Card className="p-6 bg-[#FFFFFF] border border-[#EBEBEB] space-y-4 rounded-lg shadow-sm">
                   <h4 className="text-[10px] font-mono text-[#8F8F8F] uppercase tracking-wider border-b border-[#EBEBEB] pb-2">Central Intelligence</h4>
                   <Button onClick={explainTopic} className="w-full justify-start bg-[#FAFAFA] hover:bg-[#F2F2F2] border border-[#EBEBEB] text-[#171717] h-10 px-4 rounded-md">
-                    <Sparkles className="w-4 h-4 mr-3 text-[#171717]" /> Explain this Topic
+                    <Lightbulb className="w-4 h-4 mr-3 text-[#171717]" /> Explain this Topic
                   </Button>
                   <Button onClick={() => router.push(`/${locale}/codingforge`)} className="w-full justify-start bg-[#FAFAFA] hover:bg-[#F2F2F2] border border-[#EBEBEB] text-[#171717] h-10 px-4 rounded-md">
                     <Code className="w-4 h-4 mr-3 text-[#171717]" /> Practice Coding

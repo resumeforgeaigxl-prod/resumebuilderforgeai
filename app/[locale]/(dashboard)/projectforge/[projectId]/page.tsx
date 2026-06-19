@@ -12,9 +12,8 @@ import {
     Code,
     Info,
     Loader2,
-    Terminal,
-    Sparkles
-} from 'lucide-react';
+    Terminal
+, Wand2 } from 'lucide-react';
 
 import FileTree from '@/components/projectforge/FileTree';
 import CodeViewer from '@/components/projectforge/CodeViewer';
@@ -194,7 +193,7 @@ export default function ProjectViewer() {
                         {activeTab === 'explanation' && (
                             <div className="h-full p-8 md:p-16 overflow-y-auto custom-scrollbar max-w-4xl mx-auto prose text-[#4D4D4D] font-normal leading-relaxed">
                                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-[10px] font-semibold uppercase tracking-wider mb-8">
-                                    <Sparkles className="w-3.5 h-3.5" />
+                                    <Wand2 className="w-3.5 h-3.5" />
                                     Beginner Friendly Explanation
                                 </div>
                                 <h1 className="text-3xl font-semibold text-[#171717] mb-8 tracking-tight">How This Project Works</h1>

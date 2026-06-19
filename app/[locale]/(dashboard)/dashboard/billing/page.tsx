@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { MapPin, CreditCard, Shield, Clock, Zap, Crown, CheckCircle, ArrowLeft, Tag, X, Sparkles } from 'lucide-react';
+import { MapPin, CreditCard, Shield, Clock, Zap, Crown, CheckCircle, ArrowLeft, Tag, X , Stars } from 'lucide-react';
 import Link from 'next/link';
 
 import { PLANS as CONFIG_PLANS } from '@/lib/pricing/config';
@@ -591,7 +591,7 @@ function BillingContent({ params }: { params: { locale: string } }) {
                                 {couponResult?.valid ? (
                                     <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
                                         <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800">
-                                            <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+                                            <Stars className="w-4 h-4 text-emerald-600 shrink-0" />
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-xs font-bold uppercase tracking-wider leading-none">{couponResult.code}</p>
                                                 <p className="text-[10px] text-emerald-700/80 mt-1 truncate">{couponResult.message}</p>
@@ -652,7 +652,7 @@ function BillingContent({ params }: { params: { locale: string } }) {
                                     </>
                                 ) : isFree ? (
                                     <>
-                                        <Sparkles className="w-4 h-4 text-white animate-pulse" />
+                                        <Stars className="w-4 h-4 text-white animate-pulse" />
                                         Activate Plan
                                     </>
                                 ) : (

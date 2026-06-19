@@ -5,7 +5,6 @@ export const dynamic = 'force-dynamic';
 import React, { useState, useEffect } from 'react';
 import {
     BrainCircuit,
-    Sparkles,
     Loader2,
     CheckCircle2,
     AlertCircle,
@@ -16,7 +15,7 @@ import {
     Code2,
     Bug,
     Layout
-} from 'lucide-react';
+, Lightbulb } from 'lucide-react';
 
 interface QuestionStatsItem {
     type?: string;
@@ -149,7 +148,7 @@ export default function CodingForgeAdmin() {
                 {/* Generation Control */}
                 <div className="p-8 bg-gradient-to-br from-[#0a0a1a] to-[#070710] border border-white/5 rounded-[40px] shadow-2xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-20 transition-opacity">
-                        <Sparkles className="w-24 h-24 text-white" />
+                        <Lightbulb className="w-24 h-24 text-white" />
                     </div>
 
                     <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
@@ -209,7 +208,7 @@ export default function CodingForgeAdmin() {
                         {[
                             { label: 'Multi-Category Support', desc: 'Generates Programming, SQL, Debugging, and Logic challenges.', icon: Plus },
                             { label: 'Smart Visuals (SVG)', desc: 'Creates custom illustrations for logic patterns and data structures.', icon: Layout },
-                            { label: 'Company-Specific Context', desc: 'Adds real interview tags like Google, Meta, and Amazon.', icon: Sparkles },
+                            { label: 'Company-Specific Context', desc: 'Adds real interview tags like Google, Meta, and Amazon.', icon: Lightbulb },
                             { label: 'Language diversity', desc: 'Each question includes solutions in 9+ languages.', icon: Zap },
                         ].map((item, i) => (
                             <li key={i} className="flex gap-4">

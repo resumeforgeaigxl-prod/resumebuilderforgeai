@@ -8,7 +8,6 @@ import {
     ChevronRight,
     Search,
     Loader2,
-    Sparkles,
     FileText,
     ShieldCheck,
     CheckCircle2,
@@ -149,7 +148,7 @@ function AtsLiveLogic() {
 
                             <div className="p-6 bg-[#FFFFFF] border border-[#EBEBEB] rounded-xl shadow-sm">
                                 <h3 className="text-sm font-semibold text-[#171717] mb-4 flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4 text-[#0070F3]" />
+                                    <Zap className="w-4 h-4 text-[#0070F3]" />
                                     AI Optimization Strategy
                                 </h3>
                                 <ul className="space-y-3">

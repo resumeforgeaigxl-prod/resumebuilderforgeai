@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 ;
 
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Video, Globe, BookOpen, ExternalLink, Loader2, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Video, Globe, BookOpen, ExternalLink, Loader2 , Brain } from 'lucide-react';
 
 interface VideoRecord {
     id: string;
@@ -186,7 +186,7 @@ export default function LearnForgeAdmin() {
                         <div key={video.id} className="group relative p-6 rounded-2xl bg-[#0a0a0f] border border-white/5 hover:border-white/10 transition-all flex items-center gap-6">
                             <div className="w-16 h-16 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
                                 {video.video_type === 'technical' ? (
-                                    <Sparkles className="w-8 h-8 text-indigo-400" />
+                                    <Brain className="w-8 h-8 text-indigo-400" />
                                 ) : (
                                     <Globe className="w-8 h-8 text-emerald-400" />
                                 )}

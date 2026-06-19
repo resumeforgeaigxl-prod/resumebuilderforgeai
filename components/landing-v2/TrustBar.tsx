@@ -1,11 +1,11 @@
 "use client";
 
 import { motion, Variants } from "framer-motion";
-import { Shield, Sparkles, LayoutTemplate, FileDown, Target } from "lucide-react";
+import { Shield, Brain, LayoutTemplate, FileDown, Target } from "lucide-react";
 
 const capabilities = [
   { icon: Shield, label: "ATS Optimization" },
-  { icon: Sparkles, label: "AI Tailored Content" },
+  { icon: Brain, label: "AI Tailored Content" },
   { icon: LayoutTemplate, label: "Multiple Templates" },
   { icon: FileDown, label: "PDF Export" },
   { icon: Target, label: "Job Matching" },

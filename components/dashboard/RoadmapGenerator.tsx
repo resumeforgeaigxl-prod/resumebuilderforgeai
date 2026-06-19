@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import {
     Compass, Loader2, CheckCircle2,
-    Clock, Target, Info, Sparkles, BookOpen,
+    Clock, Target, Info, BookOpen,
     ChevronRight,
     Map
-} from 'lucide-react';
+, Wand2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -237,7 +237,7 @@ export default function RoadmapGenerator() {
                                 disabled={loading || !targetRole}
                                 className="w-full h-12 rounded-md bg-[#171717] hover:bg-[#171717]/90 text-white font-medium text-xs shadow-sm flex items-center justify-center gap-2"
                             >
-                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Sparkles className="w-4 h-4" /> Initialize Synthesis</>}
+                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Wand2 className="w-4 h-4" /> Initialize Synthesis</>}
                             </Button>
                         </div>
                     </Card>
@@ -283,7 +283,7 @@ export default function RoadmapGenerator() {
                             <div className="relative">
                                 <div className="w-16 h-16 rounded-full border-4 border-[#EBEBEB] border-t-[#171717] animate-spin" />
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <Sparkles className="w-6 h-6 text-[#171717] animate-pulse" />
+                                    <Wand2 className="w-6 h-6 text-[#171717] animate-pulse" />
                                 </div>
                             </div>
                             <div className="space-y-2">
@@ -329,7 +329,7 @@ export default function RoadmapGenerator() {
                                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                                 <div className="space-y-4">
                                                     <div className="flex items-center gap-1.5 text-[9px] font-semibold text-[#8F8F8F] uppercase tracking-wider mb-1">
-                                                        <Sparkles className="w-3 h-3 text-[#171717]" /> Logical Nodes
+                                                        <Wand2 className="w-3 h-3 text-[#171717]" /> Logical Nodes
                                                     </div>
                                                     {mappingLoading && (
                                                         <div className="flex items-center gap-1.5 text-[9px] font-semibold text-[#0070F3] uppercase tracking-wider animate-pulse">

@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 import React from 'react';
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Sparkles, ArrowRight, FileText, Briefcase, Code, MessageSquare, Terminal, BookOpen, Search, Zap, GraduationCap, Users } from 'lucide-react';
+import { ArrowRight, FileText, Briefcase, Code, MessageSquare, Terminal, BookOpen, Search, Zap, GraduationCap, Users , Wand2 } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: "AI Tech Career Tools | ResumeForgeAI",
@@ -25,7 +25,7 @@ const tools = [
   { name: "StudyForge", icon: <Users />, desc: "AI-powered technical study materials.", link: "/en-in/studyforge" },
   { name: "CareerForge", icon: <Briefcase />, desc: "Comprehensive AI career planning hub.", link: "/en-in/careerforge" },
   { name: "MentorForge", icon: <Users />, desc: "Dedicated 24/7 AI technical mentorship.", link: "/en-in/mentorforge" },
-  { name: "CompanyPrep", icon: <Sparkles />, desc: "Targeted interview prep for top companies.", link: "/en-in/company-prep" },
+  { name: "CompanyPrep", icon: <Wand2 />, desc: "Targeted interview prep for top companies.", link: "/en-in/company-prep" },
 ];
 
 export default function AIToolsSEO() {

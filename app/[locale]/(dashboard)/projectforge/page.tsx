@@ -4,7 +4,6 @@ export const dynamic = 'force-dynamic';
 import React, { useState, useEffect } from 'react';
 import {
     Cpu,
-    Sparkles,
     ArrowRight,
     Layers,
     Code,
@@ -15,7 +14,7 @@ import {
     AlertCircle,
     Loader2,
     Box
-} from 'lucide-react';
+, Wand2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -147,7 +146,7 @@ export default function ProjectForgeLanding() {
                     {[
                         { label: 'Latency', value: '30ms Cycle', icon: <Workflow className="w-4 h-4 text-[#171717]" /> },
                         { label: 'Engine', value: 'Neural Architect', icon: <Cpu className="w-4 h-4 text-[#171717]" /> },
-                        { label: 'Model', value: 'Gemini Prime', icon: <Sparkles className="w-4 h-4 text-[#171717]" /> }
+                        { label: 'Model', value: 'Gemini Prime', icon: <Wand2 className="w-4 h-4 text-[#171717]" /> }
                     ].map((stat, i) => (
                         <div key={i} className="flex items-center gap-3 px-4 py-3 rounded-lg border border-[#EBEBEB] bg-[#FFFFFF] shadow-sm">
                             <div className="p-2 rounded-md bg-[#FAFAFA] border border-[#EBEBEB]">{stat.icon}</div>

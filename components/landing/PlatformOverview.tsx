@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle2, Layout, Sparkles } from "lucide-react";
+import { CheckCircle2, Layout, Wand2} from 'lucide-react';
 
 export default function PlatformOverview() {
   const forges = [
@@ -49,7 +49,7 @@ export default function PlatformOverview() {
                   <div className="space-y-1">
                     <span className="text-slate-500 text-[10px] uppercase font-black tracking-widest">Global Authority</span>
                     <h5 className="text-white font-bold flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-amber-500" />
+                        <Wand2 className="w-4 h-4 text-amber-500" />
                         Verified Success
                     </h5>
                   </div>

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Sparkles, LogOut } from 'lucide-react';
+import { LogOut, Wand2} from 'lucide-react';
 import { getSession } from '@/lib/auth/jwt';
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
 import RegionSwitcher from '@/components/ui/RegionSwitcher';
@@ -32,7 +32,7 @@ export default async function Header({ lang = 'en', region = 'in' }: { lang?: st
                         <>
                             {session.role === 'admin' && (
                                 <Link href={`/${locale}/admin`} className="text-sm font-medium text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1">
-                                    <Sparkles className="w-3 h-3" />
+                                    <Wand2 className="w-3 h-3" />
                                     Admin
                                 </Link>
                             )}

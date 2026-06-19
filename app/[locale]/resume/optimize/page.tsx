@@ -6,10 +6,10 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import {
-    FileText, Sparkles, Loader2, CheckCircle, AlertCircle,
+    FileText, Loader2, CheckCircle, AlertCircle,
     Download, Edit, Briefcase, Zap, Target,
     X, ChevronRight, PlusCircle
-} from 'lucide-react';
+, Wand2 } from 'lucide-react';
 import Link from 'next/link';
 import { ResumeData, ResumeRecord } from '@/types/resume';
 import { FeatureGate } from '@/components/pricing/FeatureGate';
@@ -286,7 +286,7 @@ export default function ResumeOptimizePage() {
                                     disabled={!selectedResumeId}
                                     className="px-12 py-5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black uppercase tracking-[0.2em] rounded-3xl flex items-center gap-3 transition-all active:scale-95 shadow-2xl shadow-indigo-500/20"
                                 >
-                                    <Sparkles className="w-5 h-5" /> Start Optimization
+                                    <Wand2 className="w-5 h-5" /> Start Optimization
                                 </button>
                             </div>
                         )}
@@ -300,7 +300,7 @@ export default function ResumeOptimizePage() {
                             <div className="absolute inset-0 rounded-full border-4 border-indigo-500/10" />
                             <div className="absolute inset-0 rounded-full border-4 border-t-indigo-500 animate-spin" />
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <Sparkles className="w-10 h-10 text-indigo-500 animate-pulse" />
+                                <Wand2 className="w-10 h-10 text-indigo-500 animate-pulse" />
                             </div>
                         </div>
 

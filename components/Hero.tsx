@@ -3,12 +3,11 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Sparkles, FileText, Brain, Search } from "lucide-react";
+import { ArrowRight, FileText, Brain, Search, Wand2} from 'lucide-react';
 import {
   DEFAULT_LOCALE,
   fadeInScale,
-  fadeInUp,
-} from "@/lib/constants";
+  fadeInUp } from "@/lib/constants";
 
 type HeroProps = {
   locale?: string;
@@ -71,7 +70,7 @@ export default function Hero({ locale = DEFAULT_LOCALE }: HeroProps) {
             {...fadeInUp(0.06)}
             className="inline-flex items-center gap-2 rounded-full border border-[#00D4A0]/30 bg-[#00D4A0]/10 px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] text-[#00D4A0] backdrop-blur-sm shadow-[0_0_20px_rgba(0,212,160,0.15)]"
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Wand2 className="w-3.5 h-3.5" />
             <span>The Intelligence Layer for Careers</span>
           </motion.div>
 

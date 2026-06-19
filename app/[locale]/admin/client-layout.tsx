@@ -3,7 +3,7 @@
 import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, ShieldCheck, Target, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning, Briefcase, FileHeart, Receipt, LifeBuoy, Mic, Compass, TrendingUp, Bell, BookOpen, Sparkles, Video, BookOpenCheck, Bot, GraduationCap } from 'lucide-react';
+import { Shield, ShieldCheck, Target, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning, Briefcase, FileHeart, Receipt, LifeBuoy, Mic, Compass, TrendingUp, Bell, BookOpen, Video, BookOpenCheck, Bot, GraduationCap , Wand2 } from 'lucide-react';
 import Image from 'next/image';
 
 export default function AdminLayoutClient({ children, profile, locale }: { children: ReactNode, profile: { email: string }, locale: string }) {
@@ -51,7 +51,7 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
         { href: `/${locale}/admin/coupons`, label: 'Coupons', icon: Ticket },
         { href: `/${locale}/admin/codingforge`, label: 'CodingForge AI', icon: BrainCircuit },
         { href: `/${locale}/admin/studyforge`, label: 'StudyForge AI', icon: BookOpen },
-        { href: `/${locale}/admin/explainforge`, label: 'ExplainForge AI', icon: Sparkles },
+        { href: `/${locale}/admin/explainforge`, label: 'ExplainForge AI', icon: Wand2 },
         { href: `/${locale}/admin/ai-monitoring`, label: 'AI Neural Monitor', icon: MessageSquareWarning },
         { href: `/${locale}/admin/learnforge`, label: 'LearnForge Library', icon: BookOpen },
         { href: `/${locale}/admin/demo-studio`, label: 'Demo Studio', icon: Video },

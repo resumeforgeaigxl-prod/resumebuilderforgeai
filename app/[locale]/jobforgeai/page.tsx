@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Loader2, Send, Bot, User, AlertCircle, ShieldCheck, Copy, Share2, Check, Terminal, ArrowLeft } from 'lucide-react';
+import { Loader2, Send, Bot, User, AlertCircle, ShieldCheck, Copy, Share2, Check, Terminal, ArrowLeft , Search } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/lib/i18n/I18nProvider';
@@ -316,7 +316,7 @@ export default function JobForgeAIPage() {
                         {[
                             { title: 'Create Resume', desc: 'Build ATS-optimized resume', icon: SearchIcon, href: '/builder' },
                             { title: 'Start Mock Interview', desc: 'Practice with AI feedback', icon: Brain, href: '/mock-interview' },
-                            { title: 'Check ATS Score', desc: 'Analyze resume compatibility', icon: SparklesAssistant, href: '/dashboard' },
+                            { title: 'Check ATS Score', desc: 'Analyze resume compatibility', icon: TargetAssistant, href: '/dashboard' },
                             { title: 'Coding Practice', desc: 'Solve DSA problems', icon: MapIconAssistant, prompt: 'Give me 5 easy-level DSA problems to practice' },
                             { title: 'Browse Jobs', desc: 'Curated job listings', icon: SearchIcon, href: '/jobs' },
                             { title: 'Career Roadmap', desc: 'Get your skill path', icon: MapIconAssistant, prompt: 'I want to become a senior backend engineer. What skills do I need?' }
@@ -439,5 +439,5 @@ export default function JobForgeAIPage() {
 // Micro icons for suggestion cards
 function SearchIcon(props: React.SVGProps<SVGSVGElement>) { return <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>; }
 function Brain(props: React.SVGProps<SVGSVGElement>) { return <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>; }
-function SparklesAssistant(props: React.SVGProps<SVGSVGElement>) { return <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" /></svg>; }
+function TargetAssistant(props: React.SVGProps<SVGSVGElement>) { return <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /><circle cx="12" cy="12" r="6" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /><circle cx="12" cy="12" r="2" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /></svg>; }
 function MapIconAssistant(props: React.SVGProps<SVGSVGElement>) { return <svg {...props} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>; }
