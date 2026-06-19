@@ -1,7 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { Lightbulb, Briefcase, Award, User, Check } from "lucide-react";
+
 
 /* ═══════════════════════════════════════════════
    Animation helpers
@@ -42,13 +45,18 @@ const cardFadeUp = {
 };
 
 /* ═══════════════════════════════════════════════
-   Sub-components: Hero Preview Cards
+   Sub-components: Hero Preview Cards (Reactive & Animated)
    ═══════════════════════════════════════════════ */
 
 const cardShadow =
   "0 2px 2px rgba(0,0,0,0.04), 0 8px 16px -4px rgba(0,0,0,0.06)";
 
-function ResumeDocument3D() {
+interface ResumeDocumentProps {
+  text: string;
+  isTyping: boolean;
+}
+
+function ResumeDocument3D({ text, isTyping }: ResumeDocumentProps) {
   return (
     <div className="relative w-[280px] h-[396px] select-none" style={{ transformStyle: "preserve-3d" }}>
       {/* Page 3 (lowest, back) */}
@@ -97,7 +105,14 @@ function ResumeDocument3D() {
                 </div>
                 <div className="text-[#7928CA] text-[3.5px] font-medium">Vercel • Next.js Core Team</div>
                 <ul className="list-disc pl-2.5 mt-0.5 space-y-0.5 text-[#8F8F8F] text-[3.2px] leading-[4.5px]">
-                  <li>Architected Next.js routing and server component performance updates.</li>
+                  <li className="relative">
+                    <span className={`transition-all duration-300 ${isTyping ? "text-[#7928CA] font-semibold bg-purple-50/70 rounded-sm px-0.5" : "text-[#4D4D4D]"}`}>
+                      {text}
+                    </span>
+                    {isTyping && (
+                      <span className="inline-block w-[1px] h-[4px] bg-[#7928CA] ml-0.5 animate-pulse align-middle" />
+                    )}
+                  </li>
                   <li>Reduced serverless cold-start latency by 24% globally across Edge Network.</li>
                 </ul>
               </div>
@@ -130,10 +145,13 @@ function ResumeDocument3D() {
   );
 }
 
-function ATSScoreCard() {
+interface ATSScoreCardProps {
+  score: number;
+}
+
+function ATSScoreCard({ score }: ATSScoreCardProps) {
   const radius = 42;
   const circumference = 2 * Math.PI * radius;
-  const score = 92;
   const filled = (score / 100) * circumference;
 
   return (
@@ -156,11 +174,12 @@ function ATSScoreCard() {
           cy="50"
           r={radius}
           fill="none"
-          stroke="#171717"
+          stroke={score >= 85 ? "#10B981" : "#F59E0B"}
           strokeWidth="7"
           strokeLinecap="round"
           strokeDasharray={`${filled} ${circumference}`}
           transform="rotate(-90 50 50)"
+          className="transition-all duration-300"
         />
         <text
           x="50"
@@ -194,11 +213,11 @@ function ATSScoreCard() {
         </text>
       </svg>
       <p
-        className="text-[#8F8F8F]"
+        className="text-[#8F8F8F] transition-colors duration-200 group-hover:text-[#4D4D4D]"
         style={{
           fontFamily: "var(--font-geist-sans)",
           fontSize: "11px",
-          fontWeight: 400,
+          fontWeight: 500,
         }}
       >
         ATS Score
@@ -207,37 +226,54 @@ function ATSScoreCard() {
   );
 }
 
-function AISuggestionsCard() {
-  const suggestions = [
-    "Add quantified achievements",
-    "Include action verbs",
-    "Optimize keywords",
-  ];
+interface SuggestionItem {
+  id: number;
+  text: string;
+  done: boolean;
+}
 
+interface AISuggestionsCardProps {
+  suggestions: SuggestionItem[];
+}
+
+function AISuggestionsCard({ suggestions }: AISuggestionsCardProps) {
   return (
     <div
       className="group bg-white border border-[#EBEBEB] hover:border-[#171717]/15 rounded-xl p-4 w-[200px] h-[130px] flex flex-col shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05),0_16px_32px_-8px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 cursor-default"
     >
-      <p
-        className="text-[#171717] mb-2.5"
-        style={{
-          fontFamily: "var(--font-geist-sans)",
-          fontSize: "14px",
-          fontWeight: 600,
-          lineHeight: "20px",
-        }}
-      >
-        AI Suggestions
-      </p>
+      <div className="flex items-center gap-1.5 mb-2.5">
+        <Lightbulb className="w-4 h-4 text-[#7928CA]" />
+        <p
+          className="text-[#171717]"
+          style={{
+            fontFamily: "var(--font-geist-sans)",
+            fontSize: "13px",
+            fontWeight: 600,
+            lineHeight: "20px",
+          }}
+        >
+          AI Suggestions
+        </p>
+      </div>
       <div className="flex flex-col gap-2">
-        {suggestions.map((text) => (
-          <div key={text} className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 transition-transform duration-300 group-hover:scale-125" />
+        {suggestions.map(({ id, text, done }) => (
+          <div key={id} className="flex items-center gap-2">
+            <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 border transition-all duration-300 ${
+              done 
+                ? "bg-emerald-500 border-emerald-500 text-white" 
+                : "border-[#EBEBEB] bg-[#FAFAFA]"
+            }`}>
+              {done ? (
+                <Check className="w-2.5 h-2.5" strokeWidth={3} />
+              ) : (
+                <div className="w-1.5 h-1.5 rounded-full bg-[#8F8F8F]" />
+              )}
+            </div>
             <span
-              className="text-[#4D4D4D]"
+              className={`transition-all duration-300 ${done ? "text-[#8F8F8F] line-through" : "text-[#4D4D4D]"}`}
               style={{
                 fontFamily: "var(--font-geist-sans)",
-                fontSize: "12px",
+                fontSize: "11px",
                 fontWeight: 400,
                 lineHeight: "16px",
               }}
@@ -251,13 +287,16 @@ function AISuggestionsCard() {
   );
 }
 
-function SkillMatchCard() {
-  const skills = [
-    { name: "React", value: 85 },
-    { name: "Node.js", value: 72 },
-    { name: "TypeScript", value: 90 },
-  ];
+interface SkillItem {
+  name: string;
+  value: number;
+}
 
+interface SkillMatchCardProps {
+  skills: SkillItem[];
+}
+
+function SkillMatchCard({ skills }: SkillMatchCardProps) {
   return (
     <div
       className="group bg-white border border-[#EBEBEB] hover:border-[#171717]/15 rounded-xl p-4 w-[160px] h-[144px] flex flex-col shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05),0_16px_32px_-8px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 cursor-default"
@@ -266,7 +305,7 @@ function SkillMatchCard() {
         className="text-[#171717] mb-2.5"
         style={{
           fontFamily: "var(--font-geist-sans)",
-          fontSize: "14px",
+          fontSize: "13px",
           fontWeight: 600,
           lineHeight: "20px",
         }}
@@ -300,7 +339,7 @@ function SkillMatchCard() {
             </div>
             <div className="h-1.5 w-full rounded-full bg-[#EBEBEB] overflow-hidden">
               <div
-                className="h-full rounded-full bg-[#171717] transition-all duration-300 origin-left group-hover:scale-y-[1.25]"
+                className="h-full rounded-full bg-[#171717] transition-all duration-500 origin-left"
                 style={{ width: `${value}%` }}
               />
             </div>
@@ -312,10 +351,98 @@ function SkillMatchCard() {
 }
 
 /* ═══════════════════════════════════════════════
-   Product Preview Composite
+   Product Preview Composite (Live AI Editor Shell)
    ═══════════════════════════════════════════════ */
 
 function ProductPreview() {
+  const startText = "I wrote JavaScript code for the client-side of the application.";
+  const targetText = "Architected Next.js routing and server component performance, boosting speed by 35%.";
+
+  const [text, setText] = useState(startText);
+  const [isTyping, setIsTyping] = useState(false);
+  const [atsScore, setAtsScore] = useState(68);
+  const [suggestions, setSuggestions] = useState<SuggestionItem[]>([
+    { id: 1, text: "Quantify achievements", done: false },
+    { id: 2, text: "Include action verbs", done: true },
+    { id: 3, text: "Optimize keywords", done: true },
+  ]);
+  const [skills, setSkills] = useState<SkillItem[]>([
+    { name: "React", value: 85 },
+    { name: "TypeScript", value: 55 },
+  ]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const runAnimationLoop = async () => {
+      while (isMounted) {
+        // Reset to initial state
+        if (!isMounted) break;
+        setText(startText);
+        setAtsScore(68);
+        setSuggestions([
+          { id: 1, text: "Quantify achievements", done: false },
+          { id: 2, text: "Include action verbs", done: true },
+          { id: 3, text: "Optimize keywords", done: true },
+        ]);
+        setSkills([
+          { name: "React", value: 85 },
+          { name: "TypeScript", value: 55 },
+        ]);
+        setIsTyping(false);
+
+        // 1. Idle for 3 seconds
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        if (!isMounted) break;
+
+        // 2. Start Typing Rewrite
+        setIsTyping(true);
+        setText("");
+        for (let i = 0; i <= targetText.length; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 20));
+          if (!isMounted) break;
+          setText(targetText.substring(0, i));
+        }
+
+        if (!isMounted) break;
+        setIsTyping(false);
+
+        // 3. Short pause after rewrite
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        if (!isMounted) break;
+
+        // 4. Animate ATS Score up from 68 to 92
+        for (let score = 68; score <= 92; score++) {
+          await new Promise((resolve) => setTimeout(resolve, 25));
+          if (!isMounted) break;
+          setAtsScore(score);
+        }
+
+        if (!isMounted) break;
+
+        // 5. Expand TypeScript Skill bar and Check off Suggestions
+        setSkills([
+          { name: "React", value: 85 },
+          { name: "TypeScript", value: 90 },
+        ]);
+        setSuggestions([
+          { id: 1, text: "Quantify achievements", done: true },
+          { id: 2, text: "Include action verbs", done: true },
+          { id: 3, text: "Optimize keywords", done: true },
+        ]);
+
+        // 6. Hold optimized state for 4 seconds
+        await new Promise((resolve) => setTimeout(resolve, 4000));
+      }
+    };
+
+    runAnimationLoop();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <motion.div
       className="relative w-[480px] h-[450px] hidden lg:block origin-right lg:scale-75 xl:scale-90 2xl:scale-100 transition-transform shrink-0"
@@ -329,7 +456,7 @@ function ProductPreview() {
         {/* ATS Score Card connector -> Resume Header */}
         <motion.path
           d="M 380 80 Q 320 60 280 90"
-          stroke="rgba(23, 23, 23, 0.12)"
+          stroke="rgba(121, 40, 202, 0.15)"
           strokeWidth="1.2"
           strokeDasharray="4 4"
           initial={{ pathLength: 0 }}
@@ -339,7 +466,7 @@ function ProductPreview() {
         {/* AI Suggestions Card connector -> Experience Section */}
         <motion.path
           d="M 210 360 Q 160 330 140 240"
-          stroke="rgba(23, 23, 23, 0.12)"
+          stroke="rgba(16, 185, 129, 0.15)"
           strokeWidth="1.2"
           strokeDasharray="4 4"
           initial={{ pathLength: 0 }}
@@ -349,7 +476,7 @@ function ProductPreview() {
         {/* Skill Match Card connector -> Skills Section */}
         <motion.path
           d="M 310 360 Q 285 385 260 365"
-          stroke="rgba(23, 23, 23, 0.12)"
+          stroke="rgba(17, 17, 17, 0.12)"
           strokeWidth="1.2"
           strokeDasharray="4 4"
           initial={{ pathLength: 0 }}
@@ -358,13 +485,13 @@ function ProductPreview() {
         />
       </svg>
 
-      {/* Resume Stack Document — centerpiece (occupies 70%+ of vertical visual area) */}
+      {/* Main Resume Canvas centered */}
       <motion.div
         variants={cardFadeUp}
         className="absolute top-[30px] left-[100px] z-10"
       >
         <div className="animate-float-gentle" style={{ animationDelay: "0s" }}>
-          <ResumeDocument3D />
+          <ResumeDocument3D text={text} isTyping={isTyping} />
         </div>
       </motion.div>
 
@@ -374,7 +501,7 @@ function ProductPreview() {
         className="absolute top-[10px] right-[10px] z-30"
       >
         <div className="animate-float-gentle" style={{ animationDelay: "0.8s" }}>
-          <ATSScoreCard />
+          <ATSScoreCard score={atsScore} />
         </div>
       </motion.div>
 
@@ -384,7 +511,7 @@ function ProductPreview() {
         className="absolute bottom-[30px] left-[10px] z-30"
       >
         <div className="animate-float-gentle" style={{ animationDelay: "1.2s" }}>
-          <AISuggestionsCard />
+          <AISuggestionsCard suggestions={suggestions} />
         </div>
       </motion.div>
 
@@ -394,7 +521,7 @@ function ProductPreview() {
         className="absolute bottom-[20px] right-[15px] z-30"
       >
         <div className="animate-float-gentle" style={{ animationDelay: "0.6s" }}>
-          <SkillMatchCard />
+          <SkillMatchCard skills={skills} />
         </div>
       </motion.div>
     </motion.div>

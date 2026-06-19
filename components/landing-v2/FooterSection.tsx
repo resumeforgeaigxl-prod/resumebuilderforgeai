@@ -29,7 +29,7 @@ const columns = (locale: string) => [
     title: "Company",
     links: [
       { label: "About", href: "#" },
-      { label: "Careers", href: "#" },
+      { label: "Careers", href: "https://careers.growxlabs.tech/" },
       { label: "Contact", href: "#" },
       { label: "Press", href: "#" },
     ],
@@ -72,6 +72,8 @@ export default function FooterSection({ locale = "en-in" }: FooterSectionProps) 
                   <li key={link.label}>
                     <Link
                       href={link.href}
+                      target={link.href.startsWith("http") ? "_blank" : undefined}
+                      rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
                       className="block py-1.5 transition-colors duration-200"
                       style={{
                         fontSize: "14px",
@@ -108,15 +110,25 @@ export default function FooterSection({ locale = "en-in" }: FooterSectionProps) 
           >
             © 2026 ResumeForge AI
           </span>
-          <span
+          <a
+            href="https://growxlabs.tech"
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
               fontSize: "14px",
               fontWeight: 400,
               color: "#8F8F8F",
+              transition: "color 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              (e.target as HTMLAnchorElement).style.color = "#171717";
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLAnchorElement).style.color = "#8F8F8F";
             }}
           >
-            Built with precision.
-          </span>
+            Built with Growxlabstech.
+          </a>
         </div>
       </div>
     </footer>
