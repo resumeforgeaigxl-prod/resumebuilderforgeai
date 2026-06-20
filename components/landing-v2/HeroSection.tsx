@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { Lightbulb, Briefcase, Award, User, Check } from "lucide-react";
-
+import { FileSearch, Wand2, ArrowRight } from "lucide-react";
 
 /* ═══════════════════════════════════════════════
    Animation helpers
@@ -28,355 +27,203 @@ const fadeUp = {
   },
 };
 
-const cardContainer = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.1, delayChildren: 0.5 },
-  },
-};
-
-const cardFadeUp = {
-  hidden: { opacity: 0, y: 28 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, ease },
-  },
-};
-
 /* ═══════════════════════════════════════════════
-   Sub-components: Hero Preview Cards (Reactive & Animated)
+   Carousel Slide Components (Presentation Style)
    ═══════════════════════════════════════════════ */
 
-const cardShadow =
-  "0 2px 2px rgba(0,0,0,0.04), 0 8px 16px -4px rgba(0,0,0,0.06)";
-
-// Centerpiece: Target Pixel Art Landscape
-function PixelArtLandscape() {
+// Slide 1: Handcrafted landscape and overlay resume
+function Slide1() {
   return (
-    <div className="relative w-[600px] h-[400px] rounded-2xl overflow-hidden border border-[#EBEBEB] shadow-[0_12px_40px_rgba(0,0,0,0.06)]">
-      {/* Background Mountain Layer */}
+    <div className="relative w-full h-full flex items-center justify-center">
+      {/* Background Pixel Art */}
       <img
         src="/hero-landscape.png"
         alt="Pixel Art Mountain Forest Landscape"
-        className="w-full h-full object-cover transition-transform duration-700 ease-out hover:scale-105"
+        className="absolute inset-0 w-full h-full object-cover"
       />
-      {/* Soft Ambient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/5 via-transparent to-blue-500/5 pointer-events-none" />
-    </div>
-  );
-}
+      {/* Ambient dark overlay */}
+      <div className="absolute inset-0 bg-slate-950/15 pointer-events-none" />
 
-// Focal Point: Embedded Realistic Resume
-function EmbeddedResumeCard() {
-  return (
-    <div
-      className="relative w-[210px] h-[296px] bg-white rounded-xl border border-[#EBEBEB] p-3 text-left flex flex-col font-sans select-none shadow-[0_20px_50px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.02)]"
-      style={{ transform: "rotateX(6deg) rotateY(-8deg) rotateZ(0.5deg)" }}
-    >
-      {/* Top accent bar */}
-      <div className="h-0.5 bg-[#7928CA] w-full mb-2 shrink-0" />
-      
-      {/* Header */}
-      <div className="mb-2 shrink-0">
-        <div className="font-bold text-[7px] text-[#171717] tracking-tight">ALEX RIVERA</div>
-        <div className="text-[#7928CA] font-medium text-[4px] mt-0.5">Staff Software Engineer</div>
-        <div className="text-[#8F8F8F] text-[3px] mt-0.5">Vercel • Next.js Core Team</div>
-      </div>
+      {/* Centerpiece Floating Resume */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 15 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 w-[240px] h-[330px] bg-white rounded-xl border border-[#EBEBEB] p-3.5 text-left flex flex-col font-sans select-none shadow-[0_20px_50px_rgba(0,0,0,0.15)] hover:scale-[1.02] transition-transform duration-300"
+      >
+        {/* Top accent bar */}
+        <div className="h-0.5 bg-[#7928CA] w-full mb-2 shrink-0" />
+        
+        {/* Header */}
+        <div className="mb-2 shrink-0">
+          <div className="font-bold text-[8px] text-[#171717] tracking-tight">ALEX RIVERA</div>
+          <div className="text-[#7928CA] font-medium text-[4.5px] mt-0.5">Staff Software Engineer</div>
+          <div className="text-[#8F8F8F] text-[3.5px] mt-0.5">Vercel • Next.js Core Team</div>
+        </div>
 
-      {/* Experience block */}
-      <div className="space-y-2 flex-1 min-h-0 overflow-hidden">
-        <div>
-          <div className="font-semibold text-[#171717] border-b border-[#EBEBEB] pb-0.5 mb-1 text-[3.5px] tracking-wider">EXPERIENCE</div>
-          <div className="space-y-1">
-            <div>
-              <div className="flex justify-between font-medium text-[#171717] text-[3px]">
-                <span>Staff Software Engineer</span>
-                <span className="text-[#8F8F8F] font-normal">2022 - Pres</span>
+        {/* Experience block */}
+        <div className="space-y-2 flex-1 min-h-0 overflow-hidden">
+          <div>
+            <div className="font-semibold text-[#171717] border-b border-[#EBEBEB] pb-0.5 mb-1.5 text-[4px] tracking-wider">EXPERIENCE</div>
+            <div className="space-y-1.5">
+              <div>
+                <div className="flex justify-between font-medium text-[#171717] text-[3.5px]">
+                  <span>Staff Software Engineer</span>
+                  <span className="text-[#8F8F8F] font-normal text-[3px]">2022 - Pres</span>
+                </div>
+                <ul className="list-disc pl-2 mt-0.5 space-y-0.5 text-[#8F8F8F] text-[3px] leading-[4px]">
+                  <li>Architected Next.js App Router compiler upgrades.</li>
+                  <li>Reduced cold-start latency by 24% globally.</li>
+                </ul>
               </div>
-              <ul className="list-disc pl-1.5 mt-0.5 space-y-0.5 text-[#8F8F8F] text-[2.6px] leading-[3.5px]">
-                <li>Architected Next.js App Router compiler upgrades.</li>
-                <li>Reduced cold-start latency by 24% globally.</li>
-              </ul>
+            </div>
+          </div>
+
+          {/* Skills block */}
+          <div>
+            <div className="font-semibold text-[#171717] border-b border-[#EBEBEB] pb-0.5 mb-1 text-[4px] tracking-wider">TECHNICAL SKILLS</div>
+            <div className="flex flex-wrap gap-0.5">
+              {["TypeScript", "React", "Next.js", "Go", "Docker"].map((skill) => (
+                <span key={skill} className="text-[3px] font-medium text-[#4D4D4D] bg-[#FAFAFA] border border-[#EBEBEB] px-1 py-0.2 rounded-sm">
+                  {skill}
+                </span>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Skills block */}
-        <div>
-          <div className="font-semibold text-[#171717] border-b border-[#EBEBEB] pb-0.5 mb-1 text-[3.5px] tracking-wider">TECHNICAL SKILLS</div>
-          <div className="flex flex-wrap gap-0.5">
-            {["TypeScript", "React", "Next.js", "Go", "Docker"].map((skill) => (
-              <span key={skill} className="text-[2.6px] font-medium text-[#4D4D4D] bg-[#FAFAFA] border border-[#EBEBEB] px-1 py-0.2 rounded-sm">
-                {skill}
-              </span>
-            ))}
-          </div>
+        {/* Embedded Mini ATS Score Tag */}
+        <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 bg-emerald-50 border border-emerald-100 rounded-full flex items-center gap-1">
+          <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-[6.5px] font-bold text-emerald-700">92 Score Passed</span>
         </div>
-      </div>
-
-      {/* Embedded Mini ATS Score Tag */}
-      <div className="absolute bottom-2 right-2 px-1.5 py-0.5 bg-emerald-50 border border-emerald-100 rounded-full flex items-center gap-1">
-        <div className="w-1 h-1 rounded-full bg-emerald-500" />
-        <span className="text-[6px] font-bold text-emerald-700">92 Score Passed</span>
-      </div>
+      </motion.div>
     </div>
   );
 }
 
-interface ATSScoreCardProps {
-  score: number;
-}
-
-function ATSScoreCard({ score }: ATSScoreCardProps) {
+// Slide 2: ATS audit scorecard dashboard with background resume
+function Slide2() {
   const radius = 42;
   const circumference = 2 * Math.PI * radius;
-  const filled = (score / 100) * circumference;
+  const filled = 0.92 * circumference;
 
   return (
-    <div
-      className="group bg-white/80 backdrop-blur-md border border-white/20 hover:border-[#171717]/15 rounded-xl p-3 w-[120px] h-[120px] flex flex-col items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_48px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 cursor-default"
-    >
-      <svg width="70" height="70" viewBox="0 0 100 100" className="mb-0.5">
-        {/* Track */}
-        <circle
-          cx="50"
-          cy="50"
-          r={radius}
-          fill="none"
-          stroke="#EBEBEB"
-          strokeWidth="7"
-        />
-        {/* Filled */}
-        <circle
-          cx="50"
-          cy="50"
-          r={radius}
-          fill="none"
-          stroke={score >= 85 ? "#10B981" : "#F59E0B"}
-          strokeWidth="7"
-          strokeLinecap="round"
-          strokeDasharray={`${filled} ${circumference}`}
-          transform="rotate(-90 50 50)"
-          className="transition-all duration-300"
-        />
-        <text
-          x="50"
-          y="48"
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fill="#171717"
-          className="transition-transform duration-300 origin-center group-hover:scale-[1.05]"
-          style={{
-            fontFamily: "var(--font-geist-sans)",
-            fontSize: "22px",
-            fontWeight: 600,
-          }}
-        >
-          {score}
-        </text>
-        <text
-          x="50"
-          y="64"
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fill="#8F8F8F"
-          className="transition-transform duration-300 origin-center group-hover:scale-[1.02]"
-          style={{
-            fontFamily: "var(--font-geist-sans)",
-            fontSize: "10px",
-            fontWeight: 400,
-          }}
-        >
-          /100
-        </text>
-      </svg>
-      <p
-        className="text-[#8F8F8F] transition-colors duration-200 group-hover:text-[#4D4D4D]"
-        style={{
-          fontFamily: "var(--font-geist-sans)",
-          fontSize: "11px",
-          fontWeight: 500,
-        }}
+    <div className="relative w-full h-full flex items-center justify-center p-8 bg-[#FAFAFA] overflow-hidden">
+      {/* Grid Pattern Background */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:24px_24px] opacity-40" />
+
+      {/* Blurred Resume Card in Background */}
+      <div className="absolute left-[30px] top-[90px] w-[180px] h-[250px] bg-white/60 border border-[#EBEBEB] rounded-lg p-2.5 shadow-sm opacity-20 blur-[1px] -rotate-6" />
+
+      {/* Foreground ATS compliance scorecard */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 15 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 w-[380px] h-[340px] bg-white border border-[#EBEBEB] rounded-2xl p-6 shadow-2xl flex flex-col justify-between"
       >
-        ATS Score
-      </p>
-    </div>
-  );
-}
-
-interface SuggestionItem {
-  id: number;
-  text: string;
-  done: boolean;
-}
-
-interface AISuggestionsCardProps {
-  suggestions: SuggestionItem[];
-}
-
-function AISuggestionsCard({ suggestions }: AISuggestionsCardProps) {
-  return (
-    <div
-      className="group bg-white/85 backdrop-blur-md border border-white/20 hover:border-[#171717]/15 rounded-xl p-3.5 w-[180px] h-[120px] flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_48px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 cursor-default"
-    >
-      <div className="flex items-center gap-1.5 mb-2.5">
-        <Lightbulb className="w-4 h-4 text-[#7928CA]" />
-        <p
-          className="text-[#171717]"
-          style={{
-            fontFamily: "var(--font-geist-sans)",
-            fontSize: "13px",
-            fontWeight: 600,
-            lineHeight: "20px",
-          }}
-        >
-          AI Suggestions
-        </p>
-      </div>
-      <div className="flex flex-col gap-2">
-        {suggestions.map(({ id, text, done }) => (
-          <div key={id} className="flex items-center gap-2">
-            <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 border transition-all duration-300 ${
-              done 
-                ? "bg-emerald-500 border-emerald-500 text-white" 
-                : "border-[#EBEBEB] bg-[#FAFAFA]"
-            }`}>
-              {done ? (
-                <Check className="w-2.5 h-2.5" strokeWidth={3} />
-              ) : (
-                <div className="w-1.5 h-1.5 rounded-full bg-[#8F8F8F]" />
-              )}
+        <div className="flex items-center justify-between border-b border-[#EBEBEB] pb-3 select-none">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center">
+              <FileSearch className="w-4.5 h-4.5 text-emerald-600" />
             </div>
-            <span
-              className={`transition-all duration-300 ${done ? "text-[#8F8F8F] line-through" : "text-[#4D4D4D]"}`}
-              style={{
-                fontFamily: "var(--font-geist-sans)",
-                fontSize: "11px",
-                fontWeight: 400,
-                lineHeight: "16px",
-              }}
-            >
-              {text}
-            </span>
+            <div>
+              <h4 className="text-sm font-bold text-[#171717] tracking-tight">ATS Compliance Scan</h4>
+              <p className="text-[10px] text-[#8F8F8F]">Target role matching index</p>
+            </div>
           </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+            Ready to Apply
+          </span>
+        </div>
 
-interface SkillItem {
-  name: string;
-  value: number;
-}
-
-interface SkillMatchCardProps {
-  skills: SkillItem[];
-}
-
-function SkillMatchCard({ skills }: SkillMatchCardProps) {
-  return (
-    <div
-      className="group bg-white/80 backdrop-blur-md border border-white/20 hover:border-[#171717]/15 rounded-xl p-3.5 w-[150px] h-[130px] flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_48px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 cursor-default"
-    >
-      <p
-        className="text-[#171717] mb-2.5"
-        style={{
-          fontFamily: "var(--font-geist-sans)",
-          fontSize: "13px",
-          fontWeight: 600,
-          lineHeight: "20px",
-        }}
-      >
-        Skill Match
-      </p>
-      <div className="flex flex-col gap-2">
-        {skills.map(({ name, value }) => (
-          <div key={name}>
-            <div className="flex items-center justify-between mb-0.5">
-              <span
-                className="text-[#4D4D4D] transition-colors duration-200 group-hover:text-[#171717]"
-                style={{
-                  fontFamily: "var(--font-geist-sans)",
-                  fontSize: "11px",
-                  fontWeight: 400,
-                }}
-              >
-                {name}
-              </span>
-              <span
-                className="text-[#8F8F8F] transition-colors duration-200 group-hover:text-[#4D4D4D]"
-                style={{
-                  fontFamily: "var(--font-geist-sans)",
-                  fontSize: "10px",
-                  fontWeight: 400,
-                }}
-              >
-                {value}%
-              </span>
-            </div>
-            <div className="h-1.5 w-full rounded-full bg-[#EBEBEB] overflow-hidden">
-              <div
-                className="h-full rounded-full bg-[#171717] transition-all duration-500 origin-left"
-                style={{ width: `${value}%` }}
+        <div className="flex items-center gap-6 my-4">
+          {/* Progress circle */}
+          <div className="relative w-24 h-24 shrink-0 flex items-center justify-center">
+            <svg width="96" height="96" viewBox="0 0 100 100" className="-rotate-90">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#EBEBEB" strokeWidth="7" />
+              <motion.circle
+                cx="50"
+                cy="50"
+                r="40"
+                fill="none"
+                stroke="#10B981"
+                strokeWidth="7"
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                initial={{ strokeDashoffset: circumference }}
+                animate={{ strokeDashoffset: circumference - filled }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
               />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center select-none">
+              <span className="text-xl font-bold text-[#171717]">92%</span>
+              <span className="text-[8px] text-[#8F8F8F] uppercase tracking-wider font-semibold">Match</span>
             </div>
           </div>
-        ))}
-      </div>
+
+          {/* Audit Details */}
+          <div className="flex-1 flex flex-col justify-center gap-3">
+            <div className="space-y-1">
+              <div className="flex justify-between text-[10px] font-medium text-[#4D4D4D]">
+                <span>Missing Tech Keywords</span>
+                <span className="text-rose-500 font-mono">0 critical</span>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-[#EBEBEB] overflow-hidden">
+                <div className="h-full bg-[#10B981] w-[95%]" />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-[10px]">
+              <span className="text-[#4D4D4D]">Formatting Score</span>
+              <span className="font-semibold text-emerald-600">Excellent (Clear fonts)</span>
+            </div>
+
+            <div className="flex items-center justify-between text-[10px]">
+              <span className="text-[#4D4D4D]">Action Verb Strength</span>
+              <span className="font-semibold text-emerald-600">Strong (14 active verbs)</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-[#EBEBEB] pt-3 flex items-center justify-between select-none">
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
+            <span className="text-[9px] text-[#8F8F8F]">Last audited 2 minutes ago</span>
+          </div>
+          <span className="text-[9px] text-[#8F8F8F] font-mono">Optimized for Vercel</span>
+        </div>
+      </motion.div>
     </div>
   );
 }
 
-/* ═══════════════════════════════════════════════
-   Product Preview Composite (Live AI Editor Shell)
-   ═══════════════════════════════════════════════ */
+// Slide 3: AI Rewrite suggestions panel
+function Slide3() {
+  const startText = "Wrote backend APIs and managed database queries.";
+  const targetText = "Designed scalable Node.js microservices handling 20k req/sec, optimizing database query response times by 40%.";
 
-function ProductPreview() {
-  const startText = "I wrote JavaScript code for the client-side of the application.";
-  const targetText = "Architected Next.js routing and server component performance, boosting speed by 35%.";
-
-  const [text, setText] = useState(startText);
-  const [isTyping, setIsTyping] = useState(false);
-  const [atsScore, setAtsScore] = useState(68);
-  const [suggestions, setSuggestions] = useState<SuggestionItem[]>([
-    { id: 1, text: "Quantify achievements", done: false },
-    { id: 2, text: "Include action verbs", done: true },
-    { id: 3, text: "Optimize keywords", done: true },
-  ]);
-  const [skills, setSkills] = useState<SkillItem[]>([
-    { name: "React", value: 85 },
-    { name: "TypeScript", value: 55 },
-  ]);
+  const [text, setText] = useState("");
+  const [rewritten, setRewritten] = useState(false);
+  const [typing, setTyping] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
 
-    const runAnimationLoop = async () => {
+    const runRewrite = async () => {
       while (isMounted) {
-        // Reset to initial state
-        if (!isMounted) break;
         setText(startText);
-        setAtsScore(68);
-        setSuggestions([
-          { id: 1, text: "Quantify achievements", done: false },
-          { id: 2, text: "Include action verbs", done: true },
-          { id: 3, text: "Optimize keywords", done: true },
-        ]);
-        setSkills([
-          { name: "React", value: 85 },
-          { name: "TypeScript", value: 55 },
-        ]);
-        setIsTyping(false);
+        setRewritten(false);
+        setTyping(false);
 
-        // 1. Idle for 3 seconds
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+        await new Promise((resolve) => setTimeout(resolve, 1500));
         if (!isMounted) break;
 
-        // 2. Start Typing Rewrite
-        setIsTyping(true);
+        setTyping(true);
+        setRewritten(true);
         setText("");
+
         for (let i = 0; i <= targetText.length; i++) {
           await new Promise((resolve) => setTimeout(resolve, 20));
           if (!isMounted) break;
@@ -384,38 +231,13 @@ function ProductPreview() {
         }
 
         if (!isMounted) break;
-        setIsTyping(false);
+        setTyping(false);
 
-        // 3. Short pause after rewrite
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        if (!isMounted) break;
-
-        // 4. Animate ATS Score up from 68 to 92
-        for (let score = 68; score <= 92; score++) {
-          await new Promise((resolve) => setTimeout(resolve, 25));
-          if (!isMounted) break;
-          setAtsScore(score);
-        }
-
-        if (!isMounted) break;
-
-        // 5. Expand TypeScript Skill bar and Check off Suggestions
-        setSkills([
-          { name: "React", value: 85 },
-          { name: "TypeScript", value: 90 },
-        ]);
-        setSuggestions([
-          { id: 1, text: "Quantify achievements", done: true },
-          { id: 2, text: "Include action verbs", done: true },
-          { id: 3, text: "Optimize keywords", done: true },
-        ]);
-
-        // 6. Hold optimized state for 4 seconds
-        await new Promise((resolve) => setTimeout(resolve, 4000));
+        await new Promise((resolve) => setTimeout(resolve, 3000));
       }
     };
 
-    runAnimationLoop();
+    runRewrite();
 
     return () => {
       isMounted = false;
@@ -423,59 +245,234 @@ function ProductPreview() {
   }, []);
 
   return (
-    <motion.div
-      className="relative w-[620px] h-[460px] hidden lg:block origin-right lg:scale-90 xl:scale-95 2xl:scale-100 transition-transform shrink-0"
-      variants={cardContainer}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.3 }}
-    >
-      {/* 1. Main Background Layer: Landscape Centerpiece */}
-      <div className="absolute top-[30px] left-[10px] z-0">
-        <PixelArtLandscape />
+    <div className="relative w-full h-full flex items-center justify-center p-8 bg-[#FAFAFA] overflow-hidden">
+      {/* Grid Pattern Background */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:24px_24px] opacity-40" />
+
+      {/* Blurred Resume Card in Background */}
+      <div className="absolute right-[40px] top-[100px] w-[180px] h-[250px] bg-white/60 border border-[#EBEBEB] rounded-lg p-2.5 shadow-sm opacity-20 blur-[1px] rotate-6" />
+
+      {/* Foreground AI Suggestions Panel */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 15 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 w-[400px] h-[340px] bg-white border border-[#EBEBEB] rounded-2xl p-6 shadow-2xl flex flex-col justify-between"
+      >
+        <div className="flex items-center gap-2 border-b border-[#EBEBEB] pb-3 select-none">
+          <div className="w-8 h-8 rounded-lg bg-purple-50 border border-purple-100 flex items-center justify-center">
+            <Wand2 className="w-4.5 h-4.5 text-purple-600" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-[#171717] tracking-tight">AI Bullet Optimizer</h4>
+            <p className="text-[10px] text-[#8F8F8F]">Real-time statement rewriting</p>
+          </div>
+        </div>
+
+        <div className="flex-1 flex flex-col justify-center my-3">
+          <p className="text-[8px] font-mono text-[#8F8F8F] uppercase tracking-wide mb-1.5 select-none">Experience Optimizer</p>
+          <div className={`p-3 rounded-lg border text-xs min-h-[90px] leading-relaxed transition-all ${
+            rewritten ? "bg-purple-50/40 border-purple-100 text-purple-900" : "bg-white border-[#EBEBEB] text-[#4D4D4D]"
+          }`}>
+            {text}
+            {typing && <span className="inline-block w-[1.5px] h-[10px] bg-purple-600 ml-0.5 animate-pulse" />}
+          </div>
+        </div>
+
+        <div className="border-t border-[#EBEBEB] pt-3 flex flex-col gap-2 select-none">
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded-full bg-emerald-505 flex items-center justify-center bg-emerald-500 text-white text-[8px] font-bold">✓</div>
+            <span className="text-[10px] text-[#4D4D4D] font-medium">Quantified achievements (40% response time)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded-full bg-emerald-505 flex items-center justify-center bg-emerald-500 text-white text-[8px] font-bold">✓</div>
+            <span className="text-[10px] text-[#4D4D4D] font-medium">Used strong action verb (Designed)</span>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+// Slide 4: Multiple styled resume designs
+function Slide4() {
+  return (
+    <div className="relative w-full h-full flex items-center justify-center p-8 bg-[#FAFAFA] overflow-hidden">
+      {/* Grid Pattern Background */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:24px_24px] opacity-40" />
+
+      {/* Fan of Overlapping Resume Templates */}
+      <div className="relative w-full h-[360px] flex items-center justify-center select-none">
+        
+        {/* Left Template (Modern Blue) */}
+        <motion.div
+          initial={{ opacity: 0, x: -60, rotate: -10 }}
+          animate={{ opacity: 0.95, x: -110, rotate: -8 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="absolute w-[180px] h-[250px] bg-white border border-[#EBEBEB] rounded-lg p-2.5 shadow-lg flex flex-col origin-bottom"
+        >
+          <div className="h-1 bg-[#0070F3] w-full rounded-t -mt-2.5 -mx-2.5 mb-1.5 shrink-0" />
+          <div className="flex gap-2 text-left">
+            <div className="w-[30px] border-r border-[#F2F2F2] pr-1.5 flex flex-col gap-1 shrink-0">
+              <div className="w-4 h-4 rounded-full bg-[#0070F3]/10 text-[#0070F3] font-bold text-[6px] flex items-center justify-center">AR</div>
+              <div className="h-1 bg-[#F2F2F2] w-full rounded" />
+              <div className="h-1 bg-[#F2F2F2] w-full rounded" />
+            </div>
+            <div className="flex-1 space-y-1.5">
+              <div className="h-1.5 bg-[#171717] w-2/3 rounded" />
+              <div className="space-y-0.5">
+                <div className="h-[2px] bg-[#F2F2F2] w-full rounded" />
+                <div className="h-[2px] bg-[#F2F2F2] w-5/6 rounded" />
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Right Template (Technical Purple) */}
+        <motion.div
+          initial={{ opacity: 0, x: 60, rotate: 10 }}
+          animate={{ opacity: 0.95, x: 110, rotate: 8 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="absolute w-[180px] h-[250px] bg-white border border-[#EBEBEB] rounded-lg p-2.5 shadow-lg flex flex-col origin-bottom"
+        >
+          <div className="h-1 bg-[#7928CA] w-full rounded-t -mt-2.5 -mx-2.5 mb-1.5 shrink-0" />
+          <div className="flex gap-2 text-left">
+            <div className="w-[30px] border-r border-[#F2F2F2] pr-1.5 flex flex-col gap-1 shrink-0">
+              <div className="h-1.5 bg-[#F2F2F2] w-full rounded" />
+              <div className="h-1 bg-[#F2F2F2] w-full rounded" />
+            </div>
+            <div className="flex-1 space-y-1.5">
+              <div className="h-1.5 bg-[#171717] w-3/4 rounded" />
+              <div className="space-y-0.5">
+                <div className="h-[2px] bg-[#F2F2F2] w-full rounded" />
+                <div className="h-[2px] bg-[#F2F2F2] w-full rounded" />
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Center Template (Executive Black - FOCAL POINT) */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="absolute w-[200px] h-[280px] bg-white border border-[#171717]/10 rounded-xl p-3 shadow-2xl flex flex-col justify-between font-serif z-10"
+        >
+          <div className="space-y-1.5 text-center">
+            <div className="text-[9px] font-bold text-[#171717] uppercase tracking-wide">Alex Rivera</div>
+            <div className="text-[4.5px] text-[#8F8F8F] uppercase tracking-widest -mt-1">Staff Software Engineer</div>
+            <div className="h-[0.5px] bg-[#171717] w-full mt-1.5" />
+          </div>
+          <div className="flex-1 text-left mt-2.5 space-y-2 overflow-hidden">
+            <div className="space-y-1">
+              <div className="text-[6px] font-bold text-[#171717] uppercase tracking-wider">Professional Experience</div>
+              <div className="space-y-0.5">
+                <div className="flex justify-between text-[4.5px] font-semibold text-[#4D4D4D]">
+                  <span>Lead Engineer @ Stripe</span>
+                  <span className="text-[#8F8F8F]">2022 - Pres</span>
+                </div>
+                <div className="h-[2.5px] bg-[#F2F2F2] w-full rounded-sm" />
+                <div className="h-[2.5px] bg-[#F2F2F2] w-11/12 rounded-sm" />
+              </div>
+            </div>
+          </div>
+          <div className="text-center border-t border-[#EBEBEB] pt-2 mt-2">
+            <span className="text-[7px] text-[#8F8F8F] uppercase tracking-wider font-mono font-bold">Executive Style</span>
+          </div>
+        </motion.div>
+
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   Product Preview Presentation Slider Component
+   ═══════════════════════════════════════════════ */
+
+function ProductPreviewSlider() {
+  const [activeSlide, setActiveSlide] = useState(0);
+  const autoRotateRef = useRef<NodeJS.Timeout | null>(null);
+
+  const slides = [
+    { id: 0, label: "Interactive Visual", component: <Slide1 /> },
+    { id: 1, label: "ATS Scan Audit", component: <Slide2 /> },
+    { id: 2, label: "AI Bullet Optimizer", component: <Slide3 /> },
+    { id: 3, label: "Resume Templates", component: <Slide4 /> },
+  ];
+
+  const resetTimer = () => {
+    if (autoRotateRef.current) {
+      clearInterval(autoRotateRef.current);
+    }
+    autoRotateRef.current = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % 4);
+    }, 5000);
+  };
+
+  useEffect(() => {
+    resetTimer();
+    return () => {
+      if (autoRotateRef.current) {
+        clearInterval(autoRotateRef.current);
+      }
+    };
+  }, []);
+
+  const handleSlideSelect = (id: number) => {
+    setActiveSlide(id);
+    resetTimer();
+  };
+
+  return (
+    <div className="hidden lg:flex flex-col items-center shrink-0 origin-right lg:scale-[0.88] xl:scale-[0.95] 2xl:scale-100 transition-transform duration-300">
+      {/* Main Widescreen Visual Container (720px width, 480px height - 3:2 ratio) */}
+      <div className="w-[720px] h-[480px] bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.06)] relative bg-[#FAFAFA]">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeSlide}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            className="w-full h-full"
+          >
+            {slides[activeSlide].component}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      {/* 2. Centerpiece Focal Point: Embedded floating resume (floating 3D layer) */}
-      <motion.div
-        variants={cardFadeUp}
-        className="absolute top-[82px] left-[205px] z-20"
-      >
-        <div className="animate-float-gentle" style={{ animationDelay: "0s" }}>
-          <EmbeddedResumeCard />
-        </div>
-      </motion.div>
-
-      {/* 3. Glassmorphic Ambient widgets arranged around resume */}
-      {/* ATS Score Card — top-right */}
-      <motion.div
-        variants={cardFadeUp}
-        className="absolute top-[12px] right-[20px] z-30"
-      >
-        <div className="animate-float-gentle" style={{ animationDelay: "0.8s" }}>
-          <ATSScoreCard score={atsScore} />
-        </div>
-      </motion.div>
-
-      {/* AI Suggestions Card — bottom-left */}
-      <motion.div
-        variants={cardFadeUp}
-        className="absolute bottom-[12px] left-[-15px] z-30"
-      >
-        <div className="animate-float-gentle" style={{ animationDelay: "1.2s" }}>
-          <AISuggestionsCard suggestions={suggestions} />
-        </div>
-      </motion.div>
-
-      {/* Skill Match — bottom-right */}
-      <motion.div
-        variants={cardFadeUp}
-        className="absolute bottom-[18px] right-[-10px] z-30"
-      >
-        <div className="animate-float-gentle" style={{ animationDelay: "0.6s" }}>
-          <SkillMatchCard skills={skills} />
-        </div>
-      </motion.div>
-    </motion.div>
+      {/* Progress Indicators Below Visual Showcase */}
+      <div className="flex gap-4 mt-6 w-[720px]">
+        {slides.map((slide) => {
+          const isActive = activeSlide === slide.id;
+          return (
+            <button
+              key={slide.id}
+              onClick={() => handleSlideSelect(slide.id)}
+              className="flex-1 flex flex-col text-left group select-none"
+            >
+              <span className={`text-[11px] font-semibold transition-colors duration-200 ${
+                isActive ? "text-[#171717]" : "text-[#8F8F8F] group-hover:text-[#4D4D4D]"
+              }`}>
+                {slide.label}
+              </span>
+              <div className="h-[3px] bg-[#EBEBEB] w-full rounded-full overflow-hidden mt-1.5 relative">
+                {isActive && (
+                  <motion.div
+                    key={activeSlide} // resets when active slide changes
+                    initial={{ width: 0 }}
+                    animate={{ width: "100%" }}
+                    transition={{ duration: 5, ease: "linear" }}
+                    className="absolute left-0 top-0 bottom-0 bg-[#171717] rounded-full"
+                  />
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -496,8 +493,8 @@ export default function HeroSection({ locale = "en-in" }: HeroSectionProps) {
         aria-hidden="true"
       />
 
-      {/* ── Content ── */}
-      <div className="relative z-10 mx-auto flex max-w-[1200px] items-center justify-between gap-16 px-6">
+      {/* ── Content (Wider container max-w-[1340px] to fit 720px column nicely) ── */}
+      <div className="relative z-10 mx-auto flex max-w-[1340px] items-center justify-between gap-12 px-6">
         {/* ── Left column: text ── */}
         <motion.div
           className="flex max-w-xl flex-col"
@@ -580,8 +577,8 @@ export default function HeroSection({ locale = "en-in" }: HeroSectionProps) {
           </motion.div>
         </motion.div>
 
-        {/* ── Right column: product preview ── */}
-        <ProductPreview />
+        {/* ── Right column: product preview slider (720px container) ── */}
+        <ProductPreviewSlider />
       </div>
     </section>
   );
