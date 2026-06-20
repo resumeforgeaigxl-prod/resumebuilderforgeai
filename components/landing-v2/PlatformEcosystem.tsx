@@ -52,7 +52,7 @@ const forges: ForgeItem[] = [
     path: "ai-resume-builder",
     statusText: "ATS Sync Active",
     metric: "92% Score",
-    x: 690,
+    x: 410,
     y: 250,
     relations: [5, 7], // ProjectForge, JobForge
     inputModule: "ProjectForge",
@@ -75,8 +75,8 @@ const forges: ForgeItem[] = [
     path: "codingforge",
     statusText: "Code Engine Ready",
     metric: "48 Solved",
-    x: 605,
-    y: 374,
+    x: 363,
+    y: 363,
     relations: [2, 3], // InterviewForge, PrepForge
     inputModule: "LearnForge",
     outputModule: "InterviewForge",
@@ -98,8 +98,8 @@ const forges: ForgeItem[] = [
     path: "interview-prep",
     statusText: "Voice Agent Loaded",
     metric: "Fluent / 88%",
-    x: 400,
-    y: 425,
+    x: 250,
+    y: 410,
     relations: [1, 7], // CodingForge, JobForge
     inputModule: "CodingForge",
     outputModule: "JobForge",
@@ -121,8 +121,8 @@ const forges: ForgeItem[] = [
     path: "prepforge",
     statusText: "Company Deck Synced",
     metric: "12 Decks",
-    x: 195,
-    y: 374,
+    x: 137,
+    y: 363,
     relations: [2, 4], // InterviewForge, LearnForge
     inputModule: "JobForge",
     outputModule: "InterviewForge",
@@ -144,7 +144,7 @@ const forges: ForgeItem[] = [
     path: "learnforge",
     statusText: "Study Paths Active",
     metric: "8 Tracks",
-    x: 110,
+    x: 90,
     y: 250,
     relations: [1, 5], // CodingForge, ProjectForge
     inputModule: "CareerForge",
@@ -167,8 +167,8 @@ const forges: ForgeItem[] = [
     path: "projectforge",
     statusText: "GitHub Repos Synced",
     metric: "4 Repos",
-    x: 195,
-    y: 126,
+    x: 137,
+    y: 137,
     relations: [0, 7], // ResumeForge, JobForge
     inputModule: "LearnForge",
     outputModule: "ResumeForge",
@@ -190,8 +190,8 @@ const forges: ForgeItem[] = [
     path: "careerforge",
     statusText: "Advisors Online",
     metric: "Active L6",
-    x: 400,
-    y: 75,
+    x: 250,
+    y: 90,
     relations: [4, 0], // LearnForge, ResumeForge
     inputModule: "User Profile",
     outputModule: "LearnForge",
@@ -213,8 +213,8 @@ const forges: ForgeItem[] = [
     path: "jobs",
     statusText: "Referrals Open",
     metric: "4 Matches",
-    x: 605,
-    y: 126,
+    x: 363,
+    y: 137,
     relations: [3, 0], // PrepForge, ResumeForge
     inputModule: "ResumeForge",
     outputModule: "PrepForge",
@@ -232,18 +232,23 @@ export default function PlatformEcosystem({ locale = "en-in" }: { locale?: strin
   const activeForgeData = forges[activeForge];
   const ActiveIcon = activeForgeData.icon;
 
-  // Calculates curved quadratic Bezier paths between nodes
+  // Calculates curved quadratic Bezier paths curving outwards away from center (250, 250)
   const getRelationPath = (x1: number, y1: number, x2: number, y2: number) => {
     const mx = (x1 + x2) / 2;
     const my = (y1 + y2) / 2;
-    // Bend curve slightly based on coordinates to make wires look beautiful
-    const bend = y1 > 250 && y2 > 250 ? 35 : -35;
-    return `M ${x1} ${y1} Q ${mx} ${my + bend} ${x2} ${y2}`;
+    
+    const dx = mx - 250;
+    const dy = my - 250;
+    const shift = 0.22;
+    const cx = mx + dx * shift;
+    const cy = my + dy * shift;
+    
+    return `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
   };
 
   return (
     <section id="templates" className="py-24 px-6 overflow-hidden bg-white border-t border-[#EBEBEB]">
-      <div className="max-w-[1000px] mx-auto">
+      <div className="max-w-[1200px] mx-auto">
         {/* Header */}
         <motion.div
           className="text-center"
@@ -288,238 +293,304 @@ export default function PlatformEcosystem({ locale = "en-in" }: { locale?: strin
           </p>
         </motion.div>
 
-        {/* ── Main Radial Visualizer Stage ── */}
-        <div className="relative w-full aspect-[8/5] max-w-[900px] mx-auto mt-16 select-none bg-white border border-[#EBEBEB] rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.015)]">
-          {/* Subtle Grid Background */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#FAFAFA_1px,transparent_1px),linear-gradient(to_bottom,#FAFAFA_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
+        {/* ── Cohesive Mockup Window Box ── */}
+        <div className="w-full max-w-[1100px] bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden mt-16 shadow-[0_8px_32px_rgba(0,0,0,0.025)] flex flex-col mx-auto select-none">
+          
+          {/* OS Window Top Bar Controls */}
+          <div className="h-10 bg-[#FAFAFA] border-b border-[#EBEBEB] px-4 flex items-center justify-between shrink-0 select-none">
+            {/* Dots */}
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56] border border-[#E0443E]" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E] border border-[#DEA123]" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F] border border-[#1AAB29]" />
+            </div>
+            {/* Title */}
+            <span className="text-[10px] font-mono text-[#8F8F8F] uppercase tracking-wider font-semibold">
+              Ecosystem Dashboard
+            </span>
+            {/* Active module tag */}
+            <span
+              className={`text-[8.5px] font-mono font-bold px-2 py-0.5 rounded border transition-colors ${activeForgeData.bgTint} ${activeForgeData.borderTint} ${activeForgeData.textAccent}`}
+            >
+              {activeForgeData.title} Online
+            </span>
+          </div>
 
-          {/* SVG Canvas for lines and pulses */}
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 800 500">
-            {/* Ambient Profile Core Pulse Ring */}
-            <motion.circle
-              cx="400"
-              cy="250"
-              r="70"
-              fill="none"
-              stroke={`${activeForgeData.accentColor}10`}
-              strokeWidth="2"
-              animate={{ scale: [1, 1.25, 1], opacity: [0.6, 0, 0.6] }}
-              transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-            />
+          {/* Internal Content (Split Left/Right) */}
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1.28fr_1fr] bg-white">
+            
+            {/* Left Column: Interactive Radial Web Graph */}
+            <div className="relative p-6 flex items-center justify-center bg-[#FAFAFA] min-h-[380px] sm:min-h-[440px] lg:min-h-[480px]">
+              {/* Soft grid background */}
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:20px_20px] opacity-40 pointer-events-none" />
 
-            {/* Static thin connection lines between center core and periphery nodes */}
-            {forges.map((f) => (
-              <line
-                key={`wire-${f.title}`}
-                x1={f.x}
-                y1={f.y}
-                x2={400}
-                y2={250}
-                stroke="#F2F2F2"
-                strokeWidth="1.2"
-              />
-            ))}
+              <svg className="relative z-10 w-full h-full max-w-[440px] aspect-square overflow-visible" viewBox="0 0 500 500">
+                <defs>
+                  <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor={activeForgeData.accentColor} stopOpacity="0.22" />
+                    <stop offset="100%" stopColor={activeForgeData.accentColor} stopOpacity="0" />
+                  </radialGradient>
+                </defs>
 
-            {/* Active pulsing wire from active node to center core */}
-            <motion.line
-              key={`active-wire-${activeForge}`}
-              x1={activeForgeData.x}
-              y1={activeForgeData.y}
-              x2={400}
-              y2={250}
-              stroke={activeForgeData.accentColor}
-              strokeWidth="1.5"
-              strokeDasharray="4 6"
-              animate={{ strokeDashoffset: [0, -20] }}
-              transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-            />
+                {/* Central glowing gradient backdrop */}
+                <motion.circle
+                  key={`glow-${activeForge}`}
+                  cx="250"
+                  cy="250"
+                  r="75"
+                  fill="url(#coreGlow)"
+                  animate={{ scale: [0.95, 1.1, 0.95] }}
+                  transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                />
 
-            {/* Dynamic direct relationship lines connecting active node to related nodes */}
-            <AnimatePresence>
-              {activeForgeData.relations.map((relIdx) => {
-                const relForge = forges[relIdx];
-                return (
-                  <motion.path
-                    key={`rel-path-${activeForge}-${relIdx}`}
-                    d={getRelationPath(activeForgeData.x, activeForgeData.y, relForge.x, relForge.y)}
-                    fill="none"
-                    stroke={activeForgeData.accentColor}
+                {/* Concentric orbital rings */}
+                <motion.circle
+                  cx="250"
+                  cy="250"
+                  r="95"
+                  fill="none"
+                  stroke="#EBEBEB"
+                  strokeWidth="1"
+                  strokeDasharray="4 6"
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 30, ease: "linear" }}
+                  style={{ transformOrigin: "250px 250px" }}
+                />
+                <motion.circle
+                  cx="250"
+                  cy="250"
+                  r="125"
+                  fill="none"
+                  stroke="#EBEBEB"
+                  strokeWidth="1"
+                  strokeDasharray="3 5"
+                  animate={{ rotate: -360 }}
+                  transition={{ repeat: Infinity, duration: 40, ease: "linear" }}
+                  style={{ transformOrigin: "250px 250px" }}
+                />
+
+                {/* Static wires to core */}
+                {forges.map((f) => (
+                  <line
+                    key={`wire-${f.title}`}
+                    x1={f.x}
+                    y1={f.y}
+                    x2={250}
+                    y2={250}
+                    stroke="#EBEBEB"
                     strokeWidth="1.2"
-                    strokeDasharray="3 5"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 0.6 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.4 }}
                   />
-                );
-              })}
-            </AnimatePresence>
+                ))}
 
-            {/* Labels under the nodes */}
-            {forges.map((f, idx) => {
-              const isActive = activeForge === idx;
-              return (
-                <text
-                  key={`label-${f.title}`}
-                  x={f.x}
-                  y={f.y + 36}
-                  textAnchor="middle"
-                  className={`text-[10px] font-medium pointer-events-none transition-all duration-300 font-sans select-none`}
-                  fill={isActive ? f.accentColor : "#8F8F8F"}
-                  style={{ fontWeight: isActive ? 700 : 500 }}
-                >
-                  {f.title}
-                </text>
-              );
-            })}
+                {/* Active glowing wire flow */}
+                <motion.line
+                  key={`active-wire-${activeForge}`}
+                  x1={activeForgeData.x}
+                  y1={activeForgeData.y}
+                  x2={250}
+                  y2={250}
+                  stroke={activeForgeData.accentColor}
+                  strokeWidth="1.5"
+                  strokeDasharray="4 6"
+                  animate={{ strokeDashoffset: [0, -20] }}
+                  transition={{ repeat: Infinity, duration: 1.4, ease: "linear" }}
+                />
 
-            {/* Nodes Placement */}
-            {forges.map((f, idx) => {
-              const Icon = f.icon;
-              const isActive = activeForge === idx;
-              const isRelated = activeForgeData.relations.includes(idx);
-              return (
+                {/* Direct relationships wires between active node and related nodes */}
+                <AnimatePresence>
+                  {activeForgeData.relations.map((relIdx) => {
+                    const relForge = forges[relIdx];
+                    return (
+                      <motion.path
+                        key={`rel-path-${activeForge}-${relIdx}`}
+                        d={getRelationPath(activeForgeData.x, activeForgeData.y, relForge.x, relForge.y)}
+                        fill="none"
+                        stroke={activeForgeData.accentColor}
+                        strokeWidth="1.2"
+                        strokeDasharray="3 5"
+                        initial={{ pathLength: 0, opacity: 0 }}
+                        animate={{ pathLength: 1, opacity: 0.6 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4 }}
+                      />
+                    );
+                  })}
+                </AnimatePresence>
+
+                {/* Node labels inside the SVG (centered below each node) */}
+                {forges.map((f, idx) => {
+                  const isActive = activeForge === idx;
+                  return (
+                    <text
+                      key={`label-${f.title}`}
+                      x={f.x}
+                      y={f.y + 24}
+                      textAnchor="middle"
+                      className="text-[8px] font-semibold pointer-events-none transition-colors duration-300 font-sans select-none"
+                      fill={isActive ? f.accentColor : "#8F8F8F"}
+                      style={{ fontWeight: isActive ? 700 : 500 }}
+                    >
+                      {f.title}
+                    </text>
+                  );
+                })}
+
+                {/* Periphery Node Buttons */}
+                {forges.map((f, idx) => {
+                  const Icon = f.icon;
+                  const isActive = activeForge === idx;
+                  const isRelated = activeForgeData.relations.includes(idx);
+                  return (
+                    <foreignObject
+                      key={`node-${f.title}`}
+                      x={f.x - 12}
+                      y={f.y - 12}
+                      width="24"
+                      height="24"
+                      className="overflow-visible"
+                    >
+                      <div
+                        onMouseEnter={() => setActiveForge(idx)}
+                        className={`w-6 h-6 rounded-full border bg-white flex items-center justify-center cursor-pointer transition-all duration-300 ${
+                          isActive
+                            ? "shadow-sm scale-110"
+                            : isRelated
+                            ? "border-neutral-300"
+                            : "border-[#EBEBEB]"
+                        }`}
+                        style={{
+                          borderColor: isActive ? f.accentColor : isRelated ? `${activeForgeData.accentColor}50` : "#EBEBEB",
+                          boxShadow: isActive ? `0 0 12px ${f.accentColor}20` : isRelated ? `0 0 6px ${activeForgeData.accentColor}10` : "none"
+                        }}
+                      >
+                        <Icon
+                          className="w-3.5 h-3.5 transition-colors"
+                          style={{ color: isActive ? f.accentColor : isRelated ? activeForgeData.accentColor : "#4D4D4D" }}
+                        />
+                      </div>
+                    </foreignObject>
+                  );
+                })}
+
+                {/* Central Profile Core Node inside SVG */}
                 <foreignObject
-                  key={`node-${f.title}`}
-                  x={f.x - 18}
-                  y={f.y - 18}
-                  width="36"
-                  height="36"
-                  className="overflow-visible"
+                  x={250 - 20}
+                  y={250 - 20}
+                  width="40"
+                  height="40"
+                  className="overflow-visible pointer-events-none"
                 >
                   <div
-                    onMouseEnter={() => setActiveForge(idx)}
-                    className={`w-9 h-9 rounded-full border bg-white flex items-center justify-center cursor-pointer transition-all duration-300 ${
-                      isActive
-                        ? "shadow-md scale-110"
-                        : isRelated
-                        ? "border-neutral-300"
-                        : "border-[#EBEBEB]"
-                    }`}
+                    className="w-10 h-10 rounded-full bg-white border flex flex-col items-center justify-center shadow-md transition-all duration-500"
                     style={{
-                      borderColor: isActive ? f.accentColor : isRelated ? `${activeForgeData.accentColor}50` : "#EBEBEB",
-                      boxShadow: isActive ? `0 0 16px ${f.accentColor}25` : isRelated ? `0 0 8px ${activeForgeData.accentColor}10` : "none"
+                      borderColor: `${activeForgeData.accentColor}40`,
+                      boxShadow: `0 0 20px ${activeForgeData.accentColor}15`
                     }}
                   >
-                    <Icon
-                      className="w-4 h-4 transition-colors"
-                      style={{ color: isActive ? f.accentColor : isRelated ? activeForgeData.accentColor : "#4D4D4D" }}
-                    />
+                    <User className="w-3.5 h-3.5 text-neutral-800" />
+                    <span className="text-[5px] font-mono font-bold uppercase tracking-wider text-neutral-500 mt-0.5">
+                      Core
+                    </span>
                   </div>
                 </foreignObject>
-              );
-            })}
-          </svg>
-
-          {/* Centered User Profile Node (CORE) */}
-          <div className="absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%] flex items-center justify-center pointer-events-none">
-            <div
-              className="w-18 h-18 rounded-full bg-white border flex flex-col items-center justify-center shadow-lg transition-all duration-500"
-              style={{
-                borderColor: `${activeForgeData.accentColor}40`,
-                boxShadow: `0 0 25px ${activeForgeData.accentColor}15`
-              }}
-            >
-              <User className="w-5 h-5 text-neutral-800" />
-              <span className="text-[7.5px] font-mono font-bold uppercase tracking-wider text-neutral-500 mt-1">
-                Profile
-              </span>
+              </svg>
             </div>
-          </div>
-        </div>
 
-        {/* ── Console Inspector Panel (Bottom) ── */}
-        <div className="mt-8 bg-white border border-[#EBEBEB] rounded-2xl p-6 md:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.01)] text-left flex flex-col md:flex-row justify-between gap-8 relative select-none">
-          {/* Top colored accent line matching hovered Forge */}
-          <div
-            className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl transition-colors duration-500"
-            style={{ backgroundColor: activeForgeData.accentColor }}
-          />
+            {/* Right Column: Console Details Inspector (No bottom card!) */}
+            <div className="bg-white border-t lg:border-t-0 lg:border-l border-[#EBEBEB] p-6 sm:p-8 flex flex-col justify-between text-left">
+              
+              {/* Module Header and Details */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-all ${activeForgeData.bgTint} ${activeForgeData.borderTint}`}
+                  >
+                    <ActiveIcon className="w-4.5 h-4.5" style={{ color: activeForgeData.accentColor }} />
+                  </div>
+                  <div>
+                    <h3
+                      className="text-base font-bold text-[#171717] tracking-tight leading-none"
+                      style={{ fontFamily: "var(--font-geist-sans)" }}
+                    >
+                      {activeForgeData.title}
+                    </h3>
+                    <span
+                      className={`text-[8.5px] font-bold font-mono uppercase tracking-wider ${activeForgeData.textAccent} mt-1 block`}
+                    >
+                      {activeForgeData.statusText} • {activeForgeData.metric}
+                    </span>
+                  </div>
+                </div>
 
-          {/* Left Details Block */}
-          <div className="flex-1 space-y-4">
-            <div className="flex items-center gap-3">
-              {/* Mini Icon Tag */}
-              <div
-                className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-all ${activeForgeData.bgTint} ${activeForgeData.borderTint}`}
-              >
-                <ActiveIcon className="w-4 h-4" style={{ color: activeForgeData.accentColor }} />
-              </div>
-              <div>
-                <h3
-                  className="text-lg font-bold text-[#171717] tracking-tight leading-none"
+                <p
+                  className="text-[13px] text-[#4D4D4D] leading-relaxed"
                   style={{ fontFamily: "var(--font-geist-sans)" }}
                 >
-                  {activeForgeData.title}
-                </h3>
-                <span
-                  className={`text-[9px] font-bold font-mono uppercase tracking-wider ${activeForgeData.textAccent} mt-1 block`}
-                >
-                  {activeForgeData.statusText} • {activeForgeData.metric}
-                </span>
+                  {activeForgeData.description}
+                </p>
+
+                {/* Outcomes Checklist */}
+                <div className="space-y-2 pt-1">
+                  {activeForgeData.outcomes.map((outcome) => (
+                    <div key={outcome} className="flex items-center gap-2.5 text-[11.5px] text-[#4D4D4D]">
+                      <div
+                        className="w-4 h-4 rounded-full flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: `${activeForgeData.accentColor}10` }}
+                      >
+                        <Check className="w-2.5 h-2.5" style={{ color: activeForgeData.accentColor }} />
+                      </div>
+                      <span className="font-medium" style={{ fontFamily: "var(--font-geist-sans)" }}>
+                        {outcome}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <p
-              className="text-[13.5px] text-[#4D4D4D] leading-relaxed max-w-xl"
-              style={{ fontFamily: "var(--font-geist-sans)" }}
-            >
-              {activeForgeData.description}
-            </p>
-
-            {/* outcomes list */}
-            <div className="space-y-2 pt-2">
-              {activeForgeData.outcomes.map((outcome) => (
-                <div key={outcome} className="flex items-center gap-2.5 text-xs text-[#4D4D4D]">
-                  <div
-                    className="w-4 h-4 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: `${activeForgeData.accentColor}10` }}
-                  >
-                    <Check className="w-2.5 h-2.5" style={{ color: activeForgeData.accentColor }} />
+              {/* Data Pipelines Flow (Console-style Integration) */}
+              <div className="border-t border-[#F2F2F2] pt-5 mt-6">
+                <h4 className="text-[9.5px] font-mono font-bold text-neutral-400 uppercase tracking-widest mb-3 select-none">
+                  Ecosystem Data Pipelines
+                </h4>
+                
+                <div className="space-y-3">
+                  {/* Pipeline display: Input Source */}
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-[#8F8F8F] font-medium" style={{ fontFamily: "var(--font-geist-sans)" }}>Pulls Context From</span>
+                    <span className="font-mono text-[10px] border border-[#EBEBEB] bg-[#FAFAFA] rounded px-2 py-0.5 font-bold text-[#171717]">
+                      {activeForgeData.inputModule}
+                    </span>
                   </div>
-                  <span className="font-medium" style={{ fontFamily: "var(--font-geist-sans)" }}>
-                    {outcome}
-                  </span>
+
+                  {/* Pipeline display: Output Target */}
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-[#8F8F8F] font-medium" style={{ fontFamily: "var(--font-geist-sans)" }}>Feeds Intelligence To</span>
+                    <span
+                      className="font-mono text-[10px] border rounded px-2 py-0.5 font-bold text-white"
+                      style={{
+                        backgroundColor: activeForgeData.accentColor,
+                        borderColor: activeForgeData.accentColor
+                      }}
+                    >
+                      {activeForgeData.outputModule}
+                    </span>
+                  </div>
                 </div>
-              ))}
+
+                <div className="mt-5 text-right select-none">
+                  <Link
+                    href={`/${locale}/${activeForgeData.path}`}
+                    className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider ${activeForgeData.textAccent} hover:opacity-80 transition-opacity`}
+                  >
+                    <span>Launch Active Module</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
+
             </div>
           </div>
 
-          {/* Right Pipeline integration block */}
-          <div className="w-full md:w-[280px] border-t md:border-t-0 md:border-l border-[#F2F2F2] pt-6 md:pt-0 md:pl-8 flex flex-col justify-center">
-            <h4
-              className="text-[10px] font-mono font-bold text-neutral-400 uppercase tracking-widest mb-3.5"
-            >
-              Ecosystem Data Pipelines
-            </h4>
-            <div className="space-y-4">
-              {/* Input Feed */}
-              <div className="text-left">
-                <span className="text-[9px] text-[#8F8F8F] uppercase font-bold tracking-wider">Pulls context from</span>
-                <div className="flex items-center gap-2 mt-1.5 font-mono text-[10.5px] border border-[#EBEBEB] bg-[#FAFAFA] rounded-md px-2.5 py-1.5 font-semibold text-[#171717]">
-                  <div className="w-1.5 h-1.5 rounded-full bg-neutral-400" />
-                  <span>{activeForgeData.inputModule}</span>
-                </div>
-              </div>
-
-              {/* Central Active Node */}
-              <div className="flex justify-center select-none text-[#8F8F8F]">
-                <div className="h-4 border-l border-dashed border-neutral-300" />
-              </div>
-
-              {/* Output Feed */}
-              <div className="text-left">
-                <span className="text-[9px] text-[#8F8F8F] uppercase font-bold tracking-wider">Feeds intelligence to</span>
-                <div className="flex items-center gap-2 mt-1.5 font-mono text-[10.5px] border border-[#EBEBEB] bg-[#FAFAFA] rounded-md px-2.5 py-1.5 font-semibold text-[#171717]">
-                  <div
-                    className="w-1.5 h-1.5 rounded-full"
-                    style={{ backgroundColor: activeForgeData.accentColor }}
-                  />
-                  <span>{activeForgeData.outputModule}</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
