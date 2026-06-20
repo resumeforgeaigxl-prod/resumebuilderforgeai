@@ -54,7 +54,7 @@ const cardShadow =
 // Centerpiece: Target Pixel Art Landscape
 function PixelArtLandscape() {
   return (
-    <div className="relative w-[600px] h-[300px] rounded-2xl overflow-hidden border border-[#EBEBEB] shadow-[0_12px_40px_rgba(0,0,0,0.06)]">
+    <div className="relative w-[600px] h-[400px] rounded-2xl overflow-hidden border border-[#EBEBEB] shadow-[0_12px_40px_rgba(0,0,0,0.06)]">
       {/* Background Mountain Layer */}
       <img
         src="/hero-landscape.png"
@@ -424,21 +424,21 @@ function ProductPreview() {
 
   return (
     <motion.div
-      className="relative w-[620px] h-[380px] hidden lg:block origin-right lg:scale-90 xl:scale-95 2xl:scale-100 transition-transform shrink-0"
+      className="relative w-[620px] h-[460px] hidden lg:block origin-right lg:scale-90 xl:scale-95 2xl:scale-100 transition-transform shrink-0"
       variants={cardContainer}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.3 }}
     >
       {/* 1. Main Background Layer: Landscape Centerpiece */}
-      <div className="absolute top-[25px] left-[10px] z-0">
+      <div className="absolute top-[30px] left-[10px] z-0">
         <PixelArtLandscape />
       </div>
 
       {/* 2. Centerpiece Focal Point: Embedded floating resume (floating 3D layer) */}
       <motion.div
         variants={cardFadeUp}
-        className="absolute top-[27px] left-[205px] z-20"
+        className="absolute top-[82px] left-[205px] z-20"
       >
         <div className="animate-float-gentle" style={{ animationDelay: "0s" }}>
           <EmbeddedResumeCard />
@@ -449,7 +449,7 @@ function ProductPreview() {
       {/* ATS Score Card — top-right */}
       <motion.div
         variants={cardFadeUp}
-        className="absolute top-[10px] right-[20px] z-30"
+        className="absolute top-[12px] right-[20px] z-30"
       >
         <div className="animate-float-gentle" style={{ animationDelay: "0.8s" }}>
           <ATSScoreCard score={atsScore} />
@@ -459,7 +459,7 @@ function ProductPreview() {
       {/* AI Suggestions Card — bottom-left */}
       <motion.div
         variants={cardFadeUp}
-        className="absolute bottom-[10px] left-[-15px] z-30"
+        className="absolute bottom-[12px] left-[-15px] z-30"
       >
         <div className="animate-float-gentle" style={{ animationDelay: "1.2s" }}>
           <AISuggestionsCard suggestions={suggestions} />
@@ -469,7 +469,7 @@ function ProductPreview() {
       {/* Skill Match — bottom-right */}
       <motion.div
         variants={cardFadeUp}
-        className="absolute bottom-[15px] right-[-10px] z-30"
+        className="absolute bottom-[18px] right-[-10px] z-30"
       >
         <div className="animate-float-gentle" style={{ animationDelay: "0.6s" }}>
           <SkillMatchCard skills={skills} />
