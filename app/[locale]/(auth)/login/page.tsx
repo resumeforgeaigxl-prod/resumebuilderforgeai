@@ -76,7 +76,7 @@ export default function LoginPage() {
                 </div>
 
                 {error && (
-                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-[14px] flex items-start gap-3 text-red-500 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-[6px] flex items-start gap-3 text-red-500 animate-in fade-in slide-in-from-top-2 duration-300">
                         <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                         <p className="text-sm font-medium">{error}</p>
                     </div>
@@ -91,13 +91,13 @@ export default function LoginPage() {
                             placeholder="you@example.com"
                             required
                             disabled={isLoading}
-                            className="w-full h-[58px] px-5 bg-[#0a0a0c] border border-[#222] focus:border-[#444] rounded-[14px] focus:outline-none transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                            className="w-full h-11 px-3.5 bg-[#0a0a0c] border border-[#222] focus:border-[#444] rounded-[6px] focus:outline-none transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                         />
                     </div>
                     <div className="space-y-2">
                         <div className="flex justify-between items-center">
                             <label className="text-sm font-medium text-slate-300">Password</label>
-                            <Link href={`/${locale}/forgot-password`} title='Forgot Password' className="text-xs text-purple-400 hover:text-purple-300 font-medium transition-colors underline underline-offset-4 decoration-purple-500/30">
+                            <Link href={`/${locale}/forgot-password`} title='Forgot Password' className="text-xs text-purple-400 hover:text-purple-300 font-semibold transition-colors underline underline-offset-4 decoration-purple-500/30">
                                 Forgot password?
                             </Link>
                         </div>
@@ -107,14 +107,14 @@ export default function LoginPage() {
                             placeholder="••••••••"
                             required
                             disabled={isLoading}
-                            className="w-full h-[58px] px-5 bg-[#0a0a0c] border border-[#222] focus:border-[#444] rounded-[14px] focus:outline-none transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                            className="w-full h-11 px-3.5 bg-[#0a0a0c] border border-[#222] focus:border-[#444] rounded-[6px] focus:outline-none transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                         />
                     </div>
 
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full h-[56px] bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-[14px] transition-all shadow-md shadow-purple-600/10 active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100 flex items-center justify-center gap-2 text-base"
+                        className="w-full h-11 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-[6px] transition-all shadow-md shadow-purple-600/10 active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100 flex items-center justify-center gap-2 text-sm"
                     >
                         {isLoading ? (
                             <>

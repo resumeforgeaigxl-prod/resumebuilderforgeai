@@ -81,14 +81,14 @@ export default function SignupPage() {
             </div>
 
             {error && (
-                <div className="mb-4 p-4 rounded-[14px] bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+                <div className="mb-4 p-4 rounded-[6px] bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
                     <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                     <p className="font-medium text-red-500">{error}</p>
                 </div>
             )}
 
             {message && (
-                <div className="mb-4 p-4 rounded-[14px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+                <div className="mb-4 p-4 rounded-[6px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
                     <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
                     <p className="font-medium text-emerald-500">{message}</p>
                 </div>
@@ -113,7 +113,7 @@ export default function SignupPage() {
                             placeholder="you@example.com"
                             required
                             disabled={isLoading}
-                            className="w-full h-[58px] px-5 bg-[#0a0a0c] border border-[#222] focus:border-[#444] rounded-[14px] focus:outline-none transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                            className="w-full h-11 px-3.5 bg-[#0a0a0c] border border-[#222] focus:border-[#444] rounded-[6px] focus:outline-none transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                         />
                     </div>
                     <div className="space-y-2">
@@ -124,7 +124,7 @@ export default function SignupPage() {
                             placeholder="+91 98765 43210"
                             required
                             disabled={isLoading}
-                            className="w-full h-[58px] px-5 bg-[#0a0a0c] border border-[#222] focus:border-[#444] rounded-[14px] focus:outline-none transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                            className="w-full h-11 px-3.5 bg-[#0a0a0c] border border-[#222] focus:border-[#444] rounded-[6px] focus:outline-none transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                         />
                         <p className="text-[10px] text-slate-500 px-1 font-medium italic">We need this for account verification and updates.</p>
                     </div>
@@ -137,11 +137,11 @@ export default function SignupPage() {
                             required
                             minLength={6}
                             disabled={isLoading}
-                            className="w-full h-[58px] px-5 bg-[#0a0a0c] border border-[#222] focus:border-[#444] rounded-[14px] focus:outline-none transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                            className="w-full h-11 px-3.5 bg-[#0a0a0c] border border-[#222] focus:border-[#444] rounded-[6px] focus:outline-none transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                         />
                     </div>
 
-                    <label className="flex items-start gap-3 p-4 rounded-[14px] bg-[#0a0a0c] border border-[#222] hover:border-[#333] cursor-pointer select-none mt-4 transition-all">
+                    <label className="flex items-start gap-3 p-3.5 rounded-[6px] bg-[#0a0a0c] border border-[#222] hover:border-[#333] cursor-pointer select-none mt-4 transition-all">
                         <input
                             type="checkbox"
                             required
@@ -166,7 +166,7 @@ export default function SignupPage() {
                     <button
                         type="submit"
                         disabled={!tcChecked || isLoading}
-                        className="w-full h-[56px] bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-[14px] transition-all shadow-md shadow-purple-600/10 active:scale-[0.99] flex items-center justify-center gap-2 text-base"
+                        className="w-full h-11 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-[6px] transition-all shadow-md shadow-purple-600/10 active:scale-[0.99] flex items-center justify-center gap-2 text-sm"
                     >
                         {isLoading ? (
                             <>
