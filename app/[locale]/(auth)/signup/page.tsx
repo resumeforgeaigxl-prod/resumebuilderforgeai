@@ -72,23 +72,23 @@ export default function SignupPage() {
     return (
         <div className="w-full flex flex-col gap-5">
             <div className="text-left">
-                <h1 className="text-4xl font-bold text-white mb-1">
+                <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-400 to-violet-300 bg-clip-text text-transparent tracking-tight mb-1">
                     Create Account
                 </h1>
-                <p className="text-sm text-gray-400 mb-6">
+                <p className="text-gray-400 text-sm mt-1 mb-8">
                     Start building your production-ready resume.
                 </p>
             </div>
 
             {error && (
-                <div className="p-4 rounded-md bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-start gap-3">
+                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-start gap-3">
                     <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                     <p className="font-medium text-red-500">{error}</p>
                 </div>
             )}
 
             {message && (
-                <div className="p-4 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm flex items-start gap-3">
+                <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm flex items-start gap-3">
                     <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
                     <p className="font-medium text-emerald-500">{message}</p>
                 </div>
@@ -97,38 +97,42 @@ export default function SignupPage() {
             <div className="flex flex-col gap-4">
                 <OAuthButtons />
 
-                <div className="text-xs text-gray-500 tracking-widest text-center my-3">
-                    OR CONTINUE WITH EMAIL
+                <div className="flex items-center gap-3 my-3">
+                    <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-purple-500/30" />
+                    <span className="text-purple-400/60 tracking-[0.2em] text-[10px] uppercase font-semibold flex-shrink-0">
+                        OR CONTINUE WITH EMAIL
+                    </span>
+                    <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-purple-500/30" />
                 </div>
 
                 <form className="space-y-4" onSubmit={handleSubmit}>
                     <div className="flex flex-col">
-                        <label className="text-[10px] tracking-widest text-gray-400 mb-1.5 uppercase font-medium">Email Address</label>
+                        <label className="text-purple-300/70 text-[10px] tracking-[0.15em] uppercase font-medium mb-1.5">Email Address</label>
                         <input
                             type="email"
                             name="email"
                             placeholder="you@example.com"
                             required
                             disabled={isLoading}
-                            className="w-full h-11 px-4 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
+                            className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-gray-600 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/60 focus:outline-none transition-all duration-200"
                         />
                     </div>
                     
                     <div className="flex flex-col">
-                        <label className="text-[10px] tracking-widest text-gray-400 mb-1.5 uppercase font-medium">Mobile Phone Number <span className="text-purple-500">*</span></label>
+                        <label className="text-purple-300/70 text-[10px] tracking-[0.15em] uppercase font-medium mb-1.5">Mobile Phone Number <span className="text-purple-500">*</span></label>
                         <input
                             type="tel"
                             name="phone_number"
                             placeholder="+91 98765 43210"
                             required
                             disabled={isLoading}
-                            className="w-full h-11 px-4 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
+                            className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-gray-600 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/60 focus:outline-none transition-all duration-200"
                         />
-                        <p className="text-[10px] text-gray-500 mt-1 italic">We need this for account verification and updates.</p>
+                        <p className="text-purple-400/50 text-xs mt-1 italic font-medium">We need this for account verification and updates.</p>
                     </div>
 
                     <div className="flex flex-col">
-                        <label className="text-[10px] tracking-widest text-gray-400 mb-1.5 uppercase font-medium">Secure Password <span className="text-purple-500">*</span></label>
+                        <label className="text-purple-300/70 text-[10px] tracking-[0.15em] uppercase font-medium mb-1.5">Secure Password <span className="text-purple-500">*</span></label>
                         <input
                             type="password"
                             name="password"
@@ -136,11 +140,11 @@ export default function SignupPage() {
                             required
                             minLength={6}
                             disabled={isLoading}
-                            className="w-full h-11 px-4 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
+                            className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-gray-600 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/60 focus:outline-none transition-all duration-200"
                         />
                     </div>
 
-                    <div className="flex items-start gap-2 text-xs text-gray-400 mt-1">
+                    <div className="flex items-start gap-2 text-gray-400 text-xs mt-1">
                         <input
                             type="checkbox"
                             id="tc-checkbox"
@@ -148,7 +152,7 @@ export default function SignupPage() {
                             checked={tcChecked}
                             onChange={e => setTcChecked(e.target.checked)}
                             disabled={isLoading}
-                            className="mt-0.5 w-4 h-4 accent-purple-500 rounded border-[#2a2a2a] bg-[#1a1a1a] cursor-pointer"
+                            className="mt-0.5 w-4 h-4 accent-purple-500 rounded border-white/10 bg-white/5 cursor-pointer"
                         />
                         <label htmlFor="tc-checkbox" className="cursor-pointer select-none leading-normal">
                             I agree to the{' '}
@@ -166,7 +170,7 @@ export default function SignupPage() {
                     <button
                         type="submit"
                         disabled={!tcChecked || isLoading}
-                        className="w-full h-11 mt-4 rounded-md bg-purple-600 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                        className="w-full h-12 mt-4 rounded-xl bg-gradient-to-r from-purple-600 to-violet-500 hover:from-purple-500 hover:to-violet-400 shadow-lg shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold hover:scale-[1.01] transition-all duration-200 flex items-center justify-center gap-2"
                     >
                         {isLoading ? (
                             <>
@@ -179,7 +183,7 @@ export default function SignupPage() {
                     </button>
                 </form>
 
-                <p className="text-center text-sm text-gray-400 mt-2">
+                <p className="text-center text-sm text-gray-500 mt-2">
                     Already have an account?{' '}
                     <Link href={`/${locale}/login`} className="text-purple-400 hover:text-purple-300 font-semibold transition-colors underline underline-offset-4 decoration-purple-500/30 hover:decoration-purple-400">
                         Sign in
