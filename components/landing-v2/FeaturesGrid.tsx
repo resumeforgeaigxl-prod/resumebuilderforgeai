@@ -493,6 +493,65 @@ const cardVariants = {
 };
 
 export default function FeaturesGrid() {
+  const [activeTab, setActiveTab] = useState(0);
+
+  const features = [
+    {
+      id: 0,
+      title: "ATS Scan Playground",
+      description: "Scan your mock resume files directly. Test the parser performance, catch compliance alerts, and identify formatting bugs in real time.",
+      icon: FileSearch,
+      playground: <ATSScanPlayground />,
+      badge: "ATS Analyzer",
+      bgClass: "bg-purple-50 border-purple-100 text-purple-600"
+    },
+    {
+      id: 1,
+      title: "AI Bullet Optimizer",
+      description: "Transform weak description statements. Our engine converts generic points into metric-rich, action-oriented career achievements.",
+      icon: Wand2,
+      playground: <AIRewritePlayground />,
+      badge: "AI Resume Writer",
+      bgClass: "bg-purple-50 border-purple-100 text-purple-600"
+    },
+    {
+      id: 2,
+      title: "Template Customizer",
+      description: "Toggle styles and colorways. Instantly test formatting layouts designed for recruiter readability.",
+      icon: LayoutTemplate,
+      playground: <TemplatesPlayground />,
+      badge: "Resume Templates",
+      bgClass: "bg-[#F2F2F2] border-transparent text-[#171717]"
+    },
+    {
+      id: 3,
+      title: "Tone Match Generator",
+      description: "Adjust the copy slider. Generate custom introduction statements tailored to specific job vibes.",
+      icon: FileText,
+      playground: <CoverLetterPlayground />,
+      badge: "Cover Letter Generator",
+      bgClass: "bg-[#F2F2F2] border-transparent text-[#171717]"
+    },
+    {
+      id: 4,
+      title: "Fit Matrix Simulator",
+      description: "Compare job descriptions. Select targets to trigger real-time fit metrics and tech stack audits.",
+      icon: Target,
+      playground: <JobMatchPlayground />,
+      badge: "Job Match Score",
+      bgClass: "bg-emerald-50 border-emerald-100 text-emerald-600"
+    },
+    {
+      id: 5,
+      title: "Smart Suggestions Engine",
+      description: "Identify sections that need immediate attention. Try clicking \"Fix\" to simulate applying automated recommendations.",
+      icon: Lightbulb,
+      playground: <SuggestionsPlayground />,
+      badge: "Smart Suggestions",
+      bgClass: "bg-purple-50 border-purple-100 text-purple-600"
+    }
+  ];
+
   return (
     <section id="features" className="py-24 px-6 relative overflow-hidden bg-[#FFFFFF]">
       <div className="mx-auto max-w-[1200px]">
@@ -536,122 +595,86 @@ export default function FeaturesGrid() {
               lineHeight: "24px",
             }}
           >
-            A dynamic bento toolkit designed to transform your resume into a job-winning application — powered by AI, validated for ATS.
+            A dynamic workspace designed to transform your resume into a job-winning application — powered by AI, validated for ATS.
           </p>
         </motion.div>
 
-        {/* Bento Grid */}
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-6 gap-6 mt-16"
-          variants={gridVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.1 }}
-        >
-          {/* Card 1: ATS Scanner (Double-width) */}
-          <motion.div
-            variants={cardVariants}
-            className="md:col-span-3 bg-white border border-[#EBEBEB] rounded-2xl p-6 transition-all duration-300 hover:border-[#171717]/15 hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-9 h-9 bg-purple-50 rounded-lg flex items-center justify-center border border-purple-100">
-                <FileSearch className="w-5 h-5 text-purple-600" />
-              </div>
-              <h3 className="mt-4 text-[18px] font-bold text-[#171717] tracking-tight">ATS Scan Playground</h3>
-              <p className="mt-1.5 text-xs text-[#4D4D4D] leading-relaxed">
-                Scan your mock resume files directly. Test the parser performance, catch compliance alerts, and identify formatting bugs in real time.
-              </p>
-            </div>
-            <ATSScanPlayground />
-          </motion.div>
+        {/* Split Interactive Workspace Layout */}
+        <div className="flex flex-col lg:flex-row gap-10 items-stretch mt-16">
+          {/* Left Column: Interactive Tab Buttons */}
+          <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-x-visible pb-4 lg:pb-0 scrollbar-none lg:w-[380px] shrink-0 snap-x">
+            {features.map((feature, idx) => {
+              const Icon = feature.icon;
+              const isActive = activeTab === idx;
+              return (
+                <button
+                  key={feature.id}
+                  onClick={() => setActiveTab(idx)}
+                  className={`flex items-start text-left p-4 rounded-xl border transition-all shrink-0 snap-start w-[280px] lg:w-full select-none ${
+                    isActive
+                      ? "bg-purple-50/10 border-purple-100 shadow-[0_4px_12px_rgba(0,0,0,0.01)]"
+                      : "bg-white border-transparent hover:bg-neutral-50/50"
+                  }`}
+                  style={{
+                    borderLeftWidth: "3px",
+                    borderLeftColor: isActive ? "#7928CA" : "transparent"
+                  }}
+                >
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border ${feature.bgClass}`}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div className="ml-3.5">
+                    <h4 className="text-sm font-bold text-[#171717] tracking-tight">{feature.title}</h4>
+                    <p className="text-[11px] text-[#4D4D4D] leading-relaxed mt-1 hidden lg:block">
+                      {feature.description}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
 
-          {/* Card 2: AI Bullet Writer (Single-width) */}
-          <motion.div
-            variants={cardVariants}
-            className="md:col-span-3 bg-white border border-[#EBEBEB] rounded-2xl p-6 transition-all duration-300 hover:border-[#171717]/15 hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-9 h-9 bg-purple-50 rounded-lg flex items-center justify-center border border-purple-100">
-                <Wand2 className="w-5 h-5 text-purple-600" />
-              </div>
-              <h3 className="mt-4 text-[18px] font-bold text-[#171717] tracking-tight">AI Bullet Optimizer</h3>
-              <p className="mt-1.5 text-xs text-[#4D4D4D] leading-relaxed">
-                Transform weak description statements. Our engine converts generic points into metric-rich, action-oriented career achievements.
-              </p>
-            </div>
-            <AIRewritePlayground />
-          </motion.div>
+          {/* Right Column: Preview Canvas with Floating Mockup */}
+          <div className="flex-1 relative rounded-2xl overflow-hidden border border-[#EBEBEB] shadow-[0_12px_40px_rgba(0,0,0,0.04)] bg-[#FAFAFA] flex items-center justify-center min-h-[380px] lg:min-h-[480px]">
+            {/* Background Mountain layer */}
+            <img
+              src="/hero-landscape.png"
+              alt="Feature Background"
+              className="absolute inset-0 w-full h-full object-cover opacity-90"
+            />
+            {/* Dark blur overlay to highlight mockup */}
+            <div className="absolute inset-0 bg-slate-900/10 backdrop-blur-[1px] pointer-events-none" />
 
-          {/* Card 3: Live Templates (Single-width) */}
-          <motion.div
-            variants={cardVariants}
-            className="md:col-span-2 bg-white border border-[#EBEBEB] rounded-2xl p-6 transition-all duration-300 hover:border-[#171717]/15 hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-9 h-9 bg-[#F2F2F2] rounded-lg flex items-center justify-center">
-                <LayoutTemplate className="w-5 h-5 text-[#171717]" />
+            {/* Floating Mock Window Frame */}
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, scale: 0.96, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="relative z-10 w-[90%] sm:w-[85%] lg:w-[480px] bg-white/95 backdrop-blur-md border border-[#EBEBEB] rounded-xl shadow-2xl overflow-hidden flex flex-col"
+            >
+              {/* Mock Window Top Bar */}
+              <div className="h-9 bg-[#FAFAFA]/90 border-b border-[#EBEBEB] px-4 flex items-center justify-between shrink-0 select-none">
+                {/* Window control dots */}
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56] border border-[#E0443E]" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E] border border-[#DEA123]" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F] border border-[#1AAB29]" />
+                </div>
+                {/* Window title */}
+                <span className="text-[10px] font-mono text-[#8F8F8F] uppercase tracking-wider font-semibold">
+                  {features[activeTab].badge}
+                </span>
+                <div className="w-12" /> {/* spacer */}
               </div>
-              <h3 className="mt-4 text-[16px] font-bold text-[#171717] tracking-tight">Template Customizer</h3>
-              <p className="mt-1.5 text-xs text-[#4D4D4D] leading-relaxed">
-                Toggle styles and colorways. Instantly test formatting layouts designed for recruiter readability.
-              </p>
-            </div>
-            <TemplatesPlayground />
-          </motion.div>
 
-          {/* Card 4: Cover Letter (Single-width) */}
-          <motion.div
-            variants={cardVariants}
-            className="md:col-span-2 bg-white border border-[#EBEBEB] rounded-2xl p-6 transition-all duration-300 hover:border-[#171717]/15 hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-9 h-9 bg-[#F2F2F2] rounded-lg flex items-center justify-center">
-                <FileText className="w-5 h-5 text-[#171717]" />
+              {/* Window Content Area */}
+              <div className="p-5 flex items-center justify-center bg-white/80 min-h-[230px]">
+                {features[activeTab].playground}
               </div>
-              <h3 className="mt-4 text-[16px] font-bold text-[#171717] tracking-tight">Tone Match Generator</h3>
-              <p className="mt-1.5 text-xs text-[#4D4D4D] leading-relaxed">
-                Adjust the copy slider. Generate custom introduction statements tailored to specific job vibes.
-              </p>
-            </div>
-            <CoverLetterPlayground />
-          </motion.div>
-
-          {/* Card 5: Job Match Score (Single-width) */}
-          <motion.div
-            variants={cardVariants}
-            className="md:col-span-2 bg-white border border-[#EBEBEB] rounded-2xl p-6 transition-all duration-300 hover:border-[#171717]/15 hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-9 h-9 bg-emerald-50 rounded-lg flex items-center justify-center border border-emerald-100">
-                <Target className="w-5 h-5 text-emerald-600" />
-              </div>
-              <h3 className="mt-4 text-[16px] font-bold text-[#171717] tracking-tight">Fit Matrix Simulator</h3>
-              <p className="mt-1.5 text-xs text-[#4D4D4D] leading-relaxed">
-                Compare job descriptions. Select targets to trigger real-time fit metrics and tech stack audits.
-              </p>
-            </div>
-            <JobMatchPlayground />
-          </motion.div>
-
-          {/* Card 6: Smart Suggestions (Full-width row) */}
-          <motion.div
-            variants={cardVariants}
-            className="md:col-span-6 bg-white border border-[#EBEBEB] rounded-2xl p-6 transition-all duration-300 hover:border-[#171717]/15 hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col md:flex-row gap-6 items-center justify-between"
-          >
-            <div className="flex-1">
-              <div className="w-9 h-9 bg-purple-50 rounded-lg flex items-center justify-center border border-purple-100">
-                <Lightbulb className="w-5 h-5 text-purple-600" />
-              </div>
-              <h3 className="mt-4 text-[18px] font-bold text-[#171717] tracking-tight">Interactive Suggestion Engine</h3>
-              <p className="mt-1.5 text-xs text-[#4D4D4D] leading-relaxed max-w-xl">
-                Identify sections that need immediate attention. Try clicking the "Fix" actions to simulate applying automated recommendations directly to draft records.
-              </p>
-            </div>
-            <div className="w-full md:w-[360px] shrink-0">
-              <SuggestionsPlayground />
-            </div>
-          </motion.div>
-        </motion.div>
+            </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   );
