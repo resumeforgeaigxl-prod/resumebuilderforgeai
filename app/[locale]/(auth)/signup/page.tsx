@@ -72,7 +72,18 @@ export default function SignupPage() {
     return (
         <div className="w-full flex flex-col gap-5">
             <div className="text-left">
-                <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-400 to-violet-300 bg-clip-text text-transparent tracking-tight mb-1">
+                <h1 
+                    className="font-bold tracking-tight mb-1"
+                    style={{
+                        fontFamily: "'Press Start 2P', monospace",
+                        fontSize: "1.6rem",
+                        lineHeight: "1.6",
+                        letterSpacing: "-0.01em",
+                        background: "linear-gradient(135deg, #c084fc, #a855f7, #7c3aed)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent"
+                    }}
+                >
                     Create Account
                 </h1>
                 <p className="text-gray-400 text-sm mt-1 mb-8">
@@ -98,16 +109,29 @@ export default function SignupPage() {
                 <OAuthButtons />
 
                 <div className="flex items-center gap-3 my-3">
-                    <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-purple-500/30" />
-                    <span className="text-purple-400/60 tracking-[0.2em] text-[10px] uppercase font-semibold flex-shrink-0">
+                    <div className="h-[1px] flex-1" style={{ background: 'linear-gradient(to right, transparent, rgba(139,92,246,0.3))' }} />
+                    <span 
+                        className="text-purple-400/50 tracking-[0.2em] text-[9px] uppercase font-bold flex-shrink-0"
+                        style={{ fontFamily: 'monospace' }}
+                    >
                         OR CONTINUE WITH EMAIL
                     </span>
-                    <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-purple-500/30" />
+                    <div className="h-[1px] flex-1" style={{ background: 'linear-gradient(to left, transparent, rgba(139,92,246,0.3))' }} />
                 </div>
 
                 <form className="space-y-4" onSubmit={handleSubmit}>
                     <div className="flex flex-col">
-                        <label className="text-purple-300/70 text-[10px] tracking-[0.15em] uppercase font-medium mb-1.5">Email Address</label>
+                        <label 
+                            className="mb-1.5 uppercase font-medium"
+                            style={{
+                                fontFamily: "'Courier New', monospace",
+                                fontSize: "10px",
+                                letterSpacing: "0.12em",
+                                color: "rgba(192,132,252,0.6)"
+                            }}
+                        >
+                            Email Address
+                        </label>
                         <input
                             type="email"
                             name="email"
@@ -119,7 +143,17 @@ export default function SignupPage() {
                     </div>
                     
                     <div className="flex flex-col">
-                        <label className="text-purple-300/70 text-[10px] tracking-[0.15em] uppercase font-medium mb-1.5">Mobile Phone Number <span className="text-purple-500">*</span></label>
+                        <label 
+                            className="mb-1.5 uppercase font-medium"
+                            style={{
+                                fontFamily: "'Courier New', monospace",
+                                fontSize: "10px",
+                                letterSpacing: "0.12em",
+                                color: "rgba(192,132,252,0.6)"
+                            }}
+                        >
+                            Mobile Phone Number <span className="text-purple-500">*</span>
+                        </label>
                         <input
                             type="tel"
                             name="phone_number"
@@ -132,7 +166,17 @@ export default function SignupPage() {
                     </div>
 
                     <div className="flex flex-col">
-                        <label className="text-purple-300/70 text-[10px] tracking-[0.15em] uppercase font-medium mb-1.5">Secure Password <span className="text-purple-500">*</span></label>
+                        <label 
+                            className="mb-1.5 uppercase font-medium"
+                            style={{
+                                fontFamily: "'Courier New', monospace",
+                                fontSize: "10px",
+                                letterSpacing: "0.12em",
+                                color: "rgba(192,132,252,0.6)"
+                            }}
+                        >
+                            Secure Password <span className="text-purple-500">*</span>
+                        </label>
                         <input
                             type="password"
                             name="password"
