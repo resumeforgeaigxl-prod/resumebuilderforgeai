@@ -40,29 +40,37 @@ function Slide1() {
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 w-[240px] h-[330px] bg-white rounded-xl border border-[#EBEBEB] p-4 text-left flex flex-col font-sans select-none shadow-[0_20px_50px_rgba(0,0,0,0.15)] hover:scale-[1.02] transition-transform duration-300"
+        className="relative z-10 w-[240px] h-[330px] p-4 text-left flex flex-col font-sans select-none hover:scale-[1.02] transition-transform duration-300 overflow-hidden"
+        style={{
+          background: 'rgba(255, 255, 255, 0.12)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.25)',
+          borderRadius: '20px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+        }}
       >
         {/* Top accent bar */}
         <div className="h-0.5 bg-[#7928CA] w-full mb-3 shrink-0" />
         
         {/* Header */}
         <div className="mb-2 shrink-0">
-          <div className="font-bold text-[9px] text-[#171717] tracking-tight">ALEX RIVERA</div>
-          <div className="text-[#7928CA] font-medium text-[5px] mt-0.5">Staff Software Engineer</div>
-          <div className="text-[#8F8F8F] text-[4px] mt-0.5">Vercel • Next.js Core Team</div>
+          <div className="font-bold text-[9px] text-white tracking-tight" style={{ fontWeight: 700 }}>ALEX RIVERA</div>
+          <div className="text-white/60 font-medium text-[5px] mt-0.5">Staff Software Engineer</div>
+          <div className="text-white/60 text-[4px] mt-0.5">Vercel • Next.js Core Team</div>
         </div>
 
         {/* Experience block */}
         <div className="space-y-2 flex-1 min-h-0 overflow-hidden mt-1">
           <div>
-            <div className="font-semibold text-[#171717] border-b border-[#EBEBEB] pb-0.5 mb-1.5 text-[4.5px] tracking-wider">EXPERIENCE</div>
+            <div className="font-semibold text-white border-b pb-0.5 mb-1.5 text-[4.5px] tracking-wider" style={{ fontWeight: 700, borderColor: 'rgba(255,255,255,0.15)' }}>EXPERIENCE</div>
             <div className="space-y-1.5">
               <div>
-                <div className="flex justify-between font-medium text-[#171717] text-[4px]">
+                <div className="flex justify-between font-medium text-white/90 text-[4px]">
                   <span>Staff Software Engineer</span>
-                  <span className="text-[#8F8F8F] font-normal text-[3.5px]">2022 - Pres</span>
+                  <span className="text-white/60 font-normal text-[3.5px]">2022 - Pres</span>
                 </div>
-                <ul className="list-disc pl-2.5 mt-0.5 space-y-0.5 text-[#8F8F8F] text-[3.5px] leading-[4.5px]">
+                <ul className="list-disc pl-2.5 mt-0.5 space-y-0.5 text-white/80 text-[3.5px] leading-[4.5px]">
                   <li>Architected Next.js App Router compiler upgrades.</li>
                   <li>Reduced cold-start latency by 24% globally.</li>
                 </ul>
@@ -72,10 +80,17 @@ function Slide1() {
 
           {/* Skills block */}
           <div className="mt-2">
-            <div className="font-semibold text-[#171717] border-b border-[#EBEBEB] pb-0.5 mb-1 text-[4.5px] tracking-wider">TECHNICAL SKILLS</div>
+            <div className="font-semibold text-white border-b pb-0.5 mb-1 text-[4.5px] tracking-wider" style={{ fontWeight: 700, borderColor: 'rgba(255,255,255,0.15)' }}>TECHNICAL SKILLS</div>
             <div className="flex flex-wrap gap-0.5 mt-1">
               {["TypeScript", "React", "Next.js", "Go", "Docker"].map((skill) => (
-                <span key={skill} className="text-[3.5px] font-medium text-[#4D4D4D] bg-[#FAFAFA] border border-[#EBEBEB] px-1 py-0.2 rounded-sm">
+                <span 
+                  key={skill} 
+                  className="text-[3.5px] font-medium text-white/90 px-1 py-0.2 rounded-sm"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)'
+                  }}
+                >
                   {skill}
                 </span>
               ))}
@@ -83,10 +98,24 @@ function Slide1() {
           </div>
         </div>
 
-        {/* Embedded Mini ATS Score Tag */}
-        <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 bg-emerald-50 border border-emerald-100 rounded-full flex items-center gap-1 z-10 shadow-sm">
-          <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[6.5px] font-bold text-emerald-700">92 Score Passed</span>
+        {/* Frosted bottom label */}
+        <div 
+          className="w-full text-center shrink-0"
+          style={{
+            background: 'rgba(255,255,255,0.1)',
+            borderTop: '1px solid rgba(255,255,255,0.15)',
+            padding: '6px 12px',
+            fontSize: '10px',
+            fontFamily: 'monospace',
+            letterSpacing: '0.1em',
+            color: 'rgba(255,255,255,0.5)',
+            margin: 'auto -16px -16px -16px',
+            width: 'calc(100% + 32px)',
+            borderBottomLeftRadius: '20px',
+            borderBottomRightRadius: '20px'
+          }}
+        >
+          ATS SCORE: 94
         </div>
       </motion.div>
     </div>
@@ -120,28 +149,52 @@ function Slide2() {
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 w-[380px] h-[340px] bg-white border border-[#EBEBEB] rounded-2xl p-6 shadow-2xl flex flex-col justify-between"
+        className="relative z-10 w-[380px] h-[340px] p-6 flex flex-col justify-between"
+        style={{
+          background: 'rgba(255, 255, 255, 0.12)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.25)',
+          borderRadius: '20px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+        }}
       >
-        <div className="flex items-center justify-between border-b border-[#EBEBEB] pb-3 select-none">
+        <div 
+          className="flex items-center justify-between border-b pb-3 select-none"
+          style={{ borderColor: 'rgba(255,255,255,0.15)' }}
+        >
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center">
-              <FileSearch className="w-4.5 h-4.5 text-emerald-600" />
+            <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center">
+              <FileSearch className="w-4.5 h-4.5 text-white/90" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-[#171717] tracking-tight">ATS Compliance Scan</h4>
-              <p className="text-[10px] text-[#8F8F8F]">Target role matching index</p>
+              <h4 className="text-sm font-bold text-white tracking-tight" style={{ fontWeight: 700 }}>ATS Compliance Scan</h4>
+              <p className="text-[10px] text-white/60">Target role matching index</p>
             </div>
           </div>
-          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+          <span 
+            className="font-bold text-[10px]"
+            style={{
+              background: 'rgba(34,197,94,0.2)',
+              border: '1px solid rgba(34,197,94,0.4)',
+              color: '#86efac',
+              borderRadius: '999px',
+              padding: '2px 10px',
+              fontSize: '11px'
+            }}
+          >
             Ready to Apply
           </span>
         </div>
 
         <div className="flex items-center gap-6 my-4">
           {/* Progress circle */}
-          <div className="relative w-24 h-24 shrink-0 flex items-center justify-center">
+          <div 
+            className="relative w-24 h-24 shrink-0 flex items-center justify-center"
+            style={{ filter: 'drop-shadow(0 0 8px rgba(34,197,94,0.4))' }}
+          >
             <svg width="96" height="96" viewBox="0 0 100 100" className="-rotate-90">
-              <circle cx="50" cy="50" r="40" fill="none" stroke="#EBEBEB" strokeWidth="7" />
+              <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="7" />
               <motion.circle
                 cx="50"
                 cy="50"
@@ -157,41 +210,53 @@ function Slide2() {
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center select-none">
-              <span className="text-xl font-bold text-[#171717]">92%</span>
-              <span className="text-[8px] text-[#8F8F8F] uppercase tracking-wider font-semibold">Match</span>
+              <span className="text-xl font-bold text-white">92%</span>
+              <span className="text-[8px] text-white/60 uppercase tracking-wider font-semibold">Match</span>
             </div>
           </div>
 
           {/* Audit Details */}
           <div className="flex-1 flex flex-col justify-center gap-3">
             <div className="space-y-1">
-              <div className="flex justify-between text-[10px] font-medium text-[#4D4D4D]">
+              <div className="flex justify-between text-[10px] font-medium text-white/85">
                 <span>Missing Tech Keywords</span>
-                <span className="text-rose-500 font-mono">0 critical</span>
+                <span className="font-mono" style={{ color: '#86efac' }}>0 critical</span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-[#EBEBEB] overflow-hidden">
+              <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
                 <div className="h-full bg-[#10B981] w-[95%]" />
               </div>
             </div>
 
             <div className="flex items-center justify-between text-[10px]">
-              <span className="text-[#4D4D4D]">Formatting Score</span>
-              <span className="font-semibold text-emerald-600">Excellent (Clear fonts)</span>
+              <span className="text-white/85">Formatting Score</span>
+              <span className="font-semibold" style={{ color: '#86efac' }}>Excellent (Clear fonts)</span>
             </div>
 
             <div className="flex items-center justify-between text-[10px]">
-              <span className="text-[#4D4D4D]">Action Verb Strength</span>
-              <span className="font-semibold text-emerald-600">Strong (14 active verbs)</span>
+              <span className="text-white/85">Action Verb Strength</span>
+              <span className="font-semibold" style={{ color: '#86efac' }}>Strong (14 active verbs)</span>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-[#EBEBEB] pt-3 flex items-center justify-between select-none">
+        <div 
+          className="border-t pt-3 flex items-center justify-between select-none"
+          style={{ borderColor: 'rgba(255,255,255,0.15)' }}
+        >
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
-            <span className="text-[9px] text-[#8F8F8F]">Last audited 2 minutes ago</span>
+            <span 
+              className="select-none"
+              style={{
+                color: 'rgba(255,255,255,0.35)',
+                fontSize: '11px',
+                fontFamily: 'monospace'
+              }}
+            >
+              Last audited 2 minutes ago
+            </span>
           </div>
-          <span className="text-[9px] text-[#8F8F8F] font-mono">Optimized for Vercel</span>
+          <span className="text-[9px] text-white/40 font-mono">Optimized for Vercel</span>
         </div>
       </motion.div>
     </div>
@@ -264,36 +329,74 @@ function Slide3() {
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 w-[400px] h-[340px] bg-white border border-[#EBEBEB] rounded-2xl p-6 shadow-2xl flex flex-col justify-between"
+        className="relative z-10 w-[400px] h-[340px] p-6 flex flex-col justify-between"
+        style={{
+          background: 'rgba(255, 255, 255, 0.12)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.25)',
+          borderRadius: '20px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+        }}
       >
-        <div className="flex items-center gap-2 border-b border-[#EBEBEB] pb-3 select-none">
-          <div className="w-8 h-8 rounded-lg bg-purple-50 border border-purple-100 flex items-center justify-center">
-            <Wand2 className="w-4.5 h-4.5 text-purple-600" />
+        <div 
+          className="flex items-center gap-2 border-b pb-3 select-none"
+          style={{ borderColor: 'rgba(255,255,255,0.15)' }}
+        >
+          <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center">
+            <Wand2 className="w-4.5 h-4.5 text-purple-300" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-[#171717] tracking-tight">AI Bullet Optimizer</h4>
-            <p className="text-[10px] text-[#8F8F8F]">Real-time statement rewriting</p>
+            <h4 className="text-sm font-bold text-white tracking-tight" style={{ fontWeight: 700 }}>AI Bullet Optimizer</h4>
+            <p className="text-[10px] text-white/60">Real-time statement rewriting</p>
           </div>
         </div>
 
         <div className="flex-1 flex flex-col justify-center my-3">
-          <p className="text-[8px] font-mono text-[#8F8F8F] uppercase tracking-wide mb-1.5 select-none">Experience Optimizer</p>
-          <div className={`p-3 rounded-lg border text-xs min-h-[90px] leading-relaxed transition-all ${
-            rewritten ? "bg-purple-50/40 border-purple-100 text-purple-900" : "bg-white border-[#EBEBEB] text-[#4D4D4D]"
-          }`}>
-            {text}
-            {typing && <span className="inline-block w-[1.5px] h-[10px] bg-purple-600 ml-0.5 animate-pulse" />}
+          <p 
+            className="mb-1.5 select-none"
+            style={{
+              color: 'rgba(167,139,250,0.8)',
+              fontFamily: 'monospace',
+              fontSize: '10px',
+              letterSpacing: '0.15em'
+            }}
+          >
+            EXPERIENCE OPTIMIZER
+          </p>
+          <div 
+            className="text-xs min-h-[90px] leading-relaxed transition-all"
+            style={{
+              background: 'rgba(0,0,0,0.2)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: '10px',
+              color: '#c4b5fd',
+              padding: '12px'
+            }}
+          >
+            {rewritten && text.startsWith("Designed") ? (
+              <span>
+                <span style={{ color: '#c4b5fd', fontWeight: 600 }}>Designed</span>
+                {text.substring(8)}
+              </span>
+            ) : (
+              text
+            )}
+            {typing && <span className="inline-block w-[1.5px] h-[10px] bg-purple-400 ml-0.5 animate-pulse" />}
           </div>
         </div>
 
-        <div className="border-t border-[#EBEBEB] pt-3 flex flex-col gap-2 select-none">
+        <div 
+          className="border-t pt-3 flex flex-col gap-2 select-none"
+          style={{ borderColor: 'rgba(255,255,255,0.15)' }}
+        >
           <div className="flex items-center gap-2">
             <div className="w-3.5 h-3.5 rounded-full bg-emerald-505 flex items-center justify-center bg-emerald-500 text-white text-[8px] font-bold">✓</div>
-            <span className="text-[10px] text-[#4D4D4D] font-medium">Quantified achievements (40% response time)</span>
+            <span className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>Quantified achievements (40% response time)</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3.5 h-3.5 rounded-full bg-emerald-505 flex items-center justify-center bg-emerald-500 text-white text-[8px] font-bold">✓</div>
-            <span className="text-[10px] text-[#4D4D4D] font-medium">Used strong action verb (Designed)</span>
+            <span className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>Used strong action verb (Designed)</span>
           </div>
         </div>
       </motion.div>
@@ -316,25 +419,59 @@ function Slide4() {
           initial={{ opacity: 0, x: -60, rotate: -10 }}
           animate={{ opacity: 0.95, x: -110, rotate: -8 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute w-[180px] h-[250px] bg-white border border-[#EBEBEB] rounded-lg p-3.5 shadow-lg flex flex-col origin-bottom overflow-hidden animate-float-slow text-left"
+          className="absolute w-[180px] h-[250px] rounded-lg p-3.5 flex flex-col origin-bottom overflow-hidden animate-float-slow text-left"
+          style={{
+            background: 'rgba(255, 255, 255, 0.12)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.25)',
+            borderRadius: '20px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+          }}
         >
           <div className="h-1 bg-[#0070F3] w-full rounded-t -mt-3.5 -mx-3.5 mb-2.5 shrink-0" />
           <div className="flex gap-2 text-left">
-            <div className="w-[32px] border-r border-[#F2F2F2] pr-1.5 flex flex-col gap-1 shrink-0">
-              <div className="w-4.5 h-4.5 rounded-full bg-[#0070F3]/10 text-[#0070F3] font-bold text-[6px] flex items-center justify-center">SA</div>
-              <div className="h-1 bg-[#F2F2F2] w-full rounded-sm" />
-              <div className="h-1 bg-[#F2F2F2] w-full rounded-sm" />
+            <div 
+              className="w-[32px] border-r pr-1.5 flex flex-col gap-1 shrink-0"
+              style={{ borderColor: 'rgba(255,255,255,0.15)' }}
+            >
+              <div 
+                className="w-4.5 h-4.5 rounded-full text-white font-bold text-[6px] flex items-center justify-center"
+                style={{ background: 'rgba(255, 255, 255, 0.1)' }}
+              >
+                SA
+              </div>
+              <div className="h-1 w-full rounded-sm" style={{ background: 'rgba(255,255,255,0.15)' }} />
+              <div className="h-1 w-full rounded-sm" style={{ background: 'rgba(255,255,255,0.15)' }} />
             </div>
             <div className="flex-1 space-y-1.5">
               <div>
-                <div className="text-[7px] font-bold text-[#171717] leading-none">Sarah Anderson</div>
-                <div className="text-[4.5px] text-[#0070F3] font-medium mt-0.5">Product Designer</div>
+                <div className="text-[7px] leading-none" style={{ color: 'white', fontWeight: 700 }}>Sarah Anderson</div>
+                <div className="text-[4.5px] mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>Product Designer</div>
               </div>
-              <div className="space-y-0.5 mt-2">
-                <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
-                <div className="h-[2px] bg-[#F2F2F2] w-5/6 rounded-sm" />
+              <div className="space-y-1 mt-2">
+                <div className="h-[2px] w-full rounded-sm" style={{ background: 'rgba(255,255,255,0.15)' }} />
+                <div className="h-[2px] w-5/6 rounded-sm" style={{ background: 'rgba(255,255,255,0.15)' }} />
+                <div className="h-[2px] w-4/5 rounded-sm" style={{ background: 'rgba(255,255,255,0.15)' }} />
+                <div className="h-[2px] w-2/3 rounded-sm" style={{ background: 'rgba(255,255,255,0.15)' }} />
               </div>
             </div>
+          </div>
+          <div 
+            className="w-full text-center shrink-0"
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              borderTop: '1px solid rgba(255,255,255,0.15)',
+              padding: '6px 12px',
+              fontSize: '10px',
+              fontFamily: 'monospace',
+              letterSpacing: '0.1em',
+              color: 'rgba(255,255,255,0.5)',
+              margin: 'auto -14px -14px -14px',
+              width: 'calc(100% + 28px)'
+            }}
+          >
+            ATS SCORE: 94
           </div>
         </motion.div>
 
@@ -343,25 +480,54 @@ function Slide4() {
           initial={{ opacity: 0, x: 60, rotate: 10 }}
           animate={{ opacity: 0.95, x: 110, rotate: 8 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute w-[180px] h-[250px] bg-white border border-[#EBEBEB] rounded-lg p-3.5 shadow-lg flex flex-col origin-bottom overflow-hidden animate-float-slow text-left font-mono"
+          className="absolute w-[180px] h-[250px] rounded-lg p-3.5 flex flex-col origin-bottom overflow-hidden animate-float-slow text-left font-mono"
+          style={{
+            background: 'rgba(255, 255, 255, 0.12)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.25)',
+            borderRadius: '20px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+          }}
         >
           <div className="h-1 bg-[#7928CA] w-full rounded-t -mt-3.5 -mx-3.5 mb-2.5 shrink-0" />
           <div className="flex gap-2">
-            <div className="w-[30px] border-r border-[#F2F2F2] pr-1 flex flex-col gap-1 shrink-0">
-              <div className="text-[4px] font-bold text-[#7928CA] uppercase">Skills</div>
-              <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
-              <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
+            <div 
+              className="w-[30px] border-r pr-1 flex flex-col gap-1 shrink-0"
+              style={{ borderColor: 'rgba(255,255,255,0.15)' }}
+            >
+              <div className="text-[4px] uppercase" style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 700 }}>Skills</div>
+              <div className="h-[2px] w-full rounded-sm" style={{ background: 'rgba(255,255,255,0.15)' }} />
+              <div className="h-[2px] w-full rounded-sm" style={{ background: 'rgba(255,255,255,0.15)' }} />
             </div>
             <div className="flex-1 space-y-1.5">
               <div>
-                <div className="text-[6.5px] font-bold text-[#171717] leading-none">&lt;Alex /&gt;</div>
-                <div className="text-[4px] text-[#7928CA] font-medium mt-0.5">&gt; Developer</div>
+                <div className="text-[6.5px] leading-none" style={{ color: 'white', fontWeight: 700 }}>&lt;Alex /&gt;</div>
+                <div className="text-[4.5px] mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>&gt; Developer</div>
               </div>
-              <div className="space-y-0.5">
-                <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
-                <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
+              <div className="space-y-1">
+                <div className="h-[2px] w-full rounded-sm" style={{ background: 'rgba(255,255,255,0.15)' }} />
+                <div className="h-[2px] w-full rounded-sm" style={{ background: 'rgba(255,255,255,0.15)' }} />
+                <div className="h-[2px] w-5/6 rounded-sm" style={{ background: 'rgba(255,255,255,0.15)' }} />
+                <div className="h-[2px] w-2/3 rounded-sm" style={{ background: 'rgba(255,255,255,0.15)' }} />
               </div>
             </div>
+          </div>
+          <div 
+            className="w-full text-center shrink-0"
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              borderTop: '1px solid rgba(255,255,255,0.15)',
+              padding: '6px 12px',
+              fontSize: '10px',
+              fontFamily: 'monospace',
+              letterSpacing: '0.1em',
+              color: 'rgba(255,255,255,0.5)',
+              margin: 'auto -14px -14px -14px',
+              width: 'calc(100% + 28px)'
+            }}
+          >
+            TECH FORMAT
           </div>
         </motion.div>
 
@@ -370,28 +536,51 @@ function Slide4() {
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute w-[200px] h-[280px] bg-white border border-[#171717]/10 rounded-xl p-4 shadow-2xl flex flex-col justify-between z-10 overflow-hidden animate-float-gentle text-center font-serif"
+          className="absolute w-[200px] h-[280px] z-10 overflow-hidden animate-float-gentle text-center font-serif"
+          style={{
+            background: 'rgba(255, 255, 255, 0.12)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.25)',
+            borderRadius: '20px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+          }}
         >
-          <div className="space-y-1">
-            <div className="text-[9px] font-bold text-[#171717] uppercase tracking-wide">David Chen</div>
-            <div className="text-[4.5px] text-[#8F8F8F] uppercase tracking-widest -mt-0.5">Chief Operating Officer</div>
-            <div className="h-[0.5px] bg-[#171717] w-full mt-1.5" />
+          <div className="space-y-1 p-4 pb-0">
+            <div className="text-[9px] uppercase tracking-wide" style={{ color: 'white', fontWeight: 700 }}>David Chen</div>
+            <div className="text-[4.5px] uppercase tracking-widest -mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>Chief Operating Officer</div>
+            <div className="h-[0.5px] w-full mt-1.5" style={{ background: 'rgba(255,255,255,0.15)' }} />
           </div>
-          <div className="flex-1 text-left mt-2.5 space-y-2 overflow-hidden">
+          <div className="flex-1 text-left mt-2.5 px-4 space-y-2 overflow-hidden">
             <div className="space-y-1">
-              <div className="text-[5.5px] font-bold text-[#171717] uppercase tracking-wider">Professional Experience</div>
-              <div className="space-y-0.5">
-                <div className="flex justify-between text-[4px] font-semibold text-[#4D4D4D]">
+              <div className="text-[5.5px] uppercase tracking-wider" style={{ color: 'white', fontWeight: 700 }}>Professional Experience</div>
+              <div className="space-y-1">
+                <div className="flex justify-between text-[4px] font-semibold" style={{ color: 'rgba(255,255,255,0.85)' }}>
                   <span>COO @ Global Solutions</span>
-                  <span className="text-[#8F8F8F]">2018 - Pres</span>
+                  <span className="text-white/40">2018 - Pres</span>
                 </div>
-                <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
-                <div className="h-[2px] bg-[#F2F2F2] w-11/12 rounded-sm" />
+                <div className="h-[2px] w-full rounded-sm" style={{ background: 'rgba(255,255,255,0.15)' }} />
+                <div className="h-[2px] w-11/12 rounded-sm" style={{ background: 'rgba(255,255,255,0.15)' }} />
+                <div className="h-[2px] w-4/5 rounded-sm" style={{ background: 'rgba(255,255,255,0.15)' }} />
+                <div className="h-[2px] w-3/4 rounded-sm" style={{ background: 'rgba(255,255,255,0.15)' }} />
               </div>
             </div>
           </div>
-          <div className="text-center border-t border-[#EBEBEB] pt-2 mt-2 shrink-0">
-            <span className="text-[6.5px] text-[#8F8F8F] uppercase tracking-wider font-mono font-bold">Executive Style</span>
+          <div 
+            className="w-full text-center shrink-0"
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              borderTop: '1px solid rgba(255,255,255,0.15)',
+              padding: '6px 12px',
+              fontSize: '10px',
+              fontFamily: 'monospace',
+              letterSpacing: '0.1em',
+              color: 'rgba(255,255,255,0.5)',
+              margin: 'auto -16px -16px -16px',
+              width: 'calc(100% + 32px)'
+            }}
+          >
+            EXECUTIVE STYLE
           </div>
         </motion.div>
 
