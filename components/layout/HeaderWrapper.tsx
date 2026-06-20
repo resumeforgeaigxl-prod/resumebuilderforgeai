@@ -38,7 +38,13 @@ export default function HeaderWrapper({ children }: { children: ReactNode }) {
         pathname?.includes('/networkforge') ||
         pathname?.includes('/ats-live') ||
         pathname?.includes('/builder') ||
-        pathname?.includes('/mock-test');
+        pathname?.includes('/mock-test') ||
+        pathname?.includes('/privacy-policy') ||
+        pathname?.includes('/terms-of-service') ||
+        pathname?.includes('/cookie-policy') ||
+        pathname?.includes('/data-deletion') ||
+        pathname?.includes('/signup') ||
+        pathname?.includes('/login');
 
     if (isInternalApp || isLandingPage) {
         return null;

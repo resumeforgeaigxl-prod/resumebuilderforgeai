@@ -53,31 +53,30 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-2xl">
-            <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 mb-4 ring-1 ring-blue-500/20">
-                    <LogIn className="w-6 h-6" />
-                </div>
-                <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+        <div className="w-full">
+            <div className="text-left mb-8">
+                <h1 className="text-[40px] md:text-[56px] font-bold tracking-[-1.5px] leading-[1.05] text-white">
                     Welcome Back
                 </h1>
-                <p className="text-slate-400 mt-2">Sign in to your account to continue</p>
+                <p className="text-sm md:text-base text-slate-400 mt-3 max-w-[420px]">
+                    Sign in to your account to continue.
+                </p>
             </div>
 
             <div className="space-y-6">
                 <OAuthButtons />
 
-                <div className="relative">
+                <div className="relative my-6">
                     <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-slate-800"></div>
+                        <div className="w-full border-t border-[#222]"></div>
                     </div>
-                    <div className="relative flex justify-center text-sm">
-                        <span className="px-2 bg-slate-900/50 text-slate-500">Or continue with email</span>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="px-3 bg-[#070710] text-[#8f8f8f] font-mono tracking-wider">Or continue with email</span>
                     </div>
                 </div>
 
                 {error && (
-                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3 text-red-500 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-[14px] flex items-start gap-3 text-red-500 animate-in fade-in slide-in-from-top-2 duration-300">
                         <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                         <p className="text-sm font-medium">{error}</p>
                     </div>
@@ -92,13 +91,13 @@ export default function LoginPage() {
                             placeholder="you@example.com"
                             required
                             disabled={isLoading}
-                            className="w-full px-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full h-[58px] px-5 bg-[#0a0a0c] border border-[#222] focus:border-[#444] rounded-[14px] focus:outline-none transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-base"
                         />
                     </div>
                     <div className="space-y-2">
                         <div className="flex justify-between items-center">
                             <label className="text-sm font-medium text-slate-300">Password</label>
-                            <Link href={`/${locale}/forgot-password`} title='Forgot Password' className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors">
+                            <Link href={`/${locale}/forgot-password`} title='Forgot Password' className="text-xs text-purple-400 hover:text-purple-300 font-medium transition-colors underline underline-offset-4 decoration-purple-500/30">
                                 Forgot password?
                             </Link>
                         </div>
@@ -108,14 +107,14 @@ export default function LoginPage() {
                             placeholder="••••••••"
                             required
                             disabled={isLoading}
-                            className="w-full px-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full h-[58px] px-5 bg-[#0a0a0c] border border-[#222] focus:border-[#444] rounded-[14px] focus:outline-none transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-base"
                         />
                     </div>
 
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100 flex items-center justify-center gap-2"
+                        className="w-full h-[56px] bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-[14px] transition-all shadow-md shadow-purple-600/10 active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100 flex items-center justify-center gap-2 text-base"
                     >
                         {isLoading ? (
                             <>
@@ -130,12 +129,12 @@ export default function LoginPage() {
 
                 <p className="text-center text-sm text-slate-400 mt-6">
                     Don&apos;t have an account?{' '}
-                    <Link href={`/${locale}/signup`} className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
+                    <Link href={`/${locale}/signup`} className="text-purple-400 hover:text-purple-300 font-semibold transition-colors underline underline-offset-4 decoration-purple-500/30 hover:decoration-purple-400">
                         Sign up
                     </Link>
                 </p>
-            </div >
-        </div >
-    )
+            </div>
+        </div>
+    );
 }
 

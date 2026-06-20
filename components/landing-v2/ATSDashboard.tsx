@@ -1,174 +1,172 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Cpu, Check, AlertTriangle, HelpCircle } from "lucide-react";
+import {
+  Target,
+  Search,
+  Check,
+  AlertTriangle,
+  ArrowUp,
+  TrendingUp,
+  Zap,
+} from "lucide-react";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-interface Metric {
-  title: string;
-  value: string;
-  percent: number;
-  status: "tags" | "success" | "text" | "warning";
-  statusText?: string;
-  tags?: { name: string; missing?: boolean }[];
+/* ─── Data: What users actually see when they use the ATS tool ─── */
+
+interface KeywordItem {
+  keyword: string;
+  found: boolean;
 }
 
-interface RoleData {
-  company: string;
+interface Improvement {
+  before: string;
+  after: string;
+  impact: string;
+}
+
+interface RoleTarget {
   role: string;
-  logo: string;
+  company: string;
   score: number;
-  scoreStatus: "Excellent" | "Good" | "Needs Review";
-  scoreColor: string;
-  scoreBg: string;
-  metrics: Metric[];
+  scoreLabel: string;
+  accentColor: string;
+  accentBg: string;
+  keywords: KeywordItem[];
+  improvements: Improvement[];
+  stats: {
+    keywordsMatched: string;
+    formatScore: string;
+    impactScore: string;
+    readability: string;
+  };
 }
 
-const rolesData: RoleData[] = [
+const roleTargets: RoleTarget[] = [
   {
+    role: "Frontend Engineer",
     company: "Vercel",
-    role: "Staff Engineer",
-    logo: "▲",
     score: 92,
-    scoreStatus: "Excellent",
-    scoreColor: "#10B981", // Emerald
-    scoreBg: "#ECFDF5",
-    metrics: [
+    scoreLabel: "Strong Match",
+    accentColor: "#10B981",
+    accentBg: "#ECFDF5",
+    keywords: [
+      { keyword: "React", found: true },
+      { keyword: "Next.js", found: true },
+      { keyword: "TypeScript", found: true },
+      { keyword: "CSS-in-JS", found: true },
+      { keyword: "Performance", found: true },
+      { keyword: "Accessibility", found: false },
+      { keyword: "Web Vitals", found: false },
+    ],
+    improvements: [
       {
-        title: "Target Keyword Match",
-        value: "95% found",
-        percent: 95,
-        status: "tags",
-        tags: [
-          { name: "Next.js" },
-          { name: "React" },
-          { name: "TypeScript" },
-          { name: "Tailwind CSS" },
-        ],
+        before: "Built web applications using React",
+        after: "Architected 3 production Next.js apps serving 50K+ monthly users with 95+ Lighthouse scores",
+        impact: "+38% impact",
       },
       {
-        title: "Formatting Issues",
-        value: "0 critical issues",
-        percent: 100,
-        status: "success",
-        statusText: "Optimized single-page template",
-      },
-      {
-        title: "Action Verb Strength",
-        value: "14 verbs matched",
-        percent: 90,
-        status: "success",
-        statusText: "Strong leadership verb utilization",
-      },
-      {
-        title: "Recruiter Readability",
-        value: "Clear hierarchy",
-        percent: 95,
-        status: "text",
-        statusText: "Clean margins and font scale",
+        before: "Worked on frontend performance",
+        after: "Reduced LCP from 4.2s to 1.1s by implementing code-splitting and edge caching strategies",
+        impact: "+45% impact",
       },
     ],
+    stats: {
+      keywordsMatched: "5 of 7",
+      formatScore: "98%",
+      impactScore: "High",
+      readability: "Grade 11",
+    },
   },
   {
+    role: "Full Stack Developer",
     company: "Stripe",
-    role: "Senior Developer",
-    logo: "💳",
-    score: 76,
-    scoreStatus: "Good",
-    scoreColor: "#0284C7", // Sky blue
-    scoreBg: "#F0F9FF",
-    metrics: [
+    score: 78,
+    scoreLabel: "Good — Needs Work",
+    accentColor: "#F59E0B",
+    accentBg: "#FFFBEB",
+    keywords: [
+      { keyword: "Node.js", found: true },
+      { keyword: "PostgreSQL", found: true },
+      { keyword: "REST APIs", found: true },
+      { keyword: "GraphQL", found: false },
+      { keyword: "CI/CD", found: true },
+      { keyword: "Microservices", found: false },
+      { keyword: "Payment Systems", found: false },
+    ],
+    improvements: [
       {
-        title: "Target Keyword Match",
-        value: "65% found",
-        percent: 65,
-        status: "tags",
-        tags: [
-          { name: "Ruby on Rails", missing: true },
-          { name: "PostgreSQL" },
-          { name: "Redis" },
-          { name: "Kafka", missing: true },
-        ],
+        before: "Developed backend APIs for the application",
+        after: "Designed RESTful API layer handling 12K req/min with 99.9% uptime across 3 microservices",
+        impact: "+42% impact",
       },
       {
-        title: "Formatting Issues",
-        value: "1 warning",
-        percent: 85,
-        status: "warning",
-        statusText: "Font size is slightly below 10pt",
-      },
-      {
-        title: "Action Verb Strength",
-        value: "8 verbs matched",
-        percent: 70,
-        status: "text",
-        statusText: "Add more financial scaling metrics",
-      },
-      {
-        title: "Recruiter Readability",
-        value: "Sufficiently clean",
-        percent: 80,
-        status: "success",
-        statusText: "Consistent margins and layouts",
+        before: "Used databases for storing data",
+        after: "Optimized PostgreSQL query performance by 60% through indexing and connection pooling strategies",
+        impact: "+51% impact",
       },
     ],
+    stats: {
+      keywordsMatched: "4 of 7",
+      formatScore: "95%",
+      impactScore: "Medium",
+      readability: "Grade 10",
+    },
   },
   {
-    company: "Airbnb",
-    role: "Fullstack Engineer",
-    logo: "🏡",
-    score: 58,
-    scoreStatus: "Needs Review",
-    scoreColor: "#EF4444", // Rose/Red
-    scoreBg: "#FEF2F2",
-    metrics: [
+    role: "Software Engineer II",
+    company: "Google",
+    score: 85,
+    scoreLabel: "Competitive",
+    accentColor: "#0070F3",
+    accentBg: "#EFF6FF",
+    keywords: [
+      { keyword: "Data Structures", found: true },
+      { keyword: "System Design", found: true },
+      { keyword: "Python", found: true },
+      { keyword: "Distributed Systems", found: false },
+      { keyword: "Testing", found: true },
+      { keyword: "Scalability", found: true },
+      { keyword: "ML/AI", found: false },
+    ],
+    improvements: [
       {
-        title: "Target Keyword Match",
-        value: "40% found",
-        percent: 40,
-        status: "tags",
-        tags: [
-          { name: "React Native", missing: true },
-          { name: "GraphQL", missing: true },
-          { name: "Jest" },
-          { name: "Node.js", missing: true },
-        ],
+        before: "Wrote unit tests for the codebase",
+        after: "Achieved 94% test coverage across 3 services using pytest, reducing production incidents by 40%",
+        impact: "+36% impact",
       },
       {
-        title: "Formatting Issues",
-        value: "3 errors",
-        percent: 50,
-        status: "warning",
-        statusText: "Multi-column tables break ATS parsers",
-      },
-      {
-        title: "Action Verb Strength",
-        value: "3 weak verbs",
-        percent: 45,
-        status: "warning",
-        statusText: "Avoid vague words like 'worked on'",
-      },
-      {
-        title: "Recruiter Readability",
-        value: "Sub-optimal layout",
-        percent: 60,
-        status: "text",
-        statusText: "Typography scale lacks distinction",
+        before: "Designed system architecture",
+        after: "Led system design of event-driven pipeline processing 2M+ daily events with <200ms p99 latency",
+        impact: "+48% impact",
       },
     ],
+    stats: {
+      keywordsMatched: "5 of 7",
+      formatScore: "100%",
+      impactScore: "High",
+      readability: "Grade 12",
+    },
   },
 ];
 
-function CircularProgress({ score, status, color, bgColor }: {
+/* ─── Circular Score Gauge ─── */
+
+function ScoreGauge({
+  score,
+  label,
+  color,
+  bg,
+}: {
   score: number;
-  status: string;
+  label: string;
   color: string;
-  bgColor: string;
+  bg: string;
 }) {
-  const size = 160;
-  const strokeWidth = 8;
+  const size = 150;
+  const strokeWidth = 7;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (score / 100) * circumference;
@@ -177,7 +175,6 @@ function CircularProgress({ score, status, color, bgColor }: {
     <div className="flex flex-col items-center">
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90">
-          {/* Track */}
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -186,7 +183,6 @@ function CircularProgress({ score, status, color, bgColor }: {
             stroke="#EBEBEB"
             strokeWidth={strokeWidth}
           />
-          {/* Fill */}
           <motion.circle
             cx={size / 2}
             cy={size / 2}
@@ -198,157 +194,65 @@ function CircularProgress({ score, status, color, bgColor }: {
             strokeDasharray={circumference}
             initial={{ strokeDashoffset: circumference }}
             animate={{ strokeDashoffset: offset }}
-            transition={{ duration: 0.6, ease }}
+            transition={{ duration: 0.7, ease }}
           />
         </svg>
-        {/* Center text */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span
             style={{
-              fontSize: "48px",
+              fontSize: "40px",
               fontWeight: 600,
               color: "#171717",
-              lineHeight: "48px",
-              letterSpacing: "-2.4px",
+              lineHeight: "40px",
+              letterSpacing: "-2px",
             }}
           >
             {score}
           </span>
           <span
-            style={{
-              fontSize: "14px",
-              fontWeight: 400,
-              color: "#8F8F8F",
-            }}
+            style={{ fontSize: "12px", fontWeight: 400, color: "#8F8F8F" }}
           >
             /100
           </span>
         </div>
       </div>
       <p
-        className="mt-4"
-        style={{
-          fontSize: "14px",
-          fontWeight: 500,
-          color: "#4D4D4D",
-        }}
+        className="mt-3"
+        style={{ fontSize: "13px", fontWeight: 500, color: "#4D4D4D" }}
       >
         ATS Match Score
       </p>
       <motion.span
-        key={status}
+        key={label}
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-colors duration-300"
-        style={{
-          backgroundColor: bgColor,
-          color: color,
-        }}
+        className="mt-1.5 inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold"
+        style={{ backgroundColor: bg, color }}
       >
-        {status}
+        {label}
       </motion.span>
     </div>
   );
 }
 
-function ProgressBar({ percent, color }: { percent: number; color: string }) {
-  return (
-    <div className="mt-3 h-1.5 rounded-full bg-[#EBEBEB] overflow-hidden">
-      <motion.div
-        className="h-full rounded-full"
-        style={{ backgroundColor: color }}
-        initial={{ width: 0 }}
-        animate={{ width: `${percent}%` }}
-        transition={{ duration: 0.6, ease }}
-      />
-    </div>
-  );
-}
-
-function MetricCard({ metric, index, color }: {
-  metric: Metric;
-  index: number;
-  color: string;
-}) {
-  return (
-    <motion.div
-      className="bg-[#FAFAFA] border border-[#EBEBEB] rounded-xl p-5 flex flex-col justify-between"
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease, delay: index * 0.06 }}
-    >
-      <div>
-        <p
-          className="uppercase tracking-wide"
-          style={{
-            fontSize: "11px",
-            fontWeight: 600,
-            color: "#8F8F8F",
-          }}
-        >
-          {metric.title}
-        </p>
-        <p
-          className="mt-1"
-          style={{
-            fontSize: "20px",
-            fontWeight: 600,
-            color: "#171717",
-            lineHeight: "28px",
-            letterSpacing: "-0.4px",
-          }}
-        >
-          {metric.value}
-        </p>
-      </div>
-
-      <div>
-        <ProgressBar percent={metric.percent} color={color} />
-        <div className="mt-3 flex items-center min-h-[20px]">
-          {metric.status === "tags" && metric.tags && (
-            <div className="flex flex-wrap gap-1.5">
-              {metric.tags.map((tag) => (
-                <span
-                  key={tag.name}
-                  className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border ${
-                    tag.missing
-                      ? "bg-rose-50 border-rose-100 text-rose-600 line-through"
-                      : "bg-[#F2F2F2] border-transparent text-[#4D4D4D]"
-                  }`}
-                >
-                  {tag.name}
-                </span>
-              ))}
-            </div>
-          )}
-          {metric.status === "success" && (
-            <div className="flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" strokeWidth={3} />
-              <span className="text-xs text-emerald-700 font-medium">{metric.statusText}</span>
-            </div>
-          )}
-          {metric.status === "warning" && (
-            <div className="flex items-center gap-1.5">
-              <AlertTriangle className="w-3.5 h-3.5 text-rose-500 shrink-0" strokeWidth={2.5} />
-              <span className="text-xs text-rose-600 font-medium">{metric.statusText}</span>
-            </div>
-          )}
-          {metric.status === "text" && (
-            <span className="text-xs text-[#4D4D4D] font-medium">{metric.statusText}</span>
-          )}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
+/* ─── Main Component ─── */
 
 export default function ATSDashboard() {
   const [activeTab, setActiveTab] = useState(0);
-  const currentRole = rolesData[activeTab];
+  const [showImprove, setShowImprove] = useState(false);
+  const current = roleTargets[activeTab];
+
+  // Reset improvement view when switching tabs
+  useEffect(() => {
+    setShowImprove(false);
+  }, [activeTab]);
 
   return (
-    <section id="ats-score" className="py-24 px-6 bg-[#FFFFFF]">
-      <div className="max-w-[1200px] mx-auto">
+    <section
+      id="ats-score"
+      className="py-24 px-6 bg-white border-t border-[#EBEBEB]"
+    >
+      <div className="max-w-[1100px] mx-auto">
         {/* Header */}
         <motion.div
           className="text-center"
@@ -366,7 +270,7 @@ export default function ATSDashboard() {
               lineHeight: "16px",
             }}
           >
-            ATS Intelligence
+            #04 — ATS Intelligence
           </p>
           <h2
             className="mt-3 text-[#171717]"
@@ -378,7 +282,7 @@ export default function ATSDashboard() {
               letterSpacing: "-1.28px",
             }}
           >
-            Know your resume score before recruiters do
+            Target a role. See your real match score.
           </h2>
           <p
             className="mt-4 mx-auto max-w-2xl text-[#4D4D4D]"
@@ -389,45 +293,46 @@ export default function ATSDashboard() {
               lineHeight: "24px",
             }}
           >
-            Test your resume compliance against real target role benchmarks. Change target roles in the sandbox below to see live score scans.
+            Paste any job description and instantly see how your resume stacks
+            up — missing keywords, weak bullet points, and exactly what to fix
+            to beat the filter.
           </p>
         </motion.div>
 
-        {/* Dashboard Mockup Container */}
+        {/* Dashboard Mockup */}
         <motion.div
-          className="mt-16 bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.03)]"
+          className="mt-16 bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.025)]"
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.7, ease }}
         >
           {/* Chrome Top Bar */}
-          <div className="h-12 bg-[#FAFAFA] border-b border-[#EBEBEB] px-5 flex items-center justify-between select-none">
+          <div className="h-11 bg-[#FAFAFA] border-b border-[#EBEBEB] px-5 flex items-center justify-between select-none">
             <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E]" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[#28C840]" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57] border border-[#E0443E]" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E] border border-[#DEA123]" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[#28C840] border border-[#1AAB29]" />
             </div>
-            <div className="flex items-center gap-1">
-              <Cpu className="w-3.5 h-3.5 text-[#7928CA]" />
-              <span className="text-xs font-mono text-[#8F8F8F]">
-                resumeforge.ai/ats-live-simulator
+            <div className="flex items-center gap-1.5">
+              <Target className="w-3.5 h-3.5 text-[#8F8F8F]" />
+              <span className="text-[11px] font-mono text-[#8F8F8F]">
+                ATS Score Analyzer
               </span>
             </div>
             <div className="w-[60px]" />
           </div>
 
-          {/* Core App Shell Workspace */}
-          <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr_2.5fr] divide-y lg:divide-y-0 lg:divide-x divide-[#EBEBEB]">
-            
-            {/* COLUMN 1: Role Sidebar */}
-            <div className="p-4 bg-[#FAFAFA] space-y-2 flex flex-col justify-start">
-              <p className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider px-2.5 mb-2">
+          {/* App Shell: 3 columns */}
+          <div className="grid grid-cols-1 lg:grid-cols-[210px_1fr_2.2fr] divide-y lg:divide-y-0 lg:divide-x divide-[#EBEBEB]">
+            {/* COL 1: Role Targets */}
+            <div className="p-4 bg-[#FAFAFA] space-y-2">
+              <p className="text-[9.5px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider px-2.5 mb-2">
                 Target Roles
               </p>
-              {rolesData.map((role, idx) => (
+              {roleTargets.map((role, idx) => (
                 <button
-                  key={role.company}
+                  key={role.role}
                   onClick={() => setActiveTab(idx)}
                   className={`w-full text-left p-2.5 rounded-xl border flex items-center gap-3 transition-all ${
                     activeTab === idx
@@ -435,21 +340,39 @@ export default function ATSDashboard() {
                       : "bg-transparent border-transparent text-[#4D4D4D] hover:bg-[#F2F2F2]"
                   }`}
                 >
-                  <div className={`w-8 h-8 rounded-lg border flex items-center justify-center font-bold text-sm transition-all ${
-                    activeTab === idx ? "bg-[#171717] border-[#171717] text-white" : "bg-white border-[#EBEBEB] text-[#4D4D4D]"
-                  }`}>
-                    {role.logo}
+                  <div
+                    className="w-8 h-8 rounded-lg border flex items-center justify-center bg-white transition-all"
+                    style={{
+                      borderColor:
+                        activeTab === idx
+                          ? role.accentColor
+                          : "#EBEBEB",
+                    }}
+                  >
+                    <Target
+                      className="w-3.5 h-3.5 transition-colors"
+                      style={{
+                        color:
+                          activeTab === idx
+                            ? role.accentColor
+                            : "#8F8F8F",
+                      }}
+                    />
                   </div>
-                  <div>
-                    <h4 className="text-xs font-bold leading-tight">{role.company}</h4>
-                    <p className="text-[10px] text-[#8F8F8F] mt-0.5">{role.role}</p>
+                  <div className="min-w-0">
+                    <h4 className="text-[11px] font-bold leading-tight truncate">
+                      {role.role}
+                    </h4>
+                    <p className="text-[9.5px] text-[#8F8F8F] mt-0.5">
+                      {role.company}
+                    </p>
                   </div>
                 </button>
               ))}
             </div>
 
-            {/* COLUMN 2: ATS Circle Gauge */}
-            <div className="p-8 flex items-center justify-center bg-white min-h-[260px]">
+            {/* COL 2: Score + Quick Stats */}
+            <div className="p-6 flex flex-col items-center justify-center bg-white min-h-[280px] gap-5">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeTab}
@@ -457,40 +380,247 @@ export default function ATSDashboard() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.35, ease }}
+                  className="flex flex-col items-center"
                 >
-                  <CircularProgress
-                    score={currentRole.score}
-                    status={currentRole.scoreStatus}
-                    color={currentRole.scoreColor}
-                    bgColor={currentRole.scoreBg}
+                  <ScoreGauge
+                    score={current.score}
+                    label={current.scoreLabel}
+                    color={current.accentColor}
+                    bg={current.accentBg}
                   />
                 </motion.div>
               </AnimatePresence>
-            </div>
 
-            {/* COLUMN 3: Metrics Dashboard */}
-            <div className="p-8 bg-white min-h-[300px]">
+              {/* Quick stat cards */}
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={activeTab}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full"
+                  key={`stats-${activeTab}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.35 }}
+                  transition={{ duration: 0.3 }}
+                  className="grid grid-cols-2 gap-2.5 w-full max-w-[220px]"
                 >
-                  {currentRole.metrics.map((metric, index) => (
-                    <MetricCard
-                      key={metric.title}
-                      metric={metric}
-                      index={index}
-                      color={currentRole.scoreColor}
-                    />
-                  ))}
+                  {[
+                    {
+                      label: "Keywords",
+                      value: current.stats.keywordsMatched,
+                      icon: Search,
+                    },
+                    {
+                      label: "Format",
+                      value: current.stats.formatScore,
+                      icon: Check,
+                    },
+                    {
+                      label: "Impact",
+                      value: current.stats.impactScore,
+                      icon: TrendingUp,
+                    },
+                    {
+                      label: "Readability",
+                      value: current.stats.readability,
+                      icon: Zap,
+                    },
+                  ].map((stat) => {
+                    const Icon = stat.icon;
+                    return (
+                      <div
+                        key={stat.label}
+                        className="bg-[#FAFAFA] border border-[#EBEBEB] rounded-lg px-3 py-2.5 text-center"
+                      >
+                        <p className="text-[8.5px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider flex items-center justify-center gap-1">
+                          <Icon className="w-2.5 h-2.5" />
+                          {stat.label}
+                        </p>
+                        <p className="text-sm font-bold text-[#171717] mt-0.5 leading-tight">
+                          {stat.value}
+                        </p>
+                      </div>
+                    );
+                  })}
                 </motion.div>
               </AnimatePresence>
             </div>
 
+            {/* COL 3: Keywords + Improvements */}
+            <div className="p-6 bg-white min-h-[300px] flex flex-col">
+              {/* Toggle tabs */}
+              <div className="flex items-center gap-1 mb-5 bg-[#F5F5F5] rounded-lg p-0.5 self-start">
+                <button
+                  onClick={() => setShowImprove(false)}
+                  className={`px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all ${
+                    !showImprove
+                      ? "bg-white shadow-sm text-[#171717]"
+                      : "text-[#8F8F8F] hover:text-[#4D4D4D]"
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Search className="w-3 h-3" />
+                    Keyword Analysis
+                  </span>
+                </button>
+                <button
+                  onClick={() => setShowImprove(true)}
+                  className={`px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all ${
+                    showImprove
+                      ? "bg-white shadow-sm text-[#171717]"
+                      : "text-[#8F8F8F] hover:text-[#4D4D4D]"
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5">
+                    AI Improvements
+                  </span>
+                </button>
+              </div>
+
+              <AnimatePresence mode="wait">
+                {!showImprove ? (
+                  /* ── Keyword Gap Analysis ── */
+                  <motion.div
+                    key={`kw-${activeTab}`}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 8 }}
+                    transition={{ duration: 0.3, ease }}
+                    className="flex-1"
+                  >
+                    <p className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider mb-3">
+                      Job Description Keywords
+                    </p>
+                    <div className="flex flex-wrap gap-2 mb-5">
+                      {current.keywords.map((kw) => (
+                        <span
+                          key={kw.keyword}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all ${
+                            kw.found
+                              ? "bg-[#ECFDF5] border-[#A7F3D0] text-[#065F46]"
+                              : "bg-[#FFF7ED] border-[#FED7AA] text-[#9A3412]"
+                          }`}
+                        >
+                          {kw.found ? (
+                            <Check
+                              className="w-3 h-3 text-emerald-600"
+                              strokeWidth={3}
+                            />
+                          ) : (
+                            <AlertTriangle
+                              className="w-3 h-3 text-orange-500"
+                              strokeWidth={2.5}
+                            />
+                          )}
+                          {kw.keyword}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Summary */}
+                    <div className="bg-[#FAFAFA] border border-[#EBEBEB] rounded-xl p-4 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-medium text-[#4D4D4D]">
+                          Keywords found in your resume
+                        </span>
+                        <span
+                          className="text-[12px] font-bold"
+                          style={{ color: current.accentColor }}
+                        >
+                          {current.keywords.filter((k) => k.found).length} of{" "}
+                          {current.keywords.length}
+                        </span>
+                      </div>
+                      <div className="h-1.5 bg-[#EBEBEB] rounded-full overflow-hidden">
+                        <motion.div
+                          className="h-full rounded-full"
+                          style={{
+                            backgroundColor: current.accentColor,
+                          }}
+                          initial={{ width: 0 }}
+                          animate={{
+                            width: `${
+                              (current.keywords.filter((k) => k.found)
+                                .length /
+                                current.keywords.length) *
+                              100
+                            }%`,
+                          }}
+                          transition={{ duration: 0.6, ease }}
+                        />
+                      </div>
+                      {current.keywords.filter((k) => !k.found).length >
+                        0 && (
+                        <p className="text-[10.5px] text-[#8F8F8F] flex items-center gap-1.5 pt-0.5">
+                          <AlertTriangle className="w-3 h-3 text-amber-500" />
+                          Add{" "}
+                          <span className="font-semibold text-[#171717]">
+                            {current.keywords
+                              .filter((k) => !k.found)
+                              .map((k) => k.keyword)
+                              .join(", ")}
+                          </span>{" "}
+                          to improve your match
+                        </p>
+                      )}
+                    </div>
+                  </motion.div>
+                ) : (
+                  /* ── AI Bullet Improvements ── */
+                  <motion.div
+                    key={`imp-${activeTab}`}
+                    initial={{ opacity: 0, x: 8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -8 }}
+                    transition={{ duration: 0.3, ease }}
+                    className="flex-1 space-y-4"
+                  >
+                    <p className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider mb-1">
+                      Before → After Improvements
+                    </p>
+                    {current.improvements.map((imp, idx) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{
+                          duration: 0.4,
+                          ease,
+                          delay: idx * 0.1,
+                        }}
+                        className="bg-[#FAFAFA] border border-[#EBEBEB] rounded-xl p-4 space-y-3"
+                      >
+                        {/* Before */}
+                        <div>
+                          <p className="text-[9px] font-mono font-bold text-[#D4D4D4] uppercase tracking-wider mb-1">
+                            Before
+                          </p>
+                          <p className="text-[12px] text-[#8F8F8F] leading-relaxed line-through decoration-[#D4D4D4]">
+                            {imp.before}
+                          </p>
+                        </div>
+                        {/* After */}
+                        <div>
+                          <p className="text-[9px] font-mono font-bold text-emerald-400 uppercase tracking-wider mb-1">
+                            After
+                          </p>
+                          <p className="text-[12px] text-[#171717] leading-relaxed font-medium">
+                            {imp.after}
+                          </p>
+                        </div>
+                        {/* Impact badge */}
+                        <div className="flex items-center gap-1.5">
+                          <ArrowUp
+                            className="w-3 h-3 text-emerald-600"
+                            strokeWidth={3}
+                          />
+                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                            {imp.impact}
+                          </span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </motion.div>
       </div>

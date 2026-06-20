@@ -266,7 +266,7 @@ export default function PlatformEcosystem({ locale = "en-in" }: { locale?: strin
               letterSpacing: "0.05em",
             }}
           >
-            AI Career Operating System
+            #03 — AI Career Operating System
           </p>
           <h2
             className="mt-3 text-[#171717]"

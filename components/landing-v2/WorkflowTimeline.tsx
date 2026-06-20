@@ -400,7 +400,7 @@ export default function WorkflowTimeline() {
               lineHeight: "16px",
             }}
           >
-            Workflow
+            #02 — Workflow
           </p>
           <h2
             className="mt-3 text-[#171717]"

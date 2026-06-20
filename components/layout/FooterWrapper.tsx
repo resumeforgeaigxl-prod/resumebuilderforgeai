@@ -5,6 +5,7 @@ import { ReactNode } from 'react';
 
 export default function FooterWrapper({ children }: { children: ReactNode }) {
     const pathname = usePathname();
+    console.log("[FooterWrapper] pathname:", pathname);
     const isLandingPage = /^\/[a-z]{2}-[a-z]{2}\/?$/.test(pathname ?? '');
 
     // Hide main footer on all internal dashboard and app routes
@@ -38,7 +39,13 @@ export default function FooterWrapper({ children }: { children: ReactNode }) {
         pathname?.includes('/networkforge') ||
         pathname?.includes('/ats-live') ||
         pathname?.includes('/builder') ||
-        pathname?.includes('/mock-test');
+        pathname?.includes('/mock-test') ||
+        pathname?.includes('/privacy-policy') ||
+        pathname?.includes('/terms-of-service') ||
+        pathname?.includes('/cookie-policy') ||
+        pathname?.includes('/data-deletion') ||
+        pathname?.includes('/signup') ||
+        pathname?.includes('/login');
 
     if (isInternalApp || isLandingPage) {
         return null;

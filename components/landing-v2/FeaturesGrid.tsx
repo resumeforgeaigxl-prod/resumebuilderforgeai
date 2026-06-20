@@ -711,7 +711,7 @@ export default function FeaturesGrid() {
               lineHeight: "16px",
             }}
           >
-            Capabilities
+            #01 — Capabilities
           </p>
           <h2
             className="mt-3 text-[#171717]"

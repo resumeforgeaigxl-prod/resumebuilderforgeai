@@ -17,6 +17,19 @@ const columns = (locale: string) => [
     ],
   },
   {
+    title: "Forges",
+    links: [
+      { label: "ResumeForge", href: `/${locale}/ai-resume-builder` },
+      { label: "CodingForge", href: `/${locale}/codingforge` },
+      { label: "InterviewForge", href: `/${locale}/interview-prep` },
+      { label: "PrepForge", href: `/${locale}/prepforge` },
+      { label: "LearnForge", href: `/${locale}/learnforge` },
+      { label: "ProjectForge", href: `/${locale}/projectforge` },
+      { label: "CareerForge", href: `/${locale}/careerforge` },
+      { label: "JobForge", href: `/${locale}/jobs` },
+    ],
+  },
+  {
     title: "Resources",
     links: [
       { label: "Documentation", href: "#" },
@@ -54,7 +67,7 @@ export default function FooterSection({ locale = "en-in" }: FooterSectionProps) 
     >
       <div className="max-w-[1200px] mx-auto">
         {/* Column grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {footerColumns.map((column) => (
             <div key={column.title}>
               <h4
@@ -127,7 +140,7 @@ export default function FooterSection({ locale = "en-in" }: FooterSectionProps) 
               (e.target as HTMLAnchorElement).style.color = "#8F8F8F";
             }}
           >
-            Built with Growxlabstech.
+            Built By Growxlabstech.
           </a>
         </div>
       </div>

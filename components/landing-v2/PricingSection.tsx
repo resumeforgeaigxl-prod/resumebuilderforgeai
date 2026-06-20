@@ -32,7 +32,7 @@ export default function PricingSection({ locale = "en-in" }: PricingSectionProps
               letterSpacing: "0.05em",
             }}
           >
-            Pricing
+            #05 — Pricing
           </p>
           <h2
             className="mt-3"
