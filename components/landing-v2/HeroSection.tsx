@@ -51,95 +51,74 @@ const cardFadeUp = {
 const cardShadow =
   "0 2px 2px rgba(0,0,0,0.04), 0 8px 16px -4px rgba(0,0,0,0.06)";
 
-interface ResumeDocumentProps {
-  text: string;
-  isTyping: boolean;
+// Centerpiece: Target Pixel Art Landscape
+function PixelArtLandscape() {
+  return (
+    <div className="relative w-[600px] h-[300px] rounded-2xl overflow-hidden border border-[#EBEBEB] shadow-[0_12px_40px_rgba(0,0,0,0.06)]">
+      {/* Background Mountain Layer */}
+      <img
+        src="/hero-landscape.png"
+        alt="Pixel Art Mountain Forest Landscape"
+        className="w-full h-full object-cover transition-transform duration-700 ease-out hover:scale-105"
+      />
+      {/* Soft Ambient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/5 via-transparent to-blue-500/5 pointer-events-none" />
+    </div>
+  );
 }
 
-function ResumeDocument3D({ text, isTyping }: ResumeDocumentProps) {
+// Focal Point: Embedded Realistic Resume
+function EmbeddedResumeCard() {
   return (
-    <div className="relative w-[280px] h-[396px] select-none" style={{ transformStyle: "preserve-3d" }}>
-      {/* Page 3 (lowest, back) */}
-      <div
-        className="absolute inset-0 bg-white border border-[#EBEBEB] rounded-sm"
-        style={{
-          boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
-          transform: "translateZ(-16px) rotateX(10deg) rotateY(-10deg) rotateZ(1.5deg) translate(-12px, -12px)",
-          opacity: 0.35,
-        }}
-      />
-      {/* Page 2 (middle) */}
-      <div
-        className="absolute inset-0 bg-white border border-[#EBEBEB] rounded-sm"
-        style={{
-          boxShadow: "0 8px 20px rgba(0,0,0,0.04)",
-          transform: "translateZ(-8px) rotateX(10deg) rotateY(-10deg) rotateZ(1.5deg) translate(-6px, -6px)",
-          opacity: 0.65,
-        }}
-      />
-      {/* Page 1 (front) */}
-      <div
-        className="absolute inset-0 bg-white border border-[#EBEBEB] rounded-sm p-4 text-left flex flex-col font-sans overflow-hidden"
-        style={{
-          boxShadow: "0 20px 45px -12px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.02)",
-          transform: "translateZ(0px) rotateX(10deg) rotateY(-10deg) rotateZ(0.5deg)",
-        }}
-      >
-        {/* Top accent line */}
-        <div className="h-1 bg-[#7928CA] w-full mb-3 shrink-0" />
-        {/* Header */}
-        <div className="mb-3 shrink-0">
-          <div className="font-bold text-[8px] text-[#171717] tracking-tight">ALEX RIVERA</div>
-          <div className="text-[#7928CA] font-medium text-[4.5px] mt-0.5">Staff Software Engineer</div>
-          <div className="text-[#8F8F8F] text-[3.5px] mt-0.5">San Francisco, CA • alex@rivera.dev • github.com/alexrivera</div>
-        </div>
-        {/* Experience */}
-        <div className="space-y-3 flex-1 min-h-0 overflow-hidden">
-          <div>
-            <div className="font-semibold text-[#171717] border-b border-[#EBEBEB] pb-0.5 mb-1.5 text-[4.5px] tracking-wider">EXPERIENCE</div>
-            <div className="space-y-2">
-              <div>
-                <div className="flex justify-between font-medium text-[#171717] text-[4px]">
-                  <span>Staff Software Engineer</span>
-                  <span className="text-[#8F8F8F] font-normal">2022 - Present</span>
-                </div>
-                <div className="text-[#7928CA] text-[3.5px] font-medium">Vercel • Next.js Core Team</div>
-                <ul className="list-disc pl-2.5 mt-0.5 space-y-0.5 text-[#8F8F8F] text-[3.2px] leading-[4.5px]">
-                  <li className="relative">
-                    <span className={`transition-all duration-300 ${isTyping ? "text-[#7928CA] font-semibold bg-purple-50/70 rounded-sm px-0.5" : "text-[#4D4D4D]"}`}>
-                      {text}
-                    </span>
-                    {isTyping && (
-                      <span className="inline-block w-[1px] h-[4px] bg-[#7928CA] ml-0.5 animate-pulse align-middle" />
-                    )}
-                  </li>
-                  <li>Reduced serverless cold-start latency by 24% globally across Edge Network.</li>
-                </ul>
+    <div
+      className="relative w-[210px] h-[296px] bg-white rounded-xl border border-[#EBEBEB] p-3 text-left flex flex-col font-sans select-none shadow-[0_20px_50px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.02)]"
+      style={{ transform: "rotateX(6deg) rotateY(-8deg) rotateZ(0.5deg)" }}
+    >
+      {/* Top accent bar */}
+      <div className="h-0.5 bg-[#7928CA] w-full mb-2 shrink-0" />
+      
+      {/* Header */}
+      <div className="mb-2 shrink-0">
+        <div className="font-bold text-[7px] text-[#171717] tracking-tight">ALEX RIVERA</div>
+        <div className="text-[#7928CA] font-medium text-[4px] mt-0.5">Staff Software Engineer</div>
+        <div className="text-[#8F8F8F] text-[3px] mt-0.5">Vercel • Next.js Core Team</div>
+      </div>
+
+      {/* Experience block */}
+      <div className="space-y-2 flex-1 min-h-0 overflow-hidden">
+        <div>
+          <div className="font-semibold text-[#171717] border-b border-[#EBEBEB] pb-0.5 mb-1 text-[3.5px] tracking-wider">EXPERIENCE</div>
+          <div className="space-y-1">
+            <div>
+              <div className="flex justify-between font-medium text-[#171717] text-[3px]">
+                <span>Staff Software Engineer</span>
+                <span className="text-[#8F8F8F] font-normal">2022 - Pres</span>
               </div>
-              <div>
-                <div className="flex justify-between font-medium text-[#171717] text-[4px]">
-                  <span>Senior Developer</span>
-                  <span className="text-[#8F8F8F] font-normal">2020 - 2022</span>
-                </div>
-                <div className="text-[#7928CA] text-[3.5px] font-medium">Linear • Core Sync Team</div>
-                <ul className="list-disc pl-2.5 mt-0.5 space-y-0.5 text-[#8F8F8F] text-[3.2px] leading-[4.5px]">
-                  <li>Designed high-performance shortcut engine and WebSocket synchronization.</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          {/* Skills */}
-          <div>
-            <div className="font-semibold text-[#171717] border-b border-[#EBEBEB] pb-0.5 mb-1.5 text-[4.5px] tracking-wider">TECHNICAL SKILLS</div>
-            <div className="flex flex-wrap gap-1">
-              {["TypeScript", "React", "Next.js", "Node.js", "Go", "Kubernetes", "GraphQL", "Docker"].map((skill) => (
-                <span key={skill} className="text-[3.2px] font-medium text-[#4D4D4D] bg-[#FAFAFA] border border-[#EBEBEB] px-1.5 py-0.5 rounded-sm">
-                  {skill}
-                </span>
-              ))}
+              <ul className="list-disc pl-1.5 mt-0.5 space-y-0.5 text-[#8F8F8F] text-[2.6px] leading-[3.5px]">
+                <li>Architected Next.js App Router compiler upgrades.</li>
+                <li>Reduced cold-start latency by 24% globally.</li>
+              </ul>
             </div>
           </div>
         </div>
+
+        {/* Skills block */}
+        <div>
+          <div className="font-semibold text-[#171717] border-b border-[#EBEBEB] pb-0.5 mb-1 text-[3.5px] tracking-wider">TECHNICAL SKILLS</div>
+          <div className="flex flex-wrap gap-0.5">
+            {["TypeScript", "React", "Next.js", "Go", "Docker"].map((skill) => (
+              <span key={skill} className="text-[2.6px] font-medium text-[#4D4D4D] bg-[#FAFAFA] border border-[#EBEBEB] px-1 py-0.2 rounded-sm">
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Embedded Mini ATS Score Tag */}
+      <div className="absolute bottom-2 right-2 px-1.5 py-0.5 bg-emerald-50 border border-emerald-100 rounded-full flex items-center gap-1">
+        <div className="w-1 h-1 rounded-full bg-emerald-500" />
+        <span className="text-[6px] font-bold text-emerald-700">92 Score Passed</span>
       </div>
     </div>
   );
@@ -156,9 +135,9 @@ function ATSScoreCard({ score }: ATSScoreCardProps) {
 
   return (
     <div
-      className="group bg-white border border-[#EBEBEB] hover:border-[#171717]/15 rounded-xl p-4 w-[140px] h-[140px] flex flex-col items-center justify-center shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05),0_16px_32px_-8px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 cursor-default"
+      className="group bg-white/80 backdrop-blur-md border border-white/20 hover:border-[#171717]/15 rounded-xl p-3 w-[120px] h-[120px] flex flex-col items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_48px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 cursor-default"
     >
-      <svg width="80" height="80" viewBox="0 0 100 100" className="mb-1">
+      <svg width="70" height="70" viewBox="0 0 100 100" className="mb-0.5">
         {/* Track */}
         <circle
           cx="50"
@@ -239,7 +218,7 @@ interface AISuggestionsCardProps {
 function AISuggestionsCard({ suggestions }: AISuggestionsCardProps) {
   return (
     <div
-      className="group bg-white border border-[#EBEBEB] hover:border-[#171717]/15 rounded-xl p-4 w-[200px] h-[130px] flex flex-col shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05),0_16px_32px_-8px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 cursor-default"
+      className="group bg-white/85 backdrop-blur-md border border-white/20 hover:border-[#171717]/15 rounded-xl p-3.5 w-[180px] h-[120px] flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_48px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 cursor-default"
     >
       <div className="flex items-center gap-1.5 mb-2.5">
         <Lightbulb className="w-4 h-4 text-[#7928CA]" />
@@ -299,7 +278,7 @@ interface SkillMatchCardProps {
 function SkillMatchCard({ skills }: SkillMatchCardProps) {
   return (
     <div
-      className="group bg-white border border-[#EBEBEB] hover:border-[#171717]/15 rounded-xl p-4 w-[160px] h-[144px] flex flex-col shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05),0_16px_32px_-8px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 cursor-default"
+      className="group bg-white/80 backdrop-blur-md border border-white/20 hover:border-[#171717]/15 rounded-xl p-3.5 w-[150px] h-[130px] flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_48px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 cursor-default"
     >
       <p
         className="text-[#171717] mb-2.5"
@@ -445,60 +424,32 @@ function ProductPreview() {
 
   return (
     <motion.div
-      className="relative w-[480px] h-[450px] hidden lg:block origin-right lg:scale-75 xl:scale-90 2xl:scale-100 transition-transform shrink-0"
+      className="relative w-[620px] h-[380px] hidden lg:block origin-right lg:scale-90 xl:scale-95 2xl:scale-100 transition-transform shrink-0"
       variants={cardContainer}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.3 }}
     >
-      {/* Visual Connector Lines linking cards to centerpiece */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none z-20" fill="none">
-        {/* ATS Score Card connector -> Resume Header */}
-        <motion.path
-          d="M 380 80 Q 320 60 280 90"
-          stroke="rgba(121, 40, 202, 0.15)"
-          strokeWidth="1.2"
-          strokeDasharray="4 4"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 1, delay: 0.8, ease: "easeInOut" }}
-        />
-        {/* AI Suggestions Card connector -> Experience Section */}
-        <motion.path
-          d="M 210 360 Q 160 330 140 240"
-          stroke="rgba(16, 185, 129, 0.15)"
-          strokeWidth="1.2"
-          strokeDasharray="4 4"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 1, delay: 1.2, ease: "easeInOut" }}
-        />
-        {/* Skill Match Card connector -> Skills Section */}
-        <motion.path
-          d="M 310 360 Q 285 385 260 365"
-          stroke="rgba(17, 17, 17, 0.12)"
-          strokeWidth="1.2"
-          strokeDasharray="4 4"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 1, delay: 1, ease: "easeInOut" }}
-        />
-      </svg>
+      {/* 1. Main Background Layer: Landscape Centerpiece */}
+      <div className="absolute top-[25px] left-[10px] z-0">
+        <PixelArtLandscape />
+      </div>
 
-      {/* Main Resume Canvas centered */}
+      {/* 2. Centerpiece Focal Point: Embedded floating resume (floating 3D layer) */}
       <motion.div
         variants={cardFadeUp}
-        className="absolute top-[30px] left-[100px] z-10"
+        className="absolute top-[27px] left-[205px] z-20"
       >
         <div className="animate-float-gentle" style={{ animationDelay: "0s" }}>
-          <ResumeDocument3D text={text} isTyping={isTyping} />
+          <EmbeddedResumeCard />
         </div>
       </motion.div>
 
+      {/* 3. Glassmorphic Ambient widgets arranged around resume */}
       {/* ATS Score Card — top-right */}
       <motion.div
         variants={cardFadeUp}
-        className="absolute top-[10px] right-[10px] z-30"
+        className="absolute top-[10px] right-[20px] z-30"
       >
         <div className="animate-float-gentle" style={{ animationDelay: "0.8s" }}>
           <ATSScoreCard score={atsScore} />
@@ -508,7 +459,7 @@ function ProductPreview() {
       {/* AI Suggestions Card — bottom-left */}
       <motion.div
         variants={cardFadeUp}
-        className="absolute bottom-[30px] left-[10px] z-30"
+        className="absolute bottom-[10px] left-[-15px] z-30"
       >
         <div className="animate-float-gentle" style={{ animationDelay: "1.2s" }}>
           <AISuggestionsCard suggestions={suggestions} />
@@ -518,7 +469,7 @@ function ProductPreview() {
       {/* Skill Match — bottom-right */}
       <motion.div
         variants={cardFadeUp}
-        className="absolute bottom-[20px] right-[15px] z-30"
+        className="absolute bottom-[15px] right-[-10px] z-30"
       >
         <div className="animate-float-gentle" style={{ animationDelay: "0.6s" }}>
           <SkillMatchCard skills={skills} />
