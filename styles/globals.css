@@ -1,3 +1,4 @@
+@import url('https://api.fontshare.com/v2/css?f[]=bespoke-serif@400,400i,700,700i&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -31,6 +32,11 @@
     --text-secondary: #94a3b8;
     --sidebar-width: 260px;
     --header-height: 64px;
+    --font-display: 'Bespoke Serif', Georgia, serif;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
   }
 
   * {

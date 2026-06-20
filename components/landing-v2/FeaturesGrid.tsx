@@ -716,11 +716,12 @@ export default function FeaturesGrid() {
           <h2
             className="mt-3 text-[#171717]"
             style={{
-              fontFamily: "var(--font-geist-sans)",
+              fontFamily: "var(--font-display)",
               fontSize: "32px",
-              fontWeight: 600,
+              fontWeight: 400,
+              fontStyle: "italic",
               lineHeight: "40px",
-              letterSpacing: "-1.28px",
+              letterSpacing: "-0.01em",
             }}
           >
             Everything you need to land interviews

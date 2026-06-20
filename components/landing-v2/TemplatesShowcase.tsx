@@ -444,11 +444,12 @@ export default function TemplatesShowcase() {
           <h2
             className="mt-3 text-[#171717]"
             style={{
-              fontFamily: "var(--font-geist-sans)",
+              fontFamily: "var(--font-display)",
               fontSize: "32px",
-              fontWeight: 600,
+              fontWeight: 400,
+              fontStyle: "italic",
               lineHeight: "40px",
-              letterSpacing: "-1.28px",
+              letterSpacing: "-0.01em",
             }}
           >
             Professional templates for every role
@@ -512,7 +513,7 @@ export default function TemplatesShowcase() {
                           fontSize: "16px",
                           fontWeight: 600,
                           color: "#171717",
-                          fontFamily: "var(--font-geist-sans)",
+                          fontFamily: "var(--font-display)",
                         }}
                       >
                         {template.name}

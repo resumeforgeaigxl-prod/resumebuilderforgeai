@@ -405,11 +405,12 @@ export default function WorkflowTimeline() {
           <h2
             className="mt-3 text-[#171717]"
             style={{
-              fontFamily: "var(--font-geist-sans)",
+              fontFamily: "var(--font-display)",
               fontSize: "32px",
-              fontWeight: 600,
+              fontWeight: 400,
+              fontStyle: "italic",
               lineHeight: "40px",
-              letterSpacing: "-1.28px",
+              letterSpacing: "-0.01em",
             }}
           >
             How ResumeForge Works
@@ -460,7 +461,7 @@ export default function WorkflowTimeline() {
                           className={`text-base font-bold tracking-tight transition-colors duration-300 ${
                             isActive ? "text-[#171717]" : "text-[#8F8F8F] group-hover:text-[#4D4D4D]"
                           }`}
-                          style={{ fontFamily: "var(--font-geist-sans)" }}
+                          style={{ fontFamily: "var(--font-display)" }}
                         >
                           {step.title}
                         </h3>

@@ -734,10 +734,11 @@ export default function HeroSection({ locale = "en-in" }: HeroSectionProps) {
             variants={fadeUp}
             className="mb-5 text-[32px] md:text-[48px] text-[#171717]"
             style={{
-              fontFamily: "var(--font-geist-sans)",
-              fontWeight: 600,
-              lineHeight: 1.1,
-              letterSpacing: "-0.05em",
+              fontFamily: "var(--font-display)",
+              fontWeight: 700,
+              fontStyle: "italic",
+              letterSpacing: "-0.02em",
+              lineHeight: 1.08,
             }}
           >
             Forge your career.

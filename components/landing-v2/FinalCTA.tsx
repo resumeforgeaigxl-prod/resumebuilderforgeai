@@ -22,7 +22,9 @@ export default function FinalCTA({ locale = "en-in" }: FinalCTAProps) {
         <h2
           className="leading-tight"
           style={{
-            fontWeight: 600,
+            fontFamily: "var(--font-display)",
+            fontWeight: 400,
+            fontStyle: "italic",
             color: "#171717",
           }}
         >
@@ -31,7 +33,7 @@ export default function FinalCTA({ locale = "en-in" }: FinalCTAProps) {
             style={{
               fontSize: "32px",
               lineHeight: "40px",
-              letterSpacing: "-1.28px",
+              letterSpacing: "-0.01em",
             }}
           >
             Your next opportunity starts with a complete career platform.
@@ -41,7 +43,7 @@ export default function FinalCTA({ locale = "en-in" }: FinalCTAProps) {
             style={{
               fontSize: "48px",
               lineHeight: "48px",
-              letterSpacing: "-2.4px",
+              letterSpacing: "-0.01em",
             }}
           >
             Your next opportunity starts with a complete career platform.

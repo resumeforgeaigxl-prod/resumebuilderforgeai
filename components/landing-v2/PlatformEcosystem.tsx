@@ -271,11 +271,12 @@ export default function PlatformEcosystem({ locale = "en-in" }: { locale?: strin
           <h2
             className="mt-3 text-[#171717]"
             style={{
-              fontFamily: "var(--font-geist-sans)",
+              fontFamily: "var(--font-display)",
               fontSize: "32px",
-              fontWeight: 600,
+              fontWeight: 400,
+              fontStyle: "italic",
               lineHeight: "40px",
-              letterSpacing: "-1.28px",
+              letterSpacing: "-0.01em",
             }}
           >
             The Interconnected Forge Flywheel
@@ -510,7 +511,7 @@ export default function PlatformEcosystem({ locale = "en-in" }: { locale?: strin
                   <div>
                     <h3
                       className="text-base font-bold text-[#171717] tracking-tight leading-none"
-                      style={{ fontFamily: "var(--font-geist-sans)" }}
+                      style={{ fontFamily: "var(--font-display)" }}
                     >
                       {activeForgeData.title}
                     </h3>
