@@ -104,32 +104,32 @@ export default function SignupPage() {
                     </div>
                 </div>
 
-                <form className="space-y-4" onSubmit={handleSubmit}>
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-slate-300">Email Address</label>
+                <form className="space-y-5" onSubmit={handleSubmit}>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-mono uppercase tracking-wider text-zinc-400">Email Address</label>
                         <input
                             type="email"
                             name="email"
                             placeholder="you@example.com"
                             required
                             disabled={isLoading}
-                            className="w-full h-11 px-3.5 bg-[#0a0a0c] border border-[#222] focus:border-[#444] rounded-[6px] focus:outline-none transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                            className="w-full h-11 px-3.5 bg-black border border-[#222] hover:border-[#333] focus:border-[#555] rounded-[6px] focus:outline-none transition-all duration-200 text-white placeholder-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                         />
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-300">Mobile Phone Number <span className="text-purple-500">*</span></label>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-mono uppercase tracking-wider text-zinc-400">Mobile Phone Number <span className="text-purple-500">*</span></label>
                         <input
                             type="tel"
                             name="phone_number"
                             placeholder="+91 98765 43210"
                             required
                             disabled={isLoading}
-                            className="w-full h-11 px-3.5 bg-[#0a0a0c] border border-[#222] focus:border-[#444] rounded-[6px] focus:outline-none transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                            className="w-full h-11 px-3.5 bg-black border border-[#222] hover:border-[#333] focus:border-[#555] rounded-[6px] focus:outline-none transition-all duration-200 text-white placeholder-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                         />
                         <p className="text-[10px] text-slate-500 px-1 font-medium italic">We need this for account verification and updates.</p>
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-300">Secure Password <span className="text-purple-500">*</span></label>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-mono uppercase tracking-wider text-zinc-400">Secure Password <span className="text-purple-500">*</span></label>
                         <input
                             type="password"
                             name="password"
@@ -137,11 +137,11 @@ export default function SignupPage() {
                             required
                             minLength={6}
                             disabled={isLoading}
-                            className="w-full h-11 px-3.5 bg-[#0a0a0c] border border-[#222] focus:border-[#444] rounded-[6px] focus:outline-none transition-all text-white placeholder-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                            className="w-full h-11 px-3.5 bg-black border border-[#222] hover:border-[#333] focus:border-[#555] rounded-[6px] focus:outline-none transition-all duration-200 text-white placeholder-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                         />
                     </div>
 
-                    <label className="flex items-start gap-3 p-3.5 rounded-[6px] bg-[#0a0a0c] border border-[#222] hover:border-[#333] cursor-pointer select-none mt-4 transition-all">
+                    <label className="flex items-start gap-3 p-3.5 rounded-[6px] bg-black border border-[#222] hover:border-[#333] cursor-pointer select-none mt-4 transition-all duration-200">
                         <input
                             type="checkbox"
                             required

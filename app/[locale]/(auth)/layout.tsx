@@ -21,7 +21,7 @@ export default function AuthLayout({
                     {/* Right Panel: Flexible illustration covers remaining space */}
                     <div className="flex-1 h-full relative overflow-hidden bg-black flex items-center justify-center">
                         <img
-                            src="/images/auth-side.png"
+                            src="/images/auth-side.png?v=welcome-pixelart"
                             alt="ResumeForgeAI Cinematic Auth Visual"
                             className="w-full h-full object-cover object-center aspect-[16/10]"
                         />
