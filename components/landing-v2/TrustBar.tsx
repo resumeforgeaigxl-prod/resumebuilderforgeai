@@ -1,79 +1,101 @@
 "use client";
 
 import { motion } from "framer-motion";
-import {
-  Shield,
-  Brain,
-  Code2,
-  Target,
-  FolderKanban,
-  BriefcaseBusiness,
-  Compass,
-  FileText
-} from "lucide-react";
 
-interface Capability {
-  icon: any;
+const ease = [0.16, 1, 0.3, 1] as const;
+
+interface Stat {
+  value: string;
   label: string;
-  accentColor: string;
 }
 
-const capabilities: Capability[] = [
-  { icon: Shield, label: "ATS Optimization", accentColor: "#0070F3" },
-  { icon: Brain, label: "AI Mock Interviews", accentColor: "#7928CA" },
-  { icon: Code2, label: "LeetCode Practice", accentColor: "#10B981" },
-  { icon: Target, label: "Company Study Decks", accentColor: "#F59E0B" },
-  { icon: FolderKanban, label: "GitHub Portfolios", accentColor: "#D97706" },
-  { icon: BriefcaseBusiness, label: "Job Discovery", accentColor: "#F43F5E" },
-  { icon: Compass, label: "Skill Gap Analysis", accentColor: "#EC4899" },
-  { icon: FileText, label: "PDF Resume Export", accentColor: "#06B6D4" }
+const stats: Stat[] = [
+  { value: "12,400+", label: "Resumes generated" },
+  { value: "92%", label: "Average ATS pass rate" },
+  { value: "1.2s", label: "Average build time" },
+  { value: "4.8★", label: "User satisfaction rating" },
 ];
-
-// Duplicate list for infinite scroll animation loop
-const duplicatedCapabilities = [...capabilities, ...capabilities, ...capabilities];
 
 export default function TrustBar() {
   return (
-    <section className="w-full border-y border-[#EBEBEB] bg-[#FAFAFA]/50 py-7 overflow-hidden relative select-none">
-      
-      {/* Ambient Left/Right blurred gradient masks */}
-      <div className="absolute left-0 top-0 bottom-0 w-20 md:w-36 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-20 md:w-36 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
-
-      {/* Infinite Horizontal Ticker Row */}
-      <div className="flex items-center w-full max-w-[1400px] mx-auto overflow-hidden">
-        <motion.div
-          className="flex gap-8 whitespace-nowrap pr-8"
-          animate={{ x: ["0%", "-33.33%"] }}
-          transition={{
-            repeat: Infinity,
-            duration: 25,
-            ease: "linear"
-          }}
-        >
-          {duplicatedCapabilities.map(({ icon: Icon, label, accentColor }, index) => (
-            <div
-              key={`${label}-${index}`}
-              className="inline-flex items-center gap-2.5 border border-[#EBEBEB] bg-white px-5 py-2.5 rounded-full text-xs font-semibold text-[#171717] shadow-[0_1px_2px_rgba(0,0,0,0.01)] hover:border-neutral-300 transition-colors cursor-pointer group"
+    <section className="w-full border-y border-[#e5e5e5] bg-white select-none">
+      {/* Stats Grid — AutoSend bordered grid pattern */}
+      <div className="max-w-[1200px] mx-auto border-x border-[#e5e5e5]">
+        <div className="grid grid-cols-2 md:grid-cols-4 border-b border-[#e5e5e5]">
+          {stats.map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              className="flex flex-col justify-center items-center gap-1.5 px-4 sm:px-6 py-6 border-[#e5e5e5] odd:border-r [&:nth-child(-n+2)]:border-b md:[&:nth-child(-n+2)]:border-b-0 md:[&:nth-child(-n+3)]:border-r"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, ease, delay: index * 0.08 }}
             >
-              <Icon
-                className="w-4 h-4 text-[#8F8F8F] group-hover:scale-105 transition-all duration-300"
-                style={{ color: "#8F8F8F" }}
-                onMouseEnter={(e: any) => {
-                  e.currentTarget.style.color = accentColor;
+              <p
+                className="text-center"
+                style={{
+                  fontFamily: "var(--font-geist-sans)",
+                  fontSize: "24px",
+                  fontWeight: 400,
+                  color: "#171717",
                 }}
-                onMouseLeave={(e: any) => {
-                  e.currentTarget.style.color = "#8F8F8F";
+              >
+                {stat.value}
+              </p>
+              <p
+                className="text-center"
+                style={{
+                  fontSize: "14px",
+                  fontWeight: 400,
+                  lineHeight: "20px",
+                  color: "#737373",
                 }}
-              />
-              <span style={{ fontFamily: "var(--font-geist-sans)" }}>
-                {label}
+              >
+                {stat.label}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Trust message row */}
+        <div className="flex justify-center items-center px-6 py-4 bg-[#FAFAFA] border-b border-[#e5e5e5]">
+          <p
+            className="text-center"
+            style={{
+              fontFamily: "monospace",
+              fontSize: "12px",
+              fontWeight: 500,
+              textTransform: "uppercase" as const,
+              letterSpacing: "0.12em",
+              color: "#737373",
+            }}
+          >
+            Trusted by developers, designers & job seekers worldwide
+          </p>
+        </div>
+
+        {/* Logo / Institution Row — AutoSend pattern */}
+        <div className="grid grid-cols-2 sm:grid-cols-4">
+          {["IIT Delhi", "IIM Bangalore", "BITS Pilani", "NIT Trichy"].map((name, i) => (
+            <div
+              key={name}
+              className="flex items-center justify-center px-4 sm:px-6 py-5 border-[#e5e5e5] odd:border-r [&:nth-child(-n+2)]:border-b sm:[&:nth-child(-n+2)]:border-b-0 sm:[&:nth-child(-n+3)]:border-r"
+            >
+              <span
+                style={{
+                  fontFamily: "var(--font-geist-sans)",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  color: "#a8a29e",
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                {name}
               </span>
             </div>
           ))}
-        </motion.div>
+        </div>
       </div>
-
     </section>
   );
 }

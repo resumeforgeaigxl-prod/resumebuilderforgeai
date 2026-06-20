@@ -380,124 +380,119 @@ export default function WorkflowTimeline() {
   const [activeStep, setActiveStep] = useState(0);
 
   return (
-    <section id="workflow" className="py-24 px-6 overflow-hidden bg-white border-t border-[#EBEBEB]">
-      <div className="max-w-[1100px] mx-auto">
+    <section id="workflow" className="w-full bg-[#fafaf9] relative overflow-hidden select-none">
+      <div className="max-w-[1200px] mx-auto border-x border-[#e7e5e4] bg-white">
         
-        {/* Header */}
-        <motion.div
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.6, ease }}
-        >
-          <p
-            className="text-[#8F8F8F] uppercase"
-            style={{
-              fontFamily: "var(--font-geist-mono)",
-              fontSize: "12px",
-              fontWeight: 500,
-              lineHeight: "16px",
-            }}
-          >
-            #02 — Workflow
-          </p>
+        {/* Header Block (Full-width, matching Capabilities) */}
+        <div className="px-6 md:px-10 py-16 text-left">
+          <span className="font-mono text-[14px] text-rose-500 font-semibold uppercase leading-4 block mb-3 select-none">
+            #02 — How It Works
+          </span>
           <h2
-            className="mt-3 text-[#171717]"
+            className="mt-3 text-[#1c1917] font-bold leading-[1.15] text-2xl md:text-[clamp(28px,3vw,40px)] tracking-tight max-w-[640px]"
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: "32px",
-              fontWeight: 400,
               fontStyle: "italic",
-              lineHeight: "40px",
-              letterSpacing: "-0.01em",
             }}
           >
             How ResumeForge Works
           </h2>
-        </motion.div>
+        </div>
 
         {/* Split Tour Layout Container */}
-        <div className="flex flex-col lg:flex-row items-stretch gap-12 mt-16">
+        <div className="border-t border-[#e7e5e4] grid grid-cols-1 lg:grid-cols-[50%_50%] items-stretch divide-y lg:divide-y-0 lg:divide-x divide-[#e7e5e4]">
           
           {/* Left Column: Progress Timeline Stepper */}
-          <div className="flex-1 flex flex-col relative select-none">
-            {/* Vertical progress connection line */}
-            <div className="absolute left-[19px] top-4 bottom-4 w-[2px] bg-[#F2F2F2] pointer-events-none" />
+          <div className="flex flex-col bg-[#fafaf9] p-6 md:p-10">
+            <div className="relative flex-1 flex flex-col select-none">
+              {/* Vertical progress connection line */}
+              <div className="absolute left-[19px] top-4 bottom-4 w-[2px] bg-[#F2F2F2] pointer-events-none" />
 
-            {/* Glowing active line overlay */}
-            <div
-              className="absolute left-[19px] w-[2px] bg-[#7928CA] transition-all duration-500 pointer-events-none"
-              style={{
-                top: `${activeStep * 84 + 16}px`,
-                height: activeStep === 4 ? "0px" : "84px"
-              }}
-            />
+              {/* Glowing active line overlay */}
+              <div
+                className="absolute left-[19px] w-[2px] bg-[#7928CA] transition-all duration-500 pointer-events-none"
+                style={{
+                  top: `${activeStep * 84 + 16}px`,
+                  height: activeStep === 4 ? "0px" : "84px"
+                }}
+              />
 
-            <div className="flex flex-col gap-6">
-              {steps.map((step, idx) => {
-                const isActive = activeStep === idx;
-                return (
-                  <div
-                    key={step.title}
-                    onMouseEnter={() => setActiveStep(idx)}
-                    className="flex flex-col text-left cursor-pointer group"
-                  >
-                    <div className="flex items-start gap-5">
-                      {/* Step Circle Indicator */}
-                      <div
-                        className={`w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold font-sans text-sm z-10 shrink-0 transition-all duration-300 ${
-                          isActive
-                            ? "bg-white border-[#7928CA] text-[#7928CA] shadow-sm scale-105"
-                            : "bg-[#FAFAFA] border-[#EBEBEB] text-[#8F8F8F]"
-                        }`}
-                      >
-                        {idx + 1}
-                      </div>
-
-                      {/* Text details */}
-                      <div className="pt-2 flex-1">
-                        <h3
-                          className={`text-base font-bold tracking-tight transition-colors duration-300 ${
-                            isActive ? "text-[#171717]" : "text-[#8F8F8F] group-hover:text-[#4D4D4D]"
+              <div className="flex flex-col gap-6">
+                {steps.map((step, idx) => {
+                  const isActive = activeStep === idx;
+                  return (
+                    <div
+                      key={step.title}
+                      onMouseEnter={() => setActiveStep(idx)}
+                      className="flex flex-col text-left cursor-pointer group"
+                    >
+                      <div className="flex items-start gap-5">
+                        {/* Step Circle Indicator */}
+                        <div
+                          className={`w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold font-sans text-sm z-10 shrink-0 transition-all duration-300 ${
+                            isActive
+                              ? "bg-white border-[#7928CA] text-[#7928CA] shadow-sm scale-105"
+                              : "bg-[#FAFAFA] border-[#EBEBEB] text-[#8F8F8F]"
                           }`}
-                          style={{ fontFamily: "var(--font-display)" }}
                         >
-                          {step.title}
-                        </h3>
-                        <p
-                          className={`mt-1.5 text-[13px] leading-relaxed transition-colors duration-300 max-w-lg ${
-                            isActive ? "text-[#4D4D4D]" : "text-neutral-400"
-                          }`}
-                          style={{ fontFamily: "var(--font-geist-sans)" }}
-                        >
-                          {step.description}
-                        </p>
+                          {idx + 1}
+                        </div>
 
-                        {/* Mobile nested visual simulation */}
-                        {isActive && (
-                          <div className="mt-4 lg:hidden w-full h-[200px] border border-[#EBEBEB] rounded-xl bg-white flex items-center justify-center overflow-hidden shadow-sm">
-                            {renderSimulation(idx)}
-                          </div>
-                        )}
+                        {/* Text details */}
+                        <div className="pt-2 flex-1">
+                          <h3
+                            className={`text-base font-bold tracking-tight transition-colors duration-300 ${
+                              isActive ? "text-[#171717]" : "text-[#8F8F8F] group-hover:text-[#4D4D4D]"
+                            }`}
+                            style={{ fontFamily: "var(--font-display)" }}
+                          >
+                            {step.title}
+                          </h3>
+                          <p
+                            className={`mt-1.5 text-[13px] leading-relaxed transition-colors duration-300 max-w-lg ${
+                              isActive ? "text-[#4D4D4D]" : "text-neutral-400"
+                            }`}
+                            style={{ fontFamily: "var(--font-geist-sans)" }}
+                          >
+                            {step.description}
+                          </p>
+
+                          {/* Mobile nested visual simulation */}
+                          {isActive && (
+                            <div className="mt-4 lg:hidden w-full h-[200px] border border-[#EBEBEB] rounded-xl bg-white flex items-center justify-center overflow-hidden shadow-sm">
+                              {renderSimulation(idx)}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
 
           {/* Right Column: Sticky Mock Window Visual Simulator (Desktop only) */}
-          <div className="hidden lg:flex w-[460px] shrink-0 flex-col">
-            <div className="sticky top-[120px] self-start w-full border border-[#EBEBEB] rounded-2xl bg-white shadow-[0_8px_32px_rgba(0,0,0,0.015)] overflow-hidden flex flex-col h-[340px]">
+          <div className="hidden lg:flex flex-col justify-center items-center bg-white p-6 md:p-10 relative min-h-[400px] overflow-hidden">
+            {/* Landscape Background Layer */}
+            <div
+              className="absolute inset-0 bg-cover bg-center pointer-events-none"
+              style={{
+                backgroundImage: "url('/hero-landscape.png')",
+                zIndex: 0,
+              }}
+            />
+            {/* Dark overlay for contrast */}
+            <div className="absolute inset-0 bg-slate-950/20 z-0 pointer-events-none" />
+
+            <div className="relative z-10 w-[440px] border border-[#EBEBEB] rounded-2xl bg-white shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col h-[340px]">
               
               {/* Window Header */}
               <div className="h-10 bg-[#FAFAFA] border-b border-[#EBEBEB] px-4 flex items-center justify-between select-none">
                 <div className="flex items-center gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56] border border-[#E0443E]" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E] border border-[#DEA123]" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F] border border-[#1AAB29]" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
                 </div>
                 <span className="text-[10px] font-mono text-[#8F8F8F] uppercase tracking-wider font-semibold">
                   Sandbox Tour

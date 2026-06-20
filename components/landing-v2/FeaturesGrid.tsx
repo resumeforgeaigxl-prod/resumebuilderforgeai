@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import {
   FileSearch,
   Wand2,
@@ -10,8 +11,7 @@ import {
   Target,
   Lightbulb,
   Check,
-  RotateCcw,
-  ArrowRight
+  RotateCcw
 } from "lucide-react";
 
 /* ═══════════════════════════════════════════════
@@ -25,9 +25,9 @@ interface ATSScanDemoProps {
 
 function ATSScanDemo({ subOpt }: ATSScanDemoProps) {
   const files = [
-    { name: "alex_rivera_resume.pdf", score: 68, status: "Review Needed", missing: ["Next.js", "CI/CD", "Docker"] },
-    { name: "marketing_draft.docx", score: 45, status: "Weak Match", missing: ["SEO", "Copywriting", "GA4"] },
-    { name: "technical_cv_v2.pdf", score: 92, status: "Excellent Match", missing: [] }
+    { name: "alex_rivera_resume.pdf", score: 68, status: "Review Needed", missing: ["Next.js", "CI/CD", "Docker"], size: "142 KB", pages: "2", words: "1,482", atsReady: "✓ Yes" },
+    { name: "marketing_draft.docx", score: 45, status: "Weak Match", missing: ["SEO", "Copywriting", "GA4"], size: "98 KB", pages: "1", words: "740", atsReady: "✗ No" },
+    { name: "technical_cv_v2.pdf", score: 92, status: "Excellent Match", missing: [], size: "115 KB", pages: "2", words: "1,120", atsReady: "✓ Yes" }
   ];
 
   const file = files[subOpt] || files[0];
@@ -57,15 +57,16 @@ function ATSScanDemo({ subOpt }: ATSScanDemoProps) {
     }, 120);
 
     await new Promise((r) => setTimeout(r, 1400));
+    clearInterval(interval);
     setIsScanning(false);
     setScanned(true);
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col justify-between overflow-hidden text-left">
+    <div className="w-full h-full flex flex-col justify-center relative overflow-hidden select-none">
       {isScanning && (
         <motion.div
-          className="absolute left-0 right-0 h-[2px] bg-purple-500 shadow-[0_0_10px_#7928CA] z-20"
+          className="absolute left-0 right-0 h-[2.5px] bg-[#7c3aed] shadow-[0_0_10px_#7c3aed] z-20"
           initial={{ top: "0%" }}
           animate={{ top: "100%" }}
           transition={{ duration: 1.4, ease: "linear" }}
@@ -73,17 +74,36 @@ function ATSScanDemo({ subOpt }: ATSScanDemoProps) {
       )}
 
       {!scanned ? (
-        <div className="flex flex-col items-center justify-center flex-1 text-center select-none py-2">
-          <div className="w-8 h-8 rounded-full bg-purple-50 border border-purple-100 flex items-center justify-center mb-1.5">
-            <FileSearch className="w-4 h-4 text-purple-600" />
+        <div className="flex flex-col items-center justify-center text-center py-1">
+          {/* File Icon: purple, 36px */}
+          <div className="w-12 h-12 rounded-lg bg-[#f3f0ff] flex items-center justify-center mb-3 shrink-0">
+            <FileSearch className="w-9 h-9 text-[#7c3aed]" />
           </div>
-          <p className="text-[11px] text-[#171717] font-semibold">{file.name}</p>
-          <p className="text-[9px] text-[#8F8F8F]">142 KB • Ready to audit</p>
+          <p className="text-[13px] text-[#0f0f0f] font-semibold truncate max-w-full">{file.name}</p>
+          <p className="text-[11px] text-[#9ca3af] mt-1">{file.size} · Ready to audit</p>
+
+          {/* Stats Row */}
+          <div className="flex gap-2 mt-4 w-full max-w-[320px] mx-auto shrink-0">
+            <div className="flex-1 border border-[#e5e5e5] rounded-lg p-2.5 text-center bg-white">
+              <div className="font-mono text-[9px] text-[#9ca3af]">PAGES</div>
+              <div className="font-bold text-[18px] text-black mt-0.5">{file.pages}</div>
+            </div>
+            <div className="flex-1 border border-[#e5e5e5] rounded-lg p-2.5 text-center bg-white">
+              <div className="font-mono text-[9px] text-[#9ca3af]">WORDS</div>
+              <div className="font-bold text-[18px] text-black mt-0.5">{file.words}</div>
+            </div>
+            <div className="flex-1 border border-[#e5e5e5] rounded-lg p-2.5 text-center bg-white">
+              <div className="font-mono text-[9px] text-[#9ca3af]">ATS READY</div>
+              <div className={`font-bold mt-1 text-[13px] ${file.atsReady.includes("Yes") ? "text-[#059669]" : "text-rose-600"}`}>
+                {file.atsReady}
+              </div>
+            </div>
+          </div>
 
           <button
             onClick={handleScan}
             disabled={isScanning}
-            className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 bg-[#171717] hover:bg-[#171717]/90 text-white rounded-full text-[9px] font-medium transition-all"
+            className="mt-4 px-5 py-2 bg-[#0f0f0f] hover:bg-[#7c3aed] text-white rounded-lg text-[13px] font-semibold transition-all duration-200 cursor-pointer shrink-0"
           >
             {isScanning ? `Auditing ${scanProgress}%` : "Scan Resume"}
           </button>
@@ -94,39 +114,39 @@ function ATSScanDemo({ subOpt }: ATSScanDemoProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <div className="flex items-center justify-between border-b border-[#EBEBEB] pb-1.5">
-            <span className="text-[10px] font-bold text-[#171717]">Compliance Audit</span>
-            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+          <div className="flex items-center justify-between border-b border-[#EBEBEB] pb-2 shrink-0">
+            <span className="text-xs font-bold text-[#0f0f0f]">Compliance Audit</span>
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
               file.score >= 85 ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
             }`}>
-              {file.score}% Match ({file.status})
+              {file.score}% Match
             </span>
           </div>
 
-          <div className="space-y-1.5 my-2">
-            <div className="flex items-center gap-1.5 text-[9.5px]">
+          <div className="space-y-2 my-3 flex-1 flex flex-col justify-center">
+            <div className="flex items-center gap-1.5 text-[11px]">
               <span className={file.score >= 85 ? "text-emerald-500 font-bold" : "text-amber-500 font-bold"}>
                 {file.score >= 85 ? "✓" : "⚠"}
               </span>
-              <span className="text-[#4D4D4D]">
-                {file.score >= 85 ? "Full keyword match" : `Missing keywords: ${file.missing.join(", ")}`}
+              <span className="text-[#6b7280] truncate max-w-full">
+                {file.score >= 85 ? "Full keyword match" : `Missing: ${file.missing.join(", ")}`}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 text-[9.5px]">
+            <div className="flex items-center gap-1.5 text-[11px]">
               <span className="text-emerald-500 font-bold">✓</span>
-              <span className="text-[#4D4D4D]">Scannable structure & layout</span>
+              <span className="text-[#6b7280]">Scannable structure & layout</span>
             </div>
-            <div className="flex items-center gap-1.5 text-[9.5px]">
+            <div className="flex items-center gap-1.5 text-[11px]">
               <span className="text-emerald-500 font-bold">✓</span>
-              <span className="text-[#4D4D4D]">PDF file-type compliance</span>
+              <span className="text-[#6b7280]">PDF file-type compliance</span>
             </div>
           </div>
 
           <button
             onClick={() => setScanned(false)}
-            className="self-center inline-flex items-center gap-1 px-2.5 py-1 border border-[#EBEBEB] hover:bg-[#F2F2F2] rounded-full text-[9px] font-semibold text-[#4D4D4D] transition-colors"
+            className="self-center inline-flex items-center gap-1 px-3 py-1.5 border border-[#EBEBEB] hover:bg-[#F2F2F2] rounded-full text-[10px] font-semibold text-[#6b7280] transition-colors cursor-pointer shrink-0"
           >
-            <RotateCcw className="w-2.5 h-2.5" /> Re-scan
+            <RotateCcw className="w-3 h-3" /> Re-scan
           </button>
         </motion.div>
       )}
@@ -143,93 +163,66 @@ function ImproveBulletsDemo({ subOpt }: ImproveBulletsDemoProps) {
   const data = [
     {
       start: "Led a team of developers to build the frontend website.",
-      target: "Orchestrated a team of 6 engineers to deliver 4 high-traffic React apps, boosting page speed by 35%."
+      target: "Orchestrated a team of 6 engineers to deliver 4 high-traffic React apps, boosting page speed by 35%.",
+      actionVerb: "Orchestrated"
     },
     {
       start: "Wrote backend APIs and managed database queries.",
-      target: "Designed scalable Node.js microservices handling 20k req/sec, optimizing database query response times by 40%."
+      target: "Engineered REST APIs handling 20k req/sec, reducing p99 latency by 40%.",
+      actionVerb: "Engineered"
     },
     {
       start: "Gathered customer requirements and wrote product specs.",
-      target: "Launched 3 core feature verticals by aligning cross-functional teams, driving a 15% increase in user retention."
+      target: "Launched 3 core feature verticals by aligning cross-functional teams, driving a 15% increase in user retention.",
+      actionVerb: "Launched"
     },
     {
       start: "Analyzed company data and created SQL reports.",
-      target: "Built ETL pipelines processing 50M+ rows daily, uncovering insights that saved $45K in annual infrastructure costs."
+      target: "Built ETL pipelines processing 50M+ rows daily, uncovering insights that saved $45K in annual infrastructure costs.",
+      actionVerb: "Built"
     },
     {
       start: "Set up CI/CD pipelines and deployment processes.",
-      target: "Automated AWS deployments via Terraform and GitHub Actions, reducing release cycle time from 3 days to 12 minutes."
+      target: "Automated AWS deployments via Terraform and GitHub Actions, reducing release cycle time from 3 days to 12 minutes.",
+      actionVerb: "Automated"
     }
   ];
 
   const bullet = data[subOpt] || data[0];
-  const [text, setText] = useState("");
-  const [rewritten, setRewritten] = useState(false);
-  const [typing, setTyping] = useState(false);
-
-  useEffect(() => {
-    setText(bullet.start);
-    setRewritten(false);
-    setTyping(false);
-  }, [subOpt]);
-
-  const handleRewrite = async () => {
-    setTyping(true);
-    setRewritten(true);
-    setText("");
-    const targetText = bullet.target;
-    for (let i = 0; i <= targetText.length; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 15));
-      setText(targetText.substring(0, i));
-    }
-    setTyping(false);
-  };
-
-  const handleReset = () => {
-    setText(bullet.start);
-    setRewritten(false);
-    setTyping(false);
-  };
 
   return (
-    <div className="w-full h-full flex flex-col justify-between text-left">
-      <div className="flex-1 flex flex-col justify-center gap-1.5">
-        {!rewritten ? (
-          <div className="space-y-1">
-            <span className="text-[8px] font-mono text-rose-500 uppercase font-semibold">Original (Weak)</span>
-            <div className="p-2 border border-rose-100 bg-rose-50/20 text-rose-950 rounded-lg text-[10.5px] leading-relaxed">
-              {text}
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-1">
-            <span className="text-[8px] font-mono text-emerald-500 uppercase font-semibold">AI Optimized (Strong & Quantified)</span>
-            <div className="p-2 border border-emerald-100 bg-emerald-50/20 text-emerald-950 rounded-lg text-[10.5px] leading-relaxed min-h-[60px]">
-              {text}
-              {typing && <span className="inline-block w-[1.5px] h-[10px] bg-purple-600 ml-0.5 animate-pulse" />}
-            </div>
-          </div>
-        )}
+    <div className="w-full h-full flex flex-col justify-start text-left overflow-y-auto select-none">
+      {/* Before block */}
+      <div className="mb-2 shrink-0">
+        <div className="font-mono text-[9px] text-[#f43f5e] font-semibold mb-1.5 uppercase tracking-wider">BEFORE</div>
+        <div className="bg-[#fff1f2] border border-[#fecdd3] rounded-lg p-3 text-[12px] text-[#6b7280] leading-relaxed">
+          {bullet.start}
+        </div>
       </div>
 
-      <div className="flex justify-center shrink-0 mt-2">
-        {!rewritten ? (
-          <button
-            onClick={handleRewrite}
-            className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#7928CA] hover:bg-[#7928CA]/90 text-white rounded-full text-[9px] font-medium transition-all"
-          >
-            <Wand2 className="w-3 h-3" /> Improve with AI
-          </button>
-        ) : (
-          <button
-            onClick={handleReset}
-            disabled={typing}
-            className="inline-flex items-center gap-1 px-3 py-1.5 border border-[#EBEBEB] hover:bg-[#F2F2F2] rounded-full text-[9px] font-medium text-[#4D4D4D] transition-colors"
-          >
-            <RotateCcw className="w-3 h-3" /> Reset Bullet
-          </button>
-        )}
+      {/* Arrow down */}
+      <div className="text-center text-[#9ca3af] my-1 text-[16px] leading-none shrink-0">
+        ↓
+      </div>
+
+      {/* After block */}
+      <div className="mb-3 shrink-0">
+        <div className="font-mono text-[9px] text-emerald-600 font-semibold mb-1.5 uppercase tracking-wider">AFTER · AI OPTIMIZED</div>
+        <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-lg p-3 text-[12px] text-[#0f0f0f] font-medium leading-relaxed">
+          {bullet.target}
+        </div>
+      </div>
+
+      {/* Checklist */}
+      <div className="space-y-1 shrink-0">
+        <div className="flex items-center gap-1.5 text-[11px] text-[#059669] font-medium">
+          <span>✓</span>
+          <span>Quantified achievement added</span>
+        </div>
+        <div className="flex items-center gap-1.5 text-[11px] text-[#059669] font-medium">
+          <span>✓</span>
+          <span>Strong action verb ({bullet.actionVerb})</span>
+        </div>
       </div>
     </div>
   );
@@ -237,139 +230,96 @@ function ImproveBulletsDemo({ subOpt }: ImproveBulletsDemoProps) {
 
 // 3. Resume Template Designer Demo
 interface TemplatesPlaygroundProps {
-  templateName: "Modern" | "Executive" | "Technical" | "Creative" | "Minimal";
+  activeIdx: number;
+  onChange?: (val: number) => void;
 }
 
-function TemplatesPlayground({ templateName }: TemplatesPlaygroundProps) {
-  const themes = {
-    Modern: { color: "#0070F3", name: "Modern Blue" },
-    Executive: { color: "#171717", name: "Executive Black" },
-    Technical: { color: "#7928CA", name: "Technical Purple" },
-    Creative: { color: "#FF0080", name: "Creative Pink" },
-    Minimal: { color: "#8F8F8F", name: "Minimal Gray" },
-  };
+function TemplatesPlayground({ activeIdx, onChange }: TemplatesPlaygroundProps) {
+  const templates = [
+    { id: 0, label: "Classic" },
+    { id: 1, label: "Modern" },
+    { id: 2, label: "Sidebar" },
+  ];
 
   return (
-    <div className="w-full h-full flex flex-col justify-between">
-      <div className="bg-white border border-[#EBEBEB] rounded-lg p-3 flex flex-col flex-1 shadow-sm overflow-hidden select-none relative">
-        {templateName === "Modern" && (
-          <div className="h-full flex flex-col justify-between">
-            <div className="h-1 bg-[#0070F3] w-full rounded-t -mt-3 -mx-3 mb-2 shrink-0" />
-            <div className="flex-1 flex gap-3 mt-1 overflow-hidden text-left">
-              <div className="w-[45px] pr-2 flex flex-col gap-1.5" style={{ borderRight: "1px solid #F2F2F2" }}>
-                <div className="w-7 h-7 rounded-full bg-[#0070F3]/10 text-[#0070F3] font-bold text-[9px] flex items-center justify-center">AR</div>
-                <div className="space-y-0.5 mt-1">
-                  <div className="h-[3px] bg-[#0070F3]/30 w-full rounded-sm" />
-                  <div className="h-1 bg-[#FAFAFA] border border-[#EBEBEB] w-full rounded-sm" />
-                </div>
-              </div>
-              <div className="flex-1 space-y-2">
-                <div>
-                  <div className="text-[9px] font-bold text-[#171717] leading-none">Alex Rivera</div>
-                  <div className="text-[6px] text-[#0070F3] font-medium mt-0.5">Staff Software Engineer</div>
-                </div>
-                <div className="space-y-1 mt-2">
-                  <div className="h-[3px] bg-[#171717] w-1/3 rounded-sm" />
-                  <div className="space-y-0.5">
-                    <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
-                    <div className="h-[2px] bg-[#F2F2F2] w-5/6 rounded-sm" />
+    <div className="w-full h-full flex flex-col items-center justify-center text-center select-none shrink-0">
+      <div className="flex justify-center gap-3">
+        {templates.map((tpl) => {
+          const isActive = activeIdx % 3 === tpl.id;
+          
+          return (
+            <div
+              key={tpl.id}
+              onClick={() => onChange && onChange(tpl.id)}
+              className="flex flex-col items-center cursor-pointer"
+            >
+              {/* Thumbnail card */}
+              <div
+                className="relative bg-white overflow-hidden flex flex-col justify-between transition-all"
+                style={{
+                  width: "90px",
+                  height: "120px",
+                  borderRadius: "6px",
+                  border: isActive ? "2px solid #7c3aed" : "1px solid #e5e5e5",
+                  boxShadow: isActive ? "0 0 0 3px rgba(124,58,237,0.15)" : "none",
+                }}
+              >
+                {/* Template Content */}
+                {tpl.id === 0 && (
+                  <div className="w-full h-full flex flex-col p-1.5 gap-2 text-left">
+                    <div className="h-1.5 w-full bg-[#7c3aed] rounded-sm shrink-0" />
+                    <div className="space-y-1 flex-1 mt-0.5">
+                      <div className="h-1 bg-gray-200 w-2/3 rounded-sm" />
+                      <div className="h-0.5 bg-gray-100 w-full rounded-sm" />
+                      <div className="h-0.5 bg-gray-100 w-5/6 rounded-sm" />
+                      <div className="h-0.5 bg-gray-100 w-4/5 rounded-sm" />
+                    </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+                )}
 
-        {templateName === "Executive" && (
-          <div className="h-full flex flex-col justify-between font-serif text-center">
-            <div className="space-y-1">
-              <div className="text-[10px] font-bold text-[#171717] uppercase tracking-wide">Alex Rivera</div>
-              <div className="text-[5px] text-[#8F8F8F] uppercase tracking-widest -mt-0.5">Staff Software Engineer</div>
-              <div className="h-[0.5px] bg-[#171717] w-full mt-1.5" />
-            </div>
-            <div className="flex-1 text-left mt-2 space-y-2 overflow-hidden">
-              <div className="space-y-1">
-                <div className="text-[6px] font-bold text-[#171717] uppercase tracking-wider">Professional Experience</div>
-                <div className="space-y-0.5">
-                  <div className="flex justify-between text-[4.5px] font-semibold text-[#4D4D4D]">
-                    <span>Lead Engineer @ Stripe</span>
-                    <span className="text-[#8F8F8F]">2022 - Pres</span>
+                {tpl.id === 1 && (
+                  <div className="w-full h-full flex flex-col p-1.5 gap-2 text-left">
+                    <div className="h-1.5 w-full bg-[#0f0f0f] rounded-sm shrink-0" />
+                    <div className="space-y-1 flex-1 mt-0.5">
+                      <div className="h-1 bg-gray-200 w-1/2 rounded-sm" />
+                      <div className="h-0.5 bg-gray-100 w-full rounded-sm" />
+                      <div className="h-0.5 bg-gray-100 w-full rounded-sm" />
+                    </div>
                   </div>
-                  <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+                )}
 
-        {templateName === "Technical" && (
-          <div className="h-full flex flex-col justify-between text-left font-mono">
-            <div className="flex-1 flex gap-3 overflow-hidden">
-              <div className="w-[50px] pr-2 flex flex-col gap-1" style={{ borderRight: "1px solid #F2F2F2" }}>
-                <div className="text-[5px] font-bold text-[#7928CA] uppercase">Skills</div>
-                {["React", "TS", "Next.js", "Go"].map((skill) => (
-                  <span key={skill} className="text-[4px] font-medium text-[#4D4D4D] bg-[#FAFAFA] border border-[#EBEBEB] px-1 py-0.2 rounded-sm text-center">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-              <div className="flex-1 space-y-2">
-                <div>
-                  <div className="text-[8px] font-bold text-[#171717]">alex_rivera.ts</div>
-                  <div className="text-[5px] text-[#7928CA] font-medium mt-0.5">&gt; Staff Software Engineer</div>
-                </div>
-                <div className="space-y-1">
-                  <div className="h-[0.5px] bg-[#EBEBEB] w-full" />
-                  <div className="space-y-0.5">
-                    <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
+                {tpl.id === 2 && (
+                  <div className="w-full h-full flex gap-1 p-1 text-left">
+                    <div className="w-5 bg-[#f3f0ff] rounded-sm shrink-0 flex flex-col items-center py-1 gap-1">
+                      <div className="w-3 h-3 rounded-full bg-[#7c3aed]/20" />
+                      <div className="w-3 h-0.5 bg-[#7c3aed]/30 rounded-sm" />
+                    </div>
+                    <div className="flex-1 space-y-1 mt-0.5">
+                      <div className="h-1 bg-gray-200 w-2/3 rounded-sm" />
+                      <div className="h-0.5 bg-gray-100 w-full rounded-sm" />
+                      <div className="h-0.5 bg-gray-100 w-5/6 rounded-sm" />
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
-            </div>
-          </div>
-        )}
 
-        {templateName === "Creative" && (
-          <div className="h-full flex flex-col justify-between text-left">
-            <div className="flex-1 flex gap-3 overflow-hidden">
-              <div className="w-[36px] bg-[#FF0080]/5 rounded-md flex flex-col items-center justify-center p-2 border border-[#FF0080]/10">
-                <span className="text-[14px] font-black text-[#FF0080]">R</span>
-                <span className="text-[4px] text-[#FF0080] font-bold uppercase mt-1">Creative</span>
-              </div>
-              <div className="flex-1 space-y-2">
-                <div>
-                  <div className="text-[9px] font-black text-[#171717] tracking-tight">ALEX RIVERA</div>
-                  <div className="text-[5.5px] text-[#FF0080] font-semibold mt-0.5">Staff Software Engineer</div>
-                </div>
-                <div className="space-y-1">
-                  <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
-                  <div className="h-[2px] bg-[#F2F2F2] w-11/12 rounded-sm" />
-                </div>
-              </div>
+              {/* Label */}
+              <span
+                className="font-mono text-[9px] mt-2 transition-colors"
+                style={{
+                  color: isActive ? "#7c3aed" : "#9ca3af",
+                  fontWeight: isActive ? 600 : 400,
+                }}
+              >
+                {tpl.label}
+              </span>
             </div>
-          </div>
-        )}
-
-        {templateName === "Minimal" && (
-          <div className="h-full flex flex-col justify-between text-left font-sans">
-            <div className="space-y-1">
-              <div className="text-[9px] font-medium text-[#171717]">Alex Rivera</div>
-              <div className="text-[5.5px] text-[#8F8F8F] -mt-0.5">Staff Software Engineer</div>
-              <div className="h-[0.5px] bg-[#F2F2F2] w-full mt-1.5" />
-            </div>
-            <div className="flex-1 space-y-1.5 mt-2 overflow-hidden">
-              <div className="space-y-0.5">
-                <div className="h-[2px] bg-[#FAFAFA] border border-[#F2F2F2] w-full rounded-sm" />
-                <div className="h-[2px] bg-[#FAFAFA] border border-[#F2F2F2] w-5/6 rounded-sm" />
-              </div>
-            </div>
-          </div>
-        )}
+          );
+        })}
       </div>
-      <div className="text-center mt-2 select-none">
-        <span className="text-[9px] text-[#8F8F8F] font-mono uppercase tracking-wider font-semibold">
-          Active Layout: {themes[templateName].name}
-        </span>
+
+      <div className="text-[12px] text-[#6b7280] mt-3.5 font-medium shrink-0">
+        12 ATS-optimized templates
       </div>
     </div>
   );
@@ -383,42 +333,55 @@ interface TailorResumeDemoProps {
 function TailorResumeDemo({ subOpt }: TailorResumeDemoProps) {
   const jobs = [
     {
-      role: "Next.js Core Developer",
-      desc: "Requires deep knowledge of Next.js Server Components, React rendering lifecycles, and TypeScript compiler optimization.",
-      summary: "Staff Engineer with 5+ years of experience specializing in Next.js App Router performance and TypeScript compiler configurations."
+      company: "Vercel",
+      text: "Senior Frontend Engineer at Vercel: Experience with Next.js, React Server Components, and Web Vitals optimization.",
+      match: 87,
+      chips: ["+ Add: System Design", "+ Add: Web Vitals"]
     },
     {
-      role: "Stripe Billing Lead",
-      desc: "Looking for an engineer to lead billing initiatives. Heavy emphasis on Ruby/Rails, SQL optimizations, and payment gateways.",
-      summary: "Fullstack Leader with a proven track record scaling Stripe payment pipelines and optimizing database transactions."
+      company: "Stripe",
+      text: "Backend Lead at Stripe: Build robust financial pipelines, APIs, and microservices using Ruby and Go.",
+      match: 75,
+      chips: ["+ Add: PostgreSQL", "+ Add: Ruby on Rails"]
     },
     {
-      role: "Linear Sync Engineer",
-      desc: "Architect local-first synchronization layers. Requires real-time WebSocket protocol engineering and strict TypeScript typing.",
-      summary: "Systems Engineer specialized in local-first sync layers, WebSocket architecture, and real-time state synchronization."
+      company: "Linear",
+      text: "Product Engineer at Linear: Build fast, local-first web applications using React, WebSockets, and SQLite.",
+      match: 90,
+      chips: ["+ Add: SQLite", "+ Add: WebSockets"]
     }
   ];
 
   const job = jobs[subOpt] || jobs[0];
 
   return (
-    <div className="w-full h-full flex flex-col justify-between text-left select-none">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 flex-1 overflow-hidden my-1">
-        {/* Left Column: Job Spec */}
-        <div className="flex flex-col border border-[#EBEBEB] bg-[#FAFAFA] rounded-lg p-2.5 overflow-hidden">
-          <span className="text-[7.5px] font-mono text-purple-600 uppercase font-semibold">Target Job Role</span>
-          <h5 className="text-[9.5px] font-bold text-[#171717] mt-0.5 truncate">{job.role}</h5>
-          <p className="text-[8.5px] text-[#8F8F8F] leading-normal mt-1 flex-1 overflow-y-auto">
-            {job.desc}
-          </p>
+    <div className="w-full h-full flex flex-col justify-start text-left overflow-y-auto select-none">
+      <div className="mb-3 shrink-0">
+        <div className="font-mono text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-wider">JOB DESCRIPTION</div>
+        <div className="bg-[#f9f9f9] border border-[#e5e5e5] rounded-lg p-3 text-[12px] text-[#374151] h-[80px] overflow-hidden leading-relaxed">
+          {job.text}
         </div>
-        {/* Right Column: AI Response */}
-        <div className="flex flex-col border border-[#EBEBEB] bg-white rounded-lg p-2.5 overflow-hidden">
-          <span className="text-[7.5px] font-mono text-emerald-600 uppercase font-semibold">AI Tailored Summary</span>
-          <div className="text-[8.5px] text-[#4D4D4D] leading-normal mt-1.5 flex-1 overflow-y-auto bg-emerald-50/10 border border-emerald-100/50 p-1.5 rounded">
-            {job.summary}
-          </div>
+      </div>
+
+      <div className="mb-3 shrink-0">
+        <div className="flex justify-between items-center mb-1.5">
+          <span className="text-[12px] text-[#6b7280] font-medium">Resume Match</span>
+          <span className="font-bold text-[#7c3aed] text-[14px]">{job.match}%</span>
         </div>
+        <div className="w-full h-1.5 bg-[#e5e7eb] rounded-full overflow-hidden">
+          <div className="h-full bg-[#7c3aed] rounded-full" style={{ width: `${job.match}%` }} />
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mt-1 shrink-0">
+        {job.chips.map((chip) => (
+          <span
+            key={chip}
+            className="bg-[#faf5ff] border border-[#e9d5ff] text-[#7c3aed] rounded-full px-3 py-1 text-[11px] font-medium"
+          >
+            {chip}
+          </span>
+        ))}
       </div>
     </div>
   );
@@ -430,88 +393,57 @@ interface MatchResumeDemoProps {
 }
 
 function MatchResumeDemo({ subOpt }: MatchResumeDemoProps) {
-  const data = {
-    Vercel: {
-      score: 95,
-      keywords: ["Next.js", "Server Components", "Tailwind CSS"],
-      status: "Excellent Match",
-      color: "#10B981"
+  const jobs = [
+    {
+      company: "Vercel",
+      text: "Senior Frontend Engineer at Vercel: Experience with Next.js, React Server Components, and Web Vitals optimization.",
+      match: 92,
+      chips: ["+ Add: System Design", "+ Add: Web Vitals"]
     },
-    Stripe: {
-      score: 72,
-      keywords: ["Ruby on Rails", "PostgreSQL", "React"],
-      status: "Moderate Match",
-      color: "#F59E0B"
+    {
+      company: "Stripe",
+      text: "Backend Lead at Stripe: Build robust financial pipelines, APIs, and microservices using Ruby and Go.",
+      match: 92,
+      chips: ["+ Add: PostgreSQL", "+ Add: Ruby on Rails"]
     },
-    Linear: {
-      score: 86,
-      keywords: ["TypeScript", "WebSockets", "Linear Sync"],
-      status: "Strong Match",
-      color: "#10B981"
-    },
-  };
+    {
+      company: "Linear",
+      text: "Product Engineer at Linear: Build fast, local-first web applications using React, WebSockets, and SQLite.",
+      match: 92,
+      chips: ["+ Add: SQLite", "+ Add: WebSockets"]
+    }
+  ];
 
-  const companies = ["Vercel", "Stripe", "Linear"] as const;
-  const company = companies[subOpt] || companies[0];
-  const info = data[company];
+  const job = jobs[subOpt] || jobs[0];
 
   return (
-    <div className="w-full h-full flex flex-col justify-between text-left select-none">
-      <div className="flex items-center justify-between border-b border-[#EBEBEB] pb-1.5 shrink-0">
-        <span className="text-[10.5px] font-bold text-[#171717]">{company} Compatibility Audit</span>
-        <span
-          className="text-[9px] font-semibold px-2 py-0.5 rounded-full"
-          style={{
-            backgroundColor: `${info.color}15`,
-            color: info.color,
-          }}
-        >
-          {info.status}
-        </span>
+    <div className="w-full h-full flex flex-col justify-start text-left overflow-y-auto select-none">
+      <div className="mb-3 shrink-0">
+        <div className="font-mono text-[9px] text-gray-400 font-semibold mb-2 uppercase tracking-wider">JOB DESCRIPTION</div>
+        <div className="bg-[#f9f9f9] border border-[#e5e5e5] rounded-lg p-3 text-[12px] text-[#374151] h-[80px] overflow-hidden leading-relaxed">
+          {job.text}
+        </div>
       </div>
 
-      <div className="flex items-center gap-5 flex-1 my-2">
-        {/* Metric circle */}
-        <div className="relative w-16 h-16 shrink-0 flex items-center justify-center">
-          <svg width="64" height="64" viewBox="0 0 100 100" className="-rotate-90">
-            <circle cx="50" cy="50" r="40" fill="none" stroke="#EBEBEB" strokeWidth="8" />
-            <motion.circle
-              cx="50"
-              cy="50"
-              r="40"
-              fill="none"
-              stroke={info.color}
-              strokeWidth="8"
-              strokeLinecap="round"
-              strokeDasharray={2 * Math.PI * 40}
-              initial={{ strokeDashoffset: 2 * Math.PI * 40 }}
-              animate={{
-                strokeDashoffset:
-                  2 * Math.PI * 40 - (info.score / 100) * (2 * Math.PI * 40),
-              }}
-              transition={{ duration: 0.6 }}
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-sm font-bold text-[#171717]">{info.score}%</span>
-            <span className="text-[6.5px] text-[#8F8F8F] uppercase tracking-wider font-semibold">Match</span>
-          </div>
+      <div className="mb-3 shrink-0">
+        <div className="flex justify-between items-center mb-1.5">
+          <span className="text-[12px] text-[#6b7280] font-medium">Resume Match</span>
+          <span className="font-bold text-[#059669] text-[14px]">{job.match}%</span>
         </div>
+        <div className="w-full h-1.5 bg-[#e5e7eb] rounded-full overflow-hidden">
+          <div className="h-full bg-[#059669] rounded-full" style={{ width: `${job.match}%` }} />
+        </div>
+      </div>
 
-        {/* Required Keywords */}
-        <div className="flex-1 flex flex-col justify-center">
-          <p className="text-[9px] text-[#8F8F8F] font-semibold mb-1">Target Keyword Match Status</p>
-          <div className="flex flex-wrap gap-1">
-            {info.keywords.map((kw) => (
-              <span
-                key={kw}
-                className="text-[8.5px] font-medium font-mono px-1.5 py-0.5 rounded bg-white border border-[#EBEBEB] text-[#4D4D4D]"
-              >
-                {kw}
-              </span>
-            ))}
-          </div>
-        </div>
+      <div className="flex flex-wrap gap-2 mt-1 shrink-0">
+        {job.chips.map((chip) => (
+          <span
+            key={chip}
+            className="bg-[#f0fdf4] border border-[#bbf7d0] text-[#059669] rounded-full px-3 py-1 text-[11px] font-medium"
+          >
+            {chip}
+          </span>
+        ))}
       </div>
     </div>
   );
@@ -523,99 +455,56 @@ interface SuggestionsDemoProps {
 }
 
 function SuggestionsDemo({ filterType }: SuggestionsDemoProps) {
-  const [fixed1, setFixed1] = useState(false);
-  const [fixed2, setFixed2] = useState(false);
-
-  const filters = ["All Issues", "Experience", "Skills"] as const;
-  const activeFilter = filters[filterType] || filters[0];
-
-  const items = [
-    {
-      id: 1,
-      text: "Quantify bullet point in Experience 1",
-      category: "Experience",
-      fixed: fixed1,
-      setFixed: setFixed1,
-    },
-    {
-      id: 2,
-      text: "Add missing \"Next.js\" tag to skills",
-      category: "Skills",
-      fixed: fixed2,
-      setFixed: setFixed2,
-    },
-  ];
-
-  const filteredItems = items.filter(
-    (item) => activeFilter === "All Issues" || item.category === activeFilter
-  );
-
   return (
-    <div className="w-full h-full flex flex-col justify-between text-left">
-      <div className="flex-1 flex flex-col justify-center gap-2">
-        {filteredItems.map((item) => (
-          <div key={item.id} className="flex items-center justify-between bg-white border border-[#EBEBEB] rounded-lg p-2.5 transition-all shadow-sm">
-            <div className="flex items-center gap-2">
-              <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border transition-all ${
-                item.fixed ? "bg-emerald-500 border-emerald-500 text-white animate-scale-pop" : "border-[#EBEBEB]"
-              }`}>
-                {item.fixed && <Check className="w-2.5 h-2.5" strokeWidth={3} />}
-              </div>
-              <span className={`text-[10px] font-medium transition-all ${item.fixed ? "text-[#8F8F8F] line-through" : "text-[#171717]"}`}>
-                {item.text}
-              </span>
-            </div>
-            {!item.fixed && (
-              <button
-                onClick={() => item.setFixed(true)}
-                className="text-[9px] font-bold text-purple-600 hover:text-purple-700 bg-purple-50 px-2 py-0.5 rounded select-none"
-              >
-                Fix
-              </button>
-            )}
-          </div>
-        ))}
-        {filteredItems.length === 0 && (
-          <div className="text-center text-[10px] text-[#8F8F8F] py-4 select-none">
-            No suggestions left in this category
-          </div>
-        )}
-      </div>
+    <div className="w-full h-full flex flex-col justify-start text-left overflow-y-auto select-none">
+      {/* Card 1 */}
+      {(filterType === 0 || filterType === 1) && (
+        <div
+          className="bg-[#faf9ff] p-[10px_14px] mb-2 shrink-0"
+          style={{
+            borderLeft: "3px solid #7c3aed",
+            borderRadius: "0 8px 8px 0",
+          }}
+        >
+          <div className="text-[12px] font-bold text-[#0f0f0f]">💡 Add metrics to bullet #3</div>
+          <div className="text-[11px] text-[#6b7280] mt-0.5">Quantify your impact: &apos;...reducing load time by 40%&apos;</div>
+        </div>
+      )}
 
-      <div className="mt-2 text-center border-t border-[#EBEBEB] pt-2 shrink-0 flex items-center justify-between select-none">
-        <span className="text-[9px] text-[#8F8F8F]">
-          {fixed1 && fixed2 ? "All suggestions resolved" : "Suggestions pending"}
-        </span>
-        {(fixed1 || fixed2) && (
-          <button
-            onClick={() => {
-              setFixed1(false);
-              setFixed2(false);
-            }}
-            className="text-[9px] font-semibold text-[#8F8F8F] hover:text-[#171717]"
-          >
-            Reset
-          </button>
-        )}
-      </div>
+      {/* Card 2 */}
+      {(filterType === 0 || filterType === 2) && (
+        <div
+          className="bg-[#faf9ff] p-[10px_14px] mb-2 shrink-0"
+          style={{
+            borderLeft: "3px solid #7c3aed",
+            borderRadius: "0 8px 8px 0",
+          }}
+        >
+          <div className="text-[12px] font-bold text-[#0f0f0f]">⚡ Missing keyword: TypeScript</div>
+          <div className="text-[11px] text-[#6b7280] mt-0.5">Add TypeScript to skills section for this role</div>
+        </div>
+      )}
+
+      {/* Card 3 */}
+      {filterType === 0 && (
+        <div
+          className="bg-[#faf9ff] p-[10px_14px] mb-2 shrink-0"
+          style={{
+            borderLeft: "3px solid #059669",
+            borderRadius: "0 8px 8px 0",
+          }}
+        >
+          <div className="text-[12px] font-bold text-[#059669]">✓ Strong action verbs detected</div>
+          <div className="text-[11px] text-[#6b7280] mt-0.5">14 of 15 bullets start with action verbs</div>
+        </div>
+      )}
     </div>
   );
 }
 
 /* ═══════════════════════════════════════════════
-   FeaturesGrid (Split Layout Workspace Showcase)
+   FeaturesGrid (Capabilities Redesign Section)
    ═══════════════════════════════════════════════ */
-
-const ease = [0.16, 1, 0.3, 1] as const;
-
-const headerVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease },
-  },
-};
 
 export default function FeaturesGrid() {
   const [activeTab, setActiveTab] = useState(0);
@@ -632,9 +521,8 @@ export default function FeaturesGrid() {
       description: "Scan your resume against job criteria to identify formatting issues and missing keywords.",
       icon: FileSearch,
       sidebarOptions: ["alex_resume.pdf", "marketing_draft.docx", "technical_cv_v2.pdf"],
-      renderPlayground: (subOpt: number) => <ATSScanDemo subOpt={subOpt} />,
-      badge: "ATS Scanner",
-      bgClass: "bg-purple-50 border-purple-100 text-purple-600"
+      renderPlayground: (subOpt: number, setSubOpt?: (val: number) => void) => <ATSScanDemo subOpt={subOpt} />,
+      badge: "ATS SCANNER"
     },
     {
       id: 1,
@@ -642,9 +530,8 @@ export default function FeaturesGrid() {
       description: "Rewrite plain duties into high-impact, metrics-driven bullet achievements.",
       icon: Wand2,
       sidebarOptions: ["Frontend", "Backend", "Product", "Data", "DevOps"],
-      renderPlayground: (subOpt: number) => <ImproveBulletsDemo subOpt={subOpt} />,
-      badge: "AI Bullet Optimizer",
-      bgClass: "bg-purple-50 border-purple-100 text-purple-600"
+      renderPlayground: (subOpt: number, setSubOpt?: (val: number) => void) => <ImproveBulletsDemo subOpt={subOpt} />,
+      badge: "BULLET OPTIMIZER"
     },
     {
       id: 2,
@@ -652,12 +539,10 @@ export default function FeaturesGrid() {
       description: "Instantly toggle between professional layouts built for recruiter readability.",
       icon: LayoutTemplate,
       sidebarOptions: ["Modern", "Executive", "Technical", "Creative", "Minimal"],
-      renderPlayground: (subOpt: number) => {
-        const templates = ["Modern", "Executive", "Technical", "Creative", "Minimal"] as const;
-        return <TemplatesPlayground templateName={templates[subOpt]} />;
-      },
-      badge: "Template Designer",
-      bgClass: "bg-[#F2F2F2] border-transparent text-[#171717]"
+      renderPlayground: (subOpt: number, setSubOpt?: (val: number) => void) => (
+        <TemplatesPlayground activeIdx={subOpt} onChange={setSubOpt} />
+      ),
+      badge: "TEMPLATE DESIGNER"
     },
     {
       id: 3,
@@ -665,9 +550,8 @@ export default function FeaturesGrid() {
       description: "Generate customized resume summaries and cover letters for specific job posts.",
       icon: FileText,
       sidebarOptions: ["Vercel", "Stripe", "Linear"],
-      renderPlayground: (subOpt: number) => <TailorResumeDemo subOpt={subOpt} />,
-      badge: "Role Adaptor",
-      bgClass: "bg-[#F2F2F2] border-transparent text-[#171717]"
+      renderPlayground: (subOpt: number, setSubOpt?: (val: number) => void) => <TailorResumeDemo subOpt={subOpt} />,
+      badge: "ROLE ADAPTOR"
     },
     {
       id: 4,
@@ -675,9 +559,8 @@ export default function FeaturesGrid() {
       description: "Get a comprehensive compatibility score and skill gap analysis for any tech role.",
       icon: Target,
       sidebarOptions: ["Vercel", "Stripe", "Linear"],
-      renderPlayground: (subOpt: number) => <MatchResumeDemo subOpt={subOpt} />,
-      badge: "Job Match Matrix",
-      bgClass: "bg-emerald-50 border-emerald-100 text-emerald-600"
+      renderPlayground: (subOpt: number, setSubOpt?: (val: number) => void) => <MatchResumeDemo subOpt={subOpt} />,
+      badge: "JOB MATCH MATRIX"
     },
     {
       id: 5,
@@ -685,151 +568,227 @@ export default function FeaturesGrid() {
       description: "Receive real-time, actionable resume fixes with one-click automated updates.",
       icon: Lightbulb,
       sidebarOptions: ["All Issues", "Experience", "Skills"],
-      renderPlayground: (subOpt: number) => <SuggestionsDemo filterType={subOpt} />,
-      badge: "Suggestions Feed",
-      bgClass: "bg-purple-50 border-purple-100 text-purple-600"
+      renderPlayground: (subOpt: number, setSubOpt?: (val: number) => void) => <SuggestionsDemo filterType={subOpt} />,
+      badge: "SUGGESTIONS FEED"
     }
   ];
 
   return (
-    <section id="features" className="py-24 px-6 relative overflow-hidden bg-[#FFFFFF]">
-      <div className="mx-auto max-w-[1200px]">
-        {/* Header */}
-        <motion.div
-          className="text-center"
-          variants={headerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          <p
-            className="text-[#8F8F8F] uppercase tracking-widest"
-            style={{
-              fontFamily: "var(--font-geist-mono)",
-              fontSize: "12px",
-              fontWeight: 500,
-              lineHeight: "16px",
-            }}
-          >
+    <section id="features" className="w-full bg-[#fafaf9] relative overflow-hidden select-none">
+      <div className="max-w-[1200px] mx-auto border-x border-[#e7e5e4] bg-white">
+        
+        {/* Header Block (Full-width inside section, matching AutoSend) */}
+        <div className="px-6 md:px-10 py-16 text-left">
+          <span className="font-mono text-[14px] text-rose-500 font-semibold uppercase leading-4 block mb-3 select-none">
             #01 — Capabilities
-          </p>
-          <h2
-            className="mt-3 text-[#171717]"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "32px",
-              fontWeight: 400,
-              fontStyle: "italic",
-              lineHeight: "40px",
-              letterSpacing: "-0.01em",
-            }}
-          >
+          </span>
+          <h2 className="text-[#1c1917] font-bold leading-[1.15] text-2xl md:text-[clamp(28px,3vw,40px)] tracking-tight max-w-[640px]">
             Everything you need to land interviews
           </h2>
-          <p
-            className="mt-4 mx-auto max-w-2xl text-[#4D4D4D]"
-            style={{
-              fontFamily: "var(--font-geist-sans)",
-              fontSize: "16px",
-              fontWeight: 400,
-              lineHeight: "24px",
-            }}
-          >
-            A dynamic workspace designed to transform your resume into a job-winning application — powered by AI, validated for ATS.
+          <p className="text-sm md:text-base text-stone-500 mt-3 max-w-[560px] leading-relaxed">
+            A dynamic workspace designed to transform your resume into a job winning application powered by AI and validated for ATS.
           </p>
-        </motion.div>
+        </div>
 
-        {/* Split Interactive Workspace Layout (AutoSend Style) */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.38fr] border border-[#EBEBEB] rounded-2xl overflow-hidden mt-16 shadow-[0_8px_32px_rgba(0,0,0,0.02)] bg-white">
-          {/* Left Column: Interactive Tab Buttons */}
-          <div className="flex lg:flex-col overflow-x-auto lg:overflow-x-visible scrollbar-none bg-[#FAFAFA] border-b lg:border-b-0 lg:border-r border-[#EBEBEB] shrink-0 snap-x">
+        {/* Two-Column Integrated Block with split layout */}
+        <div className="border-t border-[#e7e5e4] grid grid-cols-1 lg:grid-cols-[40%_60%] items-stretch">
+          
+          {/* Left Column (40% width) - Stacked divided tabs list */}
+          <div className="flex flex-col bg-[#fafaf9] divide-y divide-[#e7e5e4] border-b lg:border-b-0 lg:border-r border-[#e7e5e4]">
             {features.map((feature, idx) => {
               const Icon = feature.icon;
               const isActive = activeTab === idx;
               return (
-                <button
+                <div
                   key={feature.id}
                   onClick={() => setActiveTab(idx)}
-                  className={`relative flex items-start text-left p-6 transition-all hover:bg-neutral-100/30 border-r lg:border-r-0 lg:border-b border-[#EBEBEB] last:border-r-0 lg:last:border-b-0 shrink-0 snap-start w-[280px] lg:w-full select-none ${
-                    isActive ? "bg-white" : "bg-transparent"
+                  className={`cursor-pointer flex items-start gap-4 p-5 md:p-6 transition-all select-none relative ${
+                    isActive ? "bg-white" : "bg-[#fafaf9] hover:bg-[#f5f5f4]"
                   }`}
                 >
-                  {/* Left purple active indicator line */}
-                  {isActive && (
-                    <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#7928CA]" />
-                  )}
-                  
-                  <div className={`w-8 h-8 rounded border border-[#EBEBEB] bg-white flex items-center justify-center shrink-0 mt-0.5 ${isActive ? "text-[#7928CA]" : "text-[#4D4D4D]"}`}>
-                    <Icon className="w-4 h-4" />
+                  {/* Animated progress bar on active tab (AutoSend pattern) */}
+                  <div className="absolute left-0 inset-y-0 w-[3px] overflow-hidden">
+                    <motion.div
+                      className="absolute inset-y-0 left-0 w-full"
+                      style={{
+                        background: isActive
+                          ? "linear-gradient(to bottom, #7c3aed 0%, #a78bfa 100%)"
+                          : "transparent",
+                      }}
+                      initial={false}
+                      animate={{
+                        y: isActive ? "0%" : "100%",
+                      }}
+                      transition={{
+                        duration: isActive ? 5 : 0.2,
+                        ease: "linear",
+                      }}
+                    />
                   </div>
-                  <div className="ml-4">
-                    <h4 className="text-sm font-bold text-[#171717] tracking-tight">{feature.title}</h4>
-                    <p className="text-[11px] text-[#8F8F8F] leading-relaxed mt-1 hidden lg:block">
+                  <div 
+                    className="shrink-0 mt-0.5 transition-colors"
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: isActive ? '#7c3aed' : '#78716c'
+                    }}
+                  >
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span 
+                      className="text-sm font-semibold tracking-tight"
+                      style={{ color: isActive ? "#1c1917" : "#44403c" }}
+                    >
+                      {feature.title}
+                    </span>
+                    <p 
+                      className="text-xs mt-1 leading-normal"
+                      style={{ color: isActive ? "#57534e" : "#78716c" }}
+                    >
                       {feature.description}
                     </p>
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
 
-          {/* Right Column: Preview Canvas with Floating Mockup */}
-          <div className="relative flex items-center justify-center p-8 bg-[#FAFAFA] min-h-[420px] lg:min-h-[480px]">
-            {/* Grid Pattern Background */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:20px_20px] opacity-40" />
+          {/* Right Column (60% width) - Centered Browser Chrome Mockup with Landscape Background */}
+          <div className="relative flex items-center justify-center p-5 md:p-6 w-full h-full min-h-[400px] lg:min-h-[460px] overflow-hidden">
+            {/* Landscape Background Layer */}
+            <div
+              className="absolute inset-0 bg-cover bg-center pointer-events-none"
+              style={{
+                backgroundImage: "url('/hero-landscape.png')",
+                zIndex: 0,
+              }}
+            />
+            {/* Dark overlay for contrast */}
+            <div className="absolute inset-0 bg-slate-950/20 z-0 pointer-events-none" />
 
-            {/* Floating Mock Window Frame */}
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, scale: 0.96, y: 8 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="relative z-10 w-full max-w-[580px] h-[360px] bg-white border border-[#EBEBEB] rounded-xl shadow-[0_12px_40px_rgba(0,0,0,0.06)] overflow-hidden flex flex-col"
+            {/* Mockup Window Frame (Glassmorphic) */}
+            <div 
+              className="relative z-10 w-full max-w-[580px] h-[360px] overflow-hidden flex flex-col border border-white/10"
+              style={{
+                background: "rgba(255,255,255,0.96)",
+                borderRadius: "12px",
+                boxShadow: "0 8px 40px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.15)",
+                margin: "24px 20px",
+              }}
             >
-              {/* Mock Window Top Bar */}
-              <div className="h-9 bg-[#FAFAFA]/90 border-b border-[#EBEBEB] px-4 flex items-center justify-between shrink-0 select-none">
+              
+              {/* Top Bar */}
+              <div className="h-11 bg-[#f0eff0] border-b border-[#e5e5e5] flex items-center px-4 gap-3 select-none shrink-0">
                 {/* Window control dots */}
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56] border border-[#E0443E]" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E] border border-[#DEA123]" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F] border border-[#1AAB29]" />
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
                 </div>
-                {/* Window title */}
-                <span className="text-[10px] font-mono text-[#8F8F8F] uppercase tracking-wider font-semibold">
-                  {features[activeTab].badge}
-                </span>
-                <div className="w-12" /> {/* spacer */}
+                {/* Center Panel Label */}
+                <div className="flex-1 text-center md:text-left">
+                  <span className="font-mono text-[11px] tracking-widest text-gray-400 font-semibold uppercase">
+                    {features[activeTab].badge}
+                  </span>
+                </div>
               </div>
 
-              {/* Mock Window Split Content */}
-              <div className="flex-1 flex overflow-hidden bg-white">
-                {/* Internal Left Sidebar */}
-                <div className="w-[140px] bg-[#FAFAFA] border-r border-[#EBEBEB] flex flex-col shrink-0 py-2 overflow-y-auto select-none">
+              {/* Split content area */}
+              <div className="flex-1 flex overflow-hidden">
+                {/* Left Sidebar inside browser frame - Hidden on mobile (<768px) */}
+                <div 
+                  className="hidden md:flex bg-[#fafafa] border-r border-[#eeeeee] flex-col shrink-0 py-2 select-none"
+                  style={{
+                    width: activeTab === 0 ? "35%" : "120px"
+                  }}
+                >
                   {features[activeTab].sidebarOptions.map((opt, idx) => {
                     const isActive = activeSubOption === idx;
+                    let displayLabel = opt;
+                    if (activeTab === 0) {
+                      displayLabel = opt.length > 15 ? opt.substring(0, 12) + "..." : opt;
+                    } else if (opt === "marketing_draft.docx") {
+                      displayLabel = "marketing_draft.do...";
+                    }
                     return (
                       <button
                         key={opt}
                         onClick={() => setActiveSubOption(idx)}
-                        className={`text-left px-3.5 py-1.5 text-[11px] font-medium transition-all truncate ${
-                          isActive 
-                            ? "bg-[#171717]/5 text-[#171717] font-semibold border-l-2 border-[#7928CA]" 
-                            : "text-[#8F8F8F] hover:text-[#4D4D4D] border-l-2 border-transparent"
-                        }`}
+                        className={`text-left transition-all truncate border-l-2 cursor-pointer`}
+                        style={{
+                          padding: activeTab === 0 ? "10px 14px" : "8px 14px",
+                          fontSize: "12px",
+                          fontFamily: "monospace",
+                          borderLeftWidth: activeTab === 0 ? "0px" : "2px",
+                          backgroundColor: activeTab === 0 && isActive ? "#f3f0ff" : (isActive && activeTab !== 0 ? "#ffffff" : "transparent"),
+                          color: isActive ? "#7c3aed" : "#9ca3af",
+                          fontWeight: isActive ? 600 : 400,
+                        }}
                       >
-                        {opt}
+                        {displayLabel}
                       </button>
                     );
                   })}
                 </div>
 
-                {/* Internal Right Playground Content */}
-                <div className="flex-1 bg-white p-5 overflow-y-auto flex items-center justify-center">
-                  {features[activeTab].renderPlayground(activeSubOption)}
+                {/* Main Content Area */}
+                <div className="flex-1 bg-white p-5 overflow-y-auto flex flex-col justify-center">
+                  
+                  {/* Mobile Sub-Options Selector (Visible only on <768px) */}
+                  <div className="flex md:hidden gap-1.5 overflow-x-auto pb-3 mb-3 select-none scrollbar-none shrink-0 border-b border-[#eeeeee] w-full">
+                    {features[activeTab].sidebarOptions.map((opt, idx) => {
+                      const isActive = activeSubOption === idx;
+                      const displayLabel = opt === "marketing_draft.docx" ? "marketing_draft.do..." : opt;
+                      return (
+                        <button
+                          key={opt}
+                          onClick={() => setActiveSubOption(idx)}
+                          className={`px-3 py-1 text-[10px] font-semibold rounded-full border transition-all cursor-pointer whitespace-nowrap ${
+                            isActive 
+                              ? "bg-[#f3f0ff] border-[#c084fc] text-[#7c3aed]" 
+                              : "bg-white border-[#EBEBEB] text-gray-400 hover:text-gray-600"
+                          }`}
+                        >
+                          {displayLabel}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={activeTab}
+                      initial={{ opacity: 0, scale: 0.98 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.98 }}
+                      transition={{ duration: 0.25 }}
+                      className="w-full h-full"
+                    >
+                      {features[activeTab].renderPlayground(activeSubOption, setActiveSubOption)}
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
               </div>
-            </motion.div>
+
+            </div>
           </div>
+
+        </div>
+
+        {/* Bottom CTA Row (inside bordered block, matching AutoSend pattern) */}
+        <div
+          className="flex justify-center border-t border-[#e7e5e4] py-4 bg-[#fafaf9]"
+        >
+          <Link
+            href="#"
+            className="font-mono text-[11px] tracking-[0.15em] text-[#7c3aed] font-semibold hover:text-[#6d28d9] transition-colors"
+          >
+            EXPLORE ALL FEATURES →
+          </Link>
         </div>
       </div>
     </section>

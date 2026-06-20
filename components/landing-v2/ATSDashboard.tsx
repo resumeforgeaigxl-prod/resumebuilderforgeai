@@ -165,8 +165,8 @@ function ScoreGauge({
   color: string;
   bg: string;
 }) {
-  const size = 150;
-  const strokeWidth = 7;
+  const size = 140;
+  const strokeWidth = 4;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (score / 100) * circumference;
@@ -180,7 +180,7 @@ function ScoreGauge({
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="#EBEBEB"
+            stroke="#e7e5e4"
             strokeWidth={strokeWidth}
           />
           <motion.circle
@@ -200,25 +200,24 @@ function ScoreGauge({
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span
             style={{
-              fontSize: "40px",
-              fontWeight: 600,
-              color: "#171717",
-              lineHeight: "40px",
-              letterSpacing: "-2px",
+              fontSize: "36px",
+              fontWeight: 700,
+              color: "#1c1917",
+              lineHeight: "36px",
+              letterSpacing: "-1.5px",
             }}
           >
             {score}
           </span>
           <span
-            style={{ fontSize: "12px", fontWeight: 400, color: "#8F8F8F" }}
+            style={{ fontSize: "11px", fontWeight: 400, color: "#78716c" }}
           >
             /100
           </span>
         </div>
       </div>
       <p
-        className="mt-3"
-        style={{ fontSize: "13px", fontWeight: 500, color: "#4D4D4D" }}
+        className="mt-3 text-[11px] font-mono font-semibold uppercase tracking-wider text-[#78716c]"
       >
         ATS Match Score
       </p>
@@ -226,9 +225,12 @@ function ScoreGauge({
         key={label}
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="mt-1.5 inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold"
-        style={{ backgroundColor: bg, color }}
+        className="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium border border-[#e7e5e4] bg-white text-stone-700 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
       >
+        <span
+          className="w-1.5 h-1.5 rounded-full shrink-0"
+          style={{ backgroundColor: color }}
+        />
         {label}
       </motion.span>
     </div>
@@ -248,97 +250,67 @@ export default function ATSDashboard() {
   }, [activeTab]);
 
   return (
-    <section
-      id="ats-score"
-      className="py-24 px-6 bg-white border-t border-[#EBEBEB]"
-    >
-      <div className="max-w-[1100px] mx-auto">
-        {/* Header */}
-        <motion.div
-          className="text-center"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6, ease }}
-        >
-          <p
-            className="uppercase text-[#8F8F8F] tracking-widest"
-            style={{
-              fontFamily: "var(--font-geist-mono)",
-              fontSize: "12px",
-              fontWeight: 500,
-              lineHeight: "16px",
-            }}
-          >
+    <section id="ats-score" className="w-full bg-[#fafaf9] relative overflow-hidden select-none">
+      <div className="max-w-[1200px] mx-auto border-x border-[#e7e5e4] bg-white">
+        
+        {/* Header Block (Full-width, left-aligned) */}
+        <div className="px-6 md:px-10 py-16 text-left">
+          <span className="font-mono text-[14px] text-rose-500 font-semibold uppercase leading-4 block mb-3 select-none">
             #04 — ATS Intelligence
-          </p>
+          </span>
           <h2
-            className="mt-3 text-[#171717]"
+            className="text-[#1c1917] font-bold leading-[1.15] text-2xl md:text-[clamp(28px,3vw,40px)] tracking-tight max-w-[640px]"
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: "32px",
-              fontWeight: 400,
               fontStyle: "italic",
-              lineHeight: "40px",
-              letterSpacing: "-0.01em",
             }}
           >
             Target a role. See your real match score.
           </h2>
-          <p
-            className="mt-4 mx-auto max-w-2xl text-[#4D4D4D]"
-            style={{
-              fontFamily: "var(--font-geist-sans)",
-              fontSize: "16px",
-              fontWeight: 400,
-              lineHeight: "24px",
-            }}
-          >
+          <p className="text-sm md:text-base text-stone-500 mt-3 max-w-[560px] leading-relaxed">
             Paste any job description and instantly see how your resume stacks
             up — missing keywords, weak bullet points, and exactly what to fix
             to beat the filter.
           </p>
-        </motion.div>
+        </div>
 
-        {/* Dashboard Mockup */}
-        <motion.div
-          className="mt-16 bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.025)]"
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.7, ease }}
-        >
-          {/* Chrome Top Bar */}
-          <div className="h-11 bg-[#FAFAFA] border-b border-[#EBEBEB] px-5 flex items-center justify-between select-none">
-            <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57] border border-[#E0443E]" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E] border border-[#DEA123]" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[#28C840] border border-[#1AAB29]" />
+        {/* Mockup Window Container */}
+        <div className="px-6 md:px-10 pb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.7, ease }}
+            className="border border-[#e7e5e4] rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col"
+          >
+            {/* Chrome Top Bar */}
+            <div className="h-11 bg-[#FAFAFA] border-b border-[#e7e5e4] px-5 flex items-center justify-between select-none shrink-0">
+              <div className="flex items-center gap-1.5 shrink-0">
+                <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
+                <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
+                <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Target className="w-3.5 h-3.5 text-[#8F8F8F]" />
+                <span className="text-[11px] font-mono text-[#8F8F8F]">ATS Score Analyzer</span>
+              </div>
+              <div className="w-[60px]" />
             </div>
-            <div className="flex items-center gap-1.5">
-              <Target className="w-3.5 h-3.5 text-[#8F8F8F]" />
-              <span className="text-[11px] font-mono text-[#8F8F8F]">
-                ATS Score Analyzer
-              </span>
-            </div>
-            <div className="w-[60px]" />
-          </div>
 
-          {/* App Shell: 3 columns */}
-          <div className="grid grid-cols-1 lg:grid-cols-[210px_1fr_2.2fr] divide-y lg:divide-y-0 lg:divide-x divide-[#EBEBEB]">
+            <div className="grid grid-cols-1 lg:grid-cols-[210px_1fr_2.2fr] divide-y lg:divide-y-0 lg:divide-x divide-[#e7e5e4]">
             {/* COL 1: Role Targets */}
-            <div className="p-4 bg-[#FAFAFA] space-y-2">
-              <p className="text-[9.5px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider px-2.5 mb-2">
+            <div className="p-4 bg-[#fafaf9] space-y-2">
+              <p className="text-[9.5px] font-mono font-semibold text-[#78716c] uppercase tracking-wider px-2.5 mb-2">
                 Target Roles
               </p>
               {roleTargets.map((role, idx) => (
                 <button
                   key={role.role}
                   onClick={() => setActiveTab(idx)}
-                  className={`w-full text-left p-2.5 rounded-xl border flex items-center gap-3 transition-all ${
+                  className={`w-full text-left p-2.5 rounded-xl border flex items-center gap-3 transition-all cursor-pointer ${
                     activeTab === idx
-                      ? "bg-white border-[#EBEBEB] shadow-sm text-[#171717]"
-                      : "bg-transparent border-transparent text-[#4D4D4D] hover:bg-[#F2F2F2]"
+                      ? "bg-white border-[#e7e5e4] shadow-[0_2px_8px_rgba(0,0,0,0.02)] text-[#1c1917]"
+                      : "bg-transparent border-transparent text-[#78716c] hover:bg-[#e7e5e4]/30 hover:text-[#1c1917]"
                   }`}
                 >
                   <div
@@ -347,7 +319,7 @@ export default function ATSDashboard() {
                       borderColor:
                         activeTab === idx
                           ? role.accentColor
-                          : "#EBEBEB",
+                          : "#e7e5e4",
                     }}
                   >
                     <Target
@@ -356,7 +328,7 @@ export default function ATSDashboard() {
                         color:
                           activeTab === idx
                             ? role.accentColor
-                            : "#8F8F8F",
+                            : "#a8a29e",
                       }}
                     />
                   </div>
@@ -364,7 +336,7 @@ export default function ATSDashboard() {
                     <h4 className="text-[11px] font-bold leading-tight truncate">
                       {role.role}
                     </h4>
-                    <p className="text-[9.5px] text-[#8F8F8F] mt-0.5">
+                    <p className="text-[9.5px] text-[#78716c] mt-0.5">
                       {role.company}
                     </p>
                   </div>
@@ -428,13 +400,13 @@ export default function ATSDashboard() {
                     return (
                       <div
                         key={stat.label}
-                        className="bg-[#FAFAFA] border border-[#EBEBEB] rounded-lg px-3 py-2.5 text-center"
+                        className="bg-white border border-[#e7e5e4] rounded-xl px-3 py-2.5 text-center shadow-[0_2px_8px_rgba(0,0,0,0.01)]"
                       >
-                        <p className="text-[8.5px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider flex items-center justify-center gap-1">
+                        <p className="text-[8.5px] font-mono font-semibold text-[#78716c] uppercase tracking-wider flex items-center justify-center gap-1">
                           <Icon className="w-2.5 h-2.5" />
                           {stat.label}
                         </p>
-                        <p className="text-sm font-bold text-[#171717] mt-0.5 leading-tight">
+                        <p className="text-sm font-bold text-[#1c1917] mt-0.5 leading-tight">
                           {stat.value}
                         </p>
                       </div>
@@ -447,13 +419,13 @@ export default function ATSDashboard() {
             {/* COL 3: Keywords + Improvements */}
             <div className="p-6 bg-white min-h-[300px] flex flex-col">
               {/* Toggle tabs */}
-              <div className="flex items-center gap-1 mb-5 bg-[#F5F5F5] rounded-lg p-0.5 self-start">
+              <div className="flex items-center gap-1 mb-5 border border-[#e7e5e4] rounded-lg p-0.5 self-start bg-transparent">
                 <button
                   onClick={() => setShowImprove(false)}
-                  className={`px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all ${
+                  className={`px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
                     !showImprove
-                      ? "bg-white shadow-sm text-[#171717]"
-                      : "text-[#8F8F8F] hover:text-[#4D4D4D]"
+                      ? "bg-white border border-[#e7e5e4] text-[#1c1917] shadow-sm"
+                      : "text-stone-500 hover:text-stone-800 hover:bg-stone-50"
                   }`}
                 >
                   <span className="flex items-center gap-1.5">
@@ -463,10 +435,10 @@ export default function ATSDashboard() {
                 </button>
                 <button
                   onClick={() => setShowImprove(true)}
-                  className={`px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all ${
+                  className={`px-3 py-1.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
                     showImprove
-                      ? "bg-white shadow-sm text-[#171717]"
-                      : "text-[#8F8F8F] hover:text-[#4D4D4D]"
+                      ? "bg-white border border-[#e7e5e4] text-[#1c1917] shadow-sm"
+                      : "text-stone-500 hover:text-stone-800 hover:bg-stone-50"
                   }`}
                 >
                   <span className="flex items-center gap-1.5">
@@ -486,39 +458,29 @@ export default function ATSDashboard() {
                     transition={{ duration: 0.3, ease }}
                     className="flex-1"
                   >
-                    <p className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider mb-3">
+                    <p className="text-[10px] font-mono font-semibold text-stone-500 uppercase tracking-wider mb-3">
                       Job Description Keywords
                     </p>
                     <div className="flex flex-wrap gap-2 mb-5">
                       {current.keywords.map((kw) => (
                         <span
                           key={kw.keyword}
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all ${
-                            kw.found
-                              ? "bg-[#ECFDF5] border-[#A7F3D0] text-[#065F46]"
-                              : "bg-[#FFF7ED] border-[#FED7AA] text-[#9A3412]"
-                          }`}
+                          className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-white border border-[#e7e5e4] text-stone-700 transition-all hover:border-stone-400"
                         >
-                          {kw.found ? (
-                            <Check
-                              className="w-3 h-3 text-emerald-600"
-                              strokeWidth={3}
-                            />
-                          ) : (
-                            <AlertTriangle
-                              className="w-3 h-3 text-orange-500"
-                              strokeWidth={2.5}
-                            />
-                          )}
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                              kw.found ? "bg-emerald-500" : "bg-orange-500"
+                            }`}
+                          />
                           {kw.keyword}
                         </span>
                       ))}
                     </div>
 
                     {/* Summary */}
-                    <div className="bg-[#FAFAFA] border border-[#EBEBEB] rounded-xl p-4 space-y-2.5">
+                    <div className="bg-white border border-[#e7e5e4] rounded-xl p-4 space-y-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-medium text-[#4D4D4D]">
+                        <span className="text-[11px] font-medium text-stone-600">
                           Keywords found in your resume
                         </span>
                         <span
@@ -529,7 +491,7 @@ export default function ATSDashboard() {
                           {current.keywords.length}
                         </span>
                       </div>
-                      <div className="h-1.5 bg-[#EBEBEB] rounded-full overflow-hidden">
+                      <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
                         <motion.div
                           className="h-full rounded-full"
                           style={{
@@ -549,10 +511,10 @@ export default function ATSDashboard() {
                       </div>
                       {current.keywords.filter((k) => !k.found).length >
                         0 && (
-                        <p className="text-[10.5px] text-[#8F8F8F] flex items-center gap-1.5 pt-0.5">
-                          <AlertTriangle className="w-3 h-3 text-amber-500" />
+                        <p className="text-[10.5px] text-stone-500 flex items-center gap-1.5 pt-0.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
                           Add{" "}
-                          <span className="font-semibold text-[#171717]">
+                          <span className="font-semibold text-stone-800">
                             {current.keywords
                               .filter((k) => !k.found)
                               .map((k) => k.keyword)
@@ -573,7 +535,7 @@ export default function ATSDashboard() {
                     transition={{ duration: 0.3, ease }}
                     className="flex-1 space-y-4"
                   >
-                    <p className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider mb-1">
+                    <p className="text-[10px] font-mono font-semibold text-stone-500 uppercase tracking-wider mb-1">
                       Before → After Improvements
                     </p>
                     {current.improvements.map((imp, idx) => (
@@ -586,23 +548,23 @@ export default function ATSDashboard() {
                           ease,
                           delay: idx * 0.1,
                         }}
-                        className="bg-[#FAFAFA] border border-[#EBEBEB] rounded-xl p-4 space-y-3"
+                        className="bg-white border border-[#e7e5e4] rounded-xl p-4 space-y-3 shadow-[0_2px_8px_rgba(0,0,0,0.02)]"
                       >
                         {/* Before */}
                         <div>
-                          <p className="text-[9px] font-mono font-bold text-[#D4D4D4] uppercase tracking-wider mb-1">
+                          <p className="text-[9px] font-mono font-bold text-stone-400 uppercase tracking-wider mb-1">
                             Before
                           </p>
-                          <p className="text-[12px] text-[#8F8F8F] leading-relaxed line-through decoration-[#D4D4D4]">
+                          <p className="text-[12px] text-stone-500 leading-relaxed line-through decoration-stone-200">
                             {imp.before}
                           </p>
                         </div>
                         {/* After */}
                         <div>
-                          <p className="text-[9px] font-mono font-bold text-emerald-400 uppercase tracking-wider mb-1">
+                          <p className="text-[9px] font-mono font-bold text-emerald-600 uppercase tracking-wider mb-1">
                             After
                           </p>
-                          <p className="text-[12px] text-[#171717] leading-relaxed font-medium">
+                          <p className="text-[12px] text-stone-900 leading-relaxed font-medium">
                             {imp.after}
                           </p>
                         </div>
@@ -622,9 +584,10 @@ export default function ATSDashboard() {
                 )}
               </AnimatePresence>
             </div>
-          </div>
-        </motion.div>
-      </div>
-    </section>
+        </div>
+      </motion.div>
+    </div>
+  </div>
+</section>
   );
 }

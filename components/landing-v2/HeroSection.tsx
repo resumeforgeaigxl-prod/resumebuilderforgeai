@@ -34,13 +34,13 @@ const fadeUp = {
 // Slide 1: Handcrafted landscape and overlay resume
 function Slide1() {
   return (
-    <div className="relative w-full h-full flex items-center justify-center">
+    <div className="relative w-full h-full flex items-end justify-center md:block">
       {/* Centerpiece Floating Resume */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 w-[240px] h-[330px] p-4 text-left flex flex-col font-sans select-none hover:scale-[1.02] transition-transform duration-300 overflow-hidden"
+        className="relative md:absolute md:bottom-8 md:right-[10%] -mt-[60px] md:mt-0 mx-4 md:mx-0 z-10 w-[240px] h-[330px] p-4 text-left flex flex-col font-sans select-none hover:scale-[1.02] transition-transform duration-300 overflow-hidden"
         style={{
           background: 'rgba(255, 255, 255, 0.12)',
           backdropFilter: 'blur(20px)',
@@ -129,12 +129,12 @@ function Slide2() {
   const filled = 0.92 * circumference;
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center p-8 bg-transparent overflow-hidden">
+    <div className="relative w-full h-full flex items-end justify-center md:block bg-transparent md:overflow-hidden">
       {/* Grid Pattern Background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:24px_24px] opacity-20" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:24px_24px] opacity-20 pointer-events-none" />
 
       {/* Blurred Resume Card in Background */}
-      <div className="absolute left-[30px] top-[90px] w-[180px] h-[250px] bg-white/40 border border-[#EBEBEB] rounded-lg p-2.5 shadow-sm opacity-20 blur-[1px] -rotate-6 flex flex-col text-left">
+      <div className="hidden md:flex absolute left-[30px] top-[90px] w-[180px] h-[250px] bg-white/40 border border-[#EBEBEB] rounded-lg p-2.5 shadow-sm opacity-20 blur-[1px] -rotate-6 flex-col text-left">
         <div className="h-0.5 bg-neutral-300 w-full mb-1.5 shrink-0" />
         <div className="h-2 bg-neutral-200 w-2/3 rounded-sm mb-2" />
         <div className="space-y-1.5 flex-1 overflow-hidden">
@@ -149,7 +149,7 @@ function Slide2() {
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 w-[380px] h-[340px] p-6 flex flex-col justify-between"
+        className="relative md:absolute md:bottom-8 md:right-[10%] -mt-[60px] md:mt-0 mx-4 md:mx-0 z-10 w-full max-w-[380px] h-[340px] p-6 flex flex-col justify-between"
         style={{
           background: 'rgba(255, 255, 255, 0.12)',
           backdropFilter: 'blur(20px)',
@@ -309,12 +309,12 @@ function Slide3() {
   }, []);
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center p-8 bg-transparent overflow-hidden">
+    <div className="relative w-full h-full flex items-end justify-center md:block bg-transparent md:overflow-hidden">
       {/* Grid Pattern Background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:24px_24px] opacity-20" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:24px_24px] opacity-20 pointer-events-none" />
 
       {/* Blurred Resume Card in Background */}
-      <div className="absolute right-[40px] top-[100px] w-[180px] h-[250px] bg-white/40 border border-[#EBEBEB] rounded-lg p-2.5 shadow-sm opacity-20 blur-[1px] rotate-6 flex flex-col text-left">
+      <div className="hidden md:flex absolute right-[40px] top-[100px] w-[180px] h-[250px] bg-white/40 border border-[#EBEBEB] rounded-lg p-2.5 shadow-sm opacity-20 blur-[1px] rotate-6 flex-col text-left">
         <div className="h-0.5 bg-neutral-300 w-full mb-1.5 shrink-0" />
         <div className="h-2 bg-neutral-200 w-2/3 rounded-sm mb-2" />
         <div className="space-y-1.5 flex-1 overflow-hidden">
@@ -329,7 +329,7 @@ function Slide3() {
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 w-[400px] h-[340px] p-6 flex flex-col justify-between"
+        className="relative md:absolute md:bottom-8 md:right-[10%] -mt-[60px] md:mt-0 mx-4 md:mx-0 z-10 w-full max-w-[400px] h-[340px] p-6 flex flex-col justify-between"
         style={{
           background: 'rgba(255, 255, 255, 0.12)',
           backdropFilter: 'blur(20px)',
@@ -407,12 +407,12 @@ function Slide3() {
 // Slide 4: Multiple styled resume designs
 function Slide4() {
   return (
-    <div className="relative w-full h-full flex items-center justify-center p-8 bg-transparent overflow-hidden">
+    <div className="relative w-full h-full flex items-end justify-center md:block bg-transparent md:overflow-hidden">
       {/* Grid Pattern Background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:24px_24px] opacity-20" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:24px_24px] opacity-20 pointer-events-none" />
 
       {/* Fan of Overlapping Resume Templates */}
-      <div className="relative w-full h-[360px] flex items-center justify-center select-none">
+      <div className="relative md:absolute md:bottom-8 md:right-[10%] -mt-[60px] md:mt-0 mx-4 md:mx-0 z-10 w-full md:w-[360px] h-[280px] md:h-[360px] flex items-center justify-center select-none scale-[0.8] md:scale-100 origin-center md:origin-bottom-right transition-transform duration-300">
         
         {/* Left Template (Modern Blue) */}
         <motion.div
@@ -628,43 +628,50 @@ function ProductPreviewSlider() {
   };
 
   return (
-    <div className="hidden lg:flex flex-col items-center shrink-0 origin-right lg:scale-[0.88] xl:scale-[0.95] 2xl:scale-100 transition-transform duration-300">
-      {/* Main Widescreen Visual Container (720px width, 480px height - 3:2 ratio) */}
-      <div className="w-[720px] h-[480px] border border-[#EBEBEB] rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.06)] relative bg-[#FAFAFA]">
-        {/* Background Pixel Art (common for all slides) */}
-        <img
-          src="/hero-landscape.png"
-          alt="Pixel Art Mountain Forest Landscape"
-          className="absolute inset-0 w-full h-full object-cover z-0"
-        />
-        {/* Ambient dark overlay */}
-        <div className="absolute inset-0 bg-slate-950/15 pointer-events-none z-10" />
+    <div className="w-full flex flex-col items-center">
+      {/* Main Widescreen Visual Container */}
+      <div className="relative w-full max-w-[960px] mx-auto h-[320px] md:h-[480px]">
+        {/* Image Panel */}
+        <div className="absolute inset-0 rounded-t-[16px] overflow-hidden border border-[#e5e5e5] border-b-0 shadow-[0_20px_60px_rgba(0,0,0,0.06)] bg-[#FAFAFA]">
+          <img
+            src="/hero-landscape.png"
+            alt="Pixel Art Mountain Forest Landscape"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-slate-950/15 pointer-events-none z-10" />
+        </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeSlide}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-            className="w-full h-full relative z-20"
-          >
-            {slides[activeSlide].component}
-          </motion.div>
-        </AnimatePresence>
+        {/* Slides overlay */}
+        <div className="absolute inset-0 z-20">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeSlide}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+              className="w-full h-full relative"
+            >
+              {slides[activeSlide].component}
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
 
-      {/* Progress Indicators Below Visual Showcase */}
-      <div className="flex gap-4 mt-6 w-[720px]">
+      {/* Tab Bar (Interactive Visual / ATS Scan Audit / etc.) */}
+      <div 
+        className="w-full max-w-[960px] mx-auto border border-[#e5e5e5] rounded-b-[16px] bg-[#ffffff] px-6 py-4 md:py-5 flex gap-3 md:gap-6 items-center"
+        style={{ borderTop: 'none' }}
+      >
         {slides.map((slide) => {
           const isActive = activeSlide === slide.id;
           return (
             <button
               key={slide.id}
               onClick={() => handleSlideSelect(slide.id)}
-              className="flex-1 flex flex-col text-left group select-none"
+              className="flex-1 flex flex-col text-left group select-none cursor-pointer"
             >
-              <span className={`text-[11px] font-semibold transition-colors duration-200 ${
+              <span className={`text-[10px] md:text-[11px] font-semibold transition-colors duration-200 whitespace-nowrap overflow-hidden text-ellipsis ${
                 isActive ? "text-[#171717]" : "text-[#8F8F8F] group-hover:text-[#4D4D4D]"
               }`}>
                 {slide.label}
@@ -672,7 +679,7 @@ function ProductPreviewSlider() {
               <div className="h-[3px] bg-[#EBEBEB] w-full rounded-full overflow-hidden mt-1.5 relative">
                 {isActive && (
                   <motion.div
-                    key={activeSlide} // resets when active slide changes
+                    key={activeSlide}
                     initial={{ width: 0 }}
                     animate={{ width: "100%" }}
                     transition={{ duration: 5, ease: "linear" }}
@@ -698,100 +705,179 @@ interface HeroSectionProps {
 
 export default function HeroSection({ locale = "en-in" }: HeroSectionProps) {
   return (
-    <section className="relative overflow-hidden pt-24 pb-32">
-      {/* ── Mesh gradient overlay ── */}
-      <div
-        className="rf-mesh-gradient pointer-events-none absolute inset-0 z-0"
-        aria-hidden="true"
-      />
+    <section className="w-full bg-[#fafaf9] relative overflow-hidden select-none">
+      <div className="max-w-[1200px] mx-auto border-x border-[#e7e5e4] bg-white pt-20 pb-0 flex flex-col items-center relative">
+        {/* ── Mesh gradient overlay ── */}
+        <div
+          className="rf-mesh-gradient pointer-events-none absolute inset-0 z-0"
+          aria-hidden="true"
+        />
 
-      {/* ── Content (Wider container max-w-[1340px] to fit 720px column nicely) ── */}
-      <div className="relative z-10 mx-auto flex max-w-[1340px] items-center justify-between gap-12 px-6">
-        {/* ── Left column: text ── */}
-        <motion.div
-          className="flex max-w-xl flex-col"
-          variants={textContainer}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.4 }}
+      {/* ── Top: text block ── */}
+      <motion.div
+        className="relative z-10 w-full max-w-[720px] mx-auto text-center px-6 flex flex-col items-center"
+        variants={textContainer}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.4 }}
+      >
+        {/* Eyebrow */}
+        <motion.p
+          variants={fadeUp}
+          className="mb-4 text-[#8F8F8F] uppercase tracking-widest text-center"
+          style={{
+            fontFamily: "var(--font-geist-mono)",
+            fontSize: "12px",
+            fontWeight: 500,
+            lineHeight: "16px",
+          }}
         >
-          {/* Eyebrow */}
-          <motion.p
-            variants={fadeUp}
-            className="mb-4 text-[#8F8F8F] uppercase tracking-widest"
-            style={{
-              fontFamily: "var(--font-geist-mono)",
-              fontSize: "12px",
-              fontWeight: 500,
-              lineHeight: "16px",
-            }}
-          >
-            Connected Developer Career Platform
-          </motion.p>
+          Connected Developer Career Platform
+        </motion.p>
 
-          {/* Headline */}
-          <motion.h1
-            variants={fadeUp}
-            className="mb-5 text-[32px] md:text-[48px] text-[#171717]"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 700,
-              fontStyle: "italic",
-              letterSpacing: "-0.02em",
-              lineHeight: 1.08,
-            }}
-          >
-            Forge your career.
-            <br />
-            From resume to offer.
-          </motion.h1>
+        {/* Headline */}
+        <motion.h1
+          variants={fadeUp}
+          className="mb-5 text-[32px] md:text-[clamp(40px,6vw,72px)] text-[#171717] text-center max-w-[640px] mx-auto"
+          style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 700,
+            fontStyle: "italic",
+            letterSpacing: "-0.02em",
+            lineHeight: 1.08,
+          }}
+        >
+          Forge your career. From resume to offer.
+        </motion.h1>
 
-          {/* Subheadline */}
-          <motion.p
-            variants={fadeUp}
-            className="mb-8 max-w-lg text-[#4D4D4D]"
+        {/* Subheadline */}
+        <motion.p
+          variants={fadeUp}
+          className="mx-auto mb-8 max-w-[520px] text-[#6b7280] text-center"
+          style={{
+            fontFamily: "var(--font-geist-sans)",
+            fontSize: "16px",
+            fontWeight: 400,
+            lineHeight: "1.6",
+          }}
+        >
+          ResumeForge AI connects all the tools you need: resume optimization, 
+          portfolio showcases, coding practice, and mock interviews in one unified ecosystem.
+        </motion.p>
+
+        {/* CTA row */}
+        <motion.div variants={fadeUp} className="flex justify-center gap-3 mb-14">
+          <Link
+            href={`/${locale}/ai-resume-builder`}
+            className="inline-flex items-center justify-center rounded-full bg-[#171717] px-6 h-11 text-white transition-opacity duration-200 hover:opacity-85"
             style={{
               fontFamily: "var(--font-geist-sans)",
               fontSize: "16px",
-              fontWeight: 400,
-              lineHeight: "24px",
+              fontWeight: 500,
+              lineHeight: "20px",
             }}
           >
-            ResumeForge AI connects all the tools you need—resume optimization, 
-            portfolio showcases, coding practice, and mock interviews—in one unified ecosystem.
-          </motion.p>
-
-          {/* CTA row */}
-          <motion.div variants={fadeUp} className="flex flex-wrap gap-4">
-            <Link
-              href={`/${locale}/ai-resume-builder`}
-              className="inline-flex items-center justify-center rounded-full bg-[#171717] px-6 h-11 text-white transition-opacity duration-200 hover:opacity-85"
-              style={{
-                fontFamily: "var(--font-geist-sans)",
-                fontSize: "16px",
-                fontWeight: 500,
-                lineHeight: "20px",
-              }}
-            >
-              Generate Resume
-            </Link>
-            <a
-              href="#workflow"
-              className="inline-flex items-center justify-center rounded-full border border-[#EBEBEB] bg-white px-6 h-11 text-[#171717] transition-colors duration-200 hover:bg-[#F2F2F2]"
-              style={{
-                fontFamily: "var(--font-geist-sans)",
-                fontSize: "16px",
-                fontWeight: 500,
-                lineHeight: "20px",
-              }}
-            >
-              Watch Demo
-            </a>
-          </motion.div>
+            Generate Resume
+          </Link>
+          <a
+            href="#workflow"
+            className="inline-flex items-center justify-center rounded-full border border-[#EBEBEB] bg-white px-6 h-11 text-[#171717] transition-colors duration-200 hover:bg-[#F2F2F2]"
+            style={{
+              fontFamily: "var(--font-geist-sans)",
+              fontSize: "16px",
+              fontWeight: 500,
+              lineHeight: "20px",
+            }}
+          >
+            Watch Demo
+          </a>
         </motion.div>
+      </motion.div>
 
-        {/* ── Right column: product preview slider (720px container) ── */}
+      {/* ── 3-Column Bordered Feature Summary Grid (AutoSend Pattern) ── */}
+      <motion.div
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        className="relative z-10 w-full max-w-[960px] mx-auto px-6 md:px-0 mb-14"
+      >
+        <div className="border border-stone-200 bg-white/50 backdrop-blur-sm rounded-xl overflow-hidden shadow-[0_2px_2px_rgba(0,0,0,0.02),0_8px_16px_-4px_rgba(0,0,0,0.04)] select-none">
+          <div className="grid grid-cols-1 sm:grid-cols-3">
+            {/* Cell 1: ATS Scanner */}
+            <div className="flex flex-col justify-between border-b sm:border-b-0 sm:border-r border-stone-200">
+              <div className="px-6 py-6 text-left">
+                <span className="font-mono text-[11px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-2">
+                  #01 — ATS Scanner
+                </span>
+                <h4 className="font-sans text-sm font-bold text-stone-800 tracking-tight mb-1">
+                  ATS Scanner
+                </h4>
+                <p className="text-xs text-stone-500 leading-normal">
+                  AI-powered resume auditing that catches formatting issues ATS systems flag.
+                </p>
+              </div>
+              <div className="border-t border-stone-200 px-6 py-3 bg-stone-50/50">
+                <Link
+                  href={`/${locale}/ai-resume-builder`}
+                  className="font-mono text-[10px] tracking-wider text-[#7c3aed] font-bold hover:text-[#6d28d9] transition-colors"
+                >
+                  TRY IT →
+                </Link>
+              </div>
+            </div>
+            {/* Cell 2: Bullet Optimizer */}
+            <div className="flex flex-col justify-between border-b sm:border-b-0 sm:border-r border-stone-200">
+              <div className="px-6 py-6 text-left">
+                <span className="font-mono text-[11px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-2">
+                  #02 — Bullet Optimizer
+                </span>
+                <h4 className="font-sans text-sm font-bold text-stone-800 tracking-tight mb-1">
+                  Bullet Optimizer
+                </h4>
+                <p className="text-xs text-stone-500 leading-normal">
+                  Transform plain duties into high-impact, metrics-driven achievements.
+                </p>
+              </div>
+              <div className="border-t border-stone-200 px-6 py-3 bg-stone-50/50">
+                <Link
+                  href={`/${locale}/ai-resume-builder`}
+                  className="font-mono text-[10px] tracking-wider text-[#7c3aed] font-bold hover:text-[#6d28d9] transition-colors"
+                >
+                  TRY IT →
+                </Link>
+              </div>
+            </div>
+            {/* Cell 3: Job Matcher */}
+            <div className="flex flex-col justify-between">
+              <div className="px-6 py-6 text-left">
+                <span className="font-mono text-[11px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-2">
+                  #03 — Job Matcher
+                </span>
+                <h4 className="font-sans text-sm font-bold text-stone-800 tracking-tight mb-1">
+                  Job Matcher
+                </h4>
+                <p className="text-xs text-stone-500 leading-normal">
+                  Match your resume to any job description with intelligent gap analysis.
+                </p>
+              </div>
+              <div className="border-t border-stone-200 px-6 py-3 bg-stone-50/50">
+                <Link
+                  href={`/${locale}/ai-resume-builder`}
+                  className="font-mono text-[10px] tracking-wider text-[#7c3aed] font-bold hover:text-[#6d28d9] transition-colors"
+                >
+                  TRY IT →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ── Bottom: Image + Tabs block ── */}
+      <div className="relative z-10 w-full px-6 md:px-0 mt-4 md:mt-0">
         <ProductPreviewSlider />
+      </div>
       </div>
     </section>
   );

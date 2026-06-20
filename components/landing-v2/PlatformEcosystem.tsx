@@ -247,58 +247,41 @@ export default function PlatformEcosystem({ locale = "en-in" }: { locale?: strin
   };
 
   return (
-    <section id="templates" className="py-24 px-6 overflow-hidden bg-white border-t border-[#EBEBEB]">
-      <div className="max-w-[1200px] mx-auto">
-        {/* Header */}
-        <motion.div
-          className="text-center"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6, ease }}
-        >
-          <p
-            className="uppercase text-[#8F8F8F]"
-            style={{
-              fontFamily: "var(--font-geist-mono)",
-              fontSize: "12px",
-              fontWeight: 500,
-              letterSpacing: "0.05em",
-            }}
-          >
+    <section id="templates" className="w-full bg-[#fafaf9] relative overflow-hidden select-none">
+      <div className="max-w-[1200px] mx-auto border-x border-[#e7e5e4] bg-white">
+        
+        {/* Header Block (Full-width, left-aligned) */}
+        <div className="px-6 md:px-10 py-16 text-left">
+          <span className="font-mono text-[14px] text-rose-500 font-semibold uppercase leading-4 block mb-3 select-none">
             #03 — AI Career Operating System
-          </p>
+          </span>
           <h2
-            className="mt-3 text-[#171717]"
+            className="mt-3 text-[#1c1917] font-bold leading-[1.15] text-2xl md:text-[clamp(28px,3vw,40px)] tracking-tight max-w-[640px]"
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: "32px",
-              fontWeight: 400,
               fontStyle: "italic",
-              lineHeight: "40px",
-              letterSpacing: "-0.01em",
             }}
           >
             The Interconnected Forge Flywheel
           </h2>
           <p
-            className="mt-4 mx-auto max-w-2xl text-[#4D4D4D]"
+            className="mt-4 text-[#57534e] max-w-2xl"
             style={{
               fontFamily: "var(--font-geist-sans)",
-              fontSize: "16px",
+              fontSize: "15px",
               fontWeight: 400,
-              lineHeight: "24px",
+              lineHeight: "22px",
             }}
           >
             Your developer data is never locked in silos. Every action in one Forge updates your profile core, dynamically adapting your study tracks, code sandboxes, mocks, and job targeting.
           </p>
-        </motion.div>
+        </div>
 
         {/* ── Cohesive Mockup Window Box ── */}
-        <div className="w-full max-w-[1100px] bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden mt-16 shadow-[0_8px_32px_rgba(0,0,0,0.025)] flex flex-col mx-auto select-none">
+        <div className="border-t border-[#e7e5e4] w-full bg-white overflow-hidden flex flex-col select-none">
           
           {/* OS Window Top Bar Controls */}
-          <div className="h-10 bg-[#FAFAFA] border-b border-[#EBEBEB] px-4 flex items-center justify-between shrink-0 select-none">
+          <div className="h-10 bg-[#FAFAFA] border-b border-[#e7e5e4] px-4 flex items-center justify-between shrink-0 select-none">
             {/* Dots */}
             <div className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56] border border-[#E0443E]" />
@@ -318,7 +301,7 @@ export default function PlatformEcosystem({ locale = "en-in" }: { locale?: strin
           </div>
 
           {/* Internal Content (Split Left/Right) */}
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1.28fr_1fr] bg-white">
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1.28fr_1fr] bg-white divide-y lg:divide-y-0 lg:divide-x divide-[#e7e5e4]">
             
             {/* Left Column: Interactive Radial Web Graph */}
             <div className="relative p-6 flex items-center justify-center bg-[#FAFAFA] min-h-[380px] sm:min-h-[440px] lg:min-h-[480px]">
@@ -498,7 +481,7 @@ export default function PlatformEcosystem({ locale = "en-in" }: { locale?: strin
             </div>
 
             {/* Right Column: Console Details Inspector (No bottom card!) */}
-            <div className="bg-white border-t lg:border-t-0 lg:border-l border-[#EBEBEB] p-6 sm:p-8 flex flex-col justify-between text-left">
+            <div className="bg-white p-6 sm:p-8 flex flex-col justify-between text-left relative z-10">
               
               {/* Module Header and Details */}
               <div className="space-y-4">

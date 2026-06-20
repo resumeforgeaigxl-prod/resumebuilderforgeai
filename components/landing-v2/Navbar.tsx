@@ -47,13 +47,15 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
-        scrolled
-          ? "bg-[#FAFAFA]/80 backdrop-blur-md border-b border-[#EBEBEB]"
-          : "bg-[#FAFAFA] border-b border-transparent"
-      }`}
+      className="sticky top-0 z-50 w-full bg-[#fafaf9]"
     >
-      <nav className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6">
+      <nav
+        className={`mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6 border-x border-[#e7e5e4] transition-all duration-300 ${
+          scrolled
+            ? "bg-[#FAFAFA]/80 backdrop-blur-md border-b border-[#e7e5e4]"
+            : "bg-[#FAFAFA] border-b border-transparent"
+        }`}
+      >
         {/* ── Logo ── */}
         <Link
           href={`/${locale}`}
@@ -93,11 +95,13 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
             <li key={label}>
               <a
                 href={href}
-                className="text-[#4D4D4D] transition-colors duration-200 hover:text-[#171717]"
+                className="text-[#4D4D4D] transition-colors duration-200 hover:text-[#171717] font-mono"
                 style={{
-                  fontFamily: "var(--font-geist-sans)",
-                  fontSize: "14px",
-                  fontWeight: 400,
+                  fontFamily: "monospace",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  textTransform: "uppercase" as const,
+                  letterSpacing: "0.04em",
                   lineHeight: "20px",
                 }}
               >
@@ -111,11 +115,10 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
         <div className="hidden md:flex items-center gap-3">
           <Link
             href={`/${locale}/signup`}
-            className="inline-flex items-center justify-center rounded-[6px] border border-[#EBEBEB] bg-white px-3 h-9 text-[#171717] transition-colors duration-200 hover:bg-[#F2F2F2]"
+            className="inline-flex items-center justify-center rounded-xl border border-[#EBEBEB] bg-white px-3 h-9 text-[#171717] transition-all duration-75 hover:bg-[#F2F2F2] active:scale-95 font-mono text-[13px] uppercase font-semibold"
             style={{
-              fontFamily: "var(--font-geist-sans)",
-              fontSize: "14px",
-              fontWeight: 500,
+              fontFamily: "monospace",
+              letterSpacing: "0.04em",
               lineHeight: "20px",
             }}
           >
@@ -123,11 +126,10 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
           </Link>
           <Link
             href={`/${locale}/ai-resume-builder`}
-            className="inline-flex items-center justify-center rounded-full bg-[#171717] px-5 h-10 text-white transition-opacity duration-200 hover:opacity-85"
+            className="inline-flex items-center justify-center rounded-xl bg-[#7c3aed] border border-[#6d28d9] px-5 h-10 text-white transition-all duration-75 hover:bg-[#6d28d9] active:scale-95 font-mono text-[13px] uppercase font-semibold"
             style={{
-              fontFamily: "var(--font-geist-sans)",
-              fontSize: "14px",
-              fontWeight: 500,
+              fontFamily: "monospace",
+              letterSpacing: "0.04em",
               lineHeight: "20px",
             }}
           >
@@ -166,11 +168,13 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
                   key={label}
                   href={href}
                   onClick={() => setMobileOpen(false)}
-                  className="text-[#4D4D4D] transition-colors duration-200 hover:text-[#171717] py-1"
+                  className="text-[#4D4D4D] transition-colors duration-200 hover:text-[#171717] font-mono py-1"
                   style={{
-                    fontFamily: "var(--font-geist-sans)",
-                    fontSize: "14px",
-                    fontWeight: 400,
+                    fontFamily: "monospace",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    textTransform: "uppercase" as const,
+                    letterSpacing: "0.04em",
                     lineHeight: "20px",
                   }}
                 >
@@ -182,11 +186,10 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
                 <Link
                   href={`/${locale}/signup`}
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex items-center justify-center rounded-[6px] border border-[#EBEBEB] bg-white px-3 h-9 text-[#171717] transition-colors duration-200 hover:bg-[#F2F2F2]"
+                  className="inline-flex items-center justify-center rounded-xl border border-[#EBEBEB] bg-white px-3 h-9 text-[#171717] transition-all duration-75 hover:bg-[#F2F2F2] active:scale-95 font-mono text-[13px] uppercase font-semibold"
                   style={{
-                    fontFamily: "var(--font-geist-sans)",
-                    fontSize: "14px",
-                    fontWeight: 500,
+                    fontFamily: "monospace",
+                    letterSpacing: "0.04em",
                     lineHeight: "20px",
                   }}
                 >
@@ -195,11 +198,10 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
                 <Link
                   href={`/${locale}/ai-resume-builder`}
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex items-center justify-center rounded-full bg-[#171717] px-5 h-10 text-white transition-opacity duration-200 hover:opacity-85"
+                  className="inline-flex items-center justify-center rounded-xl bg-[#7c3aed] border border-[#6d28d9] px-5 h-10 text-white transition-all duration-75 hover:bg-[#6d28d9] active:scale-95 font-mono text-[13px] uppercase font-semibold"
                   style={{
-                    fontFamily: "var(--font-geist-sans)",
-                    fontSize: "14px",
-                    fontWeight: 500,
+                    fontFamily: "monospace",
+                    letterSpacing: "0.04em",
                     lineHeight: "20px",
                   }}
                 >

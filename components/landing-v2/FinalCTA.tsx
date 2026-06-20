@@ -11,9 +11,10 @@ interface FinalCTAProps {
 
 export default function FinalCTA({ locale = "en-in" }: FinalCTAProps) {
   return (
-    <section className="py-24 md:py-32 px-6">
-      <motion.div
-        className="max-w-[800px] mx-auto text-center"
+    <section className="w-full bg-[#fafaf9] relative overflow-hidden select-none">
+      <div className="max-w-[1200px] mx-auto border-x border-[#e7e5e4] bg-white py-24 md:py-32 px-6">
+        <motion.div
+          className="max-w-[800px] mx-auto text-center"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
@@ -52,18 +53,23 @@ export default function FinalCTA({ locale = "en-in" }: FinalCTAProps) {
 
         <Link href={`/${locale}/signup`} className="inline-block mt-8">
           <button
-            className="inline-flex items-center justify-center px-8 h-12 rounded-full font-medium transition-colors duration-200 cursor-pointer"
+            className="inline-flex items-center justify-center px-8 h-12 rounded-xl font-semibold transition-all duration-75 cursor-pointer border active:scale-95"
             style={{
-              backgroundColor: "#171717",
+              backgroundColor: "#7c3aed",
+              borderColor: "#6d28d9",
               color: "#FFFFFF",
-              fontSize: "16px",
-              fontWeight: 500,
+              fontSize: "14px",
+              fontWeight: 600,
+              fontFamily: "monospace",
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
             }}
           >
             Get Started Free
           </button>
         </Link>
       </motion.div>
+      </div>
     </section>
   );
 }
