@@ -15,15 +15,22 @@ import {
 } from "lucide-react";
 
 /* ═══════════════════════════════════════════════
-   Bento Micro-Playgrounds (Refactored to be Sidebar-Driven)
+   Dedicated UI Demos (AutoSend Style)
    ═══════════════════════════════════════════════ */
 
-// 1. ATS Scan Playground
-interface ATSScanPlaygroundProps {
-  fileName: string;
+// 1. ATS Resume Scanner Demo
+interface ATSScanDemoProps {
+  subOpt: number;
 }
 
-function ATSScanPlayground({ fileName }: ATSScanPlaygroundProps) {
+function ATSScanDemo({ subOpt }: ATSScanDemoProps) {
+  const files = [
+    { name: "alex_rivera_resume.pdf", score: 68, status: "Review Needed", missing: ["Next.js", "CI/CD", "Docker"] },
+    { name: "marketing_draft.docx", score: 45, status: "Weak Match", missing: ["SEO", "Copywriting", "GA4"] },
+    { name: "technical_cv_v2.pdf", score: 92, status: "Excellent Match", missing: [] }
+  ];
+
+  const file = files[subOpt] || files[0];
   const [isScanning, setIsScanning] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
@@ -32,7 +39,7 @@ function ATSScanPlayground({ fileName }: ATSScanPlaygroundProps) {
     setIsScanning(false);
     setScanned(false);
     setScanProgress(0);
-  }, [fileName]);
+  }, [subOpt]);
 
   const handleScan = async () => {
     setIsScanning(true);
@@ -55,11 +62,10 @@ function ATSScanPlayground({ fileName }: ATSScanPlaygroundProps) {
   };
 
   return (
-    <div className="relative w-full h-[200px] flex flex-col justify-between overflow-hidden">
-      {/* Laser scanning beam */}
+    <div className="relative w-full h-full flex flex-col justify-between overflow-hidden text-left">
       {isScanning && (
         <motion.div
-          className="absolute left-0 right-0 h-[2px] bg-purple-500 shadow-[0_0_10px_#7928CA]"
+          className="absolute left-0 right-0 h-[2px] bg-purple-500 shadow-[0_0_10px_#7928CA] z-20"
           initial={{ top: "0%" }}
           animate={{ top: "100%" }}
           transition={{ duration: 1.4, ease: "linear" }}
@@ -67,56 +73,58 @@ function ATSScanPlayground({ fileName }: ATSScanPlaygroundProps) {
       )}
 
       {!scanned ? (
-        <div className="flex flex-col items-center justify-center flex-1 text-center select-none">
-          <div className="w-9 h-9 rounded-full bg-purple-50 border border-purple-100 flex items-center justify-center mb-2">
+        <div className="flex flex-col items-center justify-center flex-1 text-center select-none py-2">
+          <div className="w-8 h-8 rounded-full bg-purple-50 border border-purple-100 flex items-center justify-center mb-1.5">
             <FileSearch className="w-4 h-4 text-purple-600" />
           </div>
-          <p className="text-xs text-[#171717] font-semibold">{fileName}</p>
-          <p className="text-[10px] text-[#8F8F8F] mt-0.5">142 KB • Ready for scan</p>
+          <p className="text-[11px] text-[#171717] font-semibold">{file.name}</p>
+          <p className="text-[9px] text-[#8F8F8F]">142 KB • Ready to audit</p>
 
           <button
             onClick={handleScan}
             disabled={isScanning}
-            className="mt-3.5 inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#171717] hover:bg-[#171717]/90 text-white rounded-full text-[10px] font-medium transition-all"
+            className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 bg-[#171717] hover:bg-[#171717]/90 text-white rounded-full text-[9px] font-medium transition-all"
           >
-            {isScanning ? (
-              <>Scanning {scanProgress}%</>
-            ) : (
-              <>
-                Run ATS Scan <ArrowRight className="w-3 h-3" />
-              </>
-            )}
+            {isScanning ? `Auditing ${scanProgress}%` : "Scan Resume"}
           </button>
         </div>
       ) : (
         <motion.div
-          className="flex flex-col justify-between h-full"
+          className="flex flex-col justify-between h-full py-1"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
           <div className="flex items-center justify-between border-b border-[#EBEBEB] pb-1.5">
-            <span className="text-[11px] font-semibold text-[#171717]">Scan Analysis</span>
-            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-              64% Match
+            <span className="text-[10px] font-bold text-[#171717]">Compliance Audit</span>
+            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+              file.score >= 85 ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
+            }`}>
+              {file.score}% Match ({file.status})
             </span>
           </div>
+
           <div className="space-y-1.5 my-2">
-            <div className="flex justify-between items-center text-[10px]">
-              <span className="text-[#4D4D4D]">Missing Tech Keywords:</span>
-              <span className="font-semibold text-rose-500 font-mono">3 critical</span>
+            <div className="flex items-center gap-1.5 text-[9.5px]">
+              <span className={file.score >= 85 ? "text-emerald-500 font-bold" : "text-amber-500 font-bold"}>
+                {file.score >= 85 ? "✓" : "⚠"}
+              </span>
+              <span className="text-[#4D4D4D]">
+                {file.score >= 85 ? "Full keyword match" : `Missing keywords: ${file.missing.join(", ")}`}
+              </span>
             </div>
-            <div className="flex justify-between items-center text-[10px]">
-              <span className="text-[#4D4D4D]">Formatting Score:</span>
-              <span className="font-semibold text-amber-500">Warning (Serif font)</span>
+            <div className="flex items-center gap-1.5 text-[9.5px]">
+              <span className="text-emerald-500 font-bold">✓</span>
+              <span className="text-[#4D4D4D]">Scannable structure & layout</span>
             </div>
-            <div className="flex justify-between items-center text-[10px]">
-              <span className="text-[#4D4D4D]">Action Verb Strength:</span>
-              <span className="font-semibold text-rose-500">Weak (use lead/managed)</span>
+            <div className="flex items-center gap-1.5 text-[9.5px]">
+              <span className="text-emerald-500 font-bold">✓</span>
+              <span className="text-[#4D4D4D]">PDF file-type compliance</span>
             </div>
           </div>
+
           <button
             onClick={() => setScanned(false)}
-            className="self-center inline-flex items-center gap-1 px-3 py-1 border border-[#EBEBEB] hover:bg-[#F2F2F2] rounded-full text-[9px] font-medium text-[#4D4D4D] transition-colors mt-1"
+            className="self-center inline-flex items-center gap-1 px-2.5 py-1 border border-[#EBEBEB] hover:bg-[#F2F2F2] rounded-full text-[9px] font-semibold text-[#4D4D4D] transition-colors"
           >
             <RotateCcw className="w-2.5 h-2.5" /> Re-scan
           </button>
@@ -126,50 +134,51 @@ function ATSScanPlayground({ fileName }: ATSScanPlaygroundProps) {
   );
 }
 
-// 2. AI Writer Playground
-interface AIRewritePlaygroundProps {
-  roleType: "Frontend" | "Backend" | "Product" | "Data" | "DevOps";
+// 2. Improve Resume Bullet Points Demo
+interface ImproveBulletsDemoProps {
+  subOpt: number;
 }
 
-function AIRewritePlayground({ roleType }: AIRewritePlaygroundProps) {
-  const data = {
-    Frontend: {
+function ImproveBulletsDemo({ subOpt }: ImproveBulletsDemoProps) {
+  const data = [
+    {
       start: "Led a team of developers to build the frontend website.",
       target: "Orchestrated a team of 6 engineers to deliver 4 high-traffic React apps, boosting page speed by 35%."
     },
-    Backend: {
+    {
       start: "Wrote backend APIs and managed database queries.",
       target: "Designed scalable Node.js microservices handling 20k req/sec, optimizing database query response times by 40%."
     },
-    Product: {
+    {
       start: "Gathered customer requirements and wrote product specs.",
       target: "Launched 3 core feature verticals by aligning cross-functional teams, driving a 15% increase in user retention."
     },
-    Data: {
+    {
       start: "Analyzed company data and created SQL reports.",
       target: "Built ETL pipelines processing 50M+ rows daily, uncovering insights that saved $45K in annual infrastructure costs."
     },
-    DevOps: {
+    {
       start: "Set up CI/CD pipelines and deployment processes.",
       target: "Automated AWS deployments via Terraform and GitHub Actions, reducing release cycle time from 3 days to 12 minutes."
     }
-  };
+  ];
 
+  const bullet = data[subOpt] || data[0];
   const [text, setText] = useState("");
   const [rewritten, setRewritten] = useState(false);
   const [typing, setTyping] = useState(false);
 
   useEffect(() => {
-    setText(data[roleType].start);
+    setText(bullet.start);
     setRewritten(false);
     setTyping(false);
-  }, [roleType]);
+  }, [subOpt]);
 
   const handleRewrite = async () => {
     setTyping(true);
     setRewritten(true);
     setText("");
-    const targetText = data[roleType].target;
+    const targetText = bullet.target;
     for (let i = 0; i <= targetText.length; i++) {
       await new Promise((resolve) => setTimeout(resolve, 15));
       setText(targetText.substring(0, i));
@@ -178,35 +187,45 @@ function AIRewritePlayground({ roleType }: AIRewritePlaygroundProps) {
   };
 
   const handleReset = () => {
-    setText(data[roleType].start);
+    setText(bullet.start);
     setRewritten(false);
     setTyping(false);
   };
 
   return (
-    <div className="w-full h-[200px] flex flex-col justify-between">
-      <div className="flex-1 flex flex-col justify-center">
-        <p className="text-[9px] font-mono text-[#8F8F8F] uppercase tracking-wide mb-1 select-none">Bullet Point</p>
-        <div className={`p-2.5 rounded-lg border text-[11px] min-h-[75px] leading-relaxed transition-all ${
-          rewritten ? "bg-purple-50/40 border-purple-100 text-purple-900" : "bg-white border-[#EBEBEB] text-[#4D4D4D]"
-        }`}>
-          {text}
-          {typing && <span className="inline-block w-[1.5px] h-[10px] bg-purple-600 ml-0.5 animate-pulse" />}
-        </div>
+    <div className="w-full h-full flex flex-col justify-between text-left">
+      <div className="flex-1 flex flex-col justify-center gap-1.5">
+        {!rewritten ? (
+          <div className="space-y-1">
+            <span className="text-[8px] font-mono text-rose-500 uppercase font-semibold">Original (Weak)</span>
+            <div className="p-2 border border-rose-100 bg-rose-50/20 text-rose-950 rounded-lg text-[10.5px] leading-relaxed">
+              {text}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-1">
+            <span className="text-[8px] font-mono text-emerald-500 uppercase font-semibold">AI Optimized (Strong & Quantified)</span>
+            <div className="p-2 border border-emerald-100 bg-emerald-50/20 text-emerald-950 rounded-lg text-[10.5px] leading-relaxed min-h-[60px]">
+              {text}
+              {typing && <span className="inline-block w-[1.5px] h-[10px] bg-purple-600 ml-0.5 animate-pulse" />}
+            </div>
+          </div>
+        )}
       </div>
-      <div className="flex justify-center mt-2 shrink-0">
+
+      <div className="flex justify-center shrink-0 mt-2">
         {!rewritten ? (
           <button
             onClick={handleRewrite}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#7928CA] hover:bg-[#7928CA]/90 text-white rounded-full text-[10px] font-medium transition-all shadow-sm"
+            className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#7928CA] hover:bg-[#7928CA]/90 text-white rounded-full text-[9px] font-medium transition-all"
           >
-            <Wand2 className="w-3 h-3" /> Optimize with AI
+            <Wand2 className="w-3 h-3" /> Improve with AI
           </button>
         ) : (
           <button
             onClick={handleReset}
             disabled={typing}
-            className="inline-flex items-center gap-1 px-3.5 py-1.5 border border-[#EBEBEB] hover:bg-[#F2F2F2] rounded-full text-[10px] font-medium text-[#4D4D4D] transition-colors"
+            className="inline-flex items-center gap-1 px-3 py-1.5 border border-[#EBEBEB] hover:bg-[#F2F2F2] rounded-full text-[9px] font-medium text-[#4D4D4D] transition-colors"
           >
             <RotateCcw className="w-3 h-3" /> Reset Bullet
           </button>
@@ -216,7 +235,7 @@ function AIRewritePlayground({ roleType }: AIRewritePlaygroundProps) {
   );
 }
 
-// 3. Live Templates Playground
+// 3. Resume Template Designer Demo
 interface TemplatesPlaygroundProps {
   templateName: "Modern" | "Executive" | "Technical" | "Creative" | "Minimal";
 }
@@ -231,26 +250,19 @@ function TemplatesPlayground({ templateName }: TemplatesPlaygroundProps) {
   };
 
   return (
-    <div className="w-full h-[200px] flex flex-col justify-between">
-      {/* Micro Resume Preview */}
+    <div className="w-full h-full flex flex-col justify-between">
       <div className="bg-white border border-[#EBEBEB] rounded-lg p-3 flex flex-col flex-1 shadow-sm overflow-hidden select-none relative">
-        
-        {/* Render different template design dynamically based on templateName */}
         {templateName === "Modern" && (
           <div className="h-full flex flex-col justify-between">
-            {/* Top Blue Accent */}
             <div className="h-1 bg-[#0070F3] w-full rounded-t -mt-3 -mx-3 mb-2 shrink-0" />
             <div className="flex-1 flex gap-3 mt-1 overflow-hidden text-left">
-              {/* Left Column (Sidebar) */}
               <div className="w-[45px] pr-2 flex flex-col gap-1.5" style={{ borderRight: "1px solid #F2F2F2" }}>
                 <div className="w-7 h-7 rounded-full bg-[#0070F3]/10 text-[#0070F3] font-bold text-[9px] flex items-center justify-center">AR</div>
                 <div className="space-y-0.5 mt-1">
                   <div className="h-[3px] bg-[#0070F3]/30 w-full rounded-sm" />
                   <div className="h-1 bg-[#FAFAFA] border border-[#EBEBEB] w-full rounded-sm" />
-                  <div className="h-1 bg-[#FAFAFA] border border-[#EBEBEB] w-full rounded-sm" />
                 </div>
               </div>
-              {/* Right Column (Content) */}
               <div className="flex-1 space-y-2">
                 <div>
                   <div className="text-[9px] font-bold text-[#171717] leading-none">Alex Rivera</div>
@@ -261,7 +273,6 @@ function TemplatesPlayground({ templateName }: TemplatesPlaygroundProps) {
                   <div className="space-y-0.5">
                     <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
                     <div className="h-[2px] bg-[#F2F2F2] w-5/6 rounded-sm" />
-                    <div className="h-[2px] bg-[#F2F2F2] w-4/5 rounded-sm" />
                   </div>
                 </div>
               </div>
@@ -276,17 +287,15 @@ function TemplatesPlayground({ templateName }: TemplatesPlaygroundProps) {
               <div className="text-[5px] text-[#8F8F8F] uppercase tracking-widest -mt-0.5">Staff Software Engineer</div>
               <div className="h-[0.5px] bg-[#171717] w-full mt-1.5" />
             </div>
-            
             <div className="flex-1 text-left mt-2 space-y-2 overflow-hidden">
               <div className="space-y-1">
                 <div className="text-[6px] font-bold text-[#171717] uppercase tracking-wider">Professional Experience</div>
                 <div className="space-y-0.5">
                   <div className="flex justify-between text-[4.5px] font-semibold text-[#4D4D4D]">
                     <span>Lead Engineer @ Stripe</span>
-                    <span className="text-[#8F8F8F]">2022 - Present</span>
+                    <span className="text-[#8F8F8F]">2022 - Pres</span>
                   </div>
                   <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
-                  <div className="h-[2px] bg-[#F2F2F2] w-11/12 rounded-sm" />
                 </div>
               </div>
             </div>
@@ -296,7 +305,6 @@ function TemplatesPlayground({ templateName }: TemplatesPlaygroundProps) {
         {templateName === "Technical" && (
           <div className="h-full flex flex-col justify-between text-left font-mono">
             <div className="flex-1 flex gap-3 overflow-hidden">
-              {/* Left Column (Skills) */}
               <div className="w-[50px] pr-2 flex flex-col gap-1" style={{ borderRight: "1px solid #F2F2F2" }}>
                 <div className="text-[5px] font-bold text-[#7928CA] uppercase">Skills</div>
                 {["React", "TS", "Next.js", "Go"].map((skill) => (
@@ -305,7 +313,6 @@ function TemplatesPlayground({ templateName }: TemplatesPlaygroundProps) {
                   </span>
                 ))}
               </div>
-              {/* Right Column (Content) */}
               <div className="flex-1 space-y-2">
                 <div>
                   <div className="text-[8px] font-bold text-[#171717]">alex_rivera.ts</div>
@@ -315,7 +322,6 @@ function TemplatesPlayground({ templateName }: TemplatesPlaygroundProps) {
                   <div className="h-[0.5px] bg-[#EBEBEB] w-full" />
                   <div className="space-y-0.5">
                     <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
-                    <div className="h-[2px] bg-[#F2F2F2] w-5/6 rounded-sm" />
                   </div>
                 </div>
               </div>
@@ -326,12 +332,10 @@ function TemplatesPlayground({ templateName }: TemplatesPlaygroundProps) {
         {templateName === "Creative" && (
           <div className="h-full flex flex-col justify-between text-left">
             <div className="flex-1 flex gap-3 overflow-hidden">
-              {/* Left Column: Bold initial mark */}
               <div className="w-[36px] bg-[#FF0080]/5 rounded-md flex flex-col items-center justify-center p-2 border border-[#FF0080]/10">
                 <span className="text-[14px] font-black text-[#FF0080]">R</span>
                 <span className="text-[4px] text-[#FF0080] font-bold uppercase mt-1">Creative</span>
               </div>
-              {/* Right Column (Content) */}
               <div className="flex-1 space-y-2">
                 <div>
                   <div className="text-[9px] font-black text-[#171717] tracking-tight">ALEX RIVERA</div>
@@ -340,7 +344,6 @@ function TemplatesPlayground({ templateName }: TemplatesPlaygroundProps) {
                 <div className="space-y-1">
                   <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
                   <div className="h-[2px] bg-[#F2F2F2] w-11/12 rounded-sm" />
-                  <div className="h-[2px] bg-[#F2F2F2] w-4/5 rounded-sm" />
                 </div>
               </div>
             </div>
@@ -356,14 +359,12 @@ function TemplatesPlayground({ templateName }: TemplatesPlaygroundProps) {
             </div>
             <div className="flex-1 space-y-1.5 mt-2 overflow-hidden">
               <div className="space-y-0.5">
-                <div className="h-[2.5px] bg-[#EBEBEB] w-1/4 rounded-sm" />
                 <div className="h-[2px] bg-[#FAFAFA] border border-[#F2F2F2] w-full rounded-sm" />
                 <div className="h-[2px] bg-[#FAFAFA] border border-[#F2F2F2] w-5/6 rounded-sm" />
               </div>
             </div>
           </div>
         )}
-
       </div>
       <div className="text-center mt-2 select-none">
         <span className="text-[9px] text-[#8F8F8F] font-mono uppercase tracking-wider font-semibold">
@@ -374,44 +375,61 @@ function TemplatesPlayground({ templateName }: TemplatesPlaygroundProps) {
   );
 }
 
-// 4. Tone Slider Playground (Cover Letter)
-interface CoverLetterPlaygroundProps {
-  tone: "Professional" | "Bold" | "Creative";
+// 4. Tailor Resume For Any Job Demo
+interface TailorResumeDemoProps {
+  subOpt: number;
 }
 
-function CoverLetterPlayground({ tone }: CoverLetterPlaygroundProps) {
-  const letters = {
-    Professional: "I am writing to express my strong interest in the Software Engineer position. With 5 years of experience in React and Node.js, I am confident in my ability...",
-    Bold: "Stripe is redefining online commerce. As a developer who obsesses over page load speeds and API efficiency, I want to lead your core checkout initiatives...",
-    Creative: "From midnight side projects to deployment pipelines, code has always been my medium. I don't just build UI; I craft user experiences that feel fluid...",
-  };
+function TailorResumeDemo({ subOpt }: TailorResumeDemoProps) {
+  const jobs = [
+    {
+      role: "Next.js Core Developer",
+      desc: "Requires deep knowledge of Next.js Server Components, React rendering lifecycles, and TypeScript compiler optimization.",
+      summary: "Staff Engineer with 5+ years of experience specializing in Next.js App Router performance and TypeScript compiler configurations."
+    },
+    {
+      role: "Stripe Billing Lead",
+      desc: "Looking for an engineer to lead billing initiatives. Heavy emphasis on Ruby/Rails, SQL optimizations, and payment gateways.",
+      summary: "Fullstack Leader with a proven track record scaling Stripe payment pipelines and optimizing database transactions."
+    },
+    {
+      role: "Linear Sync Engineer",
+      desc: "Architect local-first synchronization layers. Requires real-time WebSocket protocol engineering and strict TypeScript typing.",
+      summary: "Systems Engineer specialized in local-first sync layers, WebSocket architecture, and real-time state synchronization."
+    }
+  ];
+
+  const job = jobs[subOpt] || jobs[0];
 
   return (
-    <div className="w-full h-[200px] flex flex-col justify-center">
-      <p className="text-[9px] font-mono text-[#8F8F8F] uppercase tracking-wide mb-1 select-none">Generated Letter</p>
-      <div className="p-3 bg-white border border-[#EBEBEB] rounded-lg text-[11px] leading-relaxed text-[#4D4D4D] min-h-[95px] select-none">
-        <AnimatePresence mode="wait">
-          <motion.p
-            key={tone}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.2 }}
-          >
-            {letters[tone]}
-          </motion.p>
-        </AnimatePresence>
+    <div className="w-full h-full flex flex-col justify-between text-left select-none">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 flex-1 overflow-hidden my-1">
+        {/* Left Column: Job Spec */}
+        <div className="flex flex-col border border-[#EBEBEB] bg-[#FAFAFA] rounded-lg p-2.5 overflow-hidden">
+          <span className="text-[7.5px] font-mono text-purple-600 uppercase font-semibold">Target Job Role</span>
+          <h5 className="text-[9.5px] font-bold text-[#171717] mt-0.5 truncate">{job.role}</h5>
+          <p className="text-[8.5px] text-[#8F8F8F] leading-normal mt-1 flex-1 overflow-y-auto">
+            {job.desc}
+          </p>
+        </div>
+        {/* Right Column: AI Response */}
+        <div className="flex flex-col border border-[#EBEBEB] bg-white rounded-lg p-2.5 overflow-hidden">
+          <span className="text-[7.5px] font-mono text-emerald-600 uppercase font-semibold">AI Tailored Summary</span>
+          <div className="text-[8.5px] text-[#4D4D4D] leading-normal mt-1.5 flex-1 overflow-y-auto bg-emerald-50/10 border border-emerald-100/50 p-1.5 rounded">
+            {job.summary}
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-// 5. Job Match Score Matrix
-interface JobMatchPlaygroundProps {
-  company: "Vercel" | "Stripe" | "Linear";
+// 5. Match Resume To Job Description Demo
+interface MatchResumeDemoProps {
+  subOpt: number;
 }
 
-function JobMatchPlayground({ company }: JobMatchPlaygroundProps) {
+function MatchResumeDemo({ subOpt }: MatchResumeDemoProps) {
   const data = {
     Vercel: {
       score: 95,
@@ -433,57 +451,61 @@ function JobMatchPlayground({ company }: JobMatchPlaygroundProps) {
     },
   };
 
+  const companies = ["Vercel", "Stripe", "Linear"] as const;
+  const company = companies[subOpt] || companies[0];
+  const info = data[company];
+
   return (
-    <div className="w-full h-[200px] flex flex-col justify-between">
-      <div className="flex items-center justify-between border-b border-[#EBEBEB] pb-1.5 shrink-0 select-none">
-        <span className="text-[11px] font-bold text-[#171717]">{company} Fit Audit</span>
+    <div className="w-full h-full flex flex-col justify-between text-left select-none">
+      <div className="flex items-center justify-between border-b border-[#EBEBEB] pb-1.5 shrink-0">
+        <span className="text-[10.5px] font-bold text-[#171717]">{company} Compatibility Audit</span>
         <span
           className="text-[9px] font-semibold px-2 py-0.5 rounded-full"
           style={{
-            backgroundColor: `${data[company].color}15`,
-            color: data[company].color,
+            backgroundColor: `${info.color}15`,
+            color: info.color,
           }}
         >
-          {data[company].status}
+          {info.status}
         </span>
       </div>
 
-      <div className="flex items-center gap-6 flex-1 my-2">
-        {/* Metric gauge circle */}
-        <div className="relative w-18 h-18 flex-shrink-0 flex items-center justify-center">
-          <svg width="72" height="72" viewBox="0 0 100 100" className="-rotate-90">
+      <div className="flex items-center gap-5 flex-1 my-2">
+        {/* Metric circle */}
+        <div className="relative w-16 h-16 shrink-0 flex items-center justify-center">
+          <svg width="64" height="64" viewBox="0 0 100 100" className="-rotate-90">
             <circle cx="50" cy="50" r="40" fill="none" stroke="#EBEBEB" strokeWidth="8" />
             <motion.circle
               cx="50"
               cy="50"
               r="40"
               fill="none"
-              stroke={data[company].color}
+              stroke={info.color}
               strokeWidth="8"
               strokeLinecap="round"
               strokeDasharray={2 * Math.PI * 40}
               initial={{ strokeDashoffset: 2 * Math.PI * 40 }}
               animate={{
                 strokeDashoffset:
-                  2 * Math.PI * 40 - (data[company].score / 100) * (2 * Math.PI * 40),
+                  2 * Math.PI * 40 - (info.score / 100) * (2 * Math.PI * 40),
               }}
               transition={{ duration: 0.6 }}
             />
           </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center select-none">
-            <span className="text-base font-bold text-[#171717]">{data[company].score}%</span>
-            <span className="text-[7px] text-[#8F8F8F] uppercase tracking-wider font-semibold">Fit</span>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-sm font-bold text-[#171717]">{info.score}%</span>
+            <span className="text-[6.5px] text-[#8F8F8F] uppercase tracking-wider font-semibold">Match</span>
           </div>
         </div>
 
         {/* Required Keywords */}
         <div className="flex-1 flex flex-col justify-center">
-          <p className="text-[9px] text-[#8F8F8F] font-semibold mb-1 select-none">Target Keyword Scans</p>
+          <p className="text-[9px] text-[#8F8F8F] font-semibold mb-1">Target Keyword Match Status</p>
           <div className="flex flex-wrap gap-1">
-            {data[company].keywords.map((kw) => (
+            {info.keywords.map((kw) => (
               <span
                 key={kw}
-                className="text-[9px] font-medium font-mono px-1.5 py-0.5 rounded bg-white border border-[#EBEBEB] text-[#4D4D4D] select-none"
+                className="text-[8.5px] font-medium font-mono px-1.5 py-0.5 rounded bg-white border border-[#EBEBEB] text-[#4D4D4D]"
               >
                 {kw}
               </span>
@@ -495,14 +517,17 @@ function JobMatchPlayground({ company }: JobMatchPlaygroundProps) {
   );
 }
 
-// 6. Smart Suggestions Playground
-interface SuggestionsPlaygroundProps {
-  filter: "All Issues" | "Experience" | "Skills";
+// 6. AI Resume Suggestions Demo
+interface SuggestionsDemoProps {
+  filterType: number;
 }
 
-function SuggestionsPlayground({ filter }: SuggestionsPlaygroundProps) {
+function SuggestionsDemo({ filterType }: SuggestionsDemoProps) {
   const [fixed1, setFixed1] = useState(false);
   const [fixed2, setFixed2] = useState(false);
+
+  const filters = ["All Issues", "Experience", "Skills"] as const;
+  const activeFilter = filters[filterType] || filters[0];
 
   const items = [
     {
@@ -522,17 +547,17 @@ function SuggestionsPlayground({ filter }: SuggestionsPlaygroundProps) {
   ];
 
   const filteredItems = items.filter(
-    (item) => filter === "All Issues" || item.category === filter
+    (item) => activeFilter === "All Issues" || item.category === activeFilter
   );
 
   return (
-    <div className="w-full h-[200px] flex flex-col justify-between">
+    <div className="w-full h-full flex flex-col justify-between text-left">
       <div className="flex-1 flex flex-col justify-center gap-2">
         {filteredItems.map((item) => (
           <div key={item.id} className="flex items-center justify-between bg-white border border-[#EBEBEB] rounded-lg p-2.5 transition-all shadow-sm">
             <div className="flex items-center gap-2">
               <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border transition-all ${
-                item.fixed ? "bg-emerald-500 border-emerald-500 text-white" : "border-[#EBEBEB]"
+                item.fixed ? "bg-emerald-500 border-emerald-500 text-white animate-scale-pop" : "border-[#EBEBEB]"
               }`}>
                 {item.fixed && <Check className="w-2.5 h-2.5" strokeWidth={3} />}
               </div>
@@ -552,14 +577,14 @@ function SuggestionsPlayground({ filter }: SuggestionsPlaygroundProps) {
         ))}
         {filteredItems.length === 0 && (
           <div className="text-center text-[10px] text-[#8F8F8F] py-4 select-none">
-            No issues found in this category
+            No suggestions left in this category
           </div>
         )}
       </div>
 
       <div className="mt-2 text-center border-t border-[#EBEBEB] pt-2 shrink-0 flex items-center justify-between select-none">
         <span className="text-[9px] text-[#8F8F8F]">
-          {fixed1 && fixed2 ? "All problems resolved" : "Pending issues remaining"}
+          {fixed1 && fixed2 ? "All suggestions resolved" : "Suggestions pending"}
         </span>
         {(fixed1 || fixed2) && (
           <button
@@ -578,7 +603,7 @@ function SuggestionsPlayground({ filter }: SuggestionsPlaygroundProps) {
 }
 
 /* ═══════════════════════════════════════════════
-   FeaturesGrid (Interactive Workspace Layout)
+   FeaturesGrid (Split Layout Workspace Showcase)
    ═══════════════════════════════════════════════ */
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -596,7 +621,6 @@ export default function FeaturesGrid() {
   const [activeTab, setActiveTab] = useState(0);
   const [activeSubOption, setActiveSubOption] = useState(0);
 
-  // Reset sub-option when main tab changes
   useEffect(() => {
     setActiveSubOption(0);
   }, [activeTab]);
@@ -604,80 +628,65 @@ export default function FeaturesGrid() {
   const features = [
     {
       id: 0,
-      title: "ATS Scan Playground",
-      description: "Scan your mock resume files directly. Test the parser performance, catch compliance alerts, and identify formatting bugs in real time.",
+      title: "ATS Resume Scanner",
+      description: "Scan your resume against job criteria to identify formatting issues and missing keywords.",
       icon: FileSearch,
-      sidebarOptions: ["Resume.pdf", "Resume.docx", "Portfolio.pdf", "Draft.txt"],
-      renderPlayground: (subOpt: number) => {
-        const fileNames = ["Resume.pdf", "Resume.docx", "Portfolio.pdf", "Draft.txt"];
-        return <ATSScanPlayground fileName={fileNames[subOpt]} />;
-      },
-      badge: "ATS Analyzer",
+      sidebarOptions: ["alex_resume.pdf", "marketing_draft.docx", "technical_cv_v2.pdf"],
+      renderPlayground: (subOpt: number) => <ATSScanDemo subOpt={subOpt} />,
+      badge: "ATS Scanner",
       bgClass: "bg-purple-50 border-purple-100 text-purple-600"
     },
     {
       id: 1,
-      title: "AI Bullet Optimizer",
-      description: "Transform weak description statements. Our engine converts generic points into metric-rich, action-oriented career achievements.",
+      title: "Improve Resume Bullet Points",
+      description: "Rewrite plain duties into high-impact, metrics-driven bullet achievements.",
       icon: Wand2,
       sidebarOptions: ["Frontend", "Backend", "Product", "Data", "DevOps"],
-      renderPlayground: (subOpt: number) => {
-        const roles = ["Frontend", "Backend", "Product", "Data", "DevOps"] as const;
-        return <AIRewritePlayground roleType={roles[subOpt]} />;
-      },
-      badge: "AI Resume Writer",
+      renderPlayground: (subOpt: number) => <ImproveBulletsDemo subOpt={subOpt} />,
+      badge: "AI Bullet Optimizer",
       bgClass: "bg-purple-50 border-purple-100 text-purple-600"
     },
     {
       id: 2,
-      title: "Template Customizer",
-      description: "Toggle styles and colorways. Instantly test formatting layouts designed for recruiter readability.",
+      title: "Resume Template Designer",
+      description: "Instantly toggle between professional layouts built for recruiter readability.",
       icon: LayoutTemplate,
       sidebarOptions: ["Modern", "Executive", "Technical", "Creative", "Minimal"],
       renderPlayground: (subOpt: number) => {
         const templates = ["Modern", "Executive", "Technical", "Creative", "Minimal"] as const;
         return <TemplatesPlayground templateName={templates[subOpt]} />;
       },
-      badge: "Resume Templates",
+      badge: "Template Designer",
       bgClass: "bg-[#F2F2F2] border-transparent text-[#171717]"
     },
     {
       id: 3,
-      title: "Tone Match Generator",
-      description: "Adjust the copy slider. Generate custom introduction statements tailored to specific job vibes.",
+      title: "Tailor Resume For Any Job",
+      description: "Generate customized resume summaries and cover letters for specific job posts.",
       icon: FileText,
-      sidebarOptions: ["Professional", "Bold", "Creative"],
-      renderPlayground: (subOpt: number) => {
-        const tones = ["Professional", "Bold", "Creative"] as const;
-        return <CoverLetterPlayground tone={tones[subOpt]} />;
-      },
-      badge: "Cover Letter Generator",
+      sidebarOptions: ["Vercel", "Stripe", "Linear"],
+      renderPlayground: (subOpt: number) => <TailorResumeDemo subOpt={subOpt} />,
+      badge: "Role Adaptor",
       bgClass: "bg-[#F2F2F2] border-transparent text-[#171717]"
     },
     {
       id: 4,
-      title: "Fit Matrix Simulator",
-      description: "Compare job descriptions. Select targets to trigger real-time fit metrics and tech stack audits.",
+      title: "Match Resume To Job Description",
+      description: "Get a comprehensive compatibility score and skill gap analysis for any tech role.",
       icon: Target,
       sidebarOptions: ["Vercel", "Stripe", "Linear"],
-      renderPlayground: (subOpt: number) => {
-        const companies = ["Vercel", "Stripe", "Linear"] as const;
-        return <JobMatchPlayground company={companies[subOpt]} />;
-      },
-      badge: "Job Match Score",
+      renderPlayground: (subOpt: number) => <MatchResumeDemo subOpt={subOpt} />,
+      badge: "Job Match Matrix",
       bgClass: "bg-emerald-50 border-emerald-100 text-emerald-600"
     },
     {
       id: 5,
-      title: "Smart Suggestions Engine",
-      description: "Identify sections that need immediate attention. Try clicking \"Fix\" to simulate applying automated recommendations.",
+      title: "AI Resume Suggestions",
+      description: "Receive real-time, actionable resume fixes with one-click automated updates.",
       icon: Lightbulb,
       sidebarOptions: ["All Issues", "Experience", "Skills"],
-      renderPlayground: (subOpt: number) => {
-        const filters = ["All Issues", "Experience", "Skills"] as const;
-        return <SuggestionsPlayground filter={filters[subOpt]} />;
-      },
-      badge: "Smart Suggestions",
+      renderPlayground: (subOpt: number) => <SuggestionsDemo filterType={subOpt} />,
+      badge: "Suggestions Feed",
       bgClass: "bg-purple-50 border-purple-100 text-purple-600"
     }
   ];
@@ -729,7 +738,7 @@ export default function FeaturesGrid() {
           </p>
         </motion.div>
 
-        {/* Split Interactive Workspace Layout (Autosend Style) */}
+        {/* Split Interactive Workspace Layout (AutoSend Style) */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.38fr] border border-[#EBEBEB] rounded-2xl overflow-hidden mt-16 shadow-[0_8px_32px_rgba(0,0,0,0.02)] bg-white">
           {/* Left Column: Interactive Tab Buttons */}
           <div className="flex lg:flex-col overflow-x-auto lg:overflow-x-visible scrollbar-none bg-[#FAFAFA] border-b lg:border-b-0 lg:border-r border-[#EBEBEB] shrink-0 snap-x">
@@ -741,7 +750,7 @@ export default function FeaturesGrid() {
                   key={feature.id}
                   onClick={() => setActiveTab(idx)}
                   className={`relative flex items-start text-left p-6 transition-all hover:bg-neutral-100/30 border-r lg:border-r-0 lg:border-b border-[#EBEBEB] last:border-r-0 lg:last:border-b-0 shrink-0 snap-start w-[280px] lg:w-full select-none ${
-                    isActive ? "bg-white lg:bg-white" : "bg-transparent"
+                    isActive ? "bg-white" : "bg-transparent"
                   }`}
                 >
                   {/* Left purple active indicator line */}
@@ -765,14 +774,8 @@ export default function FeaturesGrid() {
 
           {/* Right Column: Preview Canvas with Floating Mockup */}
           <div className="relative flex items-center justify-center p-8 bg-[#FAFAFA] min-h-[420px] lg:min-h-[480px]">
-            {/* Background Mountain layer */}
-            <img
-              src="/hero-landscape.png"
-              alt="Feature Background"
-              className="absolute inset-0 w-full h-full object-cover opacity-90"
-            />
-            {/* Dark blur overlay to highlight mockup */}
-            <div className="absolute inset-0 bg-slate-900/10 backdrop-blur-[1px] pointer-events-none" />
+            {/* Grid Pattern Background */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:20px_20px] opacity-40" />
 
             {/* Floating Mock Window Frame */}
             <motion.div
@@ -780,7 +783,7 @@ export default function FeaturesGrid() {
               initial={{ opacity: 0, scale: 0.96, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="relative z-10 w-[85%] max-w-[450px] bg-white/95 backdrop-blur-md border border-[#EBEBEB] rounded-xl shadow-2xl overflow-hidden flex flex-col h-[280px]"
+              className="relative z-10 w-full max-w-[580px] h-[360px] bg-white border border-[#EBEBEB] rounded-xl shadow-[0_12px_40px_rgba(0,0,0,0.06)] overflow-hidden flex flex-col"
             >
               {/* Mock Window Top Bar */}
               <div className="h-9 bg-[#FAFAFA]/90 border-b border-[#EBEBEB] px-4 flex items-center justify-between shrink-0 select-none">
@@ -798,16 +801,16 @@ export default function FeaturesGrid() {
               </div>
 
               {/* Mock Window Split Content */}
-              <div className="flex-1 flex overflow-hidden">
+              <div className="flex-1 flex overflow-hidden bg-white">
                 {/* Internal Left Sidebar */}
-                <div className="w-[100px] bg-[#FAFAFA] border-r border-[#EBEBEB] flex flex-col shrink-0 py-2 overflow-y-auto select-none">
+                <div className="w-[140px] bg-[#FAFAFA] border-r border-[#EBEBEB] flex flex-col shrink-0 py-2 overflow-y-auto select-none">
                   {features[activeTab].sidebarOptions.map((opt, idx) => {
                     const isActive = activeSubOption === idx;
                     return (
                       <button
                         key={opt}
                         onClick={() => setActiveSubOption(idx)}
-                        className={`text-left px-3.5 py-1.5 text-[11px] font-medium transition-all ${
+                        className={`text-left px-3.5 py-1.5 text-[11px] font-medium transition-all truncate ${
                           isActive 
                             ? "bg-[#171717]/5 text-[#171717] font-semibold border-l-2 border-[#7928CA]" 
                             : "text-[#8F8F8F] hover:text-[#4D4D4D] border-l-2 border-transparent"
@@ -820,7 +823,7 @@ export default function FeaturesGrid() {
                 </div>
 
                 {/* Internal Right Playground Content */}
-                <div className="flex-1 bg-white/80 p-5 overflow-y-auto flex items-center justify-center">
+                <div className="flex-1 bg-white p-5 overflow-y-auto flex items-center justify-center">
                   {features[activeTab].renderPlayground(activeSubOption)}
                 </div>
               </div>

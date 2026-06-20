@@ -12,7 +12,7 @@ import HeroSection from "@/components/landing-v2/HeroSection";
 const TrustBar = dynamic(() => import("@/components/landing-v2/TrustBar"), { ssr: true });
 const FeaturesGrid = dynamic(() => import("@/components/landing-v2/FeaturesGrid"), { ssr: true });
 const WorkflowTimeline = dynamic(() => import("@/components/landing-v2/WorkflowTimeline"), { ssr: true });
-const TemplatesShowcase = dynamic(() => import("@/components/landing-v2/TemplatesShowcase"), { ssr: true });
+const PlatformEcosystem = dynamic(() => import("@/components/landing-v2/PlatformEcosystem"), { ssr: true });
 const ATSDashboard = dynamic(() => import("@/components/landing-v2/ATSDashboard"), { ssr: false });
 const PricingSection = dynamic(() => import("@/components/landing-v2/PricingSection"), { ssr: false });
 const FinalCTA = dynamic(() => import("@/components/landing-v2/FinalCTA"), { ssr: false });
@@ -46,7 +46,7 @@ export default function LandingPage({
         <TrustBar />
         <FeaturesGrid />
         <WorkflowTimeline />
-        <TemplatesShowcase />
+        <PlatformEcosystem locale={locale} />
         <ATSDashboard />
         <PricingSection locale={locale} />
         <FinalCTA locale={locale} />

@@ -34,7 +34,7 @@ export default function FinalCTA({ locale = "en-in" }: FinalCTAProps) {
               letterSpacing: "-1.28px",
             }}
           >
-            Your next opportunity starts with a better resume.
+            Your next opportunity starts with a complete career platform.
           </span>
           <span
             className="hidden md:block"
@@ -44,11 +44,11 @@ export default function FinalCTA({ locale = "en-in" }: FinalCTAProps) {
               letterSpacing: "-2.4px",
             }}
           >
-            Your next opportunity starts with a better resume.
+            Your next opportunity starts with a complete career platform.
           </span>
         </h2>
 
-        <Link href={`/${locale}/ai-resume-builder`} className="inline-block mt-8">
+        <Link href={`/${locale}/signup`} className="inline-block mt-8">
           <button
             className="inline-flex items-center justify-center px-8 h-12 rounded-full font-medium transition-colors duration-200 cursor-pointer"
             style={{
@@ -58,7 +58,7 @@ export default function FinalCTA({ locale = "en-in" }: FinalCTAProps) {
               fontWeight: 500,
             }}
           >
-            Generate My Resume
+            Get Started Free
           </button>
         </Link>
       </motion.div>

@@ -35,43 +35,34 @@ const fadeUp = {
 function Slide1() {
   return (
     <div className="relative w-full h-full flex items-center justify-center">
-      {/* Background Pixel Art */}
-      <img
-        src="/hero-landscape.png"
-        alt="Pixel Art Mountain Forest Landscape"
-        className="absolute inset-0 w-full h-full object-cover"
-      />
-      {/* Ambient dark overlay */}
-      <div className="absolute inset-0 bg-slate-950/15 pointer-events-none" />
-
       {/* Centerpiece Floating Resume */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 w-[240px] h-[330px] bg-white rounded-xl border border-[#EBEBEB] p-3.5 text-left flex flex-col font-sans select-none shadow-[0_20px_50px_rgba(0,0,0,0.15)] hover:scale-[1.02] transition-transform duration-300"
+        className="relative z-10 w-[240px] h-[330px] bg-white rounded-xl border border-[#EBEBEB] p-4 text-left flex flex-col font-sans select-none shadow-[0_20px_50px_rgba(0,0,0,0.15)] hover:scale-[1.02] transition-transform duration-300"
       >
         {/* Top accent bar */}
-        <div className="h-0.5 bg-[#7928CA] w-full mb-2 shrink-0" />
+        <div className="h-0.5 bg-[#7928CA] w-full mb-3 shrink-0" />
         
         {/* Header */}
         <div className="mb-2 shrink-0">
-          <div className="font-bold text-[8px] text-[#171717] tracking-tight">ALEX RIVERA</div>
-          <div className="text-[#7928CA] font-medium text-[4.5px] mt-0.5">Staff Software Engineer</div>
-          <div className="text-[#8F8F8F] text-[3.5px] mt-0.5">Vercel • Next.js Core Team</div>
+          <div className="font-bold text-[9px] text-[#171717] tracking-tight">ALEX RIVERA</div>
+          <div className="text-[#7928CA] font-medium text-[5px] mt-0.5">Staff Software Engineer</div>
+          <div className="text-[#8F8F8F] text-[4px] mt-0.5">Vercel • Next.js Core Team</div>
         </div>
 
         {/* Experience block */}
-        <div className="space-y-2 flex-1 min-h-0 overflow-hidden">
+        <div className="space-y-2 flex-1 min-h-0 overflow-hidden mt-1">
           <div>
-            <div className="font-semibold text-[#171717] border-b border-[#EBEBEB] pb-0.5 mb-1.5 text-[4px] tracking-wider">EXPERIENCE</div>
+            <div className="font-semibold text-[#171717] border-b border-[#EBEBEB] pb-0.5 mb-1.5 text-[4.5px] tracking-wider">EXPERIENCE</div>
             <div className="space-y-1.5">
               <div>
-                <div className="flex justify-between font-medium text-[#171717] text-[3.5px]">
+                <div className="flex justify-between font-medium text-[#171717] text-[4px]">
                   <span>Staff Software Engineer</span>
-                  <span className="text-[#8F8F8F] font-normal text-[3px]">2022 - Pres</span>
+                  <span className="text-[#8F8F8F] font-normal text-[3.5px]">2022 - Pres</span>
                 </div>
-                <ul className="list-disc pl-2 mt-0.5 space-y-0.5 text-[#8F8F8F] text-[3px] leading-[4px]">
+                <ul className="list-disc pl-2.5 mt-0.5 space-y-0.5 text-[#8F8F8F] text-[3.5px] leading-[4.5px]">
                   <li>Architected Next.js App Router compiler upgrades.</li>
                   <li>Reduced cold-start latency by 24% globally.</li>
                 </ul>
@@ -80,11 +71,11 @@ function Slide1() {
           </div>
 
           {/* Skills block */}
-          <div>
-            <div className="font-semibold text-[#171717] border-b border-[#EBEBEB] pb-0.5 mb-1 text-[4px] tracking-wider">TECHNICAL SKILLS</div>
-            <div className="flex flex-wrap gap-0.5">
+          <div className="mt-2">
+            <div className="font-semibold text-[#171717] border-b border-[#EBEBEB] pb-0.5 mb-1 text-[4.5px] tracking-wider">TECHNICAL SKILLS</div>
+            <div className="flex flex-wrap gap-0.5 mt-1">
               {["TypeScript", "React", "Next.js", "Go", "Docker"].map((skill) => (
-                <span key={skill} className="text-[3px] font-medium text-[#4D4D4D] bg-[#FAFAFA] border border-[#EBEBEB] px-1 py-0.2 rounded-sm">
+                <span key={skill} className="text-[3.5px] font-medium text-[#4D4D4D] bg-[#FAFAFA] border border-[#EBEBEB] px-1 py-0.2 rounded-sm">
                   {skill}
                 </span>
               ))}
@@ -93,7 +84,7 @@ function Slide1() {
         </div>
 
         {/* Embedded Mini ATS Score Tag */}
-        <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 bg-emerald-50 border border-emerald-100 rounded-full flex items-center gap-1">
+        <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 bg-emerald-50 border border-emerald-100 rounded-full flex items-center gap-1 z-10 shadow-sm">
           <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-[6.5px] font-bold text-emerald-700">92 Score Passed</span>
         </div>
@@ -109,12 +100,20 @@ function Slide2() {
   const filled = 0.92 * circumference;
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center p-8 bg-[#FAFAFA] overflow-hidden">
+    <div className="relative w-full h-full flex items-center justify-center p-8 bg-transparent overflow-hidden">
       {/* Grid Pattern Background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:24px_24px] opacity-40" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:24px_24px] opacity-20" />
 
       {/* Blurred Resume Card in Background */}
-      <div className="absolute left-[30px] top-[90px] w-[180px] h-[250px] bg-white/60 border border-[#EBEBEB] rounded-lg p-2.5 shadow-sm opacity-20 blur-[1px] -rotate-6" />
+      <div className="absolute left-[30px] top-[90px] w-[180px] h-[250px] bg-white/40 border border-[#EBEBEB] rounded-lg p-2.5 shadow-sm opacity-20 blur-[1px] -rotate-6 flex flex-col text-left">
+        <div className="h-0.5 bg-neutral-300 w-full mb-1.5 shrink-0" />
+        <div className="h-2 bg-neutral-200 w-2/3 rounded-sm mb-2" />
+        <div className="space-y-1.5 flex-1 overflow-hidden">
+          <div className="h-1 bg-neutral-200 w-full rounded-sm" />
+          <div className="h-1 bg-neutral-200 w-5/6 rounded-sm" />
+          <div className="h-1 bg-neutral-200 w-11/12 rounded-sm" />
+        </div>
+      </div>
 
       {/* Foreground ATS compliance scorecard */}
       <motion.div
@@ -245,12 +244,20 @@ function Slide3() {
   }, []);
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center p-8 bg-[#FAFAFA] overflow-hidden">
+    <div className="relative w-full h-full flex items-center justify-center p-8 bg-transparent overflow-hidden">
       {/* Grid Pattern Background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:24px_24px] opacity-40" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:24px_24px] opacity-20" />
 
       {/* Blurred Resume Card in Background */}
-      <div className="absolute right-[40px] top-[100px] w-[180px] h-[250px] bg-white/60 border border-[#EBEBEB] rounded-lg p-2.5 shadow-sm opacity-20 blur-[1px] rotate-6" />
+      <div className="absolute right-[40px] top-[100px] w-[180px] h-[250px] bg-white/40 border border-[#EBEBEB] rounded-lg p-2.5 shadow-sm opacity-20 blur-[1px] rotate-6 flex flex-col text-left">
+        <div className="h-0.5 bg-neutral-300 w-full mb-1.5 shrink-0" />
+        <div className="h-2 bg-neutral-200 w-2/3 rounded-sm mb-2" />
+        <div className="space-y-1.5 flex-1 overflow-hidden">
+          <div className="h-1 bg-neutral-200 w-full rounded-sm" />
+          <div className="h-1 bg-neutral-200 w-5/6 rounded-sm" />
+          <div className="h-1 bg-neutral-200 w-11/12 rounded-sm" />
+        </div>
+      </div>
 
       {/* Foreground AI Suggestions Panel */}
       <motion.div
@@ -297,9 +304,9 @@ function Slide3() {
 // Slide 4: Multiple styled resume designs
 function Slide4() {
   return (
-    <div className="relative w-full h-full flex items-center justify-center p-8 bg-[#FAFAFA] overflow-hidden">
+    <div className="relative w-full h-full flex items-center justify-center p-8 bg-transparent overflow-hidden">
       {/* Grid Pattern Background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:24px_24px] opacity-40" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:24px_24px] opacity-20" />
 
       {/* Fan of Overlapping Resume Templates */}
       <div className="relative w-full h-[360px] flex items-center justify-center select-none">
@@ -309,20 +316,23 @@ function Slide4() {
           initial={{ opacity: 0, x: -60, rotate: -10 }}
           animate={{ opacity: 0.95, x: -110, rotate: -8 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute w-[180px] h-[250px] bg-white border border-[#EBEBEB] rounded-lg p-2.5 shadow-lg flex flex-col origin-bottom"
+          className="absolute w-[180px] h-[250px] bg-white border border-[#EBEBEB] rounded-lg p-3.5 shadow-lg flex flex-col origin-bottom overflow-hidden animate-float-slow text-left"
         >
-          <div className="h-1 bg-[#0070F3] w-full rounded-t -mt-2.5 -mx-2.5 mb-1.5 shrink-0" />
+          <div className="h-1 bg-[#0070F3] w-full rounded-t -mt-3.5 -mx-3.5 mb-2.5 shrink-0" />
           <div className="flex gap-2 text-left">
-            <div className="w-[30px] border-r border-[#F2F2F2] pr-1.5 flex flex-col gap-1 shrink-0">
-              <div className="w-4 h-4 rounded-full bg-[#0070F3]/10 text-[#0070F3] font-bold text-[6px] flex items-center justify-center">AR</div>
-              <div className="h-1 bg-[#F2F2F2] w-full rounded" />
-              <div className="h-1 bg-[#F2F2F2] w-full rounded" />
+            <div className="w-[32px] border-r border-[#F2F2F2] pr-1.5 flex flex-col gap-1 shrink-0">
+              <div className="w-4.5 h-4.5 rounded-full bg-[#0070F3]/10 text-[#0070F3] font-bold text-[6px] flex items-center justify-center">SA</div>
+              <div className="h-1 bg-[#F2F2F2] w-full rounded-sm" />
+              <div className="h-1 bg-[#F2F2F2] w-full rounded-sm" />
             </div>
             <div className="flex-1 space-y-1.5">
-              <div className="h-1.5 bg-[#171717] w-2/3 rounded" />
-              <div className="space-y-0.5">
-                <div className="h-[2px] bg-[#F2F2F2] w-full rounded" />
-                <div className="h-[2px] bg-[#F2F2F2] w-5/6 rounded" />
+              <div>
+                <div className="text-[7px] font-bold text-[#171717] leading-none">Sarah Anderson</div>
+                <div className="text-[4.5px] text-[#0070F3] font-medium mt-0.5">Product Designer</div>
+              </div>
+              <div className="space-y-0.5 mt-2">
+                <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
+                <div className="h-[2px] bg-[#F2F2F2] w-5/6 rounded-sm" />
               </div>
             </div>
           </div>
@@ -333,19 +343,23 @@ function Slide4() {
           initial={{ opacity: 0, x: 60, rotate: 10 }}
           animate={{ opacity: 0.95, x: 110, rotate: 8 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute w-[180px] h-[250px] bg-white border border-[#EBEBEB] rounded-lg p-2.5 shadow-lg flex flex-col origin-bottom"
+          className="absolute w-[180px] h-[250px] bg-white border border-[#EBEBEB] rounded-lg p-3.5 shadow-lg flex flex-col origin-bottom overflow-hidden animate-float-slow text-left font-mono"
         >
-          <div className="h-1 bg-[#7928CA] w-full rounded-t -mt-2.5 -mx-2.5 mb-1.5 shrink-0" />
-          <div className="flex gap-2 text-left">
-            <div className="w-[30px] border-r border-[#F2F2F2] pr-1.5 flex flex-col gap-1 shrink-0">
-              <div className="h-1.5 bg-[#F2F2F2] w-full rounded" />
-              <div className="h-1 bg-[#F2F2F2] w-full rounded" />
+          <div className="h-1 bg-[#7928CA] w-full rounded-t -mt-3.5 -mx-3.5 mb-2.5 shrink-0" />
+          <div className="flex gap-2">
+            <div className="w-[30px] border-r border-[#F2F2F2] pr-1 flex flex-col gap-1 shrink-0">
+              <div className="text-[4px] font-bold text-[#7928CA] uppercase">Skills</div>
+              <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
+              <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
             </div>
             <div className="flex-1 space-y-1.5">
-              <div className="h-1.5 bg-[#171717] w-3/4 rounded" />
+              <div>
+                <div className="text-[6.5px] font-bold text-[#171717] leading-none">&lt;Alex /&gt;</div>
+                <div className="text-[4px] text-[#7928CA] font-medium mt-0.5">&gt; Developer</div>
+              </div>
               <div className="space-y-0.5">
-                <div className="h-[2px] bg-[#F2F2F2] w-full rounded" />
-                <div className="h-[2px] bg-[#F2F2F2] w-full rounded" />
+                <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
+                <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
               </div>
             </div>
           </div>
@@ -356,28 +370,28 @@ function Slide4() {
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute w-[200px] h-[280px] bg-white border border-[#171717]/10 rounded-xl p-3 shadow-2xl flex flex-col justify-between font-serif z-10"
+          className="absolute w-[200px] h-[280px] bg-white border border-[#171717]/10 rounded-xl p-4 shadow-2xl flex flex-col justify-between z-10 overflow-hidden animate-float-gentle text-center font-serif"
         >
-          <div className="space-y-1.5 text-center">
-            <div className="text-[9px] font-bold text-[#171717] uppercase tracking-wide">Alex Rivera</div>
-            <div className="text-[4.5px] text-[#8F8F8F] uppercase tracking-widest -mt-1">Staff Software Engineer</div>
+          <div className="space-y-1">
+            <div className="text-[9px] font-bold text-[#171717] uppercase tracking-wide">David Chen</div>
+            <div className="text-[4.5px] text-[#8F8F8F] uppercase tracking-widest -mt-0.5">Chief Operating Officer</div>
             <div className="h-[0.5px] bg-[#171717] w-full mt-1.5" />
           </div>
           <div className="flex-1 text-left mt-2.5 space-y-2 overflow-hidden">
             <div className="space-y-1">
-              <div className="text-[6px] font-bold text-[#171717] uppercase tracking-wider">Professional Experience</div>
+              <div className="text-[5.5px] font-bold text-[#171717] uppercase tracking-wider">Professional Experience</div>
               <div className="space-y-0.5">
-                <div className="flex justify-between text-[4.5px] font-semibold text-[#4D4D4D]">
-                  <span>Lead Engineer @ Stripe</span>
-                  <span className="text-[#8F8F8F]">2022 - Pres</span>
+                <div className="flex justify-between text-[4px] font-semibold text-[#4D4D4D]">
+                  <span>COO @ Global Solutions</span>
+                  <span className="text-[#8F8F8F]">2018 - Pres</span>
                 </div>
-                <div className="h-[2.5px] bg-[#F2F2F2] w-full rounded-sm" />
-                <div className="h-[2.5px] bg-[#F2F2F2] w-11/12 rounded-sm" />
+                <div className="h-[2px] bg-[#F2F2F2] w-full rounded-sm" />
+                <div className="h-[2px] bg-[#F2F2F2] w-11/12 rounded-sm" />
               </div>
             </div>
           </div>
-          <div className="text-center border-t border-[#EBEBEB] pt-2 mt-2">
-            <span className="text-[7px] text-[#8F8F8F] uppercase tracking-wider font-mono font-bold">Executive Style</span>
+          <div className="text-center border-t border-[#EBEBEB] pt-2 mt-2 shrink-0">
+            <span className="text-[6.5px] text-[#8F8F8F] uppercase tracking-wider font-mono font-bold">Executive Style</span>
           </div>
         </motion.div>
 
@@ -427,7 +441,16 @@ function ProductPreviewSlider() {
   return (
     <div className="hidden lg:flex flex-col items-center shrink-0 origin-right lg:scale-[0.88] xl:scale-[0.95] 2xl:scale-100 transition-transform duration-300">
       {/* Main Widescreen Visual Container (720px width, 480px height - 3:2 ratio) */}
-      <div className="w-[720px] h-[480px] bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.06)] relative bg-[#FAFAFA]">
+      <div className="w-[720px] h-[480px] border border-[#EBEBEB] rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.06)] relative bg-[#FAFAFA]">
+        {/* Background Pixel Art (common for all slides) */}
+        <img
+          src="/hero-landscape.png"
+          alt="Pixel Art Mountain Forest Landscape"
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        />
+        {/* Ambient dark overlay */}
+        <div className="absolute inset-0 bg-slate-950/15 pointer-events-none z-10" />
+
         <AnimatePresence mode="wait">
           <motion.div
             key={activeSlide}
@@ -435,7 +458,7 @@ function ProductPreviewSlider() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease: "easeInOut" }}
-            className="w-full h-full"
+            className="w-full h-full relative z-20"
           >
             {slides[activeSlide].component}
           </motion.div>
@@ -514,7 +537,7 @@ export default function HeroSection({ locale = "en-in" }: HeroSectionProps) {
               lineHeight: "16px",
             }}
           >
-            AI Resume Operating System
+            Connected Developer Career Platform
           </motion.p>
 
           {/* Headline */}
@@ -524,13 +547,13 @@ export default function HeroSection({ locale = "en-in" }: HeroSectionProps) {
             style={{
               fontFamily: "var(--font-geist-sans)",
               fontWeight: 600,
-              lineHeight: 1,
+              lineHeight: 1.1,
               letterSpacing: "-0.05em",
             }}
           >
-            Create resumes that
+            Forge your career.
             <br />
-            get interviews.
+            From resume to offer.
           </motion.h1>
 
           {/* Subheadline */}
@@ -544,8 +567,8 @@ export default function HeroSection({ locale = "en-in" }: HeroSectionProps) {
               lineHeight: "24px",
             }}
           >
-            ResumeForge AI analyzes your experience, optimizes for ATS systems,
-            and generates professional resumes tailored for every role.
+            ResumeForge AI connects all the tools you need—resume optimization, 
+            portfolio showcases, coding practice, and mock interviews—in one unified ecosystem.
           </motion.p>
 
           {/* CTA row */}
