@@ -256,7 +256,12 @@ export default function PricingSection({ locale = "en-in" }: PricingSectionProps
                       sliderValue === idx ? "text-[#7c3aed]" : "text-stone-400 group-hover:text-stone-600"
                     }`}
                   >
-                    {tier.name}
+                    {tier.name === "Professional" ? (
+                      <>
+                        <span className="hidden sm:inline">Professional</span>
+                        <span className="inline sm:hidden">Pro</span>
+                      </>
+                    ) : tier.name}
                   </span>
                   <span className="text-[9.5px] text-stone-500 mt-0.5 hidden md:inline font-mono">
                     {tier.limit.split(" ")[0]} cr

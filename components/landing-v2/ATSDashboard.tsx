@@ -281,7 +281,7 @@ export default function ATSDashboard() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.7, ease }}
-            className="relative flex items-center justify-center p-6 md:p-10 w-full overflow-hidden rounded-2xl"
+            className="relative flex items-center justify-center p-3 sm:p-6 md:p-10 w-full overflow-hidden rounded-2xl"
           >
             {/* Landscape Background Layer */}
             <div
