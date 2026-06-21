@@ -1,30 +1,75 @@
+"use client";
+
 import Link from 'next/link';
-import { ShieldAlert } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { LayoutDashboard, Home } from 'lucide-react';
 
 export default function NotFound() {
-    const dashboardLink = '/en-in/dashboard';
+    const [locale, setLocale] = useState('en-in');
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const pathParts = window.location.pathname.split('/');
+            // Check if first path segment matches standard pattern (e.g. en-in, hi-in, us-en)
+            const possibleLocale = pathParts[1];
+            if (possibleLocale && possibleLocale.includes('-')) {
+                setLocale(possibleLocale);
+            }
+        }
+    }, []);
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-[#070710] text-slate-100 p-4 selection:bg-indigo-500/30">
-            <div className="absolute top-0 right-1/4 w-[500px] h-[300px] bg-indigo-600/10 blur-[150px] -z-10" />
-            <div className="absolute bottom-0 left-1/4 w-[500px] h-[300px] bg-purple-600/10 blur-[150px] -z-10" />
+        <div 
+            className="flex flex-col items-center justify-center min-h-screen bg-[#FAFAFA] p-6 relative select-none"
+            style={{
+                backgroundImage: 'radial-gradient(#EBEBEB 1.5px, transparent 1.5px)',
+                backgroundSize: '24px 24px',
+            }}
+        >
+            <style dangerouslySetInnerHTML={{__html: `
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: scale(0.98) translateY(8px); }
+                    to { opacity: 1; transform: scale(1) translateY(0); }
+                }
+                .animate-fade-in {
+                    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+            `}} />
 
-            <div className="text-center max-w-md relative z-10 border border-white/5 bg-white/[0.02] p-10 rounded-3xl backdrop-blur-xl">
+            <div className="w-full max-w-md bg-white border border-[#EBEBEB] p-8 md:p-10 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.02),0_16px_32px_-8px_rgba(0,0,0,0.05)] text-center relative z-10 animate-fade-in">
+                {/* Premium Vercel-style Logo Mark */}
                 <div className="flex justify-center mb-6">
-                    <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20 border border-white/10">
-                        <ShieldAlert className="w-8 h-8 text-slate-400" />
+                    <div className="w-12 h-12 bg-[#171717] rounded-full flex items-center justify-center font-semibold text-white text-sm tracking-tight border border-[#171717] shadow-sm select-none">
+                        RF
                     </div>
                 </div>
-                <h1 className="text-4xl font-black mb-4 title-grad">Page Not Found</h1>
-                <p className="text-slate-400 mb-8 font-medium">
-                    The page you are looking for doesn’t exist or may have been moved.
+
+                {/* Metadata Header */}
+                <div className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-widest mb-2">
+                    Error Code: 404
+                </div>
+                <h1 className="text-2xl md:text-3xl font-semibold tracking-tighter text-[#171717] mb-3">
+                    Page Not Found
+                </h1>
+                <p className="text-sm text-[#4D4D4D] leading-relaxed mb-8 max-w-xs mx-auto">
+                    The requested page could not be located. It may have been moved, deleted, or the URL might be incorrect.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Link href="/" className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold transition-all shadow-lg hover:shadow-indigo-500/20 active:scale-95 text-center">
-                        Go to Home
-                    </Link>
-                    <Link href={dashboardLink} className="px-6 py-3 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl font-bold transition-all active:scale-95 text-center">
+
+                {/* Action Panel */}
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Link
+                        href={`/${locale}/dashboard`}
+                        className="w-full sm:w-auto px-5 py-2.5 bg-[#171717] hover:bg-[#262626] text-white rounded-lg text-sm font-medium transition-all shadow-sm active:scale-[0.98] text-center flex items-center justify-center gap-2"
+                    >
+                        <LayoutDashboard className="w-4 h-4" />
                         Go to Dashboard
+                    </Link>
+                    <Link
+                        href={`/${locale}`}
+                        className="w-full sm:w-auto px-5 py-2.5 bg-white hover:bg-[#FAFAFA] border border-[#EBEBEB] text-[#171717] rounded-lg text-sm font-medium transition-all active:scale-[0.98] text-center flex items-center justify-center gap-2"
+                    >
+                        <Home className="w-4 h-4 text-[#8F8F8F]" />
+                        Return Home
                     </Link>
                 </div>
             </div>
