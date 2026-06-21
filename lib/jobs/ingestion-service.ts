@@ -132,43 +132,25 @@ export async function ingestJobs(jobs: Partial<NormalisedJob>[]) {
     const filteredCount = totalFetched - readyToIngest.length;
 
     // LAYER 4: DATABASE CHECK (UPSERT LOGIC)
-
-    // LAYER 4: DATABASE CHECK (UPSERT LOGIC)
     let inserted = 0;
+    let updated = 0;
     let skipped = 0;
     let failed = 0;
     
     const { data: recentJobs } = await supabaseAdmin
         .from('jobs')
-        .select('external_id, apply_url, dedup_key')
+        .select('external_id')
         .order('created_at', { ascending: false })
         .limit(2000);
         
     const recentIds = new Set(recentJobs?.map(j => j.external_id).filter(Boolean) || []);
-    const recentApplyUrls = new Set(recentJobs?.map(j => j.apply_url).filter(Boolean) || []);
-    const recentDedupKeys = new Set(recentJobs?.map(j => j.dedup_key).filter(Boolean) || []);
 
     const skippedDetails: any[] = [];
     const insertedDetails: any[] = [];
+    const updatedDetails: any[] = [];
 
-    const finalDbJobs = readyToIngest.filter(j => {
-        if (recentIds.has(j.external_id)) {
-            skipped++;
-            skippedDetails.push({ title: j.title, company: j.company, reason: 'Duplicate ID' });
-            return false;
-        }
-        if (j.apply_url && recentApplyUrls.has(j.apply_url)) {
-            skipped++;
-            skippedDetails.push({ title: j.title, company: j.company, reason: 'Duplicate URL' });
-            return false;
-        }
-        if (j.dedup_key && recentDedupKeys.has(j.dedup_key)) {
-            skipped++;
-            skippedDetails.push({ title: j.title, company: j.company, reason: 'Duplicate Key' });
-            return false;
-        }
-        return true;
-    }).map(j => ({
+    // Map all readyToIngest jobs directly to the DB schema structure without pre-skipping duplicates
+    const finalDbJobs = readyToIngest.map(j => ({
         title: j.title,
         company: j.company,
         location: j.location,
@@ -187,24 +169,27 @@ export async function ingestJobs(jobs: Partial<NormalisedJob>[]) {
     }));
 
     if (finalDbJobs.length === 0) {
-        console.log(`[IngestionPipeline] All jobs duplicate/filtered. Fetched: ${totalFetched}, Skipped: ${skipped}`);
+        console.log(`[IngestionPipeline] No jobs to ingest. Fetched: ${totalFetched}, Filtered: ${filteredCount}`);
         return { 
             total: totalFetched, 
             filtered: filteredCount, 
             inserted: 0, 
-            skipped, 
+            updated: 0,
+            skipped: 0, 
             failed: 0,
             skippedDetails 
         };
     }
 
-    // Insert row-by-row to handle any production database unique constraint violations gracefully
+    // Insert or update row-by-row to handle any production database unique constraint violations gracefully
     for (const job of finalDbJobs) {
+        const isExisting = recentIds.has(job.external_id);
+
         const { data, error } = await supabaseAdmin
             .from('jobs')
             .upsert(job, { 
                 onConflict: 'external_id', 
-                ignoreDuplicates: true 
+                ignoreDuplicates: false 
             })
             .select('id, title, company');
 
@@ -214,29 +199,36 @@ export async function ingestJobs(jobs: Partial<NormalisedJob>[]) {
                 skipped++;
                 skippedDetails.push({ title: job.title, company: job.company, reason: 'DB Constraint Conflict' });
             } else {
-                console.error('[IngestionPipeline] DB Insert Error:', error.message);
+                console.error('[IngestionPipeline] DB Insert/Update Error:', error.message);
                 failed++;
             }
         } else if (data && data.length > 0) {
-            inserted++;
-            insertedDetails.push({ title: job.title, company: job.company });
+            if (isExisting) {
+                updated++;
+                updatedDetails.push({ title: job.title, company: job.company });
+            } else {
+                inserted++;
+                insertedDetails.push({ title: job.title, company: job.company });
+            }
         } else {
-            // Ignored by DB onConflict
+            // Under ignoreDuplicates: false this normally doesn't hit, but fallback safely
             skipped++;
-            skippedDetails.push({ title: job.title, company: job.company, reason: 'Duplicate ID' });
+            skippedDetails.push({ title: job.title, company: job.company, reason: 'No Row Affected' });
         }
     }
 
-    console.log(`[IngestionPipeline] Result: Fetched: ${totalFetched} | Inserted: ${inserted} | Skipped: ${skipped} | Failed: ${failed}`);
+    console.log(`[IngestionPipeline] Result: Fetched: ${totalFetched} | Inserted: ${inserted} | Updated: ${updated} | Skipped: ${skipped} | Failed: ${failed}`);
 
     return {
         total: totalFetched,
         filtered: filteredCount,
         inserted,
+        updated,
         skipped,
         failed,
         skippedDetails,
-        insertedDetails
+        insertedDetails,
+        updatedDetails
     };
 }
 
