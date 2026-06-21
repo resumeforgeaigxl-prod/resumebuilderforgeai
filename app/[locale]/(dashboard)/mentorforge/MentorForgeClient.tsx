@@ -171,7 +171,7 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
     <div className="flex flex-col h-full bg-[#FAFAFA] text-[#171717] overflow-hidden relative">
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto custom-scrollbar relative" ref={scrollRef}>
-        <div className="max-w-5xl mx-auto px-6 sm:px-8 pt-8 pb-[320px] space-y-8">
+        <div className="max-w-5xl mx-auto px-6 sm:px-8 pt-8 pb-12 space-y-8">
           {messages.map((msg, i) => (
             <motion.div
               key={i}
@@ -296,51 +296,46 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
       </div>
 
       {/* Bottom input area */}
-      <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
-        {/* Gradient fade */}
-        <div className="h-16 bg-gradient-to-t from-[#FAFAFA] via-[#FAFAFA]/95 to-transparent" />
-
-        <div className="bg-[#FAFAFA] pb-6 px-6 sm:px-8 pointer-events-auto">
-          <div className="max-w-5xl mx-auto space-y-4">
-            {/* Suggestion cards — only on initial state */}
-            <AnimatePresence>
-              {showWelcome && (
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.5 }}
-                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-                >
-                  {SUGGESTIONS.map((s) => (
-                    <button
-                      key={s.text}
-                      onClick={() => sendMessage(s.text, s.mode)}
-                      className="group flex items-center justify-between p-4 rounded-xl border border-[#EBEBEB] bg-white text-xs text-[#4D4D4D] hover:text-[#171717] hover:bg-[#FAFAFA] hover:border-[#171717] transition-all duration-200 text-left shadow-sm"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center group-hover:bg-white transition-colors">
-                          <s.icon className="w-3.5 h-3.5 text-[#171717]" />
-                        </div>
-                        <span className="font-semibold line-clamp-1">{s.text}</span>
+      <div className="w-full bg-[#FAFAFA] border-t border-[#EBEBEB] pb-6 pt-4 px-6 sm:px-8">
+        <div className="max-w-5xl mx-auto space-y-4">
+          {/* Suggestion cards — only on initial state */}
+          <AnimatePresence>
+            {showWelcome && (
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.5 }}
+                className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+              >
+                {SUGGESTIONS.map((s) => (
+                  <button
+                    key={s.text}
+                    onClick={() => sendMessage(s.text, s.mode)}
+                    className="group flex items-center justify-between p-4 rounded-xl border border-[#EBEBEB] bg-white text-xs text-[#4D4D4D] hover:text-[#171717] hover:bg-[#FAFAFA] hover:border-[#171717] transition-all duration-200 text-left shadow-sm"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center group-hover:bg-white transition-colors">
+                        <s.icon className="w-3.5 h-3.5 text-[#171717]" />
                       </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-[#8F8F8F] group-hover:translate-x-0.5 group-hover:text-[#171717] transition-all" />
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                      <span className="font-semibold line-clamp-1">{s.text}</span>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-[#8F8F8F] group-hover:translate-x-0.5 group-hover:text-[#171717] transition-all" />
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-            {/* Animated chat input */}
-            <MentorForgeChatInput
-              value={input}
-              onChange={setInput}
-              onSend={() => sendMessage()}
-              isLoading={isLoading}
-              activeMode={activeMode}
-              onModeChange={setActiveMode}
-            />
-          </div>
+          {/* Animated chat input */}
+          <MentorForgeChatInput
+            value={input}
+            onChange={setInput}
+            onSend={() => sendMessage()}
+            isLoading={isLoading}
+            activeMode={activeMode}
+            onModeChange={setActiveMode}
+          />
         </div>
       </div>
 

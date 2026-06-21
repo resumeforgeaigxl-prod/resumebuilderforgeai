@@ -3,6 +3,15 @@
 const nextConfig = {
     output: 'standalone',
     swcMinify: true,
+    webpack: (config, { dev, isServer }) => {
+        if (dev && !isServer) {
+            Object.defineProperty(config, 'devtool', {
+                get: () => 'source-map',
+                set: () => {},
+            });
+        }
+        return config;
+    },
     images: {
         remotePatterns: [
             {

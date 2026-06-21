@@ -195,8 +195,13 @@ export default function BuilderPage() {
     async function handleSave() {
         if (!resumeData) return;
         setSaving(true);
-        await supabase.from('resumes').update({ resume_json: resumeData, title, updated_at: new Date().toISOString() }).eq('id', id);
-        setInitialData(JSON.stringify(resumeData));
+        const { error } = await supabase.from('resumes').update({ resume_json: resumeData, title, updated_at: new Date().toISOString() }).eq('id', id);
+        if (error) {
+            console.error('[Save Error]', error);
+            alert('Failed to save resume: ' + error.message);
+        } else {
+            setInitialData(JSON.stringify(resumeData));
+        }
         setSaving(false);
     }
 
@@ -287,19 +292,25 @@ export default function BuilderPage() {
         if (finalData) {
             setSaving(true);
             setResumeData(finalData);
-            await supabase.from('resumes').update({
+            const { error } = await supabase.from('resumes').update({
                 resume_json: finalData,
                 title,
                 updated_at: new Date().toISOString()
             }).eq('id', id);
-            setInitialData(JSON.stringify(finalData));
-            setOptimizedResumeData(null);
-            setOriginalResumeData(null);
-            setIsReviewing(false);
-            setOptimizationSuccess(false);
-            setShowOptimizer(false);
+            
+            if (error) {
+                console.error('[Accept Optimized Save Error]', error);
+                alert('Failed to save optimized resume: ' + error.message);
+            } else {
+                setInitialData(JSON.stringify(finalData));
+                setOptimizedResumeData(null);
+                setOriginalResumeData(null);
+                setIsReviewing(false);
+                setOptimizationSuccess(false);
+                setShowOptimizer(false);
+                setStep('download');
+            }
             setSaving(false);
-            setStep('download');
         }
     }
 

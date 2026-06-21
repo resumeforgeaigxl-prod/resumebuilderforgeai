@@ -624,10 +624,14 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
           type: SchemaType.STRING,
           description: 'The template theme to select (modern, minimal, executive)',
           enum: ['modern', 'minimal', 'executive']
+        },
+        title: {
+          type: SchemaType.STRING,
+          description: 'A customized, professional title for the resume based on the career path (e.g. "Software Engineer Resume", "Frontend Developer Resume")'
         }
       }
     },
-    execute: async ({ theme }, userId) => {
+    execute: async ({ theme, title: customTitle }, userId) => {
       const supabase = createClient();
       try {
         // 1. Fetch user profile
@@ -654,8 +658,45 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
           .order('score', { ascending: false })
           .limit(3);
 
-        // 3. Build baseline resume JSON
-        const baseResume = buildResumeFromProfile(profile);
+        // 3. Fetch user's latest existing resume (to keep experience, projects, etc. intact)
+        const { data: existingResume } = await supabase
+          .from('resumes')
+          .select('id, title, resume_json')
+          .eq('user_id', userId)
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        let baseResume: any;
+        if (existingResume && existingResume.resume_json) {
+          try {
+            baseResume = typeof existingResume.resume_json === 'string'
+              ? JSON.parse(existingResume.resume_json)
+              : existingResume.resume_json;
+            
+            // Merge profile updates (name, email, phone, social, summary)
+            if (profile.full_name) baseResume.name = profile.full_name;
+            if (profile.email) baseResume.email = profile.email;
+            if (profile.phone) baseResume.phone = profile.phone;
+            if (profile.linkedin_url) baseResume.linkedin = profile.linkedin_url;
+            if (profile.github_url) baseResume.github = profile.github_url;
+            if (profile.professional_summary) baseResume.summary = profile.professional_summary;
+
+            // Merge skills
+            const profileSkills = Array.isArray(profile.skills) ? profile.skills : [];
+            if (profileSkills.length > 0) {
+              if (!baseResume.skills) {
+                baseResume.skills = { languages: [], frameworks: [], tools: [], other: [] };
+              }
+              baseResume.skills.other = Array.from(new Set([...(baseResume.skills.other || []), ...profileSkills]));
+            }
+          } catch (jsonErr) {
+            console.warn('[trigger_resume_generation] Error parsing existing resume_json, using profile fallback:', jsonErr);
+            baseResume = buildResumeFromProfile(profile);
+          }
+        } else {
+          baseResume = buildResumeFromProfile(profile);
+        }
 
         // 4. Enrich resume with achievements using AI subagent
         let enrichedResume = { ...baseResume };
@@ -693,22 +734,38 @@ Instructions:
           console.warn('[trigger_resume_generation] AI enrichment failed, saving base resume:', aiErr);
         }
 
-        // 5. Insert into database
-        const resumeTitle = profile.target_role ? `${profile.target_role} Resume` : 'Untitled Resume';
-        const { data: inserted, error } = await supabase
-          .from('resumes')
-          .insert({
-            user_id: userId,
-            title: resumeTitle,
-            resume_json: enrichedResume,
-            template_selected: theme || 'modern',
-            email_sent: false
-          })
-          .select('id')
-          .single();
+        // 5. Update existing resume or insert new one
+        const resumeTitle = customTitle || profile.target_role ? (customTitle || `${profile.target_role} Resume`) : (existingResume?.title || 'Untitled Resume');
+        
+        if (existingResume) {
+          const { error } = await supabase
+            .from('resumes')
+            .update({
+              resume_json: enrichedResume,
+              title: resumeTitle,
+              template_selected: theme || 'modern',
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', existingResume.id);
 
-        if (error) throw error;
-        return { success: true, id: inserted.id, title: resumeTitle };
+          if (error) throw error;
+          return { success: true, id: existingResume.id, title: resumeTitle };
+        } else {
+          const { data: inserted, error } = await supabase
+            .from('resumes')
+            .insert({
+              user_id: userId,
+              title: resumeTitle,
+              resume_json: enrichedResume,
+              template_selected: theme || 'modern',
+              email_sent: false
+            })
+            .select('id')
+            .single();
+
+          if (error) throw error;
+          return { success: true, id: inserted.id, title: resumeTitle };
+        }
       } catch (err: any) {
         console.error('[trigger_resume_generation] Error:', err.message);
         return { error: `Failed to generate resume: ${err.message}` };

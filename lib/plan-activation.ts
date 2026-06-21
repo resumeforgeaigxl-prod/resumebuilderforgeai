@@ -118,7 +118,6 @@ export async function activateUserPlan(userId: string, planName: PlanName, payme
         .from('users')
         .update({
             plan_type: planName.toLowerCase(),
-            plan_id: planName.toLowerCase(), // Ensure both are in sync
             plan_start: now.toISOString(),
             plan_end: planEnd.toISOString(),
             plan: 'pro', // legacy field — so existing checkUserAccess still works

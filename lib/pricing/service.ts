@@ -11,7 +11,7 @@ export class PricingService {
         
         const { data: user, error } = await supabase
             .from('users')
-            .select('role, plan_id, daily_credits_used, last_credits_reset, daily_job_views, last_job_reset')
+            .select('role, plan_type, daily_credits_used, last_credits_reset, daily_job_views, last_job_reset')
             .eq('id', userId)
             .single();
 
@@ -21,7 +21,7 @@ export class PricingService {
         }
 
         const isAdmin = user.role === 'admin';
-        const planId = (isAdmin ? 'pro' : (user.plan_id || 'free')) as PlanID;
+        const planId = (isAdmin ? 'pro' : (user.plan_type || 'free')) as PlanID;
         const plan = PLANS[planId] || PLANS.free;
 
 
