@@ -140,11 +140,13 @@ export async function ingestJobs(jobs: Partial<NormalisedJob>[]) {
     
     const { data: recentJobs } = await supabaseAdmin
         .from('jobs')
-        .select('external_id')
+        .select('external_id, apply_url, dedup_key')
         .order('created_at', { ascending: false })
         .limit(2000);
         
-    const recentIds = new Set(recentJobs?.map(j => j.external_id));
+    const recentIds = new Set(recentJobs?.map(j => j.external_id).filter(Boolean) || []);
+    const recentApplyUrls = new Set(recentJobs?.map(j => j.apply_url).filter(Boolean) || []);
+    const recentDedupKeys = new Set(recentJobs?.map(j => j.dedup_key).filter(Boolean) || []);
 
     const skippedDetails: any[] = [];
     const insertedDetails: any[] = [];
@@ -152,7 +154,17 @@ export async function ingestJobs(jobs: Partial<NormalisedJob>[]) {
     const finalDbJobs = readyToIngest.filter(j => {
         if (recentIds.has(j.external_id)) {
             skipped++;
-            skippedDetails.push({ title: j.title, company: j.company, reason: 'Duplicate' });
+            skippedDetails.push({ title: j.title, company: j.company, reason: 'Duplicate ID' });
+            return false;
+        }
+        if (j.apply_url && recentApplyUrls.has(j.apply_url)) {
+            skipped++;
+            skippedDetails.push({ title: j.title, company: j.company, reason: 'Duplicate URL' });
+            return false;
+        }
+        if (j.dedup_key && recentDedupKeys.has(j.dedup_key)) {
+            skipped++;
+            skippedDetails.push({ title: j.title, company: j.company, reason: 'Duplicate Key' });
             return false;
         }
         return true;
@@ -186,30 +198,33 @@ export async function ingestJobs(jobs: Partial<NormalisedJob>[]) {
         };
     }
 
-    // UPSERT with Conflict on external_id
-    const { data, error } = await supabaseAdmin
-        .from('jobs')
-        .upsert(finalDbJobs, { 
-            onConflict: 'external_id', 
-            ignoreDuplicates: true 
-        })
-        .select('id, title, company');
+    // Insert row-by-row to handle any production database unique constraint violations gracefully
+    for (const job of finalDbJobs) {
+        const { data, error } = await supabaseAdmin
+            .from('jobs')
+            .upsert(job, { 
+                onConflict: 'external_id', 
+                ignoreDuplicates: true 
+            })
+            .select('id, title, company');
 
-    if (error) {
-        console.error('[IngestionPipeline] UPSERT Error:', error.message);
-        failed = finalDbJobs.length;
-    } else {
-        inserted = data?.length || 0;
-        const insertedIds = new Set(data?.map(d => d.id));
-        
-        // Track what was actually inserted vs what might have been ignored by DB unique constraint
-        finalDbJobs.forEach((job, idx) => {
-            if (data && data[idx]) {
-                insertedDetails.push({ title: job.title, company: job.company });
+        if (error) {
+            // Check if it's a unique constraint violation error
+            if (error.code === '23505' || error.message.includes('unique constraint') || error.message.includes('duplicate key')) {
+                skipped++;
+                skippedDetails.push({ title: job.title, company: job.company, reason: 'DB Constraint Conflict' });
+            } else {
+                console.error('[IngestionPipeline] DB Insert Error:', error.message);
+                failed++;
             }
-        });
-        
-        skipped += (finalDbJobs.length - inserted);
+        } else if (data && data.length > 0) {
+            inserted++;
+            insertedDetails.push({ title: job.title, company: job.company });
+        } else {
+            // Ignored by DB onConflict
+            skipped++;
+            skippedDetails.push({ title: job.title, company: job.company, reason: 'Duplicate ID' });
+        }
     }
 
     console.log(`[IngestionPipeline] Result: Fetched: ${totalFetched} | Inserted: ${inserted} | Skipped: ${skipped} | Failed: ${failed}`);
