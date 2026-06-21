@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import FooterSection from '@/components/landing-v2/FooterSection';
 
 const REFERRAL_OPTIONS = [
     { label: "LinkedIn", value: "linkedin" },
@@ -661,7 +660,13 @@ export default function CompleteProfilePage() {
             </div>
             </div>
             
-            <FooterSection locale={locale} />
+            {/* Minimal Onboarding Footer (AutoSend Pattern) */}
+            <div className="w-full bg-[#fafaf9] border-t border-[#e7e5e4] py-4 px-6 select-none mt-auto">
+                <div className="max-w-[1200px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 text-center sm:text-left text-[11px] font-mono text-[#8F8F8F] uppercase tracking-wider">
+                    <span>© 2026 ResumeForge AI</span>
+                    <span>Made for developers. Built By GrowXlabsTech</span>
+                </div>
+            </div>
         </div>
     );
 }
