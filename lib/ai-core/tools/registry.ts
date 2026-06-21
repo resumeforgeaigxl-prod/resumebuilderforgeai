@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { consumeCodeExecutionCredit, refundCodeExecutionCredit } from '@/lib/code-execution-credits';
 import { generateGroundedJobSearch } from '@/lib/gemini-service';
+import { callAI } from '@/lib/ai/router';
 import { SchemaType } from '@google/generative-ai';
 
 export interface ToolDefinition {
@@ -29,6 +30,107 @@ const LANGUAGE_MAP: Record<string, number> = {
   'cpp': 54,
   'c': 50
 };
+
+const DEFAULT_RESUME_JSON: {
+  name: string;
+  email: string;
+  phone: string;
+  linkedin: string;
+  github: string;
+  summary: string;
+  skills: { languages: string[]; frameworks: string[]; tools: string[]; other: string[] };
+  experience: { id: string; company: string; role: string; duration: string; points: string[] }[];
+  projects: { id: string; name: string; tech: string[]; description: string[] }[];
+  education: { id: string; institution: string; degree: string; year: string; score: string }[];
+  certifications: { id: string; title: string; issuer: string; year: string }[];
+} = {
+  name: "",
+  email: "",
+  phone: "",
+  linkedin: "",
+  github: "",
+  summary: "",
+  skills: { languages: [], frameworks: [], tools: [], other: [] },
+  experience: [],
+  projects: [],
+  education: [],
+  certifications: []
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildResumeFromProfile(profile: any): typeof DEFAULT_RESUME_JSON {
+  if (!profile) return { ...DEFAULT_RESUME_JSON };
+
+  const profileSkills = Array.isArray(profile.skills) ? profile.skills : [];
+  const skills = {
+    languages: [] as string[],
+    frameworks: [] as string[],
+    tools: [] as string[],
+    other: profileSkills.length > 0 ? [...profileSkills] : []
+  };
+
+  const education: { id: string; institution: string; degree: string; year: string; score: string }[] = [];
+  
+  if (profile.education_10th_school) {
+    education.push({
+      id: `edu-10th-${Date.now()}`,
+      institution: profile.education_10th_school || '',
+      degree: '10th / SSC',
+      year: profile.education_10th_year || '',
+      score: profile.education_10th_percentage || ''
+    });
+  }
+  if (profile.education_12th_school) {
+    education.push({
+      id: `edu-12th-${Date.now()}`,
+      institution: profile.education_12th_school || '',
+      degree: '12th / HSC',
+      year: profile.education_12th_year || '',
+      score: profile.education_12th_percentage || ''
+    });
+  }
+  if (profile.education_diploma_college) {
+    education.push({
+      id: `edu-diploma-${Date.now()}`,
+      institution: profile.education_diploma_college || '',
+      degree: `Diploma in ${profile.education_diploma_branch || 'Engineering'}`,
+      year: profile.education_diploma_year || '',
+      score: profile.education_diploma_percentage || ''
+    });
+  }
+  if (profile.education_btech_college) {
+    education.push({
+      id: `edu-btech-${Date.now()}`,
+      institution: profile.education_btech_college || '',
+      degree: `B.Tech in ${profile.education_btech_branch || 'Computer Science'}`,
+      year: profile.education_btech_year || '',
+      score: profile.education_btech_cgpa || ''
+    });
+  }
+  if (profile.education_masters_college) {
+    education.push({
+      id: `edu-masters-${Date.now()}`,
+      institution: profile.education_masters_college || '',
+      degree: `${profile.education_masters_degree || 'M.Tech'} in ${profile.education_masters_branch || ''}`.trim(),
+      year: profile.education_masters_year || '',
+      score: profile.education_masters_cgpa || ''
+    });
+  }
+
+  return {
+    name: profile.full_name || '',
+    email: profile.email || '',
+    phone: profile.phone || '',
+    linkedin: profile.linkedin_url || '',
+    github: profile.github_url || '',
+    summary: profile.professional_summary || '',
+    skills,
+    experience: [],
+    projects: [],
+    education: education.length > 0 ? education : [],
+    certifications: []
+  };
+}
 
 export const toolsRegistry: Record<string, ToolDefinition> = {
   // ─── RESUMEFORGE TOOLS ───────────────────────────────────────────────────
@@ -510,5 +612,341 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
         return { error: `Failed to update memory insights: ${err.message}` };
       }
     }
+  },
+
+  trigger_resume_generation: {
+    name: 'trigger_resume_generation',
+    description: 'Spawns a specialized subagent to autonomously compile, enrich, and generate a new ATS-optimized resume for the user using their practice records (coding tests, interviews) and profile data. Returns the generated resume ID.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        theme: {
+          type: SchemaType.STRING,
+          description: 'The template theme to select (modern, minimal, executive)',
+          enum: ['modern', 'minimal', 'executive']
+        }
+      }
+    },
+    execute: async ({ theme }, userId) => {
+      const supabase = createClient();
+      try {
+        // 1. Fetch user profile
+        const { data: profile } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', userId)
+          .single();
+          
+        if (!profile) return { error: 'User profile not found.' };
+
+        // 2. Fetch coding & interview achievements
+        const { data: coding } = await supabase
+          .from('coding_submissions')
+          .select('language, status, score, problem_id')
+          .eq('user_id', userId)
+          .eq('status', 'success')
+          .limit(5);
+
+        const { data: interviews } = await supabase
+          .from('mock_interviews')
+          .select('role, score, feedback')
+          .eq('user_id', userId)
+          .order('score', { ascending: false })
+          .limit(3);
+
+        // 3. Build baseline resume JSON
+        const baseResume = buildResumeFromProfile(profile);
+
+        // 4. Enrich resume with achievements using AI subagent
+        let enrichedResume = { ...baseResume };
+        
+        try {
+          const enrichPrompt = `
+You are a Resume Writer Subagent.
+Your goal is to enrich the candidate's Base Resume JSON with realistic, high-impact bullet points and project descriptions based on their verified practice achievements.
+
+Candidate Base Resume:
+${JSON.stringify(baseResume)}
+
+Verified Achievements:
+- Solved Coding Tasks: ${JSON.stringify(coding || [])}
+- Mock Interviews: ${JSON.stringify(interviews || [])}
+
+Instructions:
+1. Translate coding achievements into quantified experience bullet points (e.g. "Optimized data structure logic in JavaScript...") and place them in the experience or projects section.
+2. Translate mock interview strengths/feedback into bullet points and place them in experience or skills.
+3. Keep name, contact info, and education intact.
+4. Output ONLY the complete, enriched Resume JSON matching the input schema.
+`;
+          const aiResponse = await callAI({
+            task: 'resume',
+            prompt: enrichPrompt,
+            systemPrompt: "You are a professional resume writer.",
+            userId,
+            responseFormat: 'json'
+          });
+          const aiResult = JSON.parse(aiResponse.text);
+          if (aiResult && typeof aiResult === 'object') {
+            enrichedResume = { ...enrichedResume, ...aiResult };
+          }
+        } catch (aiErr) {
+          console.warn('[trigger_resume_generation] AI enrichment failed, saving base resume:', aiErr);
+        }
+
+        // 5. Insert into database
+        const resumeTitle = profile.target_role ? `${profile.target_role} Resume` : 'Untitled Resume';
+        const { data: inserted, error } = await supabase
+          .from('resumes')
+          .insert({
+            user_id: userId,
+            title: resumeTitle,
+            resume_json: enrichedResume,
+            template_selected: theme || 'modern',
+            email_sent: false
+          })
+          .select('id')
+          .single();
+
+        if (error) throw error;
+        return { success: true, id: inserted.id, title: resumeTitle };
+      } catch (err: any) {
+        console.error('[trigger_resume_generation] Error:', err.message);
+        return { error: `Failed to generate resume: ${err.message}` };
+      }
+    }
+  },
+
+  trigger_coding_challenge: {
+    name: 'trigger_coding_challenge',
+    description: 'Spawns a coding subagent to retrieve or dynamically generate a custom coding challenge for the user on a specific topic and difficulty, returning the challenge slug.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        topic: {
+          type: SchemaType.STRING,
+          description: 'The programming topic or concept (e.g. "Arrays", "DP", "React State")'
+        },
+        difficulty: {
+          type: SchemaType.STRING,
+          description: 'Difficulty level (Easy, Medium, Hard)',
+          enum: ['Easy', 'Medium', 'Hard']
+        }
+      },
+      required: ['topic', 'difficulty']
+    },
+    execute: async ({ topic, difficulty }, userId) => {
+      const supabase = createClient();
+      try {
+        // First try to find an existing question on the topic/difficulty
+        const { data: existing } = await supabase
+          .from('coding_questions')
+          .select('id, title, slug')
+          .eq('difficulty', difficulty)
+          .ilike('topic', `%${topic}%`)
+          .limit(1)
+          .maybeSingle();
+
+        if (existing) {
+          return { success: true, id: existing.id, slug: existing.slug, title: existing.title, is_new: false };
+        }
+
+        // If none exists, generate one dynamically
+        const prompt = `Generate a coding interview question. Topic: ${topic}, Difficulty: ${difficulty}.
+Return ONLY a valid JSON object matching this schema:
+{
+  "title": "A concise title",
+  "description": "Clear problem statement with examples",
+  "topic": "${topic}",
+  "difficulty": "${difficulty}",
+  "approach": "A brief explanation of how to solve it",
+  "interview_tips": ["tip1", "tip2"],
+  "time_complexity": "O(N)",
+  "space_complexity": "O(1)",
+  "test_cases": [
+    { "input": "sample input text", "output": "expected output text", "is_hidden": false }
+  ],
+  "solutions": {
+    "javascript": "function solution() { ... }"
+  }
+}`;
+
+        const response = await callAI({
+          task: 'code',
+          prompt,
+          systemPrompt: "You are an expert technical interviewer and competitive programmer.",
+          userId,
+          responseFormat: 'json'
+        });
+
+        const q = JSON.parse(response.text);
+        const slug = q.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+        const { data: inserted, error: qError } = await supabase
+          .from('coding_questions')
+          .insert({
+            title: q.title,
+            slug,
+            description: q.description,
+            difficulty: q.difficulty,
+            topic: q.topic,
+            type: 'Programming',
+            approach: q.approach,
+            interview_tips: q.interview_tips,
+            time_complexity: q.time_complexity,
+            space_complexity: q.space_complexity
+          })
+          .select()
+          .single();
+
+        if (qError) throw qError;
+
+        // Insert test cases
+        if (q.test_cases && q.test_cases.length > 0) {
+          const testCases = q.test_cases.map((tc: any, idx: number) => ({
+            question_id: inserted.id,
+            input: tc.input,
+            expected_output: tc.output,
+            is_hidden: tc.is_hidden || false,
+            order_index: idx
+          }));
+          await supabase.from('coding_test_cases').insert(testCases);
+        }
+
+        // Insert solutions
+        if (q.solutions) {
+          const solutions = Object.entries(q.solutions).map(([lang, code]) => ({
+            question_id: inserted.id,
+            language: lang,
+            code
+          }));
+          await supabase.from('coding_solutions').insert(solutions);
+        }
+
+        return { success: true, id: inserted.id, slug, title: q.title, is_new: true };
+      } catch (err: any) {
+        console.error('[trigger_coding_challenge] Error:', err.message);
+        return { error: `Failed to spawn coding challenge: ${err.message}` };
+      }
+    }
+  },
+
+  trigger_mock_interview: {
+    name: 'trigger_mock_interview',
+    description: 'Spawns an interview subagent to set up a new mock interview session based on user target role and difficulty. Returns the mock interview session ID.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        role: {
+          type: SchemaType.STRING,
+          description: 'The job position/title (e.g. "Frontend Engineer", "DevOps Specialist")'
+        },
+        difficulty: {
+          type: SchemaType.STRING,
+          description: 'Interview level (Entry, Mid, Senior)',
+          enum: ['Entry', 'Mid', 'Senior']
+        }
+      },
+      required: ['role', 'difficulty']
+    },
+    execute: async ({ role, difficulty }, userId) => {
+      const supabase = createClient();
+      try {
+        const prompt = `Generate 5 technical interview questions for a ${difficulty} level ${role} position.
+Return a JSON array of strings containing only the questions: ["Question 1", "Question 2", ...]`;
+
+        const response = await callAI({
+          task: 'interview',
+          prompt,
+          systemPrompt: "You are an elite technical interviewer. Return valid JSON only.",
+          userId,
+          responseFormat: 'json'
+        });
+
+        const questions = JSON.parse(response.text);
+        if (!Array.isArray(questions)) {
+          throw new Error('LLM did not return an array of questions');
+        }
+
+        const { data: session, error } = await supabase
+          .from('mock_interviews')
+          .insert({
+            user_id: userId,
+            role: role,
+            interview_type: 'Technical',
+            num_questions: questions.length,
+            questions: questions,
+            interview_mode: 'chat',
+            score: 0,
+            feedback: 'Awaiting completion'
+          })
+          .select('id')
+          .single();
+
+        if (error) throw error;
+        return { success: true, id: session.id, role, num_questions: questions.length };
+      } catch (err: any) {
+        console.error('[trigger_mock_interview] Error:', err.message);
+        return { error: `Failed to spawn mock interview: ${err.message}` };
+      }
+    }
+  },
+
+  trigger_study_plan: {
+    name: 'trigger_study_plan',
+    description: 'Spawns a study subagent to dynamically create a comprehensive learning syllabus and roadmap for a topic, adding it to the user\'s profile.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        topic: {
+          type: SchemaType.STRING,
+          description: 'The technology or concept name (e.g. "Kubernetes", "Next.js routing")'
+        },
+        durationWeeks: {
+          type: SchemaType.NUMBER,
+          description: 'The duration of the study roadmap in weeks (default: 4)'
+        }
+      },
+      required: ['topic']
+    },
+    execute: async ({ topic, durationWeeks }, userId) => {
+      const supabase = createClient();
+      try {
+        const weeks = durationWeeks || 4;
+        const prompt = `Create a ${weeks}-week structured study syllabus outline for learning "${topic}".
+Return ONLY a JSON array of strings representing the weekly milestone titles: ["Week 1: ...", "Week 2: ...", ...]`;
+
+        const response = await callAI({
+          task: 'learn',
+          prompt,
+          systemPrompt: "You are an expert technical curriculum designer. Return valid JSON only.",
+          userId,
+          responseFormat: 'json'
+        });
+
+        const syllabus = JSON.parse(response.text);
+        if (!Array.isArray(syllabus)) {
+          throw new Error('Syllabus is not a valid array');
+        }
+
+        const { data: roadmap, error } = await supabase
+          .from('roadmaps')
+          .insert({
+            user_id: userId,
+            title: topic,
+            status: 'active',
+            progress: 0,
+            syllabus: syllabus
+          })
+          .select('id, title')
+          .single();
+
+        if (error) throw error;
+        return { success: true, id: roadmap.id, title: roadmap.title, syllabus_steps: syllabus.length };
+      } catch (err: any) {
+        console.error('[trigger_study_plan] Error:', err.message);
+        return { error: `Failed to create study plan: ${err.message}` };
+      }
+    }
   }
 };
+

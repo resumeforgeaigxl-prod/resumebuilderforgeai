@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 import { ResumeData } from '@/types/resume';
 import { renderResumeToHtml } from '@/lib/resume-server-renderer';
 import { getSession } from '@/lib/auth/jwt';
@@ -148,6 +149,127 @@ export async function POST(request: Request) {
         } catch { }
 
         return NextResponse.json(errorDetail, { status: 500 });
+    } finally {
+        if (browser) await browser.close();
+    }
+}
+
+export async function GET(request: Request) {
+    let browser: Browser | null = null;
+    let session: { userId?: string } | null = null;
+    let showWatermark = true;
+
+    try {
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get('id');
+        const template = searchParams.get('template') || 'harvard';
+
+        if (!id) {
+            return NextResponse.json({ error: 'No resume ID provided' }, { status: 400 });
+        }
+
+        // Get session
+        try {
+            session = await getSession();
+            if (session?.userId) {
+                const access = await checkUserAccess(session.userId);
+                showWatermark = !access.hasAccess;
+            }
+        } catch (authErr) {
+            console.error('[Download GET] Auth check failed:', authErr);
+        }
+
+        const supabase = createClient();
+        // Fetch resume from DB
+        const { data: resume, error } = await supabase
+            .from('resumes')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error || !resume) {
+            return NextResponse.json({ error: 'Resume not found' }, { status: 404 });
+        }
+
+        // Verify ownership (unless it's public or checkUserAccess is admin)
+        if (session?.userId && resume.user_id !== session.userId) {
+            return NextResponse.json({ error: 'Unauthorized to download this resume' }, { status: 403 });
+        }
+
+        console.log(`[Download GET] PDF gen start for ${id} | Template: ${template} | Watermark: ${showWatermark}`);
+
+        const html = renderResumeToHtml(resume.resume_json, template);
+        const isLocal = process.env.NODE_ENV === 'development' || !process.env.VERCEL;
+        const c = (chromium as unknown) as { args: string[]; defaultViewport: unknown; executablePath: () => Promise<string>; headless: boolean };
+        let launchOptions: unknown;
+
+        if (isLocal) {
+            launchOptions = {
+                args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+                executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+                headless: true,
+                timeout: 120000,
+            };
+        } else {
+            launchOptions = {
+                args: c.args,
+                defaultViewport: c.defaultViewport,
+                executablePath: await c.executablePath(),
+                headless: c.headless,
+                timeout: 120000,
+            };
+        }
+
+        browser = await puppeteer.launch(launchOptions as any);
+        const page = await browser.newPage();
+        await page.setDefaultNavigationTimeout(120000);
+        await page.setDefaultTimeout(120000);
+
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+        await new Promise(r => setTimeout(r, 500));
+
+        if (showWatermark) {
+            await injectWatermark(page);
+        }
+
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            margin: { top: 0, right: 0, bottom: 0, left: 0 },
+            preferCSSPageSize: true
+        });
+
+        if (!pdfBuffer || pdfBuffer.length === 0) {
+            throw new Error('PDF generation produced an empty buffer');
+        }
+
+        if (session?.userId) {
+            logPDFDownload({
+                userId: session.userId,
+                resumeName: resume.resume_json?.name || 'Untitled',
+                template,
+                watermarked: showWatermark
+            });
+            incrementForgeUsage('resumeforge').catch(e => console.error('[Download GET] Usage increment failed:', e));
+        }
+
+        return new NextResponse(Buffer.from(pdfBuffer), {
+            status: 200,
+            headers: {
+                'Content-Type': 'application/pdf',
+                'Content-Disposition': 'attachment; filename="resume.pdf"',
+                'X-Watermark': showWatermark ? 'true' : 'false',
+                'Cache-Control': 'no-store, max-age=0',
+            },
+        });
+
+    } catch (e: unknown) {
+        const err = e as Error;
+        console.error('[Download GET] CRITICAL Error:', err);
+        return NextResponse.json({
+            error: 'PDF generation failed',
+            details: err.message || String(err)
+        }, { status: 500 });
     } finally {
         if (browser) await browser.close();
     }

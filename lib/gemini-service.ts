@@ -110,6 +110,55 @@ export async function generateContentGemini(prompt: string, systemInstruction?: 
     return await fallbackViaOpenRouter(prompt, systemInstruction);
 }
 
+export async function* generateContentStreamGemini(prompt: string, systemInstruction?: string) {
+    const keysCount = GEMINI_KEYS.length;
+    if (keysCount === 0) {
+        // Fallback to non-streaming or standard OpenRouter if keys are empty
+        console.warn("[AI] No Gemini keys found for streaming. Yielding full block from OpenRouter...");
+        const result = await fallbackViaOpenRouter(prompt, systemInstruction);
+        yield result;
+        return;
+    }
+
+    for (let i = 0; i < keysCount; i++) {
+        const currentKeyIndex = (geminiIndex + i) % keysCount;
+        const apiKey = GEMINI_KEYS[currentKeyIndex];
+
+        console.log(`[AI] Attempting Gemini Content Stream with Key #${currentKeyIndex}`);
+
+        try {
+            const client = new GoogleGenerativeAI(apiKey);
+            const model = client.getGenerativeModel({
+                model: "gemini-2.0-flash",
+                systemInstruction: systemInstruction,
+            });
+
+            const resultStream = await model.generateContentStream(prompt);
+            geminiIndex = (currentKeyIndex + 1) % keysCount; // Success update index
+
+            for await (const chunk of resultStream.stream) {
+                const text = chunk.text();
+                if (text) {
+                    yield text;
+                }
+            }
+            return; // Finished streaming successfully
+        } catch (error: unknown) {
+            const err = error as { status?: number; message?: string };
+            const status = err?.status || 0;
+            const msg = err?.message || "";
+            
+            console.error(`[AI] Gemini Stream Key #${currentKeyIndex} failed:`, msg);
+
+            if (status === 429 || status === 401 || msg.includes('429') || msg.includes('quota')) {
+                console.warn(`[AI] Key #${currentKeyIndex} rate limited. Rotating stream key...`);
+                continue;
+            }
+            if (i === keysCount - 1) throw error;
+        }
+    }
+}
+
 export async function generateJsonGemini(prompt: string, systemInstruction?: string) {
     const keysCount = GEMINI_KEYS.length;
     if (keysCount === 0) {
