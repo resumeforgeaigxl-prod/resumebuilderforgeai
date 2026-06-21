@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import { Briefcase, Github, Twitter, Linkedin, Shield, FileLock } from 'lucide-react';
 
 const INTERNAL_APP_ROOTS = new Set([
+    'complete-profile',
     'dashboard',
     'careerforge',
     'resumes',

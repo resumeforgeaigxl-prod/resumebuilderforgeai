@@ -10,6 +10,7 @@ export default function FooterWrapper({ children }: { children: ReactNode }) {
 
     // Hide main footer on all internal dashboard and app routes
     const isInternalApp = 
+        pathname?.includes('/complete-profile') ||
         pathname?.includes('/dashboard') || 
         pathname?.includes('/admin') || 
         pathname?.includes('/resumes') || 

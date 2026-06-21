@@ -1,8 +1,6 @@
 import Link from 'next/link';
 import { LogOut, Wand2 } from 'lucide-react';
 import { getSession } from '@/lib/auth/jwt';
-import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
-import RegionSwitcher from '@/components/ui/RegionSwitcher';
 import { getTranslations } from '@/lib/i18n/server';
 
 export default async function Header({ lang = 'en', region = 'in' }: { lang?: string, region?: string }) {
@@ -65,11 +63,6 @@ export default async function Header({ lang = 'en', region = 'in' }: { lang?: st
 
                 {/* Right side actions */}
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 border border-[#EBEBEB] bg-white rounded-xl px-2 py-1 shadow-sm">
-                        <RegionSwitcher />
-                        <div className="w-[1px] h-3 bg-[#EBEBEB]" />
-                        <LanguageSwitcher />
-                    </div>
 
                     {session ? (
                         <>

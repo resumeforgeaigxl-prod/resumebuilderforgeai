@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import FooterSection from '@/components/landing-v2/FooterSection';
 
 const REFERRAL_OPTIONS = [
     { label: "LinkedIn", value: "linkedin" },
@@ -255,7 +256,7 @@ export default function CompleteProfilePage() {
 
     return (
         <div 
-            className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-6 relative select-none font-sans"
+            className="min-h-screen bg-[#FAFAFA] flex flex-col justify-between select-none font-sans"
             style={{
                 backgroundImage: 'radial-gradient(#EBEBEB 1.5px, transparent 1.5px)',
                 backgroundSize: '24px 24px',
@@ -271,7 +272,8 @@ export default function CompleteProfilePage() {
                 }
             `}} />
 
-            <div className="w-full max-w-xl z-10 animate-slide-in">
+            <div className="flex-1 flex items-center justify-center p-6">
+                <div className="w-full max-w-xl z-10 animate-slide-in">
                 <div className="bg-white border border-[#EBEBEB] p-8 md:p-10 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.02),0_16px_32px_-8px_rgba(0,0,0,0.05)] relative">
                     
                     {/* Brand Identifier */}
@@ -657,6 +659,9 @@ export default function CompleteProfilePage() {
                     </form>
                 </div>
             </div>
+            </div>
+            
+            <FooterSection locale={locale} />
         </div>
     );
 }
