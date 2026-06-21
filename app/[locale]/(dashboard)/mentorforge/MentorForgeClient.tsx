@@ -123,19 +123,6 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
 
   return (
     <div className="flex flex-col h-full bg-[#FAFAFA] text-[#171717] overflow-hidden relative">
-      {/* Standardized Header */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#EBEBEB] p-8 bg-white/80 backdrop-blur-md z-20 sticky top-16 shadow-sm">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-[#171717] uppercase">MentorForge</h1>
-          <p className="text-[#4D4D4D] mt-1.5 text-base">Neural career guidance and technical mentorship via high-fidelity AI protocols.</p>
-        </div>
-
-        <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-md bg-white border border-[#EBEBEB]">
-          <div className="text-[10px] text-[#8F8F8F] uppercase tracking-wider font-semibold">SIGNAL_LOCK</div>
-          <Badge variant="outline" className="border-none bg-[#FAFAFA] text-[#171717] text-[9px] font-bold uppercase">LIVE</Badge>
-        </div>
-      </header>
-
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto custom-scrollbar relative" ref={scrollRef}>
         <div className="max-w-3xl mx-auto px-6 sm:px-8 pt-8 pb-[320px] space-y-8">
