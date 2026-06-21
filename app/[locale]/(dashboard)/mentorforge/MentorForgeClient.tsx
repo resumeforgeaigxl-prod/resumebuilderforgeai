@@ -124,7 +124,7 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
   return (
     <div className="flex flex-col h-full bg-[#FAFAFA] text-[#171717] overflow-hidden relative">
       {/* Standardized Header */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#EBEBEB] p-8 bg-white/80 backdrop-blur-md z-20 sticky top-0 shadow-sm">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#EBEBEB] p-8 bg-white/80 backdrop-blur-md z-20 sticky top-16 shadow-sm">
         <div>
           <div className="flex items-center gap-2 text-[#8F8F8F] font-mono text-xs uppercase tracking-wider mb-2">
             <Bot className="w-3.5 h-3.5 text-[#171717]" /> Intelligence Core
