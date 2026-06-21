@@ -126,9 +126,6 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
       {/* Standardized Header */}
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#EBEBEB] p-8 bg-white/80 backdrop-blur-md z-20 sticky top-16 shadow-sm">
         <div>
-          <div className="flex items-center gap-2 text-[#8F8F8F] font-mono text-xs uppercase tracking-wider mb-2">
-            <Bot className="w-3.5 h-3.5 text-[#171717]" /> Intelligence Core
-          </div>
           <h1 className="text-3xl font-semibold tracking-tight text-[#171717] uppercase">MentorForge</h1>
           <p className="text-[#4D4D4D] mt-1.5 text-base">Neural career guidance and technical mentorship via high-fidelity AI protocols.</p>
         </div>
