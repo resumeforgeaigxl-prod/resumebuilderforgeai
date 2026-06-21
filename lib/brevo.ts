@@ -446,3 +446,42 @@ export async function sendWaitlistApprovalEmail(to: string, name: string, coupon
     html,
   });
 }
+
+// ── 10. Job Alert Notification Email ──────────────────────────────────────────
+
+export async function sendJobAlertEmail(
+  to: string,
+  userName: string,
+  jobs: { title: string; company: string; location: string; apply_url?: string | null }[]
+): Promise<void> {
+  const displayName = userName || to.split('@')[0];
+  const jobsHtml = jobs.map(job => `
+    <div style="background:#0d0d1c; border:1px solid #1e1b4b; border-radius:10px; padding:16px; margin-bottom:16px; text-align:left;">
+      <h3 style="margin:0 0 4px; font-size:16px; color:#f1f5f9; font-weight:700;">${job.title}</h3>
+      <p style="margin:0 0 12px; font-size:13px; color:#cbd5e1;">${job.company} • ${job.location}</p>
+      ${job.apply_url ? `
+        <a href="${job.apply_url}" style="display:inline-block; padding:8px 18px; background:#6366f1; color:#fff; font-size:12px; font-weight:700; text-decoration:none; border-radius:6px;">
+          Apply Now
+        </a>
+      ` : ''}
+    </div>
+  `).join('');
+
+  const html = emailWrapper(`
+    ${headingAndSub('New Job Matches for You 💼', 'Here are the latest developer opportunities matching your preferences.')}
+    <p style="color:#cbd5e1;font-size:14px;line-height:1.7;margin:0 0 20px;">
+      Hi ${displayName}, we found the following job matches based on your skills and locations preferences:
+    </p>
+    <div style="margin-bottom:24px;">
+      ${jobsHtml}
+    </div>
+    ${ctaButton('View All Jobs', 'https://resumeforgeai.in/dashboard-jobs', '#6366f1')}
+  `);
+
+  await sendEmail({
+    to: [{ email: to, name: displayName }],
+    subject: `💼 New Job Alerts — ${jobs.length} Matches Found | ResumeForgeAI`,
+    html,
+  });
+}
+

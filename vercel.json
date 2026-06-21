@@ -7,6 +7,10 @@
     {
        "path": "/api/jobs/collector",
        "schedule": "0 4 * * *"
+    },
+    {
+       "path": "/api/job-alerts/dispatch",
+       "schedule": "0 8 * * *"
     }
   ]
 }

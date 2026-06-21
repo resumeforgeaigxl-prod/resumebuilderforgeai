@@ -6,11 +6,13 @@ import {
     CheckCircle2, Loader2, Briefcase, MapPin
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-hot-toast';
 
 export default function JobAlertsManager() {
     const [alert, setAlert] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [testing, setTesting] = useState(false);
     const [skillInput, setSkillInput] = useState('');
     const [locationInput, setLocationInput] = useState('');
 
@@ -32,12 +34,47 @@ export default function JobAlertsManager() {
                 body: JSON.stringify(alert)
             });
             if (res.ok) {
-                // Show success state briefly
+                toast.success('Preferences updated successfully!');
+            } else {
+                toast.error('Failed to update preferences');
             }
         } catch (err) {
             console.error(err);
+            toast.error('An error occurred while saving preferences');
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleSendTestEmail = async () => {
+        setTesting(true);
+        try {
+            // First save preferences to make sure the test uses the latest criteria
+            const saveRes = await fetch('/api/job-alerts/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(alert)
+            });
+            
+            if (!saveRes.ok) {
+                toast.error('Failed to save preferences before sending test email');
+                setTesting(false);
+                return;
+            }
+
+            const res = await fetch('/api/job-alerts/dispatch?test=true');
+            const data = await res.json();
+            
+            if (res.ok && data.success) {
+                toast.success('Test email sent successfully! Please check your inbox.');
+            } else {
+                toast.error(data.error || 'Failed to send test email');
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error('An error occurred while sending the test email');
+        } finally {
+            setTesting(false);
         }
     };
 
@@ -199,13 +236,22 @@ export default function JobAlertsManager() {
                     </div>
                 </div>
 
-                <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="px-6 h-10 rounded-md bg-[#171717] hover:bg-[#171717]/90 text-white font-semibold text-xs transition-all flex items-center gap-2 disabled:opacity-50 shadow-sm"
-                >
-                    {saving ? <>Saving... <Loader2 className="w-3.5 h-3.5 animate-spin" /></> : <>Update Preferences <CheckCircle2 className="w-3.5 h-3.5" /></>}
-                </button>
+                <div className="flex flex-wrap gap-3">
+                    <button
+                        onClick={handleSendTestEmail}
+                        disabled={testing || saving}
+                        className="px-4 h-10 rounded-md border border-[#EBEBEB] bg-white hover:bg-[#FAFAFA] text-[#171717] font-semibold text-xs transition-all flex items-center gap-2 disabled:opacity-50"
+                    >
+                        {testing ? <>Sending Test... <Loader2 className="w-3.5 h-3.5 animate-spin" /></> : <>Send Test Email <Mail className="w-3.5 h-3.5" /></>}
+                    </button>
+                    <button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="px-6 h-10 rounded-md bg-[#171717] hover:bg-[#171717]/90 text-white font-semibold text-xs transition-all flex items-center gap-2 disabled:opacity-50 shadow-sm"
+                    >
+                        {saving ? <>Saving... <Loader2 className="w-3.5 h-3.5 animate-spin" /></> : <>Update Preferences <CheckCircle2 className="w-3.5 h-3.5" /></>}
+                    </button>
+                </div>
             </div>
 
             <div className="p-4 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex gap-4 items-center">
