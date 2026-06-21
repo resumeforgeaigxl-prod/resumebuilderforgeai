@@ -2,7 +2,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import {
     Search, MapPin, Briefcase, Filter,
     ChevronLeft, ChevronRight, Loader2,
@@ -32,6 +32,8 @@ interface Job {
 export default function JobsPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const params = useParams();
+    const locale = params?.locale || 'en-in';
 
     // Filters from URL
     const query = searchParams?.get('search') ?? '';
@@ -230,7 +232,7 @@ export default function JobsPage() {
                     Found <span className="text-[#171717] font-semibold">{totalJobs}</span> matching opportunities
                 </p>
                 {userPlan === 'free' && (
-                    <Link href="/billing" className="text-sm font-medium text-[#D2750F] hover:underline transition-colors flex items-center gap-1">
+                    <Link href={`/${locale}/dashboard/billing`} className="text-sm font-medium text-[#D2750F] hover:underline transition-colors flex items-center gap-1">
                         <Lock className="w-3 h-3" /> Upgrade to unlock all {totalJobs} jobs
                     </Link>
                 )}
@@ -385,6 +387,8 @@ function JobCard({ job }: { job: Job }) {
 }
 
 function LockedJobCard({ job }: { job: Job }) {
+    const params = useParams();
+    const locale = params?.locale || 'en-in';
     return (
         <div className="relative p-6 bg-[#FFFFFF] border border-[#EBEBEB] rounded-xl overflow-hidden group h-full shadow-sm">
             <div className="blur-[2px] opacity-40 select-none pointer-events-none space-y-4">
@@ -406,7 +410,7 @@ function LockedJobCard({ job }: { job: Job }) {
                 </div>
                 <h4 className="text-lg font-semibold text-[#171717] mb-1">Premium Listing</h4>
                 <p className="text-xs text-[#4D4D4D] mb-6 max-w-[240px] leading-relaxed">This {job.location} based role is available for Career plan members. Unlock 1000+ top-tier tech jobs.</p>
-                <Link href="/billing" className="px-6 py-2 bg-[#171717] hover:bg-[#333333] text-white text-xs font-medium rounded-md transition-all shadow-sm active:scale-95">
+                <Link href={`/${locale}/dashboard/billing`} className="px-6 py-2 bg-[#171717] hover:bg-[#333333] text-white text-xs font-medium rounded-md transition-all shadow-sm active:scale-95">
                     Upgrade Account
                 </Link>
             </div>

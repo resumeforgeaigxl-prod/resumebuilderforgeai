@@ -391,7 +391,7 @@ function MockInterviewContent() {
           <h2 className="text-red-600 font-semibold text-lg mb-2">Access Limited</h2>
           <p className="text-[#4D4D4D] mb-4">{error}</p>
           <Link
-            href={`/${locale}/billing`}
+            href={`/${locale}/dashboard/billing`}
             className="inline-flex items-center gap-2 px-4 py-2 bg-[#171717] hover:bg-[#333333] text-white rounded-md font-medium text-sm transition-all"
           >
             Upgrade Plan <ArrowRight className="w-4 h-4" />

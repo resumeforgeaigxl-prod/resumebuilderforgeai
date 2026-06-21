@@ -5,6 +5,7 @@ import {
     Briefcase, MapPin, ExternalLink, Loader2, Info, AlertCircle, Star, RefreshCw, Globe, GraduationCap,
     Lock, Crown, Zap, FileText} from 'lucide-react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
 interface Job {
     id: string;
@@ -227,32 +228,30 @@ function EmptyState({ label }: { label: string }) {
 
 // ─── Plan Banner ─────────────────────────────────────────────────────────────
 function PlanBanner({
-    visible, total, plan, lockedCount
+    visible,
+    total,
+    plan,
+    lockedCount
 }: {
-    visible: number; total: number; plan: string; lockedCount: number;
+    visible: number;
+    total: number;
+    plan: string;
+    lockedCount: number;
 }) {
+    const params = useParams();
+    const locale = params?.locale || 'en-in';
     const isPaid = plan !== 'free';
-    const bgClass = isPaid
-        ? 'bg-emerald-500/5 border-emerald-500/15'
-        : 'bg-amber-500/8 border-amber-500/20';
-
     return (
-        <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl border ${bgClass} mb-5`}>
-            <div className="flex items-center gap-3">
-                {isPaid
-                    ? <Crown className="w-4 h-4 text-emerald-400 shrink-0" />
-                    : <Zap className="w-4 h-4 text-amber-400 shrink-0" />
-                }
-                <div>
-                    <p className="text-sm font-bold text-white">
-                        Showing <span className={isPaid ? 'text-emerald-400' : 'text-amber-400'}>{visible}</span> of <span className="text-white">{total}</span> jobs
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5 mb-6">
+            <div>
+                <p className="text-sm font-bold text-white">
+                    Showing <span className={isPaid ? 'text-emerald-400' : 'text-amber-400'}>{visible}</span> of <span className="text-white">{total}</span> jobs
+                </p>
+                {!isPaid && lockedCount > 0 && (
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                        🔒 {lockedCount} jobs locked — Upgrade to Premium to unlock more jobs
                     </p>
-                    {!isPaid && lockedCount > 0 && (
-                        <p className="text-[11px] text-slate-400 mt-0.5">
-                            🔒 {lockedCount} jobs locked — Upgrade to Premium to unlock more jobs
-                        </p>
-                    )}
-                </div>
+                )}
             </div>
             {!isPaid && lockedCount > 0 && (
                 <Link
@@ -268,6 +267,8 @@ function PlanBanner({
 
 // ─── Upgrade Gate (shown after locked jobs) ───────────────────────────────────
 function UpgradeGate({ count, plan }: { count: number; plan: string }) {
+    const params = useParams();
+    const locale = params?.locale || 'en-in';
     if (plan !== 'free' || count === 0) return null;
     return (
         <div className="mt-6 p-6 rounded-[2rem] bg-gradient-to-br from-amber-500/10 via-orange-500/8 to-rose-500/5 border border-amber-500/20 text-center relative overflow-hidden">
@@ -284,13 +285,13 @@ function UpgradeGate({ count, plan }: { count: number; plan: string }) {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
-                    href="/billing"
+                    href={`/${locale}/dashboard/billing`}
                     className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-sm uppercase tracking-wider rounded-2xl transition-all shadow-xl shadow-amber-500/20"
                 >
                     <Crown className="w-4 h-4" /> Upgrade to Premium
                 </Link>
                 <Link
-                    href="/billing"
+                    href={`/${locale}/dashboard/billing`}
                     className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-sm rounded-2xl transition-all"
                 >
                     View Plans
