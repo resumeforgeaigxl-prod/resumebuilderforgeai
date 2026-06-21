@@ -81,13 +81,13 @@ function emailWrapper(bodyHtml: string): string {
 <body style="margin:0;padding:0;background:#0f0f1a;font-family:'Segoe UI',Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#0f0f1a;padding:32px 16px;">
     <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;border:1px solid #1e1b4b;border-collapse:collapse;">
 
         <!-- Header / Logo -->
         <tr>
-          <td style="background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#1e1b4b 100%);border-radius:16px 16px 0 0;padding:32px 40px;text-align:center;">
+          <td style="background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#1e1b4b 100%);padding:32px 40px;text-align:center;border-bottom:1px solid #1e1b4b;">
             <div style="display:inline-flex;align-items:center;gap:10px;">
-              <div style="width:40px;height:40px;background:linear-gradient(135deg,#6366f1,#a855f7);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;">✦</div>
+              <div style="width:40px;height:40px;background:linear-gradient(135deg,#6366f1,#a855f7);border-radius:0px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;color:#ffffff;border:1px solid #818cf8;">RF</div>
               <span style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.5px;">ResumeForge<span style="color:#a78bfa;">AI</span></span>
             </div>
           </td>
@@ -95,14 +95,14 @@ function emailWrapper(bodyHtml: string): string {
 
         <!-- Body -->
         <tr>
-          <td style="background:#13131f;padding:40px;border-left:1px solid #1e1b4b;border-right:1px solid #1e1b4b;">
+          <td style="background:#13131f;padding:40px;">
             ${bodyHtml}
           </td>
         </tr>
 
         <!-- Footer -->
         <tr>
-          <td style="background:#0a0a14;border-radius:0 0 16px 16px;border:1px solid #1e1b4b;padding:24px 40px;text-align:center;">
+          <td style="background:#0a0a14;border-top:1px solid #1e1b4b;padding:24px 40px;text-align:center;">
             <p style="margin:0;font-size:12px;color:#6b7280;">
               Need help? <a href="mailto:support@resumeforgeai.in" style="color:#818cf8;text-decoration:none;">support@resumeforgeai.in</a>
             </p>
@@ -122,7 +122,7 @@ function emailWrapper(bodyHtml: string): string {
 
 function ctaButton(text: string, href: string, color = '#6366f1'): string {
   return `<div style="text-align:center;margin:28px 0;">
-      <a href="${href}" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,${color},#a855f7);color:#fff;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;letter-spacing:0.3px;">
+      <a href="${href}" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,${color},#a855f7);color:#fff;font-size:15px;font-weight:700;text-decoration:none;border-radius:0px;border:1px solid #a855f7;letter-spacing:0.3px;">
         ${text} →
       </a>
     </div>`;
@@ -456,11 +456,11 @@ export async function sendJobAlertEmail(
 ): Promise<void> {
   const displayName = userName || to.split('@')[0];
   const jobsHtml = jobs.map(job => `
-    <div style="background:#0d0d1c; border:1px solid #1e1b4b; border-radius:10px; padding:16px; margin-bottom:16px; text-align:left;">
+    <div style="background:#0d0d1c; border:1px solid #1e1b4b; border-radius:0px; padding:16px; margin-bottom:16px; text-align:left;">
       <h3 style="margin:0 0 4px; font-size:16px; color:#f1f5f9; font-weight:700;">${job.title}</h3>
       <p style="margin:0 0 12px; font-size:13px; color:#cbd5e1;">${job.company} • ${job.location}</p>
       ${job.apply_url ? `
-        <a href="${job.apply_url}" style="display:inline-block; padding:8px 18px; background:#6366f1; color:#fff; font-size:12px; font-weight:700; text-decoration:none; border-radius:6px;">
+        <a href="${job.apply_url}" style="display:inline-block; padding:8px 18px; background:#6366f1; color:#fff; font-size:12px; font-weight:700; text-decoration:none; border-radius:0px; border:1px solid #818cf8;">
           Apply Now
         </a>
       ` : ''}
