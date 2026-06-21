@@ -24,6 +24,15 @@ export default function HeaderWrapper({ children }: { children: ReactNode }) {
         pathname?.includes('/projectforge') || 
         pathname?.includes('/studyforge') || 
         pathname?.includes('/company-prep') || 
+        pathname?.includes('/company-prep-interview') ||
+        pathname?.includes('/dashboard-jobs') ||
+        pathname?.includes('/jobforge-app') ||
+        pathname?.includes('/interview-intelligence') ||
+        pathname?.includes('/portfolio') ||
+        pathname?.includes('/portfolioforge') ||
+        pathname?.includes('/recruiter') ||
+        pathname?.includes('/roadmap') ||
+        pathname?.includes('/job-alerts') ||
         pathname?.includes('/api-keys') || 
         pathname?.includes('/api-platform') || 
         pathname?.includes('/mock-interview') || 
