@@ -353,8 +353,16 @@ export async function middleware(request: NextRequest) {
         }
 
         const profileIncomplete = !session.profileCompleted;
-        if (profileIncomplete && !isCompleteProfile && !isAuthRoute && !isPublicRoute) {
-            return NextResponse.redirect(new URL(`/${currentLocale}-${currentRegion}/complete-profile`, request.url));
+        if (profileIncomplete && !isCompleteProfile && !isAuthRoute) {
+            const isLegalPage = 
+                normalizedPath.startsWith('/privacy') ||
+                normalizedPath.startsWith('/terms') ||
+                normalizedPath.startsWith('/cookie-policy') ||
+                normalizedPath.startsWith('/data-deletion');
+            
+            if (!isLegalPage) {
+                return NextResponse.redirect(new URL(`/${currentLocale}-${currentRegion}/complete-profile`, request.url));
+            }
         }
 
         if (!profileIncomplete && isCompleteProfile) {
