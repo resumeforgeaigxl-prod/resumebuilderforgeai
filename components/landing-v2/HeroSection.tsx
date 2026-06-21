@@ -40,7 +40,7 @@ function Slide1() {
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="relative md:absolute md:bottom-8 md:right-[10%] -mt-[60px] md:mt-0 mx-4 md:mx-0 z-10 w-[240px] h-[330px] p-4 text-left flex flex-col font-sans select-none hover:scale-[1.02] transition-transform duration-300 overflow-hidden"
+        className="relative md:absolute md:bottom-8 md:right-[10%] mt-4 md:mt-0 mx-auto md:mx-0 z-10 w-[240px] h-[330px] p-4 text-left flex flex-col font-sans select-none hover:scale-[1.02] transition-transform duration-300 overflow-hidden"
         style={{
           background: 'rgba(255, 255, 255, 0.12)',
           backdropFilter: 'blur(20px)',
@@ -149,7 +149,7 @@ function Slide2() {
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="relative md:absolute md:bottom-8 md:right-[10%] -mt-[60px] md:mt-0 mx-4 md:mx-0 z-10 w-full max-w-[380px] h-[340px] p-6 flex flex-col justify-between"
+        className="relative md:absolute md:bottom-8 md:right-[10%] mt-4 md:mt-0 mx-auto md:mx-0 z-10 w-full max-w-[310px] sm:max-w-[380px] h-[340px] p-6 flex flex-col justify-between"
         style={{
           background: 'rgba(255, 255, 255, 0.12)',
           backdropFilter: 'blur(20px)',
@@ -329,7 +329,7 @@ function Slide3() {
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="relative md:absolute md:bottom-8 md:right-[10%] -mt-[60px] md:mt-0 mx-4 md:mx-0 z-10 w-full max-w-[400px] h-[340px] p-6 flex flex-col justify-between"
+        className="relative md:absolute md:bottom-8 md:right-[10%] mt-4 md:mt-0 mx-auto md:mx-0 z-10 w-full max-w-[310px] sm:max-w-[400px] h-[340px] p-6 flex flex-col justify-between"
         style={{
           background: 'rgba(255, 255, 255, 0.12)',
           backdropFilter: 'blur(20px)',
@@ -412,7 +412,7 @@ function Slide4() {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#EBEBEB_1px,transparent_1px),linear-gradient(to_bottom,#EBEBEB_1px,transparent_1px)] bg-[size:24px_24px] opacity-20 pointer-events-none" />
 
       {/* Fan of Overlapping Resume Templates */}
-      <div className="relative md:absolute md:bottom-8 md:right-[10%] -mt-[60px] md:mt-0 mx-4 md:mx-0 z-10 w-full md:w-[360px] h-[280px] md:h-[360px] flex items-center justify-center select-none scale-[0.8] md:scale-100 origin-center md:origin-bottom-right transition-transform duration-300">
+      <div className="relative md:absolute md:bottom-8 md:right-[10%] mt-4 md:mt-0 mx-auto md:mx-0 z-10 w-full max-w-[310px] sm:w-[360px] h-[280px] md:h-[360px] flex items-center justify-center select-none scale-[0.8] md:scale-100 origin-center md:origin-bottom-right transition-transform duration-300">
         
         {/* Left Template (Modern Blue) */}
         <motion.div
@@ -630,7 +630,7 @@ function ProductPreviewSlider() {
   return (
     <div className="w-full flex flex-col items-center">
       {/* Main Widescreen Visual Container */}
-      <div className="relative w-full max-w-[960px] mx-auto h-[320px] md:h-[480px]">
+      <div className="relative w-full max-w-[960px] mx-auto h-[400px] sm:h-[420px] md:h-[480px]">
         {/* Image Panel */}
         <div className="absolute inset-0 rounded-t-[16px] overflow-hidden border border-[#e5e5e5] border-b-0 shadow-[0_20px_60px_rgba(0,0,0,0.06)] bg-[#FAFAFA]">
           <img
@@ -660,7 +660,7 @@ function ProductPreviewSlider() {
 
       {/* Tab Bar (Interactive Visual / ATS Scan Audit / etc.) */}
       <div 
-        className="w-full max-w-[960px] mx-auto border border-[#e5e5e5] rounded-b-[16px] bg-[#ffffff] px-6 py-4 md:py-5 flex gap-3 md:gap-6 items-center"
+        className="w-full max-w-[960px] mx-auto border border-[#e5e5e5] rounded-b-[16px] bg-[#ffffff] px-4 py-3 md:px-6 md:py-5 grid grid-cols-2 md:flex gap-3 md:gap-6 items-center"
         style={{ borderTop: 'none' }}
       >
         {slides.map((slide) => {

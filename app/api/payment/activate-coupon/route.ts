@@ -60,8 +60,20 @@ export async function POST(req: NextRequest) {
         const currency = isIndia ? 'INR' : 'USD';
 
         const CURRENCY_PRICES: Record<string, Record<PlanName, number>> = {
-            INR: { DAILY: 29, WEEKLY: 79, MONTHLY: 199, PROFESSIONAL: 499, PRO: 499 },
-            USD: { DAILY: 1, WEEKLY: 3, MONTHLY: 6, PROFESSIONAL: 12, PRO: 12 }
+            INR: {
+                DAILY: 29, DAILY_STANDARD: 29, DAILY_ALL_ACCESS: 49,
+                WEEKLY: 79, WEEKLY_STANDARD: 79, WEEKLY_ALL_ACCESS: 129,
+                MONTHLY: 199, MONTHLY_STANDARD: 199, MONTHLY_ALL_ACCESS: 399,
+                PROFESSIONAL: 499, PRO_STANDARD: 499, PRO_ALL_ACCESS: 899,
+                PRO: 499
+            },
+            USD: {
+                DAILY: 1, DAILY_STANDARD: 1, DAILY_ALL_ACCESS: 2,
+                WEEKLY: 3, WEEKLY_STANDARD: 3, WEEKLY_ALL_ACCESS: 5,
+                MONTHLY: 6, MONTHLY_STANDARD: 6, MONTHLY_ALL_ACCESS: 12,
+                PROFESSIONAL: 12, PRO_STANDARD: 12, PRO_ALL_ACCESS: 24,
+                PRO: 12
+            }
         };
 
         const basePrice = CURRENCY_PRICES[currency][planName] || CURRENCY_PRICES['INR'][planName];

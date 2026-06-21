@@ -12,6 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import StreakCard from '@/components/dashboard/StreakCard'
+import { USAGE_LIMITS } from '@/lib/usage'
+import { PlanLevel } from '@/lib/access'
 
 export default async function DashboardPage({ params }: { params: { locale: string } }) {
     const { locale } = params;
@@ -23,7 +25,7 @@ export default async function DashboardPage({ params }: { params: { locale: stri
     try {
         const { data: user } = await supabase
             .from('users')
-            .select('full_name, email, role, plan_type, plan_end')
+            .select('full_name, email, role, plan_type, plan_end, daily_credits_used, daily_credits_limit, last_token_reset')
             .eq('id', session.userId)
             .single();
 
@@ -36,6 +38,18 @@ export default async function DashboardPage({ params }: { params: { locale: stri
         const displayName = user?.full_name || user?.email?.split('@')[0] || 'Member';
         const isAdmin = user?.role === 'admin';
         const plan = isAdmin ? 'ADMIN' : (user?.plan_type?.toUpperCase() || 'FREE');
+
+        // Real Daily Credits Calculation
+        let dailyCreditsUsed = user?.daily_credits_used ?? 0;
+        const limitFromPlan = USAGE_LIMITS[plan as PlanLevel] || 50;
+        const dailyCreditsLimit = user?.daily_credits_limit || limitFromPlan;
+        const lastReset = user?.last_token_reset ? new Date(user.last_token_reset) : new Date(0);
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
+        if (lastReset < todayStart) {
+            dailyCreditsUsed = 0;
+        }
 
         return (
             <div className="space-y-10 animate-fade-in text-[#171717]">
@@ -81,11 +95,9 @@ export default async function DashboardPage({ params }: { params: { locale: stri
                         icon={<FileText className="text-[#171717] w-5 h-5" />} 
                         trend="+1 this month"
                     />
-                    <MetricCard 
-                        label="AI Optimization" 
-                        value={`${scoreRes.count ? '98%' : '0'}`} 
-                        icon={<Zap className="text-[#171717] w-5 h-5" />} 
-                        trend="Top 2% Globally"
+                    <CreditUsageCard 
+                        used={dailyCreditsUsed} 
+                        limit={dailyCreditsLimit} 
                     />
                     <MetricCard 
                         label="Scheduled Events" 
@@ -227,6 +239,67 @@ export default async function DashboardPage({ params }: { params: { locale: stri
         const message = err instanceof Error ? err.message : 'Unknown error';
         return <div className="p-10 text-rose-600 font-medium bg-white border border-[#EBEBEB] rounded-xl shadow-sm">Ecosystem Linkage Error: {message}</div>;
     }
+}
+
+function CreditUsageCard({ used, limit }: { used: number; limit: number }) {
+    const percent = Math.min(100, Math.max(0, limit > 0 ? Math.round((used / limit) * 100) : 0));
+    
+    // SVG circular progress details
+    const radius = 28;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (percent / 100) * circumference;
+
+    return (
+        <div className="bg-white border border-[#EBEBEB] rounded-xl p-6 hover:shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.06)] transition-all group relative overflow-hidden flex items-center justify-between">
+            <div className="space-y-2 text-left">
+                <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center">
+                        <Zap className="text-[#171717] w-5 h-5 group-hover:scale-110 transition-transform" />
+                    </div>
+                    <div>
+                        <p className="text-xs text-[#8F8F8F] uppercase tracking-wider font-semibold">AI Credits Burn</p>
+                        <p className="text-[11px] text-[#8F8F8F] font-mono mt-0.5 uppercase tracking-normal">Resets Daily</p>
+                    </div>
+                </div>
+                <div className="pt-2">
+                    <p className="text-3xl font-semibold text-[#171717] tracking-tight leading-none">
+                        {used} <span className="text-sm font-normal text-[#8F8F8F] font-sans">/ {limit} used</span>
+                    </p>
+                </div>
+            </div>
+            
+            {/* Circular Progress Ring */}
+            <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
+                <svg width="64" height="64" viewBox="0 0 64 64" className="-rotate-90">
+                    {/* Background track */}
+                    <circle 
+                        cx="32" 
+                        cy="32" 
+                        r={radius} 
+                        fill="none" 
+                        stroke="#F2F2F2" 
+                        strokeWidth="5" 
+                    />
+                    {/* Foreground progress */}
+                    <circle 
+                        cx="32" 
+                        cy="32" 
+                        r={radius} 
+                        fill="none" 
+                        stroke="#171717" 
+                        strokeWidth="5" 
+                        strokeLinecap="round"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={strokeDashoffset}
+                        className="transition-all duration-500 ease-out"
+                    />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xs font-mono font-bold text-[#171717]">{percent}%</span>
+                </div>
+            </div>
+        </div>
+    );
 }
 
 function MetricCard({ label, value, icon, trend }: { label: string, value: string | number, icon: React.ReactNode, trend: string }) {

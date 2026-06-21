@@ -4,13 +4,18 @@ import Razorpay from 'razorpay';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
 
-type PlanName = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'PROFESSIONAL' | 'PRO';
+type PlanName =
+    | 'DAILY' | 'DAILY_STANDARD' | 'DAILY_ALL_ACCESS'
+    | 'WEEKLY' | 'WEEKLY_STANDARD' | 'WEEKLY_ALL_ACCESS'
+    | 'MONTHLY' | 'MONTHLY_STANDARD' | 'MONTHLY_ALL_ACCESS'
+    | 'PROFESSIONAL' | 'PRO_STANDARD' | 'PRO_ALL_ACCESS'
+    | 'PRO';
 
 const PLAN_PRICES: Record<PlanName, number> = {
-    DAILY: 29,
-    WEEKLY: 79,
-    MONTHLY: 199,
-    PROFESSIONAL: 499,
+    DAILY: 29, DAILY_STANDARD: 29, DAILY_ALL_ACCESS: 49,
+    WEEKLY: 79, WEEKLY_STANDARD: 79, WEEKLY_ALL_ACCESS: 129,
+    MONTHLY: 199, MONTHLY_STANDARD: 199, MONTHLY_ALL_ACCESS: 399,
+    PROFESSIONAL: 499, PRO_STANDARD: 499, PRO_ALL_ACCESS: 899,
     PRO: 499, // Legacy support
 };
 
@@ -51,10 +56,21 @@ export async function POST(req: NextRequest) {
         const currency = isIndia ? 'INR' : 'USD';
 
         // ── 2. Determine Pricing ──────────────────────────────────────────
-        // Career: 499 INR or 6 USD
         const CURRENCY_PRICES: Record<string, Record<PlanName, number>> = {
-            INR: { DAILY: 29, WEEKLY: 79, MONTHLY: 199, PROFESSIONAL: 499, PRO: 499 },
-            USD: { DAILY: 1.5, WEEKLY: 3, MONTHLY: 7, PROFESSIONAL: 15, PRO: 15 }
+            INR: {
+                DAILY: 29, DAILY_STANDARD: 29, DAILY_ALL_ACCESS: 49,
+                WEEKLY: 79, WEEKLY_STANDARD: 79, WEEKLY_ALL_ACCESS: 129,
+                MONTHLY: 199, MONTHLY_STANDARD: 199, MONTHLY_ALL_ACCESS: 399,
+                PROFESSIONAL: 499, PRO_STANDARD: 499, PRO_ALL_ACCESS: 899,
+                PRO: 499
+            },
+            USD: {
+                DAILY: 1.5, DAILY_STANDARD: 1.5, DAILY_ALL_ACCESS: 2.5,
+                WEEKLY: 3, WEEKLY_STANDARD: 3, WEEKLY_ALL_ACCESS: 5,
+                MONTHLY: 7, MONTHLY_STANDARD: 7, MONTHLY_ALL_ACCESS: 14,
+                PROFESSIONAL: 15, PRO_STANDARD: 15, PRO_ALL_ACCESS: 28,
+                PRO: 15
+            }
         };
 
 
@@ -77,7 +93,10 @@ export async function POST(req: NextRequest) {
                 const now = new Date();
                 const expired = coupon.expires_at && new Date(coupon.expires_at) < now;
                 const limitReached = coupon.max_uses !== null && coupon.used_count >= coupon.max_uses;
-                const planMatch = coupon.plan_type === 'all' || coupon.plan_type === planName.toLowerCase();
+                const planMatch =
+                    coupon.plan_type === 'all' ||
+                    coupon.plan_type === planName.toLowerCase() ||
+                    planName.toLowerCase().startsWith(coupon.plan_type + '_');
 
                 if (!expired && !limitReached && planMatch) {
                     if (coupon.type === 'full') {

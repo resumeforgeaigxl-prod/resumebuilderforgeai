@@ -410,7 +410,7 @@ export default function WorkflowTimeline() {
 
               {/* Glowing active line overlay */}
               <div
-                className="absolute left-[19px] w-[2px] bg-[#7928CA] transition-all duration-500 pointer-events-none"
+                className="hidden lg:block absolute left-[19px] w-[2px] bg-[#7928CA] transition-all duration-500 pointer-events-none"
                 style={{
                   top: `${activeStep * 84 + 16}px`,
                   height: activeStep === 4 ? "0px" : "84px"

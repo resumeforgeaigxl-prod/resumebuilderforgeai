@@ -19,134 +19,204 @@ interface TierDetails {
   allAccessPeriod: string;
   allAccessCTA: string;
   allAccessHref: string;
-  allAccessFeatures: string[];
+  allAccessFeaturesLeft: string[];
+  allAccessFeaturesRight: string[];
 }
 
 const pricingTiersData: TierDetails[] = [
   {
     name: "Free",
-    limit: "50 credits / day",
+    limit: "50 credits",
     standardPrice: "₹0",
     standardPeriod: "forever",
-    standardCTA: "Start Free",
+    standardCTA: "Get Started",
     standardHref: "/signup",
     standardFeatures: [
       "50 Daily AI credits",
       "Basic Resume Builder",
       "Standard ATS Check",
-      "Community Support",
+      "Download PDF resumes",
+      "Basic Community Support",
+      "Standard templates access",
+      "Footer branding included",
     ],
     allAccessPrice: "₹0",
     allAccessPeriod: "forever",
-    allAccessCTA: "Start Free",
+    allAccessCTA: "Get Started",
     allAccessHref: "/signup",
-    allAccessFeatures: [
+    allAccessFeaturesLeft: [
       "50 Daily AI credits",
       "Basic Resume Builder",
       "Standard ATS Check",
-      "Access to all basic mockups",
-      "Community Support",
+      "Download PDF resumes",
+      "Basic Community Support",
+      "Standard templates access",
+      "Footer branding included",
+    ],
+    allAccessFeaturesRight: [
+      "CodingForge basics",
+      "InterviewForge basics",
+      "PrepForge (TCS NQT)",
+      "ProjectForge (GitHub import)",
+      "LearnForge roadmaps",
+      "Interactive tour sandbox",
+      "Free career tools access",
     ],
   },
   {
     name: "Daily",
-    limit: "300 credits / day",
+    limit: "300 credits",
     standardPrice: "₹29",
     standardPeriod: "day",
-    standardCTA: "Get Daily Standard",
+    standardCTA: "Get Started",
     standardHref: "/dashboard/billing?plan=daily_standard",
     standardFeatures: [
       "300 Daily AI credits",
       "Full access to ResumeForge",
-      "Standard ATS Check & suggestions",
-      "Valid for 24 hours",
+      "Advanced ATS optimization",
+      "Download PDF resumes",
+      "Remove daily limits",
+      "Priority Email Support",
+      "No Footer Branding",
     ],
     allAccessPrice: "₹49",
     allAccessPeriod: "day",
-    allAccessCTA: "Get Daily All-Access",
+    allAccessCTA: "Get Started",
     allAccessHref: "/dashboard/billing?plan=daily_all_access",
-    allAccessFeatures: [
-      "500 Daily AI credits",
+    allAccessFeaturesLeft: [
+      "300 Daily AI credits",
       "Full access to ResumeForge",
-      "CodingForge (interactive drills)",
+      "Advanced ATS optimization",
+      "Download PDF resumes",
+      "Remove daily limits",
+      "Priority Email Support",
+      "No Footer Branding",
+    ],
+    allAccessFeaturesRight: [
+      "CodingForge (all interactive drills)",
       "InterviewForge (mock voice agent)",
+      "PrepForge (all company decks)",
+      "ProjectForge (GitHub import)",
+      "LearnForge roadmaps",
       "Valid for 24 hours",
+      "All Forges unlocked",
     ],
   },
   {
     name: "Weekly",
-    limit: "800 credits / day",
+    limit: "800 credits",
     standardPrice: "₹79",
     standardPeriod: "week",
-    standardCTA: "Get Weekly Standard",
+    standardCTA: "Get Started",
     standardHref: "/dashboard/billing?plan=weekly_standard",
     standardFeatures: [
       "800 Daily AI credits",
       "Full access to ResumeForge",
       "Advanced ATS optimization",
-      "Project & Portfolio basics",
+      "Download PDF resumes",
+      "Remove weekly limits",
+      "Priority Email Support",
+      "No Footer Branding",
     ],
     allAccessPrice: "₹129",
     allAccessPeriod: "week",
-    allAccessCTA: "Get Weekly All-Access",
+    allAccessCTA: "Get Started",
     allAccessHref: "/dashboard/billing?plan=weekly_all_access",
-    allAccessFeatures: [
-      "1200 Daily AI credits",
+    allAccessFeaturesLeft: [
+      "800 Daily AI credits",
       "Full access to ResumeForge",
-      "CodingForge (all problems)",
-      "InterviewForge (unlimited mock rounds)",
-      "PrepForge (TCS NQT & companies)",
+      "Advanced ATS optimization",
+      "Download PDF resumes",
+      "Remove weekly limits",
+      "Priority Email Support",
+      "No Footer Branding",
+    ],
+    allAccessFeaturesRight: [
+      "CodingForge (all interactive drills)",
+      "InterviewForge (mock voice agent)",
+      "PrepForge (all company decks)",
+      "ProjectForge (GitHub import)",
+      "LearnForge roadmaps",
+      "Valid for 7 days",
+      "All Forges unlocked",
     ],
   },
   {
     name: "Monthly",
-    limit: "2000 credits / day",
+    limit: "2,000 credits",
     standardPrice: "₹199",
     standardPeriod: "month",
-    standardCTA: "Get Monthly Standard",
+    standardCTA: "Get Started",
     standardHref: "/dashboard/billing?plan=monthly_standard",
     standardFeatures: [
-      "2000 Daily AI credits",
+      "2,000 Daily AI credits",
       "Full access to ResumeForge",
       "Advanced ATS optimization",
+      "Download PDF resumes",
+      "Remove monthly limits",
       "Priority Email Support",
+      "No Footer Branding",
     ],
     allAccessPrice: "₹399",
     allAccessPeriod: "month",
-    allAccessCTA: "Get Monthly All-Access",
+    allAccessCTA: "Get Started",
     allAccessHref: "/dashboard/billing?plan=monthly_all_access",
-    allAccessFeatures: [
-      "3500 Daily AI credits",
-      "Everything in Standard",
-      "All Forges (Coding, Interview, Prep, Project, Learn)",
-      "Adaptive Career roadmap generator",
+    allAccessFeaturesLeft: [
+      "2,000 Daily AI credits",
+      "Full access to ResumeForge",
+      "Advanced ATS optimization",
+      "Download PDF resumes",
+      "Remove monthly limits",
       "Priority Email Support",
+      "No Footer Branding",
+    ],
+    allAccessFeaturesRight: [
+      "CodingForge (practice drills)",
+      "InterviewForge (mock voice agent)",
+      "PrepForge (TCS NQT & companies)",
+      "ProjectForge (code portfolios)",
+      "LearnForge roadmaps",
+      "Adaptive Career roadmap generator",
+      "All Forges unlocked",
     ],
   },
   {
     name: "Professional",
-    limit: "5000 credits / day",
+    limit: "5,000 credits",
     standardPrice: "₹499",
     standardPeriod: "month",
-    standardCTA: "Get Pro Standard",
+    standardCTA: "Get Started",
     standardHref: "/dashboard/billing?plan=pro_standard",
     standardFeatures: [
-      "5000 Daily AI credits",
+      "5,000 Daily AI credits",
       "Full access to ResumeForge",
       "Advanced ATS optimization",
-      "Priority Routing & Skill Gap",
-      "Knowledge Runner Enabled",
+      "Download PDF resumes",
+      "Remove monthly limits",
+      "Priority Email Support",
+      "No Footer Branding",
     ],
     allAccessPrice: "₹899",
     allAccessPeriod: "month",
-    allAccessCTA: "Get Pro All-Access",
+    allAccessCTA: "Get Started",
     allAccessHref: "/dashboard/billing?plan=pro_all_access",
-    allAccessFeatures: [
-      "8000 Daily AI credits",
-      "Everything in Standard",
-      "All Forges + Mentor AI assistant",
-      "Company-specific deck customization",
-      "Priority 1-on-1 support",
+    allAccessFeaturesLeft: [
+      "5,000 Daily AI credits",
+      "Full access to ResumeForge",
+      "Advanced ATS optimization",
+      "Download PDF resumes",
+      "Remove monthly limits",
+      "Priority Email Support",
+      "No Footer Branding",
+    ],
+    allAccessFeaturesRight: [
+      "CodingForge (all interactive drills)",
+      "InterviewForge (unlimited mock rounds)",
+      "PrepForge (all company decks)",
+      "ProjectForge (GitHub import)",
+      "LearnForge roadmaps",
+      "Adaptive Career roadmap generator",
+      "1-on-1 resume feedback sessions",
     ],
   },
 ];
@@ -191,7 +261,7 @@ export default function PricingSection({ locale = "en-in" }: PricingSectionProps
                 Usage Volume Estimator
               </span>
               <span className="bg-[#7c3aed]/10 text-[#7c3aed] text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                {activeTier.limit}
+                {activeTier.limit} / day
               </span>
             </div>
 
@@ -271,114 +341,134 @@ export default function PricingSection({ locale = "en-in" }: PricingSectionProps
             </div>
           </div>
 
-          {/* Cards side-by-side comparison */}
-          <div className="grid grid-cols-1 md:grid-cols-2 items-stretch gap-6 max-w-[960px] mx-auto">
+          {/* Cards side-by-side comparison (AutoSend Split Layout) */}
+          <motion.div
+            className="border border-[#e7e5e4] bg-white rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#e7e5e4] max-w-[960px] mx-auto shadow-[0_4px_12px_rgba(0,0,0,0.02)]"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6, ease, delay: 0.05 }}
+          >
             
             {/* CARD 1: Standard Access */}
-            <motion.div
-              className="flex flex-col transition-all duration-300 bg-white border border-[#e7e5e4] rounded-2xl p-6 md:p-8 shadow-[0_4px_12px_rgba(0,0,0,0.01)] hover:-translate-y-1 h-full"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.6, ease, delay: 0.05 }}
-            >
-              <span className="font-mono text-[9px] uppercase font-bold text-stone-400 tracking-wider mb-2 block text-left">
-                Standard Tier
-              </span>
-              
-              <h3 className="text-xl md:text-2xl font-bold tracking-tight text-stone-900 font-display italic text-left">
-                Standard Access
-              </h3>
-              
-              <p className="text-[12.5px] text-stone-500 mt-1.5 leading-relaxed min-h-[38px] text-left">
-                Core AI tools for resume building and ATS scoring.
-              </p>
+            <div className="flex flex-col bg-white h-full justify-between overflow-hidden">
+              <div className="p-6 md:p-8 flex-1 flex flex-col">
+                <span className="font-mono text-[9px] uppercase font-bold text-stone-400 tracking-widest mb-1.5 block text-left">
+                  ONLY RESUME BUILDER
+                </span>
+                
+                {/* Price block */}
+                <div className="flex items-center gap-4 my-4 justify-start">
+                  <span className="text-5xl md:text-6xl font-extrabold text-stone-900 leading-none tracking-tight">
+                    {activeTier.standardPrice}
+                  </span>
+                  <div className="flex flex-col text-left justify-center leading-none">
+                    <span className="text-[12px] font-bold text-stone-800 uppercase font-mono">
+                      {activeTier.name === "Monthly" ? "STARTER" : (activeTier.name === "Professional" ? "PRO" : activeTier.name.toUpperCase())}
+                    </span>
+                    <span className="text-[11px] font-semibold text-stone-500 mt-1 font-mono">
+                      {activeTier.limit} / day
+                    </span>
+                    <span className="text-[9.5px] text-stone-400 mt-1 font-mono">
+                      billed {activeTier.standardPeriod}
+                    </span>
+                  </div>
+                </div>
 
-              {/* Price block */}
-              <div className="mt-5 flex items-baseline gap-1 justify-start">
-                <span className="text-4xl md:text-5xl font-extrabold text-stone-900 leading-none">
-                  {activeTier.standardPrice}
-                </span>
-                <span className="text-xs font-semibold text-stone-400">
-                  /{activeTier.standardPeriod}
-                </span>
+                <div className="my-4 h-[1px] bg-stone-100" />
+
+                {/* Features list */}
+                <ul className="space-y-3.5 flex-1 text-left mb-4">
+                  {activeTier.standardFeatures.map((feat) => (
+                    <li key={feat} className="flex items-start gap-2.5 text-stone-600 text-[13px]">
+                      <div className="w-4 h-4 rounded-full bg-[#7c3aed] flex items-center justify-center shrink-0 mt-0.5 animate-none">
+                        <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                      </div>
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
 
-              <div className="my-6 h-[1px] bg-stone-100" />
-
-              {/* Features list */}
-              <ul className="space-y-3.5 flex-1 mb-8 text-left">
-                {activeTier.standardFeatures.map((feat) => (
-                  <li key={feat} className="flex items-start gap-2.5 text-stone-600 text-[13.5px]">
-                    <Check className="w-4 h-4 text-[#7c3aed] mt-0.5 shrink-0" strokeWidth={2.5} />
-                    <span>{feat}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* CTA button */}
+              {/* Full-width bottom CTA */}
               <Link href={`/${locale}${activeTier.standardHref}`} className="block w-full">
-                <button className="w-full text-center border border-[#e7e5e4] rounded-xl py-3.5 text-[12px] font-semibold font-mono uppercase tracking-wider text-[#1c1917] bg-white hover:bg-[#fafaf9] hover:border-[#1c1917] transition-all duration-75 cursor-pointer active:scale-95">
-                  {activeTier.standardCTA}
-                </button>
+                <div className="w-full py-4 bg-[#292524] hover:bg-[#1c1917] text-white text-center font-mono text-[12px] uppercase font-bold tracking-widest flex items-center justify-center gap-1.5 border-t border-[#e7e5e4] cursor-pointer transition-all active:scale-[0.99]">
+                  <span>{activeTier.standardCTA}</span>
+                  <span className="text-[14px]">→</span>
+                </div>
               </Link>
-            </motion.div>
+            </div>
 
             {/* CARD 2: All-Access Forges (Recommended) */}
-            <motion.div
-              className="flex flex-col transition-all duration-300 bg-[#faf8ff] border-2 border-[#7c3aed] rounded-2xl p-6 md:p-8 shadow-[0_8px_24px_rgba(124,58,237,0.04)] hover:-translate-y-1 h-full relative overflow-hidden"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.6, ease, delay: 0.1 }}
-            >
-              <div className="absolute top-0 right-0 bg-[#7c3aed] text-white text-[8px] font-bold font-mono tracking-widest px-4 py-1.5 uppercase rounded-bl-lg select-none">
-                RECOMMENDED
+            <div className="flex flex-col bg-white h-full justify-between overflow-hidden relative">
+              <div className="p-6 md:p-8 flex-1 flex flex-col">
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="font-mono text-[9px] uppercase font-bold text-[#7c3aed] tracking-widest block text-left">
+                    RESUME BUILDER + ALL FORGES
+                  </span>
+                  <span className="bg-[#84cc16] text-white text-[8px] font-bold font-mono tracking-widest px-2.5 py-0.5 rounded uppercase select-none">
+                    RECOMMENDED
+                  </span>
+                </div>
+                
+                {/* Price block */}
+                <div className="flex items-center gap-4 my-4 justify-start">
+                  <span className="text-5xl md:text-6xl font-extrabold text-[#7c3aed] leading-none tracking-tight">
+                    {activeTier.allAccessPrice}
+                  </span>
+                  <div className="flex flex-col text-left justify-center leading-none">
+                    <span className="text-[12px] font-bold text-stone-800 uppercase font-mono">
+                      {activeTier.name === "Monthly" ? "STARTER" : (activeTier.name === "Professional" ? "PRO" : activeTier.name.toUpperCase())}
+                    </span>
+                    <span className="text-[11px] font-semibold text-stone-500 mt-1 font-mono">
+                      {activeTier.limit} / day · All Forges
+                    </span>
+                    <span className="text-[9.5px] text-stone-400 mt-1 font-mono">
+                      billed {activeTier.allAccessPeriod}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="my-4 h-[1px] bg-stone-100" />
+
+                {/* Split Features columns */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3.5 flex-1 text-left mb-4">
+                  {/* Left Column (Standard features, matching Left card) */}
+                  <ul className="space-y-3.5">
+                    {activeTier.allAccessFeaturesLeft.map((feat) => (
+                      <li key={feat} className="flex items-start gap-2.5 text-stone-700 text-[13px]">
+                        <div className="w-4 h-4 rounded-full bg-[#7c3aed] flex items-center justify-center shrink-0 mt-0.5 animate-none">
+                          <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                        </div>
+                        <span>{feat}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Right Column (All-Access extra Forges) */}
+                  <ul className="space-y-3.5 border-t sm:border-t-0 pt-3.5 sm:pt-0 border-stone-100">
+                    {activeTier.allAccessFeaturesRight.map((feat) => (
+                      <li key={feat} className="flex items-start gap-2.5 text-stone-700 text-[13px]">
+                        <div className="w-4 h-4 rounded-full bg-[#7c3aed] flex items-center justify-center shrink-0 mt-0.5 animate-none">
+                          <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                        </div>
+                        <span>{feat}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
 
-              <span className="font-mono text-[9px] uppercase font-bold text-[#7c3aed] tracking-wider mb-2 block text-left">
-                All-Access Tier
-              </span>
-              
-              <h3 className="text-xl md:text-2xl font-bold tracking-tight text-stone-900 font-display italic text-left">
-                All-Access Forges
-              </h3>
-              
-              <p className="text-[12.5px] text-stone-500 mt-1.5 leading-relaxed min-h-[38px] text-left">
-                Full access to all AI platforms (Coding, Interviews, Portfolios).
-              </p>
-
-              {/* Price block */}
-              <div className="mt-5 flex items-baseline gap-1 justify-start">
-                <span className="text-4xl md:text-5xl font-extrabold text-stone-900 leading-none">
-                  {activeTier.allAccessPrice}
-                </span>
-                <span className="text-xs font-semibold text-stone-400">
-                  /{activeTier.allAccessPeriod}
-                </span>
-              </div>
-
-              <div className="my-6 h-[1px] bg-stone-100" />
-
-              {/* Features list */}
-              <ul className="space-y-3.5 flex-1 mb-8 text-left">
-                {activeTier.allAccessFeatures.map((feat) => (
-                  <li key={feat} className="flex items-start gap-2.5 text-stone-700 text-[13.5px]">
-                    <Check className="w-4 h-4 text-[#7c3aed] mt-0.5 shrink-0" strokeWidth={2.5} />
-                    <span>{feat}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* CTA button */}
+              {/* Full-width bottom CTA */}
               <Link href={`/${locale}${activeTier.allAccessHref}`} className="block w-full">
-                <button className="w-full text-center bg-[#7c3aed] text-white border border-[#6d28d9] rounded-xl py-3.5 text-[12px] font-semibold font-mono uppercase tracking-wider hover:bg-[#6d28d9] transition-all duration-75 cursor-pointer active:scale-95 shadow-[0_2px_8px_rgba(124,58,237,0.15)]">
-                  {activeTier.allAccessCTA}
-                </button>
+                <div className="w-full py-4 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-center font-mono text-[12px] uppercase font-bold tracking-widest flex items-center justify-center gap-1.5 border-t border-[#e7e5e4] cursor-pointer transition-all active:scale-[0.99]">
+                  <span>{activeTier.allAccessCTA}</span>
+                  <span className="text-[14px]">→</span>
+                </div>
               </Link>
-            </motion.div>
+            </div>
 
-          </div>
+          </motion.div>
         </div>
 
       </div>

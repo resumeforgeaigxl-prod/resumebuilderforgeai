@@ -284,9 +284,9 @@ export default function PlatformEcosystem({ locale = "en-in" }: { locale?: strin
           <div className="h-10 bg-[#FAFAFA] border-b border-[#e7e5e4] px-4 flex items-center justify-between shrink-0 select-none">
             {/* Dots */}
             <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56] border border-[#E0443E]" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E] border border-[#DEA123]" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F] border border-[#1AAB29]" />
+              <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
+              <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
+              <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
             </div>
             {/* Title */}
             <span className="text-[10px] font-mono text-[#8F8F8F] uppercase tracking-wider font-semibold">

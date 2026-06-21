@@ -42,7 +42,13 @@ export async function checkUserAccess(userId: string): Promise<AccessResult> {
         .maybeSingle() as { data: { id: string; expires_at: string | null; plan: string } | null };
 
     if (sub) {
-        const planName = sub.plan.toUpperCase() as PlanLevel;
+        const rawPlan = sub.plan.toUpperCase();
+        const normalized = rawPlan
+            .replace('_STANDARD', '')
+            .replace('_ALL_ACCESS', '')
+            .replace('PRO_STANDARD', 'PROFESSIONAL')
+            .replace('PRO_ALL_ACCESS', 'PROFESSIONAL');
+        const planName = (normalized === 'PRO' ? 'PROFESSIONAL' : normalized) as PlanLevel;
         return {
             hasAccess: true,
             plan: planName,
@@ -52,14 +58,20 @@ export async function checkUserAccess(userId: string): Promise<AccessResult> {
     }
 
     // 3. Fallback to user table fields (for legacy or specific overrides)
-    const userPlanRaw = (user.plan_type || user.plan || 'FREE').toUpperCase() as PlanLevel;
-    const isPaidPlan = ['DAILY', 'WEEKLY', 'MONTHLY', 'PROFESSIONAL', 'PRO'].includes(userPlanRaw);
+    const userPlanRaw = (user.plan_type || user.plan || 'FREE').toUpperCase();
+    const normalizedRaw = userPlanRaw
+        .replace('_STANDARD', '')
+        .replace('_ALL_ACCESS', '')
+        .replace('PRO_STANDARD', 'PROFESSIONAL')
+        .replace('PRO_ALL_ACCESS', 'PROFESSIONAL');
+    const userPlanNormalized = (normalizedRaw === 'PRO' ? 'PROFESSIONAL' : normalizedRaw) as PlanLevel;
+    const isPaidPlan = ['DAILY', 'WEEKLY', 'MONTHLY', 'PROFESSIONAL', 'PRO'].includes(userPlanNormalized);
     const isExpired = user.access_expires_at && new Date(user.access_expires_at) < now;
 
     if (isPaidPlan && !isExpired) {
         return {
             hasAccess: true,
-            plan: userPlanRaw === 'PRO' ? 'PROFESSIONAL' : userPlanRaw,
+            plan: userPlanNormalized === 'PRO' ? 'PROFESSIONAL' : userPlanNormalized,
             expiresAt: user.access_expires_at || null,
             reason: 'free_override'
         };

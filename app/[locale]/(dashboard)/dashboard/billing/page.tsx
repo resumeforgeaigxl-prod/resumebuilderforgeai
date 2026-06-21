@@ -10,9 +10,14 @@ import Link from 'next/link';
 import { PLANS as CONFIG_PLANS } from '@/lib/pricing/config';
 
 // ── Plan definitions ──────────────────────────────────────────────────────────
-type PlanName = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'PROFESSIONAL';
+type PlanName =
+    | 'DAILY' | 'DAILY_STANDARD' | 'DAILY_ALL_ACCESS'
+    | 'WEEKLY' | 'WEEKLY_STANDARD' | 'WEEKLY_ALL_ACCESS'
+    | 'MONTHLY' | 'MONTHLY_STANDARD' | 'MONTHLY_ALL_ACCESS'
+    | 'PROFESSIONAL' | 'PRO_STANDARD' | 'PRO_ALL_ACCESS';
 
 const PLANS: Record<PlanName, {
+    basePlan: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'PROFESSIONAL';
     label: string;
     price: number;
     priceLabel: string;
@@ -22,15 +27,153 @@ const PLANS: Record<PlanName, {
     gradient: string;
     border: string;
 }> = {
-    DAILY: {
-        label: 'Daily',
-        price: CONFIG_PLANS.daily.price,
-        priceLabel: `₹${CONFIG_PLANS.daily.price}`,
-        description: '24-hour unlimited access',
+    DAILY_STANDARD: {
+        basePlan: 'DAILY',
+        label: 'Daily (Standard)',
+        price: 29,
+        priceLabel: '₹29',
+        description: '24-hour Resume Builder access',
         features: [
             '300 Daily AI credits',
             'Full ResumeForge access',
-            '24-hour validity',
+            'Advanced ATS optimization',
+            'Priority Support',
+            'No watermarks',
+        ],
+        icon: <Zap className="w-5 h-5" />,
+        gradient: 'from-blue-500/20 to-cyan-500/20',
+        border: 'border-blue-500/40',
+    },
+    DAILY_ALL_ACCESS: {
+        basePlan: 'DAILY',
+        label: 'Daily (All-Access)',
+        price: 49,
+        priceLabel: '₹49',
+        description: '24-hour full access to all Forges',
+        features: [
+            '300 Daily AI credits',
+            'Everything in Standard',
+            'CodingForge & InterviewForge access',
+            'PrepForge & ProjectForge access',
+            'LearnForge roadmaps',
+        ],
+        icon: <Zap className="w-5 h-5 text-purple-500" />,
+        gradient: 'from-purple-500/20 to-indigo-500/20',
+        border: 'border-purple-500/40',
+    },
+    WEEKLY_STANDARD: {
+        basePlan: 'WEEKLY',
+        label: 'Weekly (Standard)',
+        price: 79,
+        priceLabel: '₹79',
+        description: '7-day Resume Builder access',
+        features: [
+            '800 Daily AI credits',
+            'Full ResumeForge access',
+            'Advanced ATS optimization',
+            'Priority Support',
+            'No watermarks',
+        ],
+        icon: <Zap className="w-5 h-5" />,
+        gradient: 'from-emerald-500/20 to-teal-500/20',
+        border: 'border-emerald-500/40',
+    },
+    WEEKLY_ALL_ACCESS: {
+        basePlan: 'WEEKLY',
+        label: 'Weekly (All-Access)',
+        price: 129,
+        priceLabel: '₹129',
+        description: '7-day full access to all Forges',
+        features: [
+            '800 Daily AI credits',
+            'Everything in Standard',
+            'CodingForge & InterviewForge access',
+            'PrepForge & ProjectForge access',
+            'LearnForge roadmaps',
+        ],
+        icon: <Zap className="w-5 h-5 text-purple-500" />,
+        gradient: 'from-purple-500/20 to-indigo-500/20',
+        border: 'border-purple-500/40',
+    },
+    MONTHLY_STANDARD: {
+        basePlan: 'MONTHLY',
+        label: 'Monthly (Standard)',
+        price: 199,
+        priceLabel: '₹199/mo',
+        description: 'Monthly Resume Builder access',
+        features: [
+            '2,000 Daily AI credits',
+            'Full ResumeForge access',
+            'Advanced ATS optimization',
+            'Priority Support',
+            'No watermarks',
+        ],
+        icon: <Crown className="w-5 h-5" />,
+        gradient: 'from-purple-500/20 to-pink-500/20',
+        border: 'border-purple-500/40',
+    },
+    MONTHLY_ALL_ACCESS: {
+        basePlan: 'MONTHLY',
+        label: 'Monthly (All-Access)',
+        price: 399,
+        priceLabel: '₹399/mo',
+        description: 'Monthly full access to all Forges',
+        features: [
+            '2,000 Daily AI credits',
+            'Everything in Standard',
+            'CodingForge & InterviewForge access',
+            'PrepForge & ProjectForge access',
+            'LearnForge roadmaps',
+        ],
+        icon: <Crown className="w-5 h-5 text-purple-500" />,
+        gradient: 'from-purple-500/20 to-indigo-500/20',
+        border: 'border-purple-500/40',
+    },
+    PRO_STANDARD: {
+        basePlan: 'PROFESSIONAL',
+        label: 'Professional (Standard)',
+        price: 499,
+        priceLabel: '₹499/mo',
+        description: 'Pro Resume Builder access',
+        features: [
+            '5,000 Daily AI credits',
+            'Full ResumeForge access',
+            'Advanced ATS optimization',
+            'Priority Support',
+            'No watermarks',
+        ],
+        icon: <Crown className="w-5 h-5 text-yellow-400" />,
+        gradient: 'from-amber-500/20 to-orange-500/20',
+        border: 'border-amber-500/40',
+    },
+    PRO_ALL_ACCESS: {
+        basePlan: 'PROFESSIONAL',
+        label: 'Professional (All-Access)',
+        price: 899,
+        priceLabel: '₹899/mo',
+        description: 'Pro full access to all Forges',
+        features: [
+            '5,000 Daily AI credits',
+            'Everything in Standard',
+            'CodingForge & InterviewForge access',
+            'PrepForge & ProjectForge access',
+            'LearnForge roadmaps',
+        ],
+        icon: <Crown className="w-5 h-5 text-purple-500" />,
+        gradient: 'from-purple-500/20 to-indigo-500/20',
+        border: 'border-purple-500/40',
+    },
+    DAILY: {
+        basePlan: 'DAILY',
+        label: 'Daily (Standard)',
+        price: 29,
+        priceLabel: '₹29',
+        description: '24-hour Resume Builder access',
+        features: [
+            '300 Daily AI credits',
+            'Full ResumeForge access',
+            'Advanced ATS optimization',
+            'Priority Support',
             'No watermarks',
         ],
         icon: <Zap className="w-5 h-5" />,
@@ -38,45 +181,51 @@ const PLANS: Record<PlanName, {
         border: 'border-blue-500/40',
     },
     WEEKLY: {
-        label: 'Weekly',
-        price: CONFIG_PLANS.weekly.price,
-        priceLabel: `₹${CONFIG_PLANS.weekly.price}`,
-        description: '7-day career sprint',
+        basePlan: 'WEEKLY',
+        label: 'Weekly (Standard)',
+        price: 79,
+        priceLabel: '₹79',
+        description: '7-day Resume Builder access',
         features: [
             '800 Daily AI credits',
-            'Everything in Daily',
-            'InterviewForge access',
-            '7-day validity',
+            'Full ResumeForge access',
+            'Advanced ATS optimization',
+            'Priority Support',
+            'No watermarks',
         ],
         icon: <Zap className="w-5 h-5" />,
         gradient: 'from-emerald-500/20 to-teal-500/20',
         border: 'border-emerald-500/40',
     },
     MONTHLY: {
-        label: 'Monthly',
-        price: CONFIG_PLANS.monthly.price,
-        priceLabel: `₹${CONFIG_PLANS.monthly.price}/mo`,
-        description: 'Monthly subscription with generous limits',
+        basePlan: 'MONTHLY',
+        label: 'Monthly (Standard)',
+        price: 199,
+        priceLabel: '₹199/mo',
+        description: 'Monthly Resume Builder access',
         features: [
-            '2000 Daily AI credits',
-            'Full Advanced AI Forges',
-            'Everything in Weekly',
-            '30-day validity',
+            '2,000 Daily AI credits',
+            'Full ResumeForge access',
+            'Advanced ATS optimization',
+            'Priority Support',
+            'No watermarks',
         ],
         icon: <Crown className="w-5 h-5" />,
         gradient: 'from-purple-500/20 to-pink-500/20',
         border: 'border-purple-500/40',
     },
     PROFESSIONAL: {
-        label: 'Professional',
-        price: CONFIG_PLANS.pro.price,
-        priceLabel: `₹${CONFIG_PLANS.pro.price}/mo`,
-        description: 'Unlimited monthly access — for serious job seekers',
+        basePlan: 'PROFESSIONAL',
+        label: 'Professional (Standard)',
+        price: 499,
+        priceLabel: '₹499/mo',
+        description: 'Pro Resume Builder access',
         features: [
-            '5000 Daily AI credits',
-            'All AI Forges + Mentor AI',
+            '5,000 Daily AI credits',
+            'Full ResumeForge access',
+            'Advanced ATS optimization',
             'Priority Support',
-            '30-day validity',
+            'No watermarks',
         ],
         icon: <Crown className="w-5 h-5 text-yellow-400" />,
         gradient: 'from-amber-500/20 to-orange-500/20',
@@ -110,9 +259,10 @@ function BillingContent({ params }: { params: { locale: string } }) {
     const { locale } = params;
     const router = useRouter();
     const searchParams = useSearchParams();
-    const rawPlan = ((searchParams?.get('plan') ?? 'MONTHLY').toUpperCase() as PlanName);
-    const plan = PLANS[rawPlan] ? rawPlan : 'MONTHLY';
-    const planInfo = PLANS[plan];
+    const rawPlan = ((searchParams?.get('plan') ?? 'MONTHLY_STANDARD').toUpperCase() as PlanName);
+    const planVariant = PLANS[rawPlan] ? rawPlan : 'MONTHLY_STANDARD';
+    const planInfo = PLANS[planVariant];
+    const plan = planInfo.basePlan;
 
     const [form, setForm] = useState({
         full_name: '',
@@ -175,7 +325,7 @@ function BillingContent({ params }: { params: { locale: string } }) {
     }, [form.country]);
 
     // Derived pricing using dynamic config
-    const currentPrice = priceConfig?.prices[plan.toLowerCase()] || planInfo.price;
+    const currentPrice = priceConfig?.prices[planVariant.toLowerCase()] || planInfo.price;
     const currentSymbol = priceConfig?.symbol || '₹';
 
     const basePrice = currentPrice;
@@ -211,7 +361,7 @@ function BillingContent({ params }: { params: { locale: string } }) {
             const res = await fetch('/api/payment/validate-coupon', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code, plan_price: basePrice, plan_name: plan.toLowerCase() }),
+                body: JSON.stringify({ code, plan_price: basePrice, plan_name: planVariant.toLowerCase() }),
             });
             const data: CouponResult = await res.json();
             setCouponResult(data);
@@ -220,7 +370,7 @@ function BillingContent({ params }: { params: { locale: string } }) {
                     const posthog = (await import('@/lib/posthog')).default;
                     posthog.capture('coupon_applied', {
                         coupon_code: code,
-                        plan_name: plan,
+                        plan_name: planVariant,
                         discount_amount: data.discountAmount
                     });
                 } catch (e) { console.error('[PostHog] Event error:', e); }
@@ -246,7 +396,7 @@ function BillingContent({ params }: { params: { locale: string } }) {
         try {
             const posthog = (await import('@/lib/posthog')).default;
             posthog.capture('payment_started', {
-                plan_name: plan,
+                plan_name: planVariant,
                 coupon_code: couponResult?.code
             });
         } catch (e) { console.error('[PostHog] Event error:', e); }
@@ -270,7 +420,7 @@ function BillingContent({ params }: { params: { locale: string } }) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         coupon_code: couponResult.code,
-                        plan_name: plan,
+                        plan_name: planVariant,
                         billing_address: form.address
                             ? `${form.address}, ${form.city}, ${form.state} ${form.zip_code}, ${form.country}`.trim()
                             : null,
@@ -289,7 +439,7 @@ function BillingContent({ params }: { params: { locale: string } }) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    plan,
+                    plan: planVariant,
                     coupon_code: couponResult?.valid && couponResult.code ? couponResult.code : undefined,
                 }),
             });
@@ -306,7 +456,7 @@ function BillingContent({ params }: { params: { locale: string } }) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         coupon_code: couponResult.code,
-                        plan_name: plan,
+                        plan_name: planVariant,
                     }),
                 });
                 if (!activateRes.ok) {
@@ -344,7 +494,7 @@ function BillingContent({ params }: { params: { locale: string } }) {
                                 razorpay_order_id: response.razorpay_order_id,
                                 razorpay_payment_id: response.razorpay_payment_id,
                                 razorpay_signature: response.razorpay_signature,
-                                plan_name: plan,
+                                plan_name: planVariant,
                             }),
                         });
                         if (!verifyRes.ok) {
@@ -354,7 +504,7 @@ function BillingContent({ params }: { params: { locale: string } }) {
                             try {
                                 const posthog = (await import('@/lib/posthog')).default;
                                 posthog.capture('payment_failed', {
-                                    plan_name: plan,
+                                    plan_name: planVariant,
                                     error: d.error || 'Verification failed'
                                 });
                             } catch (e) { console.error('[PostHog] Event error:', e); }
@@ -363,7 +513,7 @@ function BillingContent({ params }: { params: { locale: string } }) {
                         try {
                             const posthog = (await import('@/lib/posthog')).default;
                             posthog.capture('payment_completed', {
-                                plan_name: plan,
+                                plan_name: planVariant,
                                 coupon_code: couponResult?.code
                             });
                         } catch (e) { console.error('[PostHog] Event error:', e); }
@@ -475,18 +625,25 @@ function BillingContent({ params }: { params: { locale: string } }) {
                         <div className="p-4 rounded-xl bg-[#FFFFFF] border border-[#EBEBEB] shadow-sm">
                             <p className="text-xs font-semibold text-[#8F8F8F] uppercase tracking-wider font-mono mb-3">Switch plan</p>
                             <div className="flex gap-2 flex-wrap">
-                                {(Object.keys(PLANS) as PlanName[]).map((p) => (
-                                    <Link
-                                        key={p}
-                                        href={`/${locale}/dashboard/billing?plan=${p}`}
-                                        className={`px-3 py-1.5 rounded-md text-xs font-semibold border transition-all ${p === plan 
-                                            ? 'bg-[#171717] border-[#171717] text-white shadow-sm' 
-                                            : 'bg-[#FAFAFA] border-[#EBEBEB] text-[#4D4D4D] hover:bg-[#FAFAFA]/80'
-                                            }`}
-                                    >
-                                        {PLANS[p].label} — {currentSymbol}{priceConfig?.prices[p.toLowerCase()] || PLANS[p].price}
-                                    </Link>
-                                ))}
+                                {(() => {
+                                    const isAllAccess = planVariant.endsWith('ALL_ACCESS');
+                                    const availablePlans = isAllAccess
+                                        ? (['DAILY_ALL_ACCESS', 'WEEKLY_ALL_ACCESS', 'MONTHLY_ALL_ACCESS', 'PRO_ALL_ACCESS'] as const)
+                                        : (['DAILY_STANDARD', 'WEEKLY_STANDARD', 'MONTHLY_STANDARD', 'PRO_STANDARD'] as const);
+                                    
+                                    return availablePlans.map((p) => (
+                                        <Link
+                                            key={p}
+                                            href={`/${locale}/dashboard/billing?plan=${p}`}
+                                            className={`px-3 py-1.5 rounded-md text-xs font-semibold border transition-all ${p === planVariant 
+                                                ? 'bg-[#171717] border-[#171717] text-white shadow-sm' 
+                                                : 'bg-[#FAFAFA] border-[#EBEBEB] text-[#4D4D4D] hover:bg-[#FAFAFA]/80'
+                                                }`}
+                                        >
+                                            {PLANS[p].label} — {currentSymbol}{priceConfig?.prices[p.toLowerCase()] || PLANS[p].price}
+                                        </Link>
+                                    ));
+                                })()}
                             </div>
                         </div>
                     </div>
