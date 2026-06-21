@@ -220,6 +220,13 @@ export default function CompleteProfilePage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (currentStep < totalSteps) {
+            if (canContinue()) {
+                nextStep();
+            }
+            return;
+        }
+        
         if (!canContinue()) return;
         
         setIsLoading(true);
