@@ -10,7 +10,29 @@ export async function POST(request: Request) {
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const body = await request.json();
-        const { role, skills, experienceText, educationText, projectsText, jobDescription } = body;
+        let { role, skills, experienceText, educationText, projectsText, jobDescription } = body;
+
+        // Auto-fetch profile data from DB as fallback
+        try {
+            const supabaseForProfile = createClient();
+            const { data: userProfile } = await supabaseForProfile
+                .from('users')
+                .select('target_role, skills, professional_summary, experience_level')
+                .eq('id', session.userId)
+                .single();
+
+            if (userProfile) {
+                if (!role && userProfile.target_role) role = userProfile.target_role;
+                if (!skills && Array.isArray(userProfile.skills) && userProfile.skills.length > 0) {
+                    skills = userProfile.skills.join(', ');
+                }
+                if (!experienceText && userProfile.experience_level) {
+                    experienceText = `Experience Level: ${userProfile.experience_level}`;
+                }
+            }
+        } catch {
+            // Safe to ignore — frontend params will be used
+        }
 
         const systemPrompt = `You are a professional resume writer for tech candidates. 
 Generate an authentic, JD-aligned professional summary.

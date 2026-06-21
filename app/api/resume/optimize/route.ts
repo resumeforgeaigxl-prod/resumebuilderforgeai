@@ -22,17 +22,29 @@ export async function POST(request: Request) {
         const supabase = createClient();
         const { data: userProfile } = await supabase
             .from('users')
-            .select('full_name, email')
+            .select('full_name, email, phone, target_role, skills, professional_summary, linkedin_url, github_url, experience_level, preferred_work_mode')
             .eq('id', session.userId)
             .single();
 
         // Pre-fill missing personal info
         if (!resumeData.name && userProfile?.full_name) resumeData.name = userProfile.full_name;
         if (!resumeData.email && userProfile?.email) resumeData.email = userProfile.email;
+        if (!resumeData.phone && userProfile?.phone) resumeData.phone = userProfile.phone;
+        if (!resumeData.linkedin && userProfile?.linkedin_url) resumeData.linkedin = userProfile.linkedin_url;
+        if (!resumeData.github && userProfile?.github_url) resumeData.github = userProfile.github_url;
+
+        // Build profile context for AI
+        const profileContext = userProfile ? {
+            targetRole: userProfile.target_role || '',
+            skills: Array.isArray(userProfile.skills) ? userProfile.skills : [],
+            professionalSummary: userProfile.professional_summary || '',
+            experienceLevel: userProfile.experience_level || '',
+            preferredWorkMode: userProfile.preferred_work_mode || ''
+        } : undefined;
 
         // NEW: Using the centralized ResumeForge
         try {
-            const result = await ResumeForge.optimize(resumeData, jobDescription, session.userId);
+            const result = await ResumeForge.optimize(resumeData, jobDescription, session.userId, profileContext);
             
             return NextResponse.json({
                 success: true,
