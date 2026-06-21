@@ -46,14 +46,14 @@ const INDIAN_COLLEGES_FALLBACK = [
 ];
 
 const ROLE_SKILLS_MAP: Record<string, string[]> = {
-    "Frontend Developer": ["React", "TypeScript", "Next.js", "HTML", "CSS", "Tailwind CSS", "Redux", "JavaScript", "Webpack", "Vite"],
-    "Backend Developer": ["Node.js", "Express", "Python", "Django", "Go", "Postgres", "Redis", "Docker", "MongoDB", "REST APIs", "GraphQL"],
-    "Full Stack Developer": ["React", "Node.js", "Express", "TypeScript", "Next.js", "Postgres", "Docker", "Git", "Tailwind CSS", "MongoDB"],
-    "DevOps Engineer": ["AWS", "Docker", "Kubernetes", "CI/CD", "GitHub Actions", "Terraform", "Linux", "Ansible", "Nginx", "Prometheus"],
-    "Data Analyst / Scientist": ["Python", "SQL", "Pandas", "NumPy", "Tableau", "PowerBI", "Machine Learning", "Scikit-Learn", "Jupyter"],
-    "Mobile App Developer": ["React Native", "Flutter", "Swift", "Kotlin", "iOS", "Android", "Firebase", "Dart", "Objective-C"],
-    "UI/UX Designer": ["Figma", "Adobe XD", "Wireframing", "Prototyping", "User Research", "Design Systems", "Framer", "Illustrator"],
-    "QA / Testing Engineer": ["Selenium", "Jest", "Cypress", "Postman", "Automation", "Manual Testing", "Playwright", "Mocha"]
+    "Frontend Developer": ["React", "TypeScript", "Next.js", "HTML5", "CSS3", "Tailwind CSS", "Redux Toolkit", "JavaScript (ES6+)", "Webpack", "Vite", "Sass", "Jest", "Cypress", "GraphQL", "REST APIs", "Git"],
+    "Backend Developer": ["Node.js", "Express", "Python", "Django", "FastAPI", "Go", "PostgreSQL", "Redis", "Docker", "MongoDB", "REST APIs", "GraphQL", "Microservices", "AWS", "SQL", "Firebase"],
+    "Full Stack Developer": ["React", "Node.js", "Express", "TypeScript", "Next.js", "PostgreSQL", "Docker", "Git", "Tailwind CSS", "MongoDB", "AWS", "REST APIs", "GraphQL", "HTML5", "CSS3", "Redis"],
+    "DevOps Engineer": ["AWS", "Docker", "Kubernetes", "CI/CD", "GitHub Actions", "Terraform", "Linux", "Ansible", "Nginx", "Prometheus", "Grafana", "Jenkins", "Bash Scripting", "Google Cloud (GCP)", "Microsoft Azure"],
+    "Data Analyst / Scientist": ["Python", "SQL", "Pandas", "NumPy", "Tableau", "PowerBI", "Machine Learning", "Scikit-Learn", "Jupyter Notebooks", "R", "Excel", "Matplotlib", "Seaborn", "Statistics", "BigQuery"],
+    "Mobile App Developer": ["React Native", "Flutter", "Swift", "Kotlin", "iOS", "Android", "Firebase", "Dart", "Objective-C", "App Store Connect", "Google Play Console", "Native Modules"],
+    "UI/UX Designer": ["Figma", "Adobe XD", "Wireframing", "Prototyping", "User Research", "Design Systems", "Framer", "Illustrator", "Photoshop", "Interaction Design", "User Flows"],
+    "QA / Testing Engineer": ["Selenium", "Jest", "Cypress", "Postman", "Automation", "Manual Testing", "Playwright", "Mocha", "Chai", "CI/CD Integration", "Bug Tracking", "API Testing"]
 };
 
 export default function CompleteProfilePage() {
@@ -482,7 +482,24 @@ export default function CompleteProfilePage() {
                                     {/* Recommendation Badges */}
                                     {selectedRole && (
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">Recommended Skills</label>
+                                            <div className="flex items-center justify-between">
+                                                <label className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">Recommended Skills</label>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const skillsToAdd = ROLE_SKILLS_MAP[selectedRole].filter(skill => !form.skills.includes(skill));
+                                                        if (skillsToAdd.length > 0) {
+                                                            setForm(prev => ({
+                                                                ...prev,
+                                                                skills: [...prev.skills, ...skillsToAdd]
+                                                            }));
+                                                        }
+                                                    }}
+                                                    className="text-[10px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                                                >
+                                                    + Add All {ROLE_SKILLS_MAP[selectedRole].length} Skills
+                                                </button>
+                                            </div>
                                             <div className="flex flex-wrap gap-1.5 p-3 bg-[#FAFAFA] border border-[#EBEBEB] rounded-xl">
                                                 {ROLE_SKILLS_MAP[selectedRole].map(skill => {
                                                     const isAdded = form.skills.includes(skill);
