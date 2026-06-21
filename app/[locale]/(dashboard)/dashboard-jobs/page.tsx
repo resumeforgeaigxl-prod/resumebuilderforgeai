@@ -43,6 +43,7 @@ export default function JobsPage() {
     const jobType = searchParams?.get('job_type') ?? '';
     const remote = (searchParams?.get('remote') ?? '') === 'true';
     const page = parseInt(searchParams?.get('page') ?? '1');
+    const jobId = searchParams?.get('id') ?? '';
 
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
@@ -65,7 +66,8 @@ export default function JobsPage() {
                 experience: experience,
                 job_type: jobType,
                 page: page.toString(),
-                limit: '20'
+                limit: '20',
+                ...(jobId ? { id: jobId } : {})
             });
             const res = await fetch(`/api/jobs/list?${params.toString()}`);
             const data = await res.json();
@@ -81,7 +83,7 @@ export default function JobsPage() {
         } finally {
             setLoading(false);
         }
-    }, [query, location, country, remote, experience, jobType, page]);
+    }, [query, location, country, remote, experience, jobType, page, jobId]);
 
     useEffect(() => {
         fetchJobs();

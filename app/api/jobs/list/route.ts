@@ -43,6 +43,7 @@ export async function GET(req: Request) {
         const country = searchParams.get('country') || defaultCountryFilter;
         const tier = searchParams.get('tier'); // 1, 2, 3, 4
         const companyParam = searchParams.get('company');
+        const jobId = searchParams.get('id');
 
         const page = parseInt(searchParams.get('page') || '1');
         const limitParam = parseInt(searchParams.get('limit') || '20');
@@ -77,44 +78,48 @@ export async function GET(req: Request) {
             .select('*', { count: 'exact' });
 
         // Apply Filters
-        if (search) {
-            query = query.or(`title.ilike.%${search}%,company.ilike.%${search}%`);
-        }
-
-        if (companyParam) {
-            query = query.ilike('company', `%${companyParam}%`);
-        }
-
-        if (remote) {
-            query = query.ilike('location', '%remote%');
-        }
-
-        if (tier) {
-            query = query.eq('tier', parseInt(tier));
-        }
-
-        // Priority: If country is explicitly set, use it.
-        // Otherwise try to infer country from location name (usa, india).
-        // Otherwise filter by location text.
-        if (country) {
-            query = query.eq('country', country);
-        } else if (location) {
-            const locLower = location.toLowerCase();
-            if (locLower === 'usa' || locLower === 'us') {
-                query = query.eq('country', 'United States');
-            } else if (locLower === 'india' || locLower === 'in') {
-                query = query.eq('country', 'India');
-            } else {
-                query = query.ilike('location', `%${location}%`);
-            }
-        }
-
-        // Handle level/job_type overlap
-        if (level === 'fresher' && jobType === 'Internship') {
-            query = query.eq('level', 'intern');
+        if (jobId) {
+            query = query.eq('id', jobId);
         } else {
-            if (level) query = query.eq('level', level);
-            if (jobType) query = query.eq('job_type', jobType);
+            if (search) {
+                query = query.or(`title.ilike.%${search}%,company.ilike.%${search}%`);
+            }
+
+            if (companyParam) {
+                query = query.ilike('company', `%${companyParam}%`);
+            }
+
+            if (remote) {
+                query = query.ilike('location', '%remote%');
+            }
+
+            if (tier) {
+                query = query.eq('tier', parseInt(tier));
+            }
+
+            // Priority: If country is explicitly set, use it.
+            // Otherwise try to infer country from location name (usa, india).
+            // Otherwise filter by location text.
+            if (country) {
+                query = query.eq('country', country);
+            } else if (location) {
+                const locLower = location.toLowerCase();
+                if (locLower === 'usa' || locLower === 'us') {
+                    query = query.eq('country', 'United States');
+                } else if (locLower === 'india' || locLower === 'in') {
+                    query = query.eq('country', 'India');
+                } else {
+                    query = query.ilike('location', `%${location}%`);
+                }
+            }
+
+            // Handle level/job_type overlap
+            if (level === 'fresher' && jobType === 'Internship') {
+                query = query.eq('level', 'intern');
+            } else {
+                if (level) query = query.eq('level', level);
+                if (jobType) query = query.eq('job_type', jobType);
+            }
         }
 
         // Pagination

@@ -452,20 +452,21 @@ export async function sendWaitlistApprovalEmail(to: string, name: string, coupon
 export async function sendJobAlertEmail(
   to: string,
   userName: string,
-  jobs: { title: string; company: string; location: string; apply_url?: string | null }[]
+  jobs: { id: string; title: string; company: string; location: string; apply_url?: string | null }[]
 ): Promise<void> {
   const displayName = userName || to.split('@')[0];
-  const jobsHtml = jobs.map(job => `
+  const jobsHtml = jobs.map(job => {
+    const applyLink = `https://resumeforgeai.in/dashboard-jobs?id=${job.id}`;
+    return `
     <div style="background:#0d0d1c; border:1px solid #1e1b4b; border-radius:0px; padding:16px; margin-bottom:16px; text-align:left;">
       <h3 style="margin:0 0 4px; font-size:16px; color:#f1f5f9; font-weight:700;">${job.title}</h3>
       <p style="margin:0 0 12px; font-size:13px; color:#cbd5e1;">${job.company} • ${job.location}</p>
-      ${job.apply_url ? `
-        <a href="${job.apply_url}" style="display:inline-block; padding:8px 18px; background:#6366f1; color:#fff; font-size:12px; font-weight:700; text-decoration:none; border-radius:0px; border:1px solid #818cf8;">
-          Apply Now
-        </a>
-      ` : ''}
+      <a href="${applyLink}" style="display:inline-block; padding:8px 18px; background:#6366f1; color:#fff; font-size:12px; font-weight:700; text-decoration:none; border-radius:0px; border:1px solid #818cf8;">
+        Apply Now
+      </a>
     </div>
-  `).join('');
+    `;
+  }).join('');
 
   const html = emailWrapper(`
     ${headingAndSub('New Job Matches for You 💼', 'Here are the latest developer opportunities matching your preferences.')}
