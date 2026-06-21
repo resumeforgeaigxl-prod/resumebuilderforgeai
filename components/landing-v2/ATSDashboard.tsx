@@ -274,15 +274,35 @@ export default function ATSDashboard() {
           </p>
         </div>
 
-        {/* Mockup Window Container */}
+        {/* Mockup Window Container with Landscape Background (FeatureGrid Style) */}
         <div className="px-6 md:px-10 pb-16">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.7, ease }}
-            className="border border-[#e7e5e4] rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col"
+            className="relative flex items-center justify-center p-6 md:p-10 w-full overflow-hidden rounded-2xl"
           >
+            {/* Landscape Background Layer */}
+            <div
+              className="absolute inset-0 bg-cover bg-center pointer-events-none"
+              style={{
+                backgroundImage: "url('/hero-landscape.png')",
+                zIndex: 0,
+              }}
+            />
+            {/* Dark overlay for contrast */}
+            <div className="absolute inset-0 bg-slate-950/20 z-0 pointer-events-none" />
+
+            {/* Mockup Window Frame (Glassmorphic) */}
+            <div 
+              className="relative z-10 w-full max-w-[1040px] overflow-hidden flex flex-col border border-white/10"
+              style={{
+                background: "rgba(255,255,255,0.96)",
+                borderRadius: "16px",
+                boxShadow: "0 8px 40px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.15)",
+              }}
+            >
             {/* Chrome Top Bar */}
             <div className="h-11 bg-[#FAFAFA] border-b border-[#e7e5e4] px-5 flex items-center justify-between select-none shrink-0">
               <div className="flex items-center gap-1.5 shrink-0">
@@ -584,6 +604,7 @@ export default function ATSDashboard() {
                 )}
               </AnimatePresence>
             </div>
+          </div>
         </div>
       </motion.div>
     </div>
