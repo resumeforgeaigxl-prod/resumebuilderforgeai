@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { Bot, User, Rocket, MessageSquare, Code, GraduationCap, BrainCircuit, Terminal, ChevronRight } from 'lucide-react';
+import { Bot, User, Rocket, MessageSquare, Code, GraduationCap, BrainCircuit, Terminal, ChevronRight, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { useToast } from '@/components/ui/use-toast';
@@ -10,6 +10,52 @@ import remarkGfm from 'remark-gfm';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+
+const CodeBlock = ({ className, children, ...props }: any) => {
+  const [copied, setCopied] = useState(false);
+  const match = /language-(\w+)/.exec(className || '');
+  const isInline = !match;
+  const codeString = String(children).replace(/\n$/, '');
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(codeString);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  if (isInline) {
+    return <code className={className} {...props}>{children}</code>;
+  }
+
+  return (
+    <div className="relative group my-4 rounded-lg overflow-hidden border border-[#EBEBEB] bg-[#1E1E1E] text-white">
+      <div className="flex items-center justify-between px-4 py-1.5 bg-[#252526] border-b border-[#333] text-xs font-mono text-[#8F8F8F]">
+        <span>{match ? match[1] : 'code'}</span>
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer"
+        >
+          {copied ? (
+            <>
+              <Check className="w-3 h-3 text-green-500" />
+              <span className="text-green-500">Copied!</span>
+            </>
+          ) : (
+            <>
+              <Copy className="w-3 h-3" />
+              <span>Copy</span>
+            </>
+          )}
+        </button>
+      </div>
+      <pre className="p-4 overflow-x-auto font-mono text-xs leading-relaxed bg-[#1E1E1E] text-[#D4D4D4] custom-scrollbar">
+        <code className={className} {...props}>
+          {children}
+        </code>
+      </pre>
+    </div>
+  );
+};
 
 interface Message {
   role: 'user' | 'assistant';
@@ -125,7 +171,7 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
     <div className="flex flex-col h-full bg-[#FAFAFA] text-[#171717] overflow-hidden relative">
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto custom-scrollbar relative" ref={scrollRef}>
-        <div className="max-w-3xl mx-auto px-6 sm:px-8 pt-8 pb-[320px] space-y-8">
+        <div className="max-w-5xl mx-auto px-6 sm:px-8 pt-8 pb-[320px] space-y-8">
           {messages.map((msg, i) => (
             <motion.div
               key={i}
@@ -159,7 +205,12 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
                     : "bg-white text-[#171717] border-[#EBEBEB] shadow-sm"
                 )}>
                   <article className="prose prose-sm max-w-none text-[#171717] prose-headings:text-[#171717] prose-strong:text-[#171717] prose-code:text-[#171717] prose-code:bg-[#FAFAFA] prose-code:border prose-code:border-[#EBEBEB] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-[#FAFAFA] prose-pre:border prose-pre:border-[#EBEBEB] prose-pre:rounded-lg prose-p:my-1.5 prose-a:text-[#0070F3] hover:prose-a:underline">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        code: CodeBlock
+                      }}
+                    >
                       {msg.content}
                     </ReactMarkdown>
                   </article>
@@ -190,20 +241,39 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
             </motion.div>
           ))}
 
-          {/* Loading skeleton */}
+          {/* Agent Running Status Widget */}
           {isLoading && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex gap-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex gap-4 p-5 rounded-xl border border-blue-100 bg-blue-50/20 max-w-xl shadow-sm my-4"
             >
-              <div className="w-9 h-9 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center">
-                <BrainCircuit className="w-4 h-4 text-[#8F8F8F] animate-pulse" />
+              <div className="w-9 h-9 rounded-lg bg-[#171717] flex items-center justify-center shrink-0 shadow-md">
+                <BrainCircuit className="w-4 h-4 text-white animate-pulse" />
               </div>
-              <div className="space-y-3 flex-1 max-w-md">
-                <div className="w-2/3 h-4 rounded bg-[#EBEBEB] animate-pulse" />
-                <div className="w-full h-24 rounded-lg bg-[#EBEBEB] animate-pulse" />
-                <div className="w-1/2 h-4 rounded bg-[#EBEBEB] animate-pulse" />
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-semibold text-blue-700 tracking-wider font-mono uppercase">Agentic Intelligence Active</div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                    </span>
+                    <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest font-mono">Running</span>
+                  </div>
+                </div>
+                <p className="text-xs text-[#4D4D4D] leading-relaxed">
+                  MentorForge Central Brain is evaluating goals, inspecting ecosystem datasets, and routing instructions to specialist spoke subagents...
+                </p>
+                {/* Visual subagent activity bar */}
+                <div className="h-1.5 w-full bg-blue-100/50 rounded-full overflow-hidden relative">
+                  <motion.div 
+                    initial={{ left: "-30%", width: "30%" }}
+                    animate={{ left: "100%" }}
+                    transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                    className="absolute top-0 h-full bg-blue-600 rounded-full"
+                  />
+                </div>
               </div>
             </motion.div>
           )}
@@ -216,7 +286,7 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
         <div className="h-32 bg-gradient-to-t from-[#FAFAFA] via-[#FAFAFA]/95 to-transparent" />
 
         <div className="bg-[#FAFAFA] pb-6 px-6 sm:px-8 pointer-events-auto">
-          <div className="max-w-3xl mx-auto space-y-4">
+          <div className="max-w-5xl mx-auto space-y-4">
             {/* Suggestion cards — only on initial state */}
             <AnimatePresence>
               {showWelcome && (

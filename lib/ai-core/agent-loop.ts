@@ -94,6 +94,8 @@ Guidelines:
 - Always use tools if the user asks about their resumes, code execution, mock test scores, or jobs.
 - Do not let the user know you are calling tools, simply use the tool observations to formulate your final response.
 - Keep "reply" markdown structured and professional.
+- Format complex datasets, comparisons, or summaries using clean markdown tables, checklists, and bullet points to make them highly structured and readable.
+- When writing source code or command snippets, always wrap them in standard markdown code blocks specifying the language (e.g., \`\`\`javascript, \`\`\`python, \`\`\`bash) for syntax highlighting.
 - When you generate a resume using the tool 'trigger_resume_generation' and it returns the resume ID, you MUST include a clickable PDF download link in your markdown response using the exact path: /api/resume/download?id=RESUME_ID (e.g. "[Download Resume PDF](/api/resume/download?id=uuid)").
 `;
 
