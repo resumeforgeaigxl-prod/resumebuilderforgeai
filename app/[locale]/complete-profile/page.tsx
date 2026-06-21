@@ -19,6 +19,42 @@ const REFERRAL_OPTIONS = [
     { label: "Friend / Word of Mouth", value: "word_of_mouth" },
     { label: "Other", value: "other" }
 ];
+const INDIAN_COLLEGES_FALLBACK = [
+    "Indian Institute of Technology Delhi (IIT Delhi)",
+    "Indian Institute of Technology Bombay (IIT Bombay)",
+    "Indian Institute of Technology Madras (IIT Madras)",
+    "Indian Institute of Technology Kharagpur (IIT Kharagpur)",
+    "Indian Institute of Technology Kanpur (IIT Kanpur)",
+    "Indian Institute of Technology Roorkee (IIT Roorkee)",
+    "Indian Institute of Science Bangalore (IISc)",
+    "Birla Institute of Technology and Science, Pilani (BITS Pilani)",
+    "National Institute of Technology, Trichy (NIT Trichy)",
+    "National Institute of Technology, Surathkal (NIT Surathkal)",
+    "International Institute of Information Technology, Hyderabad (IIIT Hyderabad)",
+    "International Institute of Information Technology, Bangalore (IIIT Bangalore)",
+    "Delhi Technological University (DTU)",
+    "Netaji Subhas University of Technology (NSUT)",
+    "Vellore Institute of Technology (VIT Vellore)",
+    "SRM Institute of Science and Technology (SRM University)",
+    "Manipal Institute of Technology (MIT Manipal)",
+    "R.V. College of Engineering (RVCE)",
+    "PES University (PESU)",
+    "Delhi University (DU)",
+    "Mumbai University",
+    "Anna University",
+    "Jawaharlal Nehru University (JNU)"
+];
+
+const ROLE_SKILLS_MAP: Record<string, string[]> = {
+    "Frontend Developer": ["React", "TypeScript", "Next.js", "HTML", "CSS", "Tailwind CSS", "Redux", "JavaScript", "Webpack", "Vite"],
+    "Backend Developer": ["Node.js", "Express", "Python", "Django", "Go", "Postgres", "Redis", "Docker", "MongoDB", "REST APIs", "GraphQL"],
+    "Full Stack Developer": ["React", "Node.js", "Express", "TypeScript", "Next.js", "Postgres", "Docker", "Git", "Tailwind CSS", "MongoDB"],
+    "DevOps Engineer": ["AWS", "Docker", "Kubernetes", "CI/CD", "GitHub Actions", "Terraform", "Linux", "Ansible", "Nginx", "Prometheus"],
+    "Data Analyst / Scientist": ["Python", "SQL", "Pandas", "NumPy", "Tableau", "PowerBI", "Machine Learning", "Scikit-Learn", "Jupyter"],
+    "Mobile App Developer": ["React Native", "Flutter", "Swift", "Kotlin", "iOS", "Android", "Firebase", "Dart", "Objective-C"],
+    "UI/UX Designer": ["Figma", "Adobe XD", "Wireframing", "Prototyping", "User Research", "Design Systems", "Framer", "Illustrator"],
+    "QA / Testing Engineer": ["Selenium", "Jest", "Cypress", "Postman", "Automation", "Manual Testing", "Playwright", "Mocha"]
+};
 
 export default function CompleteProfilePage() {
     const params = useParams() as { locale: string };
@@ -40,6 +76,77 @@ export default function CompleteProfilePage() {
     });
     const [skillInput, setSkillInput] = useState('');
     const [termsAccepted, setTermsAccepted] = useState(false);
+
+    // College suggestions states
+    const [collegeSuggestions, setCollegeSuggestions] = useState<string[]>([]);
+    const [showCollegeSuggestions, setShowCollegeSuggestions] = useState(false);
+    const [isCollegeLoading, setIsCollegeLoading] = useState(false);
+    const [justSelectedCollege, setJustSelectedCollege] = useState(false);
+    
+    // Target role recommendation state
+    const [selectedRole, setSelectedRole] = useState('');
+
+    // College autocomplete search logic
+    useEffect(() => {
+        if (justSelectedCollege) return;
+        
+        const query = form.college.trim();
+        if (query.length < 2) {
+            setCollegeSuggestions([]);
+            return;
+        }
+
+        // 1. Filter local fallback list
+        const localMatches = INDIAN_COLLEGES_FALLBACK.filter(c => 
+            c.toLowerCase().includes(query.toLowerCase())
+        );
+        setCollegeSuggestions(localMatches);
+
+        // 2. Fetch from HipoLabs API (debounced)
+        setIsCollegeLoading(true);
+        const delayDebounce = setTimeout(async () => {
+            try {
+                const res = await fetch(`http://universities.hipolabs.com/search?name=${encodeURIComponent(query)}`);
+                if (res.ok) {
+                    const data = await res.json() as Array<{ name: string; country: string }>;
+                    const apiMatches = data.map(item => item.name);
+                    
+                    setCollegeSuggestions(prev => {
+                        const merged = Array.from(new Set([...prev, ...apiMatches]));
+                        return merged.slice(0, 8); // Top 8 suggestions
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to fetch college suggestions", err);
+            } finally {
+                setIsCollegeLoading(false);
+            }
+        }, 300);
+
+        return () => {
+            clearTimeout(delayDebounce);
+            setIsCollegeLoading(false);
+        };
+    }, [form.college, justSelectedCollege]);
+
+    // Handle selection from dropdown
+    const handleSelectCollege = (collegeName: string) => {
+        setJustSelectedCollege(true);
+        setForm(prev => ({ ...prev, college: collegeName }));
+        setShowCollegeSuggestions(false);
+    };
+
+    // Close suggestions dropdown on outside click
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (!target.closest('.college-autocomplete-wrapper')) {
+                setShowCollegeSuggestions(false);
+            }
+        };
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, []);
 
     const checkAuth = useCallback(async () => {
         try {
@@ -304,21 +411,47 @@ export default function CompleteProfilePage() {
 
                         {/* STEP 5: College/Institution */}
                         {currentStep === 5 && (
-                            <div className="space-y-5 animate-slide-in">
+                            <div className="space-y-5 animate-slide-in college-autocomplete-wrapper relative">
                                 <div className="space-y-1.5">
                                     <h2 className="text-xl font-semibold tracking-tight text-[#171717]">Where are you currently active?</h2>
                                     <p className="text-xs text-[#8F8F8F]">Enter your university name or current company employer.</p>
                                 </div>
-                                <div className="pt-2">
+                                <div className="pt-2 relative">
                                     <input 
                                         type="text"
                                         required
                                         autoFocus
                                         value={form.college}
-                                        onChange={e => setForm({ ...form, college: e.target.value })}
+                                        onChange={e => {
+                                            setJustSelectedCollege(false);
+                                            setForm({ ...form, college: e.target.value });
+                                            setShowCollegeSuggestions(true);
+                                        }}
+                                        onFocus={() => setShowCollegeSuggestions(true)}
                                         className="w-full px-5 py-4 bg-gradient-to-r from-[#FAFAFA] to-white hover:from-[#F5F5F5] hover:to-[#FAFAFA] border border-[#EBEBEB] focus:border-[#171717] focus:ring-1 focus:ring-[#171717] rounded-xl text-[#171717] placeholder:text-[#8F8F8F] focus:outline-none transition-all font-medium shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)] text-sm"
                                         placeholder="University, College, or Company name"
                                     />
+                                    {isCollegeLoading && (
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
+                                            <Loader2 className="w-4 h-4 animate-spin text-[#8F8F8F]" />
+                                        </div>
+                                    )}
+
+                                    {/* Autocomplete Dropdown overlay */}
+                                    {showCollegeSuggestions && collegeSuggestions.length > 0 && (
+                                        <div className="absolute left-0 right-0 mt-1 bg-white border border-[#EBEBEB] rounded-xl shadow-lg z-50 overflow-hidden max-h-60 overflow-y-auto">
+                                            {collegeSuggestions.map((suggestion) => (
+                                                <button
+                                                    key={suggestion}
+                                                    type="button"
+                                                    onClick={() => handleSelectCollege(suggestion)}
+                                                    className="w-full px-5 py-3 text-left text-xs font-semibold text-[#4D4D4D] hover:bg-[#FAFAFA] hover:text-[#171717] transition-all border-b border-[#F2F2F2] last:border-0 cursor-pointer block"
+                                                >
+                                                    {suggestion}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -328,39 +461,91 @@ export default function CompleteProfilePage() {
                             <div className="space-y-5 animate-slide-in">
                                 <div className="space-y-1.5">
                                     <h2 className="text-xl font-semibold tracking-tight text-[#171717]">What are your technical skills?</h2>
-                                    <p className="text-xs text-[#8F8F8F]">Type a skill (e.g. React) and press Enter or comma to log it.</p>
+                                    <p className="text-xs text-[#8F8F8F]">Choose a role below to load recommendations, or type a custom skill.</p>
                                 </div>
                                 <div className="space-y-4 pt-2">
-                                    <input 
-                                        type="text"
-                                        autoFocus
-                                        value={skillInput}
-                                        onChange={e => setSkillInput(e.target.value)}
-                                        onKeyDown={handleAddSkill}
-                                        className="w-full px-5 py-4 bg-gradient-to-r from-[#FAFAFA] to-white hover:from-[#F5F5F5] hover:to-[#FAFAFA] border border-[#EBEBEB] focus:border-[#171717] focus:ring-1 focus:ring-[#171717] rounded-xl text-[#171717] placeholder:text-[#8F8F8F] focus:outline-none transition-all font-medium shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)] text-sm"
-                                        placeholder="Add skill (e.g., Python, Docker)"
-                                    />
+                                    {/* Role dropdown for suggested skills */}
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">Select target career path</label>
+                                        <select
+                                            value={selectedRole}
+                                            onChange={e => setSelectedRole(e.target.value)}
+                                            className="w-full px-4 py-3 bg-[#FAFAFA] border border-[#EBEBEB] focus:border-[#171717] rounded-xl text-xs font-semibold text-[#4D4D4D] focus:outline-none transition-all cursor-pointer shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
+                                        >
+                                            <option value="">-- Choose a role for skill recommendations --</option>
+                                            {Object.keys(ROLE_SKILLS_MAP).map(role => (
+                                                <option key={role} value={role}>{role}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* Recommendation Badges */}
+                                    {selectedRole && (
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">Recommended Skills</label>
+                                            <div className="flex flex-wrap gap-1.5 p-3 bg-[#FAFAFA] border border-[#EBEBEB] rounded-xl">
+                                                {ROLE_SKILLS_MAP[selectedRole].map(skill => {
+                                                    const isAdded = form.skills.includes(skill);
+                                                    return (
+                                                        <button
+                                                            key={skill}
+                                                            type="button"
+                                                            disabled={isAdded}
+                                                            onClick={() => {
+                                                                setForm(prev => ({
+                                                                    ...prev,
+                                                                    skills: [...prev.skills, skill]
+                                                                }));
+                                                            }}
+                                                            className={`px-2.5 py-1 text-xs font-semibold rounded-md border transition-all cursor-pointer select-none ${
+                                                                isAdded
+                                                                    ? 'bg-[#F2F2F2] border-[#EBEBEB] text-[#A1A1A1] cursor-not-allowed'
+                                                                    : 'bg-white border-[#EBEBEB] text-[#4D4D4D] hover:border-[#171717] hover:text-[#171717] shadow-sm'
+                                                            }`}
+                                                        >
+                                                            {skill} {isAdded && '✓'}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">Add Custom Skill</label>
+                                        <input 
+                                            type="text"
+                                            value={skillInput}
+                                            onChange={e => setSkillInput(e.target.value)}
+                                            onKeyDown={handleAddSkill}
+                                            className="w-full px-5 py-4 bg-gradient-to-r from-[#FAFAFA] to-white hover:from-[#F5F5F5] hover:to-[#FAFAFA] border border-[#EBEBEB] focus:border-[#171717] focus:ring-1 focus:ring-[#171717] rounded-xl text-[#171717] placeholder:text-[#8F8F8F] focus:outline-none transition-all font-medium shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)] text-sm"
+                                            placeholder="Type custom skill (e.g., Python, Docker) and press Enter"
+                                        />
+                                    </div>
                                     
-                                    <div className="flex flex-wrap gap-1.5 min-h-[40px] p-2 bg-[#FAFAFA] border border-[#EBEBEB] rounded-xl">
-                                        {form.skills.length === 0 ? (
-                                            <span className="text-xs text-[#8F8F8F] self-center pl-2 italic">No skills added yet...</span>
-                                        ) : (
-                                            form.skills.map((skill) => (
-                                                <span 
-                                                    key={skill} 
-                                                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-[#EBEBEB] text-[#171717] font-semibold text-xs rounded-md shadow-sm select-none"
-                                                >
-                                                    {skill}
-                                                    <button 
-                                                        type="button" 
-                                                        onClick={() => handleRemoveSkill(skill)}
-                                                        className="text-[#8F8F8F] hover:text-red-500 font-bold ml-1"
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">Your selected skills</label>
+                                        <div className="flex flex-wrap gap-1.5 min-h-[40px] p-3 bg-[#FAFAFA] border border-[#EBEBEB] rounded-xl">
+                                            {form.skills.length === 0 ? (
+                                                <span className="text-xs text-[#8F8F8F] self-center pl-2 italic">No skills added yet...</span>
+                                            ) : (
+                                                form.skills.map((skill) => (
+                                                    <span 
+                                                        key={skill} 
+                                                        className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-[#EBEBEB] text-[#171717] font-semibold text-xs rounded-md shadow-sm select-none"
                                                     >
-                                                        ×
-                                                    </button>
-                                                </span>
-                                            ))
-                                        )}
+                                                        {skill}
+                                                        <button 
+                                                            type="button" 
+                                                            onClick={() => handleRemoveSkill(skill)}
+                                                            className="text-[#8F8F8F] hover:text-red-500 font-bold ml-1"
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </span>
+                                                ))
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
