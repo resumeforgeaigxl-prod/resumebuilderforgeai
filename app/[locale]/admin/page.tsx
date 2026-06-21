@@ -64,74 +64,76 @@ export default async function AdminDashboard({ params }: { params: { locale: str
     .map(([name]) => name);
 
   const stats = [
-    { label: 'Total Base Users', value: totalUsers, icon: Users, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-    { label: 'Active Subscriptions', value: activeSubs, icon: CreditCard, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-    { label: 'Platform Resumes', value: totalResumes, icon: FileText, color: 'text-purple-400', bg: 'bg-purple-500/10' },
-    { label: 'AI Success Roadmaps', value: totalRoadmaps, icon: Zap, color: 'text-orange-400', bg: 'bg-orange-500/10' },
+    { label: 'Total Base Users', value: totalUsers, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50 border border-blue-100' },
+    { label: 'Active Subscriptions', value: activeSubs, icon: CreditCard, color: 'text-emerald-600', bg: 'bg-emerald-50 border border-emerald-100' },
+    { label: 'Platform Resumes', value: totalResumes, icon: FileText, color: 'text-purple-600', bg: 'bg-purple-50 border border-purple-100' },
+    { label: 'AI Success Roadmaps', value: totalRoadmaps, icon: Zap, color: 'text-orange-600', bg: 'bg-orange-50 border border-orange-100' },
   ];
 
   const secondaryStats = [
-    { label: 'Intelligence Calls Today', value: aiUsageToday, icon: Activity, color: 'text-indigo-400' },
-    { label: 'Resume Analyses', value: totalResumeAnalyses, icon: Zap, color: 'text-purple-400' },
-    { label: 'Recent Applications', value: totalJobApps, icon: Briefcase, color: 'text-emerald-400' },
-    { label: 'AI Chat Sessions', value: chatSessionsToday, icon: MessageSquare, color: 'text-blue-400' },
-    { label: 'Enterprise Forges', value: 4, icon: ShieldCheck, color: 'text-orange-400' },
+    { label: 'Intelligence Calls Today', value: aiUsageToday, icon: Activity, color: 'text-indigo-600' },
+    { label: 'Resume Analyses', value: totalResumeAnalyses, icon: Zap, color: 'text-purple-600' },
+    { label: 'Recent Applications', value: totalJobApps, icon: Briefcase, color: 'text-emerald-600' },
+    { label: 'AI Chat Sessions', value: chatSessionsToday, icon: MessageSquare, color: 'text-blue-600' },
+    { label: 'Enterprise Forges', value: 4, icon: ShieldCheck, color: 'text-orange-600' },
   ];
 
   return (
     <div className="space-y-12 pb-20">
       <header>
-        <div className="flex items-center gap-2 text-indigo-400 font-bold tracking-widest text-[10px] uppercase mb-4">
+        <div className="flex items-center gap-2 text-indigo-600 font-bold tracking-widest text-[11px] font-mono uppercase mb-4">
           <ShieldCheck className="w-3.5 h-3.5" /> Core Governance
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-white">
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-[#171717]">
           Platform Overview
         </h1>
-        <p className="text-slate-400 mt-2 text-lg">Real-time governance metrics and system integrity monitor.</p>
+        <p className="text-[#666666] mt-2 text-lg">Real-time governance metrics and system integrity monitor.</p>
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
           stat.label === 'Enterprise Forges' ? (
-            <Link key={stat.label} href={`/${locale}/admin/forges`} className="glass-card p-8 group hover:border-orange-500/30 transition-all">
-              <div className={`w-12 h-12 rounded-xl ${stat.bg || 'bg-orange-500/10'} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                <stat.icon className={`w-6 h-6 ${stat.color}`} />
+            <Link key={stat.label} href={`/${locale}/admin/forges`} className="bg-white border border-[#EBEBEB] p-6 rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.02)] group hover:border-neutral-300 transition-all flex flex-col justify-between">
+              <div>
+                <div className={`w-10 h-10 rounded-xl ${stat.bg || 'bg-orange-50 border border-orange-100'} flex items-center justify-center mb-4 group-hover:scale-105 transition-transform`}>
+                  <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                </div>
+                <div className="text-3xl font-bold text-[#171717] mb-1">{stat.value.toLocaleString()}</div>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">{stat.value.toLocaleString()}</div>
-              <div className="text-sm font-medium text-slate-500 flex items-center gap-2">
-                {stat.label} <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              <div className="text-xs font-semibold text-[#8F8F8F] uppercase tracking-wider font-mono flex items-center gap-1.5 mt-2">
+                {stat.label} <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
           ) : (
-            <div key={stat.label} className="glass-card p-8 group">
-              <div className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                <stat.icon className={`w-6 h-6 ${stat.color}`} />
+            <div key={stat.label} className="bg-white border border-[#EBEBEB] p-6 rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.02)] group hover:border-neutral-300 transition-all">
+              <div className={`w-10 h-10 rounded-xl ${stat.bg} flex items-center justify-center mb-4 group-hover:scale-105 transition-transform`}>
+                <stat.icon className={`w-5 h-5 ${stat.color}`} />
               </div>
-              <div className="text-3xl font-bold text-white mb-1">{stat.value.toLocaleString()}</div>
-              <div className="text-sm font-medium text-slate-500">{stat.label}</div>
+              <div className="text-3xl font-bold text-[#171717] mb-1">{stat.value.toLocaleString()}</div>
+              <div className="text-xs font-semibold text-[#8F8F8F] uppercase tracking-wider font-mono">{stat.label}</div>
             </div>
           )
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 glass-card p-10">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-xl font-bold text-white flex items-center gap-3">
-              <Activity className="w-5 h-5 text-indigo-400" />
+        <div className="lg:col-span-2 bg-white border border-[#EBEBEB] p-6 md:p-8 rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-bold text-[#171717] flex items-center gap-3">
+              <Activity className="w-5 h-5 text-indigo-600" />
               AI Neural Engine Monitor
             </h2>
-            <Link href={`/${locale}/admin/ai-monitoring`} className="text-xs font-bold text-indigo-400 hover:text-white transition-colors bg-indigo-500/10 px-3 py-1.5 rounded-lg flex items-center gap-2">
-              Command Center <ArrowRight className="w-3 h-3" />
+            <Link href={`/${locale}/admin/ai-monitoring`} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors bg-indigo-50 border border-indigo-100 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+              Command Center <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
             {secondaryStats.map((stat) => (
-              <div key={stat.label} className="p-4 rounded-xl bg-white/[0.02] border border-white/5">
-                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">{stat.label}</div>
-                <div className="text-xl font-bold text-white flex items-center gap-2">
-                  <stat.icon className={`w-3.5 h-3.5 ${stat.color}`} />
+              <div key={stat.label} className="p-4 rounded-xl bg-neutral-50/50 border border-[#EBEBEB]">
+                <div className="text-[9px] text-[#8F8F8F] font-bold uppercase tracking-widest font-mono mb-1">{stat.label}</div>
+                <div className="text-base font-bold text-[#171717] flex items-center gap-2">
+                  <stat.icon className={`w-4 h-4 ${stat.color}`} />
                   {stat.value.toLocaleString()}
                 </div>
               </div>
@@ -141,35 +143,35 @@ export default async function AdminDashboard({ params }: { params: { locale: str
           <LiveAIMonitor initialData={recentUsage} />
         </div>
 
-        <div className="glass-card p-10 flex flex-col justify-between">
+        <div className="bg-white border border-[#EBEBEB] p-6 md:p-8 rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.02)] flex flex-col justify-between">
           <div>
-            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
-              <Clock className="w-5 h-5 text-emerald-400" />
+            <h2 className="text-lg font-bold text-[#171717] mb-6 flex items-center gap-3">
+              <Clock className="w-5 h-5 text-emerald-600" />
               Instance Health
             </h2>
-            <div className="space-y-6">
-              <div className="flex justify-between items-center border-b border-white/5 pb-4">
-                <span className="text-sm text-slate-400">Database Engine</span>
-                <span className="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded">PHASE 4 ACTIVE</span>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center border-b border-[#EBEBEB] pb-3">
+                <span className="text-sm text-[#666666]">Database Engine</span>
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded uppercase tracking-wider font-mono">PHASE 4 ACTIVE</span>
               </div>
-              <div className="flex justify-between items-center border-b border-white/5 pb-4">
-                <span className="text-sm text-slate-400">Admin Actions</span>
-                <span className="text-sm font-mono text-white">{totalLogs}</span>
+              <div className="flex justify-between items-center border-b border-[#EBEBEB] pb-3">
+                <span className="text-sm text-[#666666]">Admin Actions</span>
+                <span className="text-sm font-mono text-[#171717] font-semibold">{totalLogs}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-400">Server Status</span>
+                <span className="text-sm text-[#666666]">Server Status</span>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-xs font-mono text-emerald-500 uppercase">Production Stable</span>
+                  <span className="text-[10px] font-mono text-emerald-700 font-bold uppercase tracking-wider bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded">Production Stable</span>
                 </div>
               </div>
               {topCompanies.length > 0 && (
-                <div className="pt-4 border-t border-white/5">
-                  <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-3">Top Applied Companies</div>
+                <div className="pt-4 border-t border-[#EBEBEB]">
+                  <div className="text-[9px] text-[#8F8F8F] font-bold uppercase tracking-widest font-mono mb-3">Top Applied Companies</div>
                   <div className="space-y-2">
                     {topCompanies.map((name, i) => (
-                      <div key={i} className="flex items-center gap-2 text-xs text-slate-300">
-                        <span className="text-indigo-400 font-bold">#{i+1}</span>
+                      <div key={i} className="flex items-center gap-2 text-xs text-[#666666] font-medium">
+                        <span className="text-indigo-600 font-bold font-mono">#{i+1}</span>
                         {name}
                       </div>
                     ))}
@@ -179,9 +181,9 @@ export default async function AdminDashboard({ params }: { params: { locale: str
             </div>
           </div>
 
-          <div className="mt-10 pt-10 border-t border-white/5">
-            <div className="text-[10px] text-slate-600 font-bold uppercase tracking-widest mb-2">Timestamp Node</div>
-            <div className="text-xs font-mono text-slate-400 truncate">{new Date().toISOString()}</div>
+          <div className="mt-8 pt-6 border-t border-[#EBEBEB]">
+            <div className="text-[9px] text-[#8F8F8F] font-bold uppercase tracking-widest font-mono mb-2">Timestamp Node</div>
+            <div className="text-xs font-mono text-[#666666] truncate">{new Date().toISOString()}</div>
           </div>
         </div>
       </div>

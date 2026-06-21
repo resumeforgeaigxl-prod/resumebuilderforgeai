@@ -14,25 +14,25 @@ export default async function JobCollectorAdminPage() {
     return (
         <div className="space-y-8 pb-20">
             <header>
-                <div className="flex items-center gap-2 text-indigo-400 font-bold tracking-widest text-[10px] uppercase mb-4">
+                <div className="flex items-center gap-2 text-indigo-600 font-bold tracking-widest text-[11px] font-mono uppercase mb-4">
                     <Target className="w-3.5 h-3.5" /> AI Target Intel
                 </div>
-                <h1 className="text-4xl font-bold tracking-tighter text-white">JobForge Collector</h1>
-                <p className="text-slate-400 mt-2">Manage AI-targeted job discovery and global sync pipelines.</p>
+                <h1 className="text-4xl font-bold tracking-tighter text-[#171717]">JobForge Collector</h1>
+                <p className="text-[#666666] mt-2">Manage AI-targeted job discovery and global sync pipelines.</p>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="glass-card p-6 border-white/5">
-                    <div className="text-sm font-medium text-slate-500 mb-1">Total Clean Jobs</div>
-                    <div className="text-3xl font-black text-white">{(totalJobs || 0).toLocaleString()}</div>
+                <div className="bg-white border border-[#EBEBEB] p-6 rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                    <div className="text-xs font-semibold text-[#8F8F8F] uppercase tracking-wider font-mono mb-1">Total Clean Jobs</div>
+                    <div className="text-3xl font-black text-[#171717]">{(totalJobs || 0).toLocaleString()}</div>
                 </div>
-                <div className="glass-card p-6 border-indigo-500/20">
-                    <div className="text-sm font-medium text-indigo-400 mb-1">AI Collector Hits</div>
-                    <div className="text-3xl font-black text-white">{(collectorJobs || 0).toLocaleString()}</div>
+                <div className="bg-white border border-[#EBEBEB] p-6 rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                    <div className="text-xs font-semibold text-indigo-600 uppercase tracking-wider font-mono mb-1">AI Collector Hits</div>
+                    <div className="text-3xl font-black text-indigo-600">{(collectorJobs || 0).toLocaleString()}</div>
                 </div>
-                <div className="glass-card p-6 border-white/5">
-                    <div className="text-sm font-medium text-slate-500 mb-1">Target Companies</div>
-                    <div className="text-3xl font-black text-white">{(targetCompanies || 0).toLocaleString()}</div>
+                <div className="bg-white border border-[#EBEBEB] p-6 rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                    <div className="text-xs font-semibold text-[#8F8F8F] uppercase tracking-wider font-mono mb-1">Target Companies</div>
+                    <div className="text-3xl font-black text-[#171717]">{(targetCompanies || 0).toLocaleString()}</div>
                 </div>
             </div>
 

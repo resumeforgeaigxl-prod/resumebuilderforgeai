@@ -56,30 +56,30 @@ export default function LiveAIMonitor({ initialData }: { initialData: AIUsageLog
     return (
         <div className="space-y-4">
             {recentUsage.length === 0 ? (
-                <div className="p-10 text-center text-slate-500 bg-white/[0.01] rounded-2xl border border-dashed border-white/5 font-medium">
+                <div className="p-10 text-center text-[#666666] bg-neutral-50 rounded-2xl border border-dashed border-[#EBEBEB] font-medium">
                     No recent AI signals detected.
                 </div>
             ) : (
                 recentUsage.map((log) => (
-                    <div key={log.id} className="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between hover:bg-white/[0.04] transition-colors group animate-in fade-in slide-in-from-right-4 duration-500">
+                    <div key={log.id} className="p-4 rounded-xl bg-white border border-[#EBEBEB] flex items-center justify-between hover:border-neutral-300 hover:bg-neutral-50/30 transition-all group animate-in fade-in slide-in-from-right-4 duration-500">
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center">
-                                <MessageSquareWarning className={`w-5 h-5 ${log.tokens_used > 1000 ? 'text-orange-400' : 'text-indigo-400'}`} />
+                            <div className="w-10 h-10 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center">
+                                <MessageSquareWarning className={`w-5 h-5 ${log.tokens_used > 1000 ? 'text-orange-600' : 'text-indigo-600'}`} />
                             </div>
                             <div>
-                                <div className="text-sm font-bold text-white group-hover:text-indigo-400 transition-colors truncate max-w-[200px]">
+                                <div className="text-sm font-semibold text-[#171717] group-hover:text-indigo-600 transition-colors truncate max-w-[200px]">
                                     {getUsageEmail(log.users) || 'Anonymous Signal'}
                                 </div>
-                                <div className="text-[10px] text-slate-500 font-mono mt-0.5 uppercase tracking-tighter">
+                                <div className="text-[10px] text-[#666666] font-mono mt-0.5 uppercase tracking-tighter">
                                     {log.module || 'JobForgeAI'} - {log.tokens_used || 0} Tokens
                                 </div>
                             </div>
                         </div>
                         <div className="text-right">
-                            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none">
+                            <div className="text-[10px] text-[#8F8F8F] font-bold uppercase tracking-widest font-mono leading-none">
                                 {new Date(log.created_at).toLocaleTimeString()}
                             </div>
-                            <div className="text-[9px] text-emerald-500 font-mono mt-1 px-1.5 py-0.5 bg-emerald-500/10 rounded-full inline-block">
+                            <div className="text-[9px] text-emerald-700 font-bold font-mono mt-1 px-1.5 py-0.5 bg-emerald-50 border border-emerald-100 rounded-full inline-block">
                                 SGNL_OK
                             </div>
                         </div>

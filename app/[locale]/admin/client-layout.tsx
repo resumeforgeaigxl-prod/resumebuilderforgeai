@@ -4,7 +4,6 @@ import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Shield, ShieldCheck, Target, Users, FileText, ScrollText, LayoutDashboard, Ticket, Menu, X, Globe, BrainCircuit, Activity, CreditCard, MessageSquareWarning, Briefcase, FileHeart, Receipt, LifeBuoy, Mic, Compass, TrendingUp, Bell, BookOpen, Video, BookOpenCheck, Bot, GraduationCap , Wand2 } from 'lucide-react';
-import Image from 'next/image';
 
 export default function AdminLayoutClient({ children, profile, locale }: { children: ReactNode, profile: { email: string }, locale: string }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -65,10 +64,10 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
     ];
 
     return (
-        <div className="min-h-screen bg-[#050508] text-slate-200 font-sans selection:bg-indigo-500/30 flex relative">
+        <div className="admin-container min-h-screen bg-[#FAFAFA] text-[#171717] font-sans selection:bg-indigo-100 selection:text-indigo-900 flex relative">
             {/* Mobile Sidebar Overlay */}
             <div
-                className={`fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] md:hidden transition-all duration-300 ease-in-out ${isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] md:hidden transition-all duration-300 ease-in-out ${isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
                     }`}
                 onClick={() => setIsSidebarOpen(false)}
             />
@@ -77,38 +76,33 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
             <aside
                 className={`
                     fixed inset-y-0 left-0 z-[70] 
-                    bg-[#050508]/95 backdrop-blur-3xl border-r border-white/5 
+                    bg-white border-r border-[#EBEBEB] 
                     flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
                     w-72 ${isCollapsed ? 'md:w-20' : 'md:w-72'}
-                    ${isSidebarOpen ? 'translate-x-0 shadow-[20px_0_100px_rgba(0,0,0,1)]' : '-translate-x-full md:translate-x-0'}
+                    ${isSidebarOpen ? 'translate-x-0 shadow-[20px_0_100px_rgba(0,0,0,0.05)]' : '-translate-x-full md:translate-x-0'}
                 `}
             >
                 {/* Sidebar Header */}
-                <div className={`h-16 flex items-center border-b border-white/5 overflow-hidden shrink-0 ${isCollapsed ? 'md:px-0 md:justify-center px-4' : 'px-6'}`}>
+                <div className={`h-16 flex items-center border-b border-[#EBEBEB] overflow-hidden shrink-0 ${isCollapsed ? 'md:px-0 md:justify-center px-4' : 'px-6'}`}>
                     {!isCollapsed ? (
-                        <Image 
-                            src="/logo/resumeforge-logo-v2.svg" 
-                            width={160}
-                            height={40}
-                            className="w-[160px] h-auto object-contain transition-all" 
-                            alt="ResumeForgeAI" 
-                            priority
-                        />
+                        <div className="flex items-center gap-3 px-2">
+                            <div className="w-8 h-8 rounded-full bg-[#171717] flex items-center justify-center text-white font-semibold text-xs shrink-0">
+                                RF
+                            </div>
+                            <span className="font-semibold text-sm tracking-tight text-[#171717] whitespace-nowrap">
+                                ResumeForge AI <span className="text-[10px] text-indigo-600 bg-indigo-50 border border-indigo-100 rounded px-1.5 py-0.5 ml-1.5 font-bold uppercase tracking-wider">Admin</span>
+                            </span>
+                        </div>
                     ) : (
-                        <Image 
-                            src="/logo/resumeforge-icon-v2.svg" 
-                            width={40}
-                            height={40}
-                            className="w-10 h-10 object-contain transition-all" 
-                            alt="RF" 
-                            priority
-                        />
+                        <div className="w-8 h-8 rounded-full bg-[#171717] flex items-center justify-center text-white font-semibold text-xs">
+                            RF
+                        </div>
                     )}
                 </div>
 
                 {/* Navigation */}
                 <nav className="flex-1 p-3 space-y-1 overflow-y-auto custom-scrollbar">
-                    <p className={`px-4 py-2 text-[10px] text-slate-500 uppercase font-bold tracking-widest transition-all duration-300 overflow-hidden whitespace-nowrap ${isCollapsed ? 'md:h-0 md:opacity-0 md:py-0' : 'h-auto opacity-100'}`}>
+                    <p className={`px-4 py-2 text-[10px] text-[#8F8F8F] uppercase font-bold tracking-widest font-mono transition-all duration-300 overflow-hidden whitespace-nowrap ${isCollapsed ? 'md:h-0 md:opacity-0 md:py-0' : 'h-auto opacity-100'}`}>
                         General
                     </p>
                     {navItems.map((item) => {
@@ -120,19 +114,19 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                                 onClick={() => setIsSidebarOpen(false)}
                                 title={isCollapsed ? item.label : ''}
                                 className={`
-                                    flex items-center py-3 rounded-2xl text-sm transition-all duration-300 group relative
+                                    flex items-center py-2.5 rounded-xl text-sm transition-all duration-300 group relative
                                     ${isActive
-                                        ? 'bg-indigo-500/10 text-white font-bold border border-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.1)]'
-                                        : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'}
+                                        ? 'bg-neutral-100 text-[#171717] font-semibold border border-[#EBEBEB]'
+                                        : 'text-[#666666] hover:text-[#171717] hover:bg-neutral-50 border border-transparent'}
                                     px-4 ${isCollapsed ? 'md:px-0 md:justify-center gap-3 md:gap-0' : 'gap-3'}
                                 `}
                             >
-                                <item.icon className={`w-5 h-5 shrink-0 transition-colors duration-300 ${isActive ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300'}`} />
+                                <item.icon className={`w-4 h-4 shrink-0 transition-colors duration-300 ${isActive ? 'text-indigo-600' : 'text-[#8F8F8F] group-hover:text-[#666666]'}`} />
                                 <span className={`transition-all duration-500 whitespace-nowrap overflow-hidden ${isCollapsed ? 'md:opacity-0 md:w-0' : 'opacity-100 w-auto'}`}>
                                     {item.label}
                                 </span>
                                 {isActive && (
-                                    <div className={`transition-all duration-500 shrink-0 ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.8)] ${isCollapsed ? 'md:hidden' : ''}`} />
+                                    <div className={`transition-all duration-500 shrink-0 ml-auto w-1.5 h-1.5 rounded-full bg-indigo-600 ${isCollapsed ? 'md:hidden' : ''}`} />
                                 )}
                             </Link>
                         );
@@ -140,13 +134,13 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                 </nav>
 
                 {/* Sidebar Footer */}
-                <div className={`p-4 border-t border-white/5 shrink-0 transition-all duration-300 ${isCollapsed ? 'md:p-2' : 'p-4'}`}>
+                <div className={`p-4 border-t border-[#EBEBEB] shrink-0 transition-all duration-300 ${isCollapsed ? 'md:p-2' : 'p-4'}`}>
                     <Link
                         href={`/${locale}/dashboard`}
                         title={isCollapsed ? 'Exit Admin' : ''}
-                        className={`flex items-center py-2.5 rounded-xl text-sm text-slate-400 hover:text-white hover:bg-red-500/5 transition-all group overflow-hidden px-3.5 ${isCollapsed ? 'md:px-0 md:justify-center gap-3 md:gap-0' : 'gap-3'}`}
+                        className={`flex items-center py-2.5 rounded-xl text-sm text-[#666666] hover:text-red-600 hover:bg-red-50 transition-all group overflow-hidden px-3.5 ${isCollapsed ? 'md:px-0 md:justify-center gap-3 md:gap-0' : 'gap-3'}`}
                     >
-                        <X className="w-5 h-5 shrink-0 group-hover:rotate-90 transition-transform text-slate-500 group-hover:text-red-400" />
+                        <X className="w-4 h-4 shrink-0 group-hover:rotate-90 transition-transform text-[#8F8F8F] group-hover:text-red-500" />
                         <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isCollapsed ? 'md:opacity-0 md:w-0' : 'opacity-100 w-auto'}`}>
                             Exit Admin
                         </span>
@@ -157,7 +151,7 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
             {/* Main Content Wrapper */}
             <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isCollapsed ? 'md:ml-20' : 'md:ml-72'}`}>
                 {/* Top Navigation */}
-                <header className="sticky top-0 z-50 flex items-center justify-between h-20 px-4 py-2 sm:px-8 bg-[#050508]/60 backdrop-blur-2xl border-b border-white/5 transition-all duration-300">
+                <header className="sticky top-0 z-50 flex items-center justify-between h-16 px-4 py-2 sm:px-8 bg-white/80 backdrop-blur-md border-b border-[#EBEBEB] transition-all duration-300">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => {
@@ -167,14 +161,14 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                                     setIsCollapsed(!isCollapsed);
                                 }
                             }}
-                            className="p-2 rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all active:scale-95 flex"
+                            className="p-2 rounded-xl bg-neutral-50 text-[#666666] hover:text-[#171717] hover:bg-neutral-100 border border-[#EBEBEB] transition-all active:scale-95 flex"
                         >
-                            <Menu className="w-5 h-5" />
+                            <Menu className="w-4 h-4" />
                         </button>
                         <div className="hidden sm:flex items-center gap-2">
-                            <span className="text-sm font-medium text-slate-400">Admin</span>
-                            <span className="text-slate-700">/</span>
-                            <span className="text-sm font-semibold text-white capitalize">
+                            <span className="text-xs font-semibold uppercase tracking-wider text-[#8F8F8F] font-mono">Admin</span>
+                            <span className="text-neutral-300">/</span>
+                            <span className="text-xs font-semibold uppercase tracking-wider text-[#171717] font-mono capitalize">
                                 {pathname?.split('/').pop()?.replace(/-/g, ' ') || 'Dashboard'}
                             </span>
                         </div>
@@ -182,16 +176,16 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
 
                     <div className="flex items-center gap-3">
                         <div className="hidden sm:flex flex-col items-end mr-2">
-                            <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest leading-tight">Admin</p>
-                            <p className="text-xs text-slate-300 font-medium max-w-[150px] truncate">{profile?.email || 'Admin'}</p>
+                            <p className="text-[9px] text-[#8F8F8F] uppercase font-bold tracking-widest leading-tight font-mono">Governing Authority</p>
+                            <p className="text-xs text-[#666666] font-medium max-w-[150px] truncate">{profile?.email || 'Admin'}</p>
                         </div>
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs ring-2 ring-white/10 shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-neutral-100 border border-[#EBEBEB] flex items-center justify-center text-[#171717] font-bold text-xs shrink-0">
                             {profile?.email?.charAt(0).toUpperCase() || 'A'}
                         </div>
                     </div>
                 </header>
 
-                <main className="flex-1 p-5 md:p-10 max-w-[1600px] w-full mx-auto">
+                <main className="flex-1 p-5 md:p-8 max-w-[1600px] w-full mx-auto">
                     <div className="animate-premium-in">
                         {children}
                     </div>
@@ -206,11 +200,160 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                     background: transparent;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: rgba(255, 255, 255, 0.05);
+                    background: #EBEBEB;
                     border-radius: 10px;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: rgba(255, 255, 255, 0.1);
+                    background: #D8D8D8;
+                }
+
+                /* ==========================================================================
+                   Vercel light theme (Geist System) global overrides for inside admin pages
+                   ========================================================================== */
+
+                /* Main table and card containers */
+                .admin-container .bg-white\/5,
+                .admin-container .bg-white\/\[0\.02\],
+                .admin-container .bg-white\/\[0\.01\],
+                .admin-container .bg-white\/2,
+                .admin-container .glass-card {
+                    background-color: #ffffff !important;
+                    border-color: #ebebeb !important;
+                    box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
+                }
+
+                .admin-container .thead,
+                .admin-container thead {
+                    background-color: #fafafa !important;
+                    border-bottom-color: #ebebeb !important;
+                }
+
+                .admin-container tr {
+                    border-bottom-color: #ebebeb !important;
+                }
+
+                .admin-container tr:hover,
+                .admin-container .hover\:bg-white\/5:hover,
+                .admin-container .hover\:bg-white\/2:hover {
+                    background-color: #fafafa !important;
+                }
+
+                /* Borders & dividers */
+                .admin-container .border-white\/10,
+                .admin-container .border-white\/5,
+                .admin-container .border-white\/20,
+                .admin-container .border-slate-800,
+                .admin-container .border-t,
+                .admin-container .border-b,
+                .admin-container .border {
+                    border-color: #ebebeb !important;
+                }
+
+                .admin-container .divide-white\/5 > * + *,
+                .admin-container .divide-y > * + * {
+                    border-color: #ebebeb !important;
+                }
+
+                /* Text Colors */
+                .admin-container .text-white,
+                .admin-container .text-slate-100,
+                .admin-container .text-slate-200,
+                .admin-container .text-slate-300,
+                .admin-container .text-gray-100,
+                .admin-container .text-gray-250,
+                .admin-container .text-gray-300 {
+                    color: #171717 !important;
+                }
+
+                .admin-container .text-slate-400,
+                .admin-container .text-slate-500,
+                .admin-container .text-gray-400,
+                .admin-container .text-gray-500 {
+                    color: #4d4d4d !important; /* Vercel body grey */
+                }
+
+                .admin-container .text-slate-600,
+                .admin-container .text-slate-700,
+                .admin-container .text-gray-600,
+                .admin-container .text-gray-700 {
+                    color: #8f8f8f !important; /* Vercel mute copy */
+                }
+
+                /* User list avatar blocks */
+                .admin-container .bg-slate-800 {
+                    background-color: #fafafa !important;
+                    border: 1px solid #ebebeb !important;
+                    color: #171717 !important;
+                }
+
+                /* Inputs & search bars */
+                .admin-container input,
+                .admin-container select,
+                .admin-container textarea {
+                    background-color: #ffffff !important;
+                    color: #171717 !important;
+                    border-color: #ebebeb !important;
+                }
+
+                .admin-container input::placeholder,
+                .admin-container textarea::placeholder {
+                    color: #a1a1a1 !important; /* Vercel faint text */
+                }
+
+                /* Badges / Category Pills */
+                .admin-container .bg-white\/5 {
+                    background-color: #fafafa !important;
+                    border-color: #ebebeb !important;
+                    color: #4d4d4d !important;
+                }
+
+                /* Semantic color mappings: Success / Emerald */
+                .admin-container .bg-emerald-500\/10,
+                .admin-container .bg-emerald-500\/20,
+                .admin-container .bg-emerald-500\/5 {
+                    background-color: #ecfdf5 !important;
+                    border-color: #a7f3d0 !important;
+                    color: #047857 !important;
+                }
+
+                .admin-container .text-emerald-400,
+                .admin-container .text-emerald-500 {
+                    color: #047857 !important;
+                }
+
+                /* Semantic color mappings: Error / Rose */
+                .admin-container .bg-rose-500\/10,
+                .admin-container .bg-rose-500\/20,
+                .admin-container .bg-rose-500\/5 {
+                    background-color: #fef2f2 !important;
+                    border-color: #fecaca !important;
+                    color: #b91c1c !important;
+                }
+
+                .admin-container .text-rose-400,
+                .admin-container .text-rose-500 {
+                    color: #b91c1c !important;
+                }
+
+                /* Accent color mappings: Purple / Indigo */
+                .admin-container .text-purple-400,
+                .admin-container .text-indigo-400,
+                .admin-container .text-purple-500,
+                .admin-container .text-indigo-500 {
+                    color: #4f46e5 !important;
+                }
+
+                .admin-container .bg-indigo-500\/20,
+                .admin-container .bg-indigo-500\/10,
+                .admin-container .bg-purple-500\/10 {
+                    background-color: #eef2ff !important;
+                    border-color: #c7d2fe !important;
+                    color: #4f46e5 !important;
+                }
+
+                /* Opacity transitions for hover buttons */
+                .admin-container .group:hover .group-hover\:opacity-100 {
+                    opacity: 100 !important;
                 }
             `}</style>
         </div>
