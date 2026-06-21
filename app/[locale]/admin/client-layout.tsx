@@ -90,7 +90,7 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                                 RF
                             </div>
                             <span className="font-semibold text-sm tracking-tight text-[#171717] whitespace-nowrap">
-                                ResumeForge AI <span className="text-[10px] text-indigo-600 bg-indigo-50 border border-indigo-100 rounded px-1.5 py-0.5 ml-1.5 font-bold uppercase tracking-wider">Admin</span>
+                                ResumeForge AI <span className="text-[10px] text-[#4D4D4D] bg-[#F2F2F2] border border-[#EBEBEB] rounded-[4px] px-1.5 py-0.5 ml-1.5 font-mono font-medium uppercase tracking-wider">Admin</span>
                             </span>
                         </div>
                     ) : (
@@ -101,8 +101,8 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 p-3 space-y-1 overflow-y-auto custom-scrollbar">
-                    <p className={`px-4 py-2 text-[10px] text-[#8F8F8F] uppercase font-bold tracking-widest font-mono transition-all duration-300 overflow-hidden whitespace-nowrap ${isCollapsed ? 'md:h-0 md:opacity-0 md:py-0' : 'h-auto opacity-100'}`}>
+                <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto custom-scrollbar">
+                    <p className={`px-4 py-2 text-[10px] text-[#8F8F8F] uppercase font-medium tracking-normal font-mono transition-all duration-300 overflow-hidden whitespace-nowrap ${isCollapsed ? 'md:h-0 md:opacity-0 md:py-0' : 'h-auto opacity-100'}`}>
                         General
                     </p>
                     {navItems.map((item) => {
@@ -114,20 +114,17 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                                 onClick={() => setIsSidebarOpen(false)}
                                 title={isCollapsed ? item.label : ''}
                                 className={`
-                                    flex items-center py-2.5 rounded-xl text-sm transition-all duration-300 group relative
+                                    flex items-center py-2 rounded-[6px] text-sm transition-all duration-200 group relative
                                     ${isActive
-                                        ? 'bg-neutral-100 text-[#171717] font-semibold border border-[#EBEBEB]'
-                                        : 'text-[#666666] hover:text-[#171717] hover:bg-neutral-50 border border-transparent'}
+                                        ? 'bg-neutral-100 text-[#171717] font-medium tracking-[-0.28px]'
+                                        : 'text-[#4D4D4D] hover:text-[#171717] hover:bg-neutral-100/50'}
                                     px-4 ${isCollapsed ? 'md:px-0 md:justify-center gap-3 md:gap-0' : 'gap-3'}
                                 `}
                             >
-                                <item.icon className={`w-4 h-4 shrink-0 transition-colors duration-300 ${isActive ? 'text-indigo-600' : 'text-[#8F8F8F] group-hover:text-[#666666]'}`} />
-                                <span className={`transition-all duration-500 whitespace-nowrap overflow-hidden ${isCollapsed ? 'md:opacity-0 md:w-0' : 'opacity-100 w-auto'}`}>
+                                <item.icon className={`w-4 h-4 shrink-0 transition-colors duration-200 ${isActive ? 'text-[#171717]' : 'text-[#8F8F8F] group-hover:text-[#4D4D4D]'}`} />
+                                <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isCollapsed ? 'md:opacity-0 md:w-0' : 'opacity-100 w-auto'}`}>
                                     {item.label}
                                 </span>
-                                {isActive && (
-                                    <div className={`transition-all duration-500 shrink-0 ml-auto w-1.5 h-1.5 rounded-full bg-indigo-600 ${isCollapsed ? 'md:hidden' : ''}`} />
-                                )}
                             </Link>
                         );
                     })}
@@ -138,9 +135,9 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                     <Link
                         href={`/${locale}/dashboard`}
                         title={isCollapsed ? 'Exit Admin' : ''}
-                        className={`flex items-center py-2.5 rounded-xl text-sm text-[#666666] hover:text-red-600 hover:bg-red-50 transition-all group overflow-hidden px-3.5 ${isCollapsed ? 'md:px-0 md:justify-center gap-3 md:gap-0' : 'gap-3'}`}
+                        className={`flex items-center py-2 rounded-[6px] text-sm text-[#4D4D4D] hover:text-[#EE0000] hover:bg-red-50/50 transition-all group overflow-hidden px-3.5 ${isCollapsed ? 'md:px-0 md:justify-center gap-3 md:gap-0' : 'gap-3'}`}
                     >
-                        <X className="w-4 h-4 shrink-0 group-hover:rotate-90 transition-transform text-[#8F8F8F] group-hover:text-red-500" />
+                        <X className="w-4 h-4 shrink-0 group-hover:rotate-90 transition-transform text-[#8F8F8F] group-hover:text-[#EE0000]" />
                         <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isCollapsed ? 'md:opacity-0 md:w-0' : 'opacity-100 w-auto'}`}>
                             Exit Admin
                         </span>
@@ -161,14 +158,14 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                                     setIsCollapsed(!isCollapsed);
                                 }
                             }}
-                            className="p-2 rounded-xl bg-neutral-50 text-[#666666] hover:text-[#171717] hover:bg-neutral-100 border border-[#EBEBEB] transition-all active:scale-95 flex"
+                            className="p-2 rounded-[6px] bg-white text-[#4D4D4D] hover:text-[#171717] hover:bg-neutral-50 border border-[#EBEBEB] transition-all active:scale-95 flex"
                         >
                             <Menu className="w-4 h-4" />
                         </button>
                         <div className="hidden sm:flex items-center gap-2">
-                            <span className="text-xs font-semibold uppercase tracking-wider text-[#8F8F8F] font-mono">Admin</span>
-                            <span className="text-neutral-300">/</span>
-                            <span className="text-xs font-semibold uppercase tracking-wider text-[#171717] font-mono capitalize">
+                            <span className="text-xs font-medium tracking-normal text-[#8F8F8F] font-mono">Admin</span>
+                            <span className="text-[#EBEBEB]">/</span>
+                            <span className="text-xs font-medium tracking-normal text-[#171717] font-mono capitalize">
                                 {pathname?.split('/').pop()?.replace(/-/g, ' ') || 'Dashboard'}
                             </span>
                         </div>
@@ -243,9 +240,9 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                 .admin-container .border-white\/5,
                 .admin-container .border-white\/20,
                 .admin-container .border-slate-800,
-                .admin-container .border-t,
-                .admin-container .border-b,
-                .admin-container .border {
+                .admin-container .border-slate-700,
+                .admin-container .border-gray-800,
+                .admin-container .border-gray-700 {
                     border-color: #ebebeb !important;
                 }
 
