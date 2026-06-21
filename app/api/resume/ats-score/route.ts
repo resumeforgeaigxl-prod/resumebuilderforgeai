@@ -4,6 +4,7 @@ import { calculateATSScore } from '@/lib/ats-score';
 import { rateLimit } from '@/lib/rate-limit';
 import { getSession } from '@/lib/auth/jwt';
 import { logATSScore } from '@/lib/admin-logger';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
     try {
@@ -24,7 +25,36 @@ export async function POST(request: Request) {
         const { resumeData, jobDescription } = await request.json();
         if (!resumeData) return NextResponse.json({ error: 'Resume data required' }, { status: 400 });
 
-        const result = calculateATSScore(resumeData, jobDescription);
+        // Retrieve the session and query role-specific skills from database
+        const session = await getSession();
+        let roleSkills: string[] | undefined = undefined;
+
+        if (session?.userId) {
+            try {
+                const supabase = createClient();
+                const { data: user } = await supabase
+                    .from('users')
+                    .select('target_role')
+                    .eq('id', session.userId)
+                    .single();
+
+                if (user?.target_role) {
+                    const { data: mapping } = await supabase
+                        .from('role_skills_map')
+                        .select('all_skills')
+                        .eq('role_name', user.target_role)
+                        .single();
+
+                    if (mapping?.all_skills) {
+                        roleSkills = mapping.all_skills;
+                    }
+                }
+            } catch (dbErr) {
+                console.warn('[ATS API] Failed to fetch user target role skills, falling back:', dbErr);
+            }
+        }
+
+        const result = calculateATSScore(resumeData, jobDescription, roleSkills);
 
         // Fire-and-forget admin logging
         getSession().then(session => {

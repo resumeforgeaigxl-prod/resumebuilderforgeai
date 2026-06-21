@@ -11,7 +11,21 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { fullName, college, skills, experience, phone, referralSource } = body;
+        const { 
+            fullName, 
+            college, 
+            skills, 
+            experience, 
+            phone, 
+            referralSource,
+            linkedinUrl,
+            githubUrl,
+            education,
+            professionalSummary,
+            portfolioUrl,
+            targetRole,
+            preferredWorkMode
+        } = body;
 
         const supabase = createClient();
 
@@ -25,6 +39,13 @@ export async function POST(req: Request) {
                 skills: Array.isArray(skills) ? skills : skills.split(',').map((s: string) => s.trim()).filter(Boolean),
                 experience_level: experience,
                 referral_source: referralSource,
+                linkedin_url: linkedinUrl || null,
+                github_url: githubUrl || null,
+                education: education || {},
+                professional_summary: professionalSummary || null,
+                portfolio_url: portfolioUrl || null,
+                target_role: targetRole || null,
+                preferred_work_mode: preferredWorkMode || null,
                 profile_completed: true,
                 terms_accepted: true,
                 terms_accepted_at: new Date().toISOString(),
@@ -33,10 +54,29 @@ export async function POST(req: Request) {
             .eq('id', session.userId);
 
         if (updateError) {
-            console.error('[CompleteProfile] DB error:', updateError);
-            // Some columns might be missing, so we'll try a fallback to only existing ones if it fails
-            // But for now let's assume columns exist or will be added.
-            return NextResponse.json({ success: false, message: 'Failed to update profile data.' }, { status: 500 });
+            console.warn('[CompleteProfile] New columns missing, falling back to legacy update...', updateError.message);
+            const fallbackUpdate = await supabase
+                .from('users')
+                .update({
+                    full_name: fullName,
+                    phone_number: phone,
+                    college: college, 
+                    skills: Array.isArray(skills) ? skills : skills.split(',').map((s: string) => s.trim()).filter(Boolean),
+                    experience_level: experience,
+                    referral_source: referralSource,
+                    linkedin_url: linkedinUrl || null,
+                    github_url: githubUrl || null,
+                    profile_completed: true,
+                    terms_accepted: true,
+                    terms_accepted_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', session.userId);
+
+            if (fallbackUpdate.error) {
+                console.error('[CompleteProfile] Fallback update failed:', fallbackUpdate.error);
+                return NextResponse.json({ success: false, message: 'Failed to update profile data: ' + fallbackUpdate.error.message }, { status: 500 });
+            }
         }
 
         // 2. Refresh the JWT Session and Cookie

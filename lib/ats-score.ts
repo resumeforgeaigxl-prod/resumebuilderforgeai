@@ -31,7 +31,7 @@ const ACTION_VERBS = new Set([
     'pioneered', 'transformed', 'delivered', 'integrated', 'architected', 'maintained', 'mentored'
 ]);
 
-export function calculateATSScore(resume: ResumeData, jobDescription?: string): ATSScoreResult | null {
+export function calculateATSScore(resume: ResumeData, jobDescription?: string, roleSkills?: string[]): ATSScoreResult | null {
     const feedback: string[] = [];
     const allText = JSON.stringify(resume).toLowerCase();
     const words = allText.split(/\W+/).filter(w => w.length > 2);
@@ -97,9 +97,13 @@ export function calculateATSScore(resume: ResumeData, jobDescription?: string): 
 
     const keywordWeight = getKeywordScore();
 
-    // 2. Skill Match & Tech Depth - 25% (Now strictly uses VALID_SKILLS)
+    // 2. Skill Match & Tech Depth - 25% (Now strictly uses VALID_SKILLS or dynamic roleSkills)
     const getSkillScore = () => {
-        const foundSkills = Array.from(VALID_SKILLS).filter(s => allText.includes(s));
+        const skillsToCheck = (roleSkills && roleSkills.length > 0)
+            ? new Set(roleSkills.map(s => s.toLowerCase()))
+            : VALID_SKILLS;
+            
+        const foundSkills = Array.from(skillsToCheck).filter(s => allText.includes(s));
         let score = 0;
 
         if (foundSkills.length >= 8) score = 25;

@@ -6,7 +6,8 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
     UserCheck, Loader2, ChevronLeft, ChevronRight, 
-    Check, Briefcase, AlertCircle, ShieldAlert, Award
+    Check, Briefcase, AlertCircle, ShieldAlert, Award,
+    Linkedin, Github
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -65,7 +66,7 @@ export default function CompleteProfilePage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [currentStep, setCurrentStep] = useState(1);
-    const totalSteps = 7;
+    const totalSteps = 8;
 
     const [form, setForm] = useState({
         referralSource: '',
@@ -73,7 +74,20 @@ export default function CompleteProfilePage() {
         phone: '',
         experience: 'Beginner',
         college: '',
-        skills: [] as string[]
+        skills: [] as string[],
+        linkedinUrl: '',
+        githubUrl: '',
+        portfolioUrl: '',
+        targetRole: '',
+        preferredWorkMode: 'Remote',
+        professionalSummary: '',
+        education: {
+            tenth: { institution: '', passingYear: '', score: '' },
+            twelfth: { institution: '', passingYear: '', score: '' },
+            diploma: { institution: '', passingYear: '', score: '', enabled: false },
+            btech: { institution: '', passingYear: '', score: '' },
+            masters: { institution: '', passingYear: '', score: '', enabled: false }
+        }
     });
     const [skillInput, setSkillInput] = useState('');
     const [termsAccepted, setTermsAccepted] = useState(false);
@@ -83,15 +97,36 @@ export default function CompleteProfilePage() {
     const [showCollegeSuggestions, setShowCollegeSuggestions] = useState(false);
     const [isCollegeLoading, setIsCollegeLoading] = useState(false);
     const [justSelectedCollege, setJustSelectedCollege] = useState(false);
+    const [collegeQuery, setCollegeQuery] = useState('');
+    const [activeEducationTab, setActiveEducationTab] = useState<'tenth' | 'twelfth' | 'diploma' | 'btech' | 'masters'>('tenth');
     
     // Target role recommendation state
     const [selectedRole, setSelectedRole] = useState('');
+    const [roleSkillsMap, setRoleSkillsMap] = useState<Record<string, string[]>>(ROLE_SKILLS_MAP);
+
+    useEffect(() => {
+        const fetchRoleSkills = async () => {
+            try {
+                const res = await fetch('/api/roles-skills');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data?.success && data?.roles) {
+                        setRoleSkillsMap(data.roles);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch database role skills", err);
+            }
+        };
+        fetchRoleSkills();
+    }, []);
+
 
     // College autocomplete search logic
     useEffect(() => {
         if (justSelectedCollege) return;
         
-        const query = form.college.trim();
+        const query = collegeQuery.trim();
         if (query.length < 2) {
             setCollegeSuggestions([]);
             return;
@@ -128,12 +163,21 @@ export default function CompleteProfilePage() {
             clearTimeout(delayDebounce);
             setIsCollegeLoading(false);
         };
-    }, [form.college, justSelectedCollege]);
+    }, [collegeQuery, justSelectedCollege]);
 
     // Handle selection from dropdown
     const handleSelectCollege = (collegeName: string) => {
         setJustSelectedCollege(true);
-        setForm(prev => ({ ...prev, college: collegeName }));
+        setForm(prev => ({
+            ...prev,
+            education: {
+                ...prev.education,
+                [activeEducationTab]: {
+                    ...prev.education[activeEducationTab],
+                    institution: collegeName
+                }
+            }
+        }));
         setShowCollegeSuggestions(false);
     };
 
@@ -155,11 +199,40 @@ export default function CompleteProfilePage() {
             if (res.ok) {
                 const data = await res.json();
                 if (data.user) {
-                    setForm(prev => ({
-                        ...prev,
-                        fullName: data.user.full_name || '',
-                        phone: data.user.phone_number || ''
-                    }));
+                    setForm(prev => {
+                        const loadedEducation = data.user.education || {};
+                        return {
+                            ...prev,
+                            fullName: data.user.full_name || prev.fullName,
+                            phone: data.user.phone_number || prev.phone,
+                            referralSource: data.user.referral_source || prev.referralSource,
+                            experience: data.user.experience_level || prev.experience,
+                            linkedinUrl: data.user.linkedin_url || prev.linkedinUrl,
+                            githubUrl: data.user.github_url || prev.githubUrl,
+                            portfolioUrl: data.user.portfolio_url || prev.portfolioUrl,
+                            targetRole: data.user.target_role || prev.targetRole,
+                            preferredWorkMode: data.user.preferred_work_mode || prev.preferredWorkMode || 'Remote',
+                            professionalSummary: data.user.professional_summary || prev.professionalSummary,
+                            skills: data.user.skills || prev.skills,
+                            education: {
+                                tenth: loadedEducation.tenth || prev.education.tenth,
+                                twelfth: loadedEducation.twelfth || prev.education.twelfth,
+                                diploma: {
+                                    institution: loadedEducation.diploma?.institution || '',
+                                    passingYear: loadedEducation.diploma?.passingYear || '',
+                                    score: loadedEducation.diploma?.score || '',
+                                    enabled: !!loadedEducation.diploma?.institution
+                                },
+                                btech: loadedEducation.btech || prev.education.btech,
+                                masters: {
+                                    institution: loadedEducation.masters?.institution || '',
+                                    passingYear: loadedEducation.masters?.passingYear || '',
+                                    score: loadedEducation.masters?.score || '',
+                                    enabled: !!loadedEducation.masters?.institution
+                                }
+                            }
+                        };
+                    });
                 }
             }
         } catch (err) {
@@ -210,10 +283,30 @@ export default function CompleteProfilePage() {
             case 1: return !!form.referralSource;
             case 2: return !!form.fullName.trim();
             case 3: return form.phone.length >= 10;
-            case 4: return !!form.experience;
-            case 5: return !!form.college.trim();
-            case 6: return form.skills.length > 0;
-            case 7: return termsAccepted;
+            case 4: return true; // Social links are optional
+            case 5: return form.targetRole.trim().length > 0 && !!form.preferredWorkMode && form.professionalSummary.trim().length >= 10;
+            case 6: {
+                const { tenth, twelfth, diploma, btech, masters } = form.education;
+                
+                const isTenthValid = !!(tenth.institution.trim() && tenth.passingYear && tenth.score.trim());
+                const isBtechValid = !!(btech.institution.trim() && btech.passingYear && btech.score.trim());
+                
+                let isTwelfthOrDiplomaValid = false;
+                if (diploma.enabled) {
+                    isTwelfthOrDiplomaValid = !!(diploma.institution.trim() && diploma.passingYear && diploma.score.trim());
+                } else {
+                    isTwelfthOrDiplomaValid = !!(twelfth.institution.trim() && twelfth.passingYear && twelfth.score.trim());
+                }
+                
+                let isMastersValid = true;
+                if (masters.enabled) {
+                    isMastersValid = !!(masters.institution.trim() && masters.passingYear && masters.score.trim());
+                }
+                
+                return isTenthValid && isBtechValid && isTwelfthOrDiplomaValid && isMastersValid;
+            }
+            case 7: return form.skills.length > 0;
+            case 8: return termsAccepted;
             default: return false;
         }
     };
@@ -239,10 +332,17 @@ export default function CompleteProfilePage() {
                 body: JSON.stringify({
                     fullName: form.fullName,
                     phone: form.phone,
-                    college: form.college,
+                    college: form.education.btech.institution || form.college,
                     skills: form.skills.join(', '),
                     experience: form.experience,
-                    referralSource: form.referralSource
+                    referralSource: form.referralSource,
+                    linkedinUrl: form.linkedinUrl,
+                    githubUrl: form.githubUrl,
+                    portfolioUrl: form.portfolioUrl,
+                    targetRole: form.targetRole,
+                    preferredWorkMode: form.preferredWorkMode,
+                    education: form.education,
+                    professionalSummary: form.professionalSummary
                 })
             });
 
@@ -255,7 +355,7 @@ export default function CompleteProfilePage() {
             router.refresh();
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Something went wrong.');
-            setCurrentStep(7); // Jump back to review screen to display error
+            setCurrentStep(8); // Jump back to review screen to display error
         } finally {
             setIsLoading(false);
         }
@@ -407,92 +507,338 @@ export default function CompleteProfilePage() {
                             </div>
                         )}
 
-                        {/* STEP 4: Experience */}
+                        {/* STEP 4: Social Profiles */}
                         {currentStep === 4 && (
-                            <div className="space-y-5 animate-slide-in">
-                                <div className="space-y-1.5">
-                                    <h2 className="text-xl font-semibold tracking-tight text-[#171717]">What is your career level?</h2>
-                                    <p className="text-xs text-[#8F8F8F]">This adjusts the baseline suggestions of our AI engine.</p>
+                            <div className="space-y-4 animate-slide-in">
+                                <div className="space-y-1">
+                                    <h2 className="text-xl font-semibold tracking-tight text-[#171717]">Professional Profiles</h2>
+                                    <p className="text-xs text-[#8F8F8F]">Link your professional network and code repositories (optional).</p>
                                 </div>
-                                <div className="flex flex-col gap-3 pt-2">
+                                <div className="space-y-3 pt-1">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider flex items-center gap-1">
+                                            <Linkedin className="w-3.5 h-3.5 text-[#0077b5]" /> LinkedIn URL
+                                        </label>
+                                        <input 
+                                            type="url"
+                                            value={form.linkedinUrl}
+                                            onChange={e => setForm({ ...form, linkedinUrl: e.target.value })}
+                                            className="w-full px-4 py-2.5 bg-gradient-to-r from-[#FAFAFA] to-white hover:from-[#F5F5F5] hover:to-[#FAFAFA] border border-[#EBEBEB] focus:border-[#171717] focus:ring-1 focus:ring-[#171717] rounded-xl text-xs text-[#171717] placeholder:text-[#8F8F8F] focus:outline-none transition-all font-medium shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
+                                            placeholder="https://linkedin.com/in/username"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider flex items-center gap-1">
+                                            <Github className="w-3.5 h-3.5 text-[#171717]" /> GitHub URL
+                                        </label>
+                                        <input 
+                                            type="url"
+                                            value={form.githubUrl}
+                                            onChange={e => setForm({ ...form, githubUrl: e.target.value })}
+                                            className="w-full px-4 py-2.5 bg-gradient-to-r from-[#FAFAFA] to-white hover:from-[#F5F5F5] hover:to-[#FAFAFA] border border-[#EBEBEB] focus:border-[#171717] focus:ring-1 focus:ring-[#171717] rounded-xl text-xs text-[#171717] placeholder:text-[#8F8F8F] focus:outline-none transition-all font-medium shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
+                                            placeholder="https://github.com/username"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider flex items-center gap-1">
+                                            <Award className="w-3.5 h-3.5 text-indigo-500" /> Portfolio / Website URL
+                                        </label>
+                                        <input 
+                                            type="url"
+                                            value={form.portfolioUrl}
+                                            onChange={e => setForm({ ...form, portfolioUrl: e.target.value })}
+                                            className="w-full px-4 py-2.5 bg-gradient-to-r from-[#FAFAFA] to-white hover:from-[#F5F5F5] hover:to-[#FAFAFA] border border-[#EBEBEB] focus:border-[#171717] focus:ring-1 focus:ring-[#171717] rounded-xl text-xs text-[#171717] placeholder:text-[#8F8F8F] focus:outline-none transition-all font-medium shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
+                                            placeholder="https://yourportfolio.com"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* STEP 5: Career Focus & Summary */}
+                        {currentStep === 5 && (
+                            <div className="space-y-4 animate-slide-in">
+                                <div className="space-y-1">
+                                    <h2 className="text-xl font-semibold tracking-tight text-[#171717]">Career Focus</h2>
+                                    <p className="text-xs text-[#8F8F8F]">Help us understand your target role and work style preferences.</p>
+                                </div>
+                                <div className="space-y-3 pt-1">
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">Target Job Title / Role</label>
+                                            <input 
+                                                type="text"
+                                                required
+                                                value={form.targetRole}
+                                                onChange={e => setForm({ ...form, targetRole: e.target.value })}
+                                                className="w-full px-4 py-2.5 bg-gradient-to-r from-[#FAFAFA] to-white hover:from-[#F5F5F5] hover:to-[#FAFAFA] border border-[#EBEBEB] focus:border-[#171717] focus:ring-1 focus:ring-[#171717] rounded-xl text-xs text-[#171717] placeholder:text-[#8F8F8F] focus:outline-none transition-all font-medium shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
+                                                placeholder="e.g. Full Stack Developer"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">Preferred Work Mode</label>
+                                            <select
+                                                required
+                                                value={form.preferredWorkMode}
+                                                onChange={e => setForm({ ...form, preferredWorkMode: e.target.value })}
+                                                className="w-full px-4 py-2.5 bg-[#FAFAFA] border border-[#EBEBEB] focus:border-[#171717] rounded-xl text-xs font-semibold text-[#4D4D4D] focus:outline-none transition-all cursor-pointer shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
+                                            >
+                                                <option value="Remote">Remote</option>
+                                                <option value="Hybrid">Hybrid</option>
+                                                <option value="On-site">On-site</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {/* Quick Role Suggestions */}
+                                    <div className="flex flex-wrap gap-1">
+                                        {["Frontend Developer", "Backend Developer", "Full Stack Developer", "DevOps Engineer"].map(role => (
+                                            <button
+                                                key={role}
+                                                type="button"
+                                                onClick={() => setForm({ ...form, targetRole: role })}
+                                                className="px-2 py-0.5 text-[9px] font-semibold rounded bg-[#FAFAFA] border border-[#EBEBEB] text-[#4D4D4D] hover:border-[#171717] hover:text-[#171717] transition-all cursor-pointer"
+                                            >
+                                                {role}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">Describe Yourself (Professional Bio)</label>
+                                        <textarea 
+                                            required
+                                            rows={3}
+                                            value={form.professionalSummary}
+                                            onChange={e => setForm({ ...form, professionalSummary: e.target.value })}
+                                            className="w-full px-4 py-3 bg-gradient-to-r from-[#FAFAFA] to-white hover:from-[#F5F5F5] hover:to-[#FAFAFA] border border-[#EBEBEB] focus:border-[#171717] focus:ring-1 focus:ring-[#171717] rounded-xl text-xs text-[#171717] placeholder:text-[#8F8F8F] focus:outline-none transition-all font-medium resize-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
+                                            placeholder="e.g. Passionate software engineer with experience in React and Node.js. Skilled in building scalable web applications and collaborating with cross-functional teams."
+                                        />
+                                        <div className="flex justify-between items-center text-[9px] font-mono text-[#8F8F8F] mt-0.5">
+                                            <span>Min 10 characters required</span>
+                                            <span>{form.professionalSummary.length} characters</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* STEP 6: Education Details */}
+                        {currentStep === 6 && (
+                            <div className="space-y-5 animate-slide-in relative">
+                                <div className="space-y-1.5">
+                                    <h2 className="text-xl font-semibold tracking-tight text-[#171717]">Academic Credentials</h2>
+                                    <p className="text-xs text-[#8F8F8F]">Enter your marks/grades, year of passing, and institute details.</p>
+                                </div>
+
+                                {/* Tab Buttons */}
+                                <div className="flex flex-wrap gap-1 border-b border-[#EBEBEB] pb-2">
                                     {[
-                                        { level: 'Beginner', title: 'Beginner / Student', desc: 'Entry-level credentials, college degree, or self-taught seeker.' },
-                                        { level: 'Intermediate', title: 'Intermediate Professional', desc: '1 to 3 years of active engineering role experience.' },
-                                        { level: 'Senior', title: 'Senior Leader', desc: '4+ years of leading architectures, tech stacks, or engineering teams.' }
-                                    ].map((opt) => {
-                                        const isSelected = form.experience === opt.level;
+                                        { key: 'tenth', label: '10th' },
+                                        { key: 'twelfth', label: '12th' },
+                                        { key: 'diploma', label: 'Diploma' },
+                                        { key: 'btech', label: 'B.Tech / Degree' },
+                                        { key: 'masters', label: 'Masters / M.Tech' }
+                                    ].map(tab => {
+                                        const isSelected = activeEducationTab === tab.key;
+                                        const isEnabled = tab.key === 'tenth' || tab.key === 'btech' || tab.key === 'twelfth' || 
+                                            (tab.key === 'diploma' && form.education.diploma.enabled) ||
+                                            (tab.key === 'masters' && form.education.masters.enabled);
+                                            
+                                        if (tab.key === 'twelfth' && form.education.diploma.enabled) return null;
+                                        if (tab.key === 'diploma' && !form.education.diploma.enabled && activeEducationTab === 'diploma') return null;
+                                        if (tab.key === 'masters' && !form.education.masters.enabled && activeEducationTab === 'masters') return null;
+
+                                        const item = form.education[tab.key as keyof typeof form.education];
+                                        const isFilled = !!(item.institution.trim() && item.passingYear && item.score.trim());
+
                                         return (
                                             <button
-                                                key={opt.level}
+                                                key={tab.key}
                                                 type="button"
-                                                onClick={() => {
-                                                    setForm(prev => ({ ...prev, experience: opt.level }));
-                                                    setTimeout(nextStep, 250);
-                                                }}
-                                                className={`p-4 text-left border rounded-xl transition-all cursor-pointer ${
+                                                onClick={() => setActiveEducationTab(tab.key as any)}
+                                                className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all cursor-pointer flex items-center gap-1 ${
                                                     isSelected
-                                                        ? 'bg-white border-[#171717] ring-1 ring-[#171717]'
-                                                        : 'bg-white border-[#EBEBEB] hover:bg-[#FAFAFA]'
+                                                        ? 'bg-[#171717] border-[#171717] text-white shadow-sm'
+                                                        : isEnabled
+                                                            ? 'bg-white border-[#EBEBEB] text-[#4D4D4D] hover:bg-[#FAFAFA]'
+                                                            : 'hidden'
                                                 }`}
                                             >
-                                                <div className="font-semibold text-xs text-[#171717]">{opt.title}</div>
-                                                <div className="text-[11px] text-[#8F8F8F] mt-1">{opt.desc}</div>
+                                                {tab.label}
+                                                {isEnabled && isFilled && <Check className="w-3 h-3 text-green-500" />}
                                             </button>
                                         );
                                     })}
                                 </div>
+
+                                {/* Optional Toggles */}
+                                <div className="flex gap-4 text-xs">
+                                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                                        <input 
+                                            type="checkbox"
+                                            checked={form.education.diploma.enabled}
+                                            onChange={e => {
+                                                const checked = e.target.checked;
+                                                setForm(prev => ({
+                                                    ...prev,
+                                                    education: {
+                                                        ...prev.education,
+                                                        diploma: { ...prev.education.diploma, enabled: checked }
+                                                    }
+                                                }));
+                                                if (checked) {
+                                                    setActiveEducationTab('diploma');
+                                                } else {
+                                                    setActiveEducationTab('twelfth');
+                                                }
+                                            }}
+                                            className="w-3.5 h-3.5 rounded border-[#EBEBEB] accent-[#171717]"
+                                        />
+                                        <span className="text-[#8F8F8F] font-semibold">I did a Diploma</span>
+                                    </label>
+
+                                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                                        <input 
+                                            type="checkbox"
+                                            checked={form.education.masters.enabled}
+                                            onChange={e => {
+                                                const checked = e.target.checked;
+                                                setForm(prev => ({
+                                                    ...prev,
+                                                    education: {
+                                                        ...prev.education,
+                                                        masters: { ...prev.education.masters, enabled: checked }
+                                                    }
+                                                }));
+                                                if (checked) {
+                                                    setActiveEducationTab('masters');
+                                                } else {
+                                                    setActiveEducationTab('btech');
+                                                }
+                                            }}
+                                            className="w-3.5 h-3.5 rounded border-[#EBEBEB] accent-[#171717]"
+                                        />
+                                        <span className="text-[#8F8F8F] font-semibold">I have a Masters / M.Tech</span>
+                                    </label>
+                                </div>
+
+                                {/* Form Fields for active tab */}
+                                <div className="space-y-4 pt-2 relative">
+                                    <div className="space-y-1.5 college-autocomplete-wrapper relative">
+                                        <label className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">
+                                            {activeEducationTab === 'tenth' ? 'School Name' : activeEducationTab === 'twelfth' ? 'Junior College / School' : 'College / University Name'}
+                                        </label>
+                                        <input 
+                                            type="text"
+                                            required
+                                            value={form.education[activeEducationTab].institution}
+                                            onChange={e => {
+                                                const val = e.target.value;
+                                                setJustSelectedCollege(false);
+                                                setCollegeQuery(val);
+                                                setShowCollegeSuggestions(true);
+                                                setForm(prev => ({
+                                                    ...prev,
+                                                    education: {
+                                                        ...prev.education,
+                                                        [activeEducationTab]: {
+                                                            ...prev.education[activeEducationTab],
+                                                            institution: val
+                                                        }
+                                                    }
+                                                }));
+                                            }}
+                                            onFocus={() => {
+                                                setCollegeQuery(form.education[activeEducationTab].institution);
+                                                setShowCollegeSuggestions(true);
+                                            }}
+                                            className="w-full px-5 py-3.5 bg-gradient-to-r from-[#FAFAFA] to-white hover:from-[#F5F5F5] hover:to-[#FAFAFA] border border-[#EBEBEB] focus:border-[#171717] focus:ring-1 focus:ring-[#171717] rounded-xl text-sm text-[#171717] focus:outline-none transition-all font-medium"
+                                            placeholder={activeEducationTab === 'tenth' ? 'e.g. St. Xavier School' : activeEducationTab === 'twelfth' ? 'e.g. Delhi Public School' : 'e.g. Indian Institute of Technology Bombay'}
+                                        />
+                                        {isCollegeLoading && (
+                                            <div className="absolute right-4 top-[38px] flex items-center justify-center">
+                                                <Loader2 className="w-4 h-4 animate-spin text-[#8F8F8F]" />
+                                            </div>
+                                        )}
+
+                                        {/* Autocomplete Dropdown overlay */}
+                                        {showCollegeSuggestions && collegeSuggestions.length > 0 && (
+                                            <div className="absolute left-0 right-0 mt-1 bg-white border border-[#EBEBEB] rounded-xl shadow-lg z-50 overflow-hidden max-h-40 overflow-y-auto">
+                                                {collegeSuggestions.map((suggestion) => (
+                                                    <button
+                                                        key={suggestion}
+                                                        type="button"
+                                                        onClick={() => handleSelectCollege(suggestion)}
+                                                        className="w-full px-5 py-2.5 text-left text-xs font-semibold text-[#4D4D4D] hover:bg-[#FAFAFA] hover:text-[#171717] transition-all border-b border-[#F2F2F2] last:border-0 cursor-pointer block"
+                                                    >
+                                                        {suggestion}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Passing Year & Score Row */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <label className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">Passing Year</label>
+                                            <select
+                                                required
+                                                value={form.education[activeEducationTab].passingYear}
+                                                onChange={e => {
+                                                    const val = e.target.value;
+                                                    setForm(prev => ({
+                                                        ...prev,
+                                                        education: {
+                                                            ...prev.education,
+                                                            [activeEducationTab]: {
+                                                                ...prev.education[activeEducationTab],
+                                                                passingYear: val
+                                                            }
+                                                        }
+                                                    }));
+                                                }}
+                                                className="w-full px-4 py-3 bg-[#FAFAFA] border border-[#EBEBEB] focus:border-[#171717] rounded-xl text-xs font-semibold text-[#4D4D4D] focus:outline-none transition-all cursor-pointer"
+                                            >
+                                                <option value="">-- Select Year --</option>
+                                                {Array.from({ length: 26 }, (_, i) => 2010 + i).map(year => (
+                                                    <option key={year} value={year}>{year}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">Score (CGPA / %)</label>
+                                            <input 
+                                                type="text"
+                                                required
+                                                value={form.education[activeEducationTab].score}
+                                                onChange={e => {
+                                                    const val = e.target.value;
+                                                    setForm(prev => ({
+                                                        ...prev,
+                                                        education: {
+                                                            ...prev.education,
+                                                            [activeEducationTab]: {
+                                                                ...prev.education[activeEducationTab],
+                                                                score: val
+                                                            }
+                                                        }
+                                                    }));
+                                                }}
+                                                className="w-full px-5 py-3.5 bg-gradient-to-r from-[#FAFAFA] to-white hover:from-[#F5F5F5] hover:to-[#FAFAFA] border border-[#EBEBEB] focus:border-[#171717] focus:ring-1 focus:ring-[#171717] rounded-xl text-sm text-[#171717] focus:outline-none transition-all font-medium"
+                                                placeholder={activeEducationTab === 'tenth' || activeEducationTab === 'twelfth' ? 'e.g. 92% or 9.5 CGPA' : 'e.g. 8.8 CGPA'}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         )}
 
-                        {/* STEP 5: College/Institution */}
-                        {currentStep === 5 && (
-                            <div className="space-y-5 animate-slide-in college-autocomplete-wrapper relative">
-                                <div className="space-y-1.5">
-                                    <h2 className="text-xl font-semibold tracking-tight text-[#171717]">Where are you currently active?</h2>
-                                    <p className="text-xs text-[#8F8F8F]">Enter your university name or current company employer.</p>
-                                </div>
-                                <div className="pt-2 relative">
-                                    <input 
-                                        type="text"
-                                        required
-                                        autoFocus
-                                        value={form.college}
-                                        onChange={e => {
-                                            setJustSelectedCollege(false);
-                                            setForm({ ...form, college: e.target.value });
-                                            setShowCollegeSuggestions(true);
-                                        }}
-                                        onFocus={() => setShowCollegeSuggestions(true)}
-                                        className="w-full px-5 py-4 bg-gradient-to-r from-[#FAFAFA] to-white hover:from-[#F5F5F5] hover:to-[#FAFAFA] border border-[#EBEBEB] focus:border-[#171717] focus:ring-1 focus:ring-[#171717] rounded-xl text-[#171717] placeholder:text-[#8F8F8F] focus:outline-none transition-all font-medium shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)] text-sm"
-                                        placeholder="University, College, or Company name"
-                                    />
-                                    {isCollegeLoading && (
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
-                                            <Loader2 className="w-4 h-4 animate-spin text-[#8F8F8F]" />
-                                        </div>
-                                    )}
-
-                                    {/* Autocomplete Dropdown overlay */}
-                                    {showCollegeSuggestions && collegeSuggestions.length > 0 && (
-                                        <div className="absolute left-0 right-0 mt-1 bg-white border border-[#EBEBEB] rounded-xl shadow-lg z-50 overflow-hidden max-h-60 overflow-y-auto">
-                                            {collegeSuggestions.map((suggestion) => (
-                                                <button
-                                                    key={suggestion}
-                                                    type="button"
-                                                    onClick={() => handleSelectCollege(suggestion)}
-                                                    className="w-full px-5 py-3 text-left text-xs font-semibold text-[#4D4D4D] hover:bg-[#FAFAFA] hover:text-[#171717] transition-all border-b border-[#F2F2F2] last:border-0 cursor-pointer block"
-                                                >
-                                                    {suggestion}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* STEP 6: Skills */}
-                        {currentStep === 6 && (
+                        {/* STEP 7: Skills */}
+                        {currentStep === 7 && (
                             <div className="space-y-5 animate-slide-in">
                                 <div className="space-y-1.5">
                                     <h2 className="text-xl font-semibold tracking-tight text-[#171717]">What are your technical skills?</h2>
@@ -508,21 +854,21 @@ export default function CompleteProfilePage() {
                                             className="w-full px-4 py-3 bg-[#FAFAFA] border border-[#EBEBEB] focus:border-[#171717] rounded-xl text-xs font-semibold text-[#4D4D4D] focus:outline-none transition-all cursor-pointer shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]"
                                         >
                                             <option value="">-- Choose a role for skill recommendations --</option>
-                                            {Object.keys(ROLE_SKILLS_MAP).map(role => (
+                                            {Object.keys(roleSkillsMap).map(role => (
                                                 <option key={role} value={role}>{role}</option>
                                             ))}
                                         </select>
                                     </div>
 
                                     {/* Recommendation Badges */}
-                                    {selectedRole && (
+                                    {selectedRole && roleSkillsMap[selectedRole] && (
                                         <div className="space-y-2">
                                             <div className="flex items-center justify-between">
                                                 <label className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">Recommended Skills</label>
                                                 <button
                                                     type="button"
                                                     onClick={() => {
-                                                        const skillsToAdd = ROLE_SKILLS_MAP[selectedRole].filter(skill => !form.skills.includes(skill));
+                                                        const skillsToAdd = roleSkillsMap[selectedRole].filter(skill => !form.skills.includes(skill));
                                                         if (skillsToAdd.length > 0) {
                                                             setForm(prev => ({
                                                                 ...prev,
@@ -532,11 +878,11 @@ export default function CompleteProfilePage() {
                                                     }}
                                                     className="text-[10px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
                                                 >
-                                                    + Add All {ROLE_SKILLS_MAP[selectedRole].length} Skills
+                                                    + Add All {roleSkillsMap[selectedRole].length} Skills
                                                 </button>
                                             </div>
                                             <div className="flex flex-wrap gap-1.5 p-3 bg-[#FAFAFA] border border-[#EBEBEB] rounded-xl max-h-[140px] overflow-y-auto">
-                                                {ROLE_SKILLS_MAP[selectedRole].map(skill => {
+                                                {roleSkillsMap[selectedRole].map(skill => {
                                                     const isAdded = form.skills.includes(skill);
                                                     return (
                                                         <button
@@ -603,20 +949,39 @@ export default function CompleteProfilePage() {
                             </div>
                         )}
 
-                        {/* STEP 7: Terms & Finish */}
-                        {currentStep === 7 && (
+                        {/* STEP 8: Terms & Finish / Review */}
+                        {currentStep === 8 && (
                             <div className="space-y-5 animate-slide-in">
                                 <div className="space-y-1.5">
                                     <h2 className="text-xl font-semibold tracking-tight text-[#171717]">Review & Integration</h2>
                                     <p className="text-xs text-[#8F8F8F]">Accept terms to complete the setup and start using the Forges.</p>
                                 </div>
 
-                                <div className="p-4 bg-[#FAFAFA] border border-[#EBEBEB] rounded-xl space-y-2 text-xs text-[#4D4D4D]">
+                                <div className="p-4 bg-[#FAFAFA] border border-[#EBEBEB] rounded-xl space-y-2 text-xs text-[#4D4D4D] max-h-56 overflow-y-auto">
                                     <div><strong>Name</strong>: {form.fullName}</div>
                                     <div><strong>Contact</strong>: {form.phone}</div>
                                     <div><strong>Level</strong>: {form.experience}</div>
-                                    <div><strong>Institution</strong>: {form.college}</div>
-                                    <div className="truncate"><strong>Skills</strong>: {form.skills.join(', ')}</div>
+                                    {form.targetRole && <div><strong>Target Role</strong>: {form.targetRole} ({form.preferredWorkMode})</div>}
+                                    {form.linkedinUrl && <div><strong>LinkedIn</strong>: {form.linkedinUrl}</div>}
+                                    {form.githubUrl && <div><strong>GitHub</strong>: {form.githubUrl}</div>}
+                                    {form.portfolioUrl && <div><strong>Portfolio</strong>: {form.portfolioUrl}</div>}
+                                    {form.professionalSummary && <div className="italic text-[#8f8f8f] border-l-2 border-[#EBEBEB] pl-2 py-0.5 truncate">"{form.professionalSummary}"</div>}
+                                    
+                                    <div className="border-t border-[#EBEBEB] pt-2 mt-2 space-y-1">
+                                        <div className="text-[10px] font-mono text-[#8f8f8f] uppercase">Academic Credentials</div>
+                                        <div><strong>10th</strong>: {form.education.tenth.institution} ({form.education.tenth.passingYear}) - {form.education.tenth.score}</div>
+                                        {form.education.diploma.enabled ? (
+                                            <div><strong>Diploma</strong>: {form.education.diploma.institution} ({form.education.diploma.passingYear}) - {form.education.diploma.score}</div>
+                                        ) : (
+                                            <div><strong>12th</strong>: {form.education.twelfth.institution} ({form.education.twelfth.passingYear}) - {form.education.twelfth.score}</div>
+                                        )}
+                                        <div><strong>B.Tech / Degree</strong>: {form.education.btech.institution} ({form.education.btech.passingYear}) - {form.education.btech.score}</div>
+                                        {form.education.masters.enabled && (
+                                            <div><strong>Masters</strong>: {form.education.masters.institution} ({form.education.masters.passingYear}) - {form.education.masters.score}</div>
+                                        )}
+                                    </div>
+                                    
+                                    <div className="truncate border-t border-[#EBEBEB] pt-2"><strong>Skills</strong>: {form.skills.join(', ')}</div>
                                 </div>
 
                                 <div className="pt-2">

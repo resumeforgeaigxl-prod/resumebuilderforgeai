@@ -15,11 +15,28 @@ export async function GET() {
         }
 
         const supabase = createClient();
-        const { data: user } = await supabase
+        let user: any = null;
+        const firstTry = await supabase
             .from('users')
-            .select('email, full_name, role, phone_number')
+            .select('email, full_name, role, phone_number, linkedin_url, github_url, professional_summary, education, skills, experience_level, referral_source, portfolio_url, target_role, preferred_work_mode')
             .eq('id', session.userId)
             .single();
+
+        if (firstTry.error) {
+            console.warn('[user/profile] New columns missing, falling back to legacy columns...', firstTry.error.message);
+            const fallbackQuery = await supabase
+                .from('users')
+                .select('email, full_name, role, phone_number, linkedin_url, github_url, referral_source')
+                .eq('id', session.userId)
+                .single();
+
+            if (fallbackQuery.error) {
+                return NextResponse.json({ error: fallbackQuery.error.message }, { status: 500 });
+            }
+            user = fallbackQuery.data;
+        } else {
+            user = firstTry.data;
+        }
 
         if (!user) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -33,6 +50,16 @@ export async function GET() {
                 email: user.email ?? null,
                 full_name: user.full_name ?? null,
                 phone_number: user.phone_number ?? null,
+                linkedin_url: user.linkedin_url ?? null,
+                github_url: user.github_url ?? null,
+                professional_summary: user.professional_summary ?? null,
+                education: user.education ?? null,
+                skills: user.skills ?? null,
+                experience_level: user.experience_level ?? null,
+                referral_source: user.referral_source ?? null,
+                portfolio_url: user.portfolio_url ?? null,
+                target_role: user.target_role ?? null,
+                preferred_work_mode: user.preferred_work_mode ?? null,
             }
         });
     } catch (err) {
