@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { Bot, User, Rocket, MessageSquare, Code, GraduationCap, BrainCircuit, Terminal, ChevronRight, Copy, Check } from 'lucide-react';
+import { Bot, User, Rocket, MessageSquare, Code, GraduationCap, BrainCircuit, Terminal, ChevronRight, Copy, Check, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { useToast } from '@/components/ui/use-toast';
@@ -219,6 +219,21 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
                 {/* Action buttons */}
                 {msg.role === 'assistant' && (
                   <div className="flex flex-wrap gap-2">
+                    {(() => {
+                      const downloadLinkMatch = msg.content.match(/\/api\/resume\/download\?id=([a-f0-9-]+)/i);
+                      const resumeId = downloadLinkMatch ? downloadLinkMatch[1] : null;
+                      return resumeId ? (
+                        <Button
+                          onClick={() => {
+                            window.open(`/api/resume/download?id=${resumeId}`, '_blank');
+                          }}
+                          size="sm"
+                          className="h-8 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-medium px-3.5 transition-all shadow-sm flex items-center gap-1.5"
+                        >
+                          <FileDown className="w-3.5 h-3.5" /> Download Resume PDF
+                        </Button>
+                      ) : null;
+                    })()}
                     {msg.suggestedAction && (
                       <Button
                         onClick={() => navigateToForge(msg.suggestedAction!)}
@@ -283,7 +298,7 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
       {/* Bottom input area */}
       <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
         {/* Gradient fade */}
-        <div className="h-32 bg-gradient-to-t from-[#FAFAFA] via-[#FAFAFA]/95 to-transparent" />
+        <div className="h-16 bg-gradient-to-t from-[#FAFAFA] via-[#FAFAFA]/95 to-transparent" />
 
         <div className="bg-[#FAFAFA] pb-6 px-6 sm:px-8 pointer-events-auto">
           <div className="max-w-5xl mx-auto space-y-4">
