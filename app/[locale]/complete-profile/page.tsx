@@ -6,7 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
     UserCheck, Loader2, ChevronLeft, ChevronRight, 
-    Check, Sparkles, AlertCircle, ShieldAlert, Award
+    Check, Briefcase, AlertCircle, ShieldAlert, Award
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -290,7 +290,7 @@ export default function CompleteProfilePage() {
                         {/* Floating overlay card for premium look */}
                         <div className="z-10 bg-white/90 backdrop-blur-md border border-[#EBEBEB] p-6 rounded-2xl max-w-sm shadow-[0_4px_24px_rgba(0,0,0,0.06)] space-y-3">
                             <div className="flex items-center gap-2">
-                                <Sparkles className="w-5 h-5 text-[#171717] animate-pulse" />
+                                <Briefcase className="w-5 h-5 text-[#171717]" />
                                 <span className="text-sm font-semibold text-[#171717] tracking-tight">ResumeForge AI</span>
                             </div>
                             <p className="text-xs text-[#4D4D4D] leading-relaxed">
@@ -674,7 +674,7 @@ export default function CompleteProfilePage() {
                                         <Loader2 className="w-4 h-4 animate-spin mx-auto" />
                                     ) : (
                                         <div className="flex items-center justify-center gap-1.5">
-                                            <Sparkles className="w-4 h-4 text-amber-500" />
+                                            <UserCheck className="w-4 h-4" />
                                             Complete Onboarding
                                         </div>
                                     )}
