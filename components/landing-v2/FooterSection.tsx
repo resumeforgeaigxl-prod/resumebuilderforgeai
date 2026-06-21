@@ -10,10 +10,10 @@ const columns = (locale: string) => [
   {
     title: "Product",
     links: [
-      { label: "Features", href: "#features" },
-      { label: "Templates", href: "#templates" },
-      { label: "ATS Score", href: "#ats-score" },
-      { label: "Pricing", href: "#pricing" },
+      { label: "Features", href: `/${locale}#features` },
+      { label: "Templates", href: `/${locale}#templates` },
+      { label: "ATS Score", href: `/${locale}#ats-score` },
+      { label: "Pricing", href: `/${locale}/pricing` },
     ],
   },
   {

@@ -5,11 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 
-const navLinks = [
-  { label: "Features", href: "#features" },
-  { label: "Templates", href: "#templates" },
-  { label: "ATS Score", href: "#ats-score" },
-  { label: "Pricing", href: "#pricing" },
+const getNavLinks = (locale: string) => [
+  { label: "Features", href: `/${locale}#features` },
+  { label: "Templates", href: `/${locale}#templates` },
+  { label: "ATS Score", href: `/${locale}#ats-score` },
+  { label: "Pricing", href: `/${locale}/pricing` },
 ] as const;
 
 interface NavbarProps {
@@ -19,6 +19,7 @@ interface NavbarProps {
 export default function Navbar({ locale = "en-in" }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const navLinks = getNavLinks(locale);
 
   const handleScroll = useCallback(() => {
     setScrolled(window.scrollY > 10);

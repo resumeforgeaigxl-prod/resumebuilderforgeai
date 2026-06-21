@@ -44,6 +44,7 @@ export default function HeaderWrapper({ children }: { children: ReactNode }) {
         pathname?.includes('/cookie-policy') ||
         pathname?.includes('/data-deletion') ||
         pathname?.includes('/signup') ||
+        pathname?.includes('/pricing') ||
         pathname?.includes('/login');
 
     if (isInternalApp || isLandingPage) {
