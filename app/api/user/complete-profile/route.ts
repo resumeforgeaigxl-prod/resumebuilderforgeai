@@ -11,7 +11,7 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { fullName, college, skills, experience, phone } = body;
+        const { fullName, college, skills, experience, phone, referralSource } = body;
 
         const supabase = createClient();
 
@@ -24,6 +24,7 @@ export async function POST(req: Request) {
                 college: college, 
                 skills: Array.isArray(skills) ? skills : skills.split(',').map((s: string) => s.trim()).filter(Boolean),
                 experience_level: experience,
+                referral_source: referralSource,
                 profile_completed: true,
                 terms_accepted: true,
                 terms_accepted_at: new Date().toISOString(),
