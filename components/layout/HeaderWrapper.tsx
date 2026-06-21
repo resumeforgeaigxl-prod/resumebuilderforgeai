@@ -9,6 +9,7 @@ export default function HeaderWrapper({ children }: { children: ReactNode }) {
 
     // Hide main header on all internal dashboard and app routes
     const isInternalApp = 
+        pathname?.includes('/complete-profile') ||
         pathname?.includes('/dashboard') || 
         pathname?.includes('/admin') || 
         pathname?.includes('/resumes') || 

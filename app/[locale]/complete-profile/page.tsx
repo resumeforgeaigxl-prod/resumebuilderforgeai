@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
 import { 
     UserCheck, Loader2, ChevronLeft, ChevronRight, 
     Check, Sparkles, AlertCircle, ShieldAlert, Award
@@ -254,13 +255,7 @@ export default function CompleteProfilePage() {
     };
 
     return (
-        <div 
-            className="min-h-screen bg-[#FAFAFA] flex flex-col justify-between select-none font-sans"
-            style={{
-                backgroundImage: 'radial-gradient(#EBEBEB 1.5px, transparent 1.5px)',
-                backgroundSize: '24px 24px',
-            }}
-        >
+        <div className="min-h-screen bg-[#fafaf9] select-none font-sans relative flex flex-col justify-between">
             <style dangerouslySetInnerHTML={{__html: `
                 @keyframes slideIn {
                     from { opacity: 0; transform: translateY(6px); }
@@ -271,33 +266,65 @@ export default function CompleteProfilePage() {
                 }
             `}} />
 
-            <div className="flex-1 flex items-center justify-center p-6">
-                <div className="w-full max-w-xl z-10 animate-slide-in">
-                <div className="bg-white border border-[#EBEBEB] p-8 md:p-10 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.02),0_16px_32px_-8px_rgba(0,0,0,0.05)] relative">
-                    
-                    {/* Brand Identifier */}
-                    <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 bg-[#171717] rounded-full flex items-center justify-center font-bold text-white text-[10px] tracking-tight border border-[#171717] shadow-sm select-none">
-                                RF
-                            </div>
-                            <span className="text-[#171717] font-semibold text-xs tracking-tight">Onboarding</span>
+            <div className="max-w-[1200px] w-full mx-auto border-x border-[#e7e5e4] bg-white flex flex-col justify-between min-h-screen shadow-sm">
+                {/* Onboarding Header (matching the landing page navbar layout) */}
+                <header className="flex h-16 items-center justify-between px-6 border-b border-[#e7e5e4] bg-white select-none shrink-0">
+                    <Link href={`/${locale}`} className="flex items-center gap-2.5 select-none">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#171717]">
+                            <span className="text-white font-bold text-[12px] tracking-tight">RF</span>
                         </div>
-                        <span className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">
-                            Step {currentStep} of {totalSteps}
-                        </span>
+                        <span className="text-[#171717] font-semibold text-sm tracking-tight">ResumeForge AI</span>
+                    </Link>
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">Onboarding Wizard</span>
+                    </div>
+                </header>
+
+                {/* Main Split Body */}
+                <div className="flex-1 flex flex-col md:flex-row border-b border-[#e7e5e4] overflow-hidden">
+                    {/* Left Pane: Pixel Art Illustration */}
+                    <div className="hidden md:flex md:w-1/2 bg-[#fafaf9] border-r border-[#e7e5e4] items-center justify-center p-8 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-cover bg-center opacity-90" style={{ backgroundImage: "url('/hero-landscape.png')" }} />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10" />
+                        
+                        {/* Floating overlay card for premium look */}
+                        <div className="z-10 bg-white/90 backdrop-blur-md border border-[#EBEBEB] p-6 rounded-2xl max-w-sm shadow-[0_4px_24px_rgba(0,0,0,0.06)] space-y-3">
+                            <div className="flex items-center gap-2">
+                                <Sparkles className="w-5 h-5 text-[#171717] animate-pulse" />
+                                <span className="text-sm font-semibold text-[#171717] tracking-tight">ResumeForge AI</span>
+                            </div>
+                            <p className="text-xs text-[#4D4D4D] leading-relaxed">
+                                Complete your profile to allow our AI engine to tailor professional resumes, run ATS checks, and match your skills to matching developer job opportunities.
+                            </p>
+                        </div>
                     </div>
 
-                    {/* Progress Bar */}
-                    <div className="w-full bg-[#FAFAFA] border border-[#EBEBEB] h-1.5 rounded-full overflow-hidden mb-8">
-                        <div 
-                            className="bg-[#171717] h-full transition-all duration-300 rounded-full"
-                            style={{ width: `${(currentStep / totalSteps) * 100}%` }}
-                        />
-                    </div>
+                    {/* Right Pane: Wizard Steps */}
+                    <div className="w-full md:w-1/2 flex flex-col justify-center p-6 md:p-12 bg-white min-h-[500px]">
+                        <div className="w-full max-w-md mx-auto space-y-6">
+                            {/* Step Indicator */}
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-7 h-7 bg-[#171717] rounded-full flex items-center justify-center font-bold text-white text-[10px] tracking-tight border border-[#171717] shadow-sm select-none">
+                                        RF
+                                    </div>
+                                    <span className="text-[#171717] font-semibold text-xs tracking-tight">Onboarding</span>
+                                </div>
+                                <span className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">
+                                    Step {currentStep} of {totalSteps}
+                                </span>
+                            </div>
 
-                    {/* Form Screen wrapper */}
-                    <form onSubmit={handleSubmit} className="space-y-8">
+                            {/* Progress Bar */}
+                            <div className="w-full bg-[#FAFAFA] border border-[#EBEBEB] h-1.5 rounded-full overflow-hidden">
+                                <div 
+                                    className="bg-[#171717] h-full transition-all duration-300 rounded-full"
+                                    style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+                                />
+                            </div>
+
+                            {/* Form Screen wrapper */}
+                            <form onSubmit={handleSubmit} className="space-y-6">
                         
                         {/* STEP 1: Referral */}
                         {currentStep === 1 && (
@@ -501,7 +528,7 @@ export default function CompleteProfilePage() {
                                                     + Add All {ROLE_SKILLS_MAP[selectedRole].length} Skills
                                                 </button>
                                             </div>
-                                            <div className="flex flex-wrap gap-1.5 p-3 bg-[#FAFAFA] border border-[#EBEBEB] rounded-xl">
+                                            <div className="flex flex-wrap gap-1.5 p-3 bg-[#FAFAFA] border border-[#EBEBEB] rounded-xl max-h-[140px] overflow-y-auto">
                                                 {ROLE_SKILLS_MAP[selectedRole].map(skill => {
                                                     const isAdded = form.skills.includes(skill);
                                                     return (
@@ -543,7 +570,7 @@ export default function CompleteProfilePage() {
                                     
                                     <div className="space-y-1.5">
                                         <label className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">Your selected skills</label>
-                                        <div className="flex flex-wrap gap-1.5 min-h-[40px] p-3 bg-[#FAFAFA] border border-[#EBEBEB] rounded-xl">
+                                        <div className="flex flex-wrap gap-1.5 min-h-[40px] max-h-[100px] overflow-y-auto p-3 bg-[#FAFAFA] border border-[#EBEBEB] rounded-xl">
                                             {form.skills.length === 0 ? (
                                                 <span className="text-xs text-[#8F8F8F] self-center pl-2 italic">No skills added yet...</span>
                                             ) : (
@@ -655,16 +682,17 @@ export default function CompleteProfilePage() {
                             )}
                         </div>
 
-                    </form>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            </div>
-            
-            {/* Minimal Onboarding Footer (AutoSend Pattern) */}
-            <div className="w-full bg-[#fafaf9] border-t border-[#e7e5e4] py-4 px-6 select-none mt-auto">
-                <div className="max-w-[1200px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 text-center sm:text-left text-[11px] font-mono text-[#8F8F8F] uppercase tracking-wider">
-                    <span>© 2026 ResumeForge AI</span>
-                    <span>Made for developers. Built By GrowXlabsTech</span>
+
+                {/* Minimal Onboarding Footer (AutoSend Pattern) */}
+                <div className="w-full bg-[#fafaf9] border-t border-[#e7e5e4] py-4 px-6 select-none shrink-0">
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-2 text-center sm:text-left text-[11px] font-mono text-[#8F8F8F] uppercase tracking-wider">
+                        <span>© 2026 ResumeForge AI</span>
+                        <span>Made for developers. Built By GrowXlabsTech</span>
+                    </div>
                 </div>
             </div>
         </div>
