@@ -7,7 +7,7 @@ export async function POST(request: Request) {
     const requestUrl = new URL(request.url);
 
     // Clear custom JWT cookie
-    clearSession();
+    await clearSession();
     clearOAuthStateCookie();
 
     return NextResponse.redirect(`${requestUrl.origin}/login`, {

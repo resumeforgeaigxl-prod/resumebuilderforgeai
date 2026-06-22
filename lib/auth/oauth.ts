@@ -60,6 +60,7 @@ export function getOAuthStateCookie(): string | undefined {
 }
 
 export function clearOAuthStateCookie() {
+    cookies().delete(OAUTH_STATE_COOKIE);
     cookies().set(OAUTH_STATE_COOKIE, '', {
         maxAge: 0,
         path: '/',
