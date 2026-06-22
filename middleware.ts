@@ -365,9 +365,7 @@ export async function middleware(request: NextRequest) {
             }
         }
 
-        if (!profileIncomplete && isCompleteProfile) {
-            return NextResponse.redirect(new URL(`/${currentLocale}-${currentRegion}/dashboard`, request.url));
-        }
+        // Allow users to visit complete-profile to update/fill details if they wish
 
         if (normalizedPath.startsWith('/admin') && session.role !== 'admin') {
             return NextResponse.redirect(new URL(`/${currentLocale}-${currentRegion}/dashboard`, request.url));

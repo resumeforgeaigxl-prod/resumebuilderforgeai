@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     clearOAuthStateCookie();
 
     return NextResponse.redirect(`${requestUrl.origin}/login`, {
-        status: 301,
+        status: 302,
     });
 }
 

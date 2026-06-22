@@ -57,7 +57,11 @@ export async function getSession(): Promise<AuthSession | null> {
 
 export async function clearSession() {
     const { cookies } = await import('next/headers');
-    cookies().delete(COOKIE_NAME);
+    cookies().set(COOKIE_NAME, '', {
+        maxAge: 0,
+        path: '/',
+        domain: process.env.NODE_ENV === 'production' ? `.${MAIN_DOMAIN}` : undefined,
+    });
 }
 
 export function verifyAdminSession(session: AuthSession | null): boolean {

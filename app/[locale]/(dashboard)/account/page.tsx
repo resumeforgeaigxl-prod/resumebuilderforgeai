@@ -6,7 +6,8 @@ import {
     ShieldCheck, CreditCard, ChevronRight,
     AlertCircle, Info, LogOut,
     Lock,
-    Settings
+    Settings,
+    Briefcase, Edit, Phone, Linkedin, Github, Globe
 } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
@@ -167,6 +168,188 @@ export default async function AccountPage({ params }: { params: { locale: string
                         </form>
                     </div>
                 </div>
+            </div>
+
+            {/* Professional Profile Section */}
+            <div className="bg-white border border-[#EBEBEB] rounded-xl p-8 space-y-8 shadow-sm text-[#171717]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center shadow-sm">
+                            <Briefcase className="w-6 h-6 text-[#171717]" />
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-semibold tracking-tight text-[#171717]">Professional Profile</h2>
+                            <p className="text-[#8F8F8F] text-[10px] font-semibold uppercase tracking-wider mt-0.5">Resume & ATS Builder Credentials</p>
+                        </div>
+                    </div>
+                    <Link href={`/${locale}/complete-profile`}>
+                        <button className="h-9 px-4 rounded-md border border-[#EBEBEB] hover:bg-[#FAFAFA] text-[#171717] font-semibold text-xs transition-all flex items-center gap-2 shadow-sm">
+                            <Edit className="w-3.5 h-3.5" /> Edit Profile Details
+                        </button>
+                    </Link>
+                </div>
+
+                {/* Details layout: Grid of inputs / text blocks */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                    {/* Target Role & Preferred Work Mode */}
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-semibold uppercase tracking-wider text-[#8F8F8F] ml-0.5">Target Role & Work Mode</label>
+                        <div className="px-4 py-3 bg-[#FAFAFA] border border-[#EBEBEB] rounded-md font-semibold text-sm flex items-center justify-between">
+                            <span>{user.target_role || 'Not Configured'}</span>
+                            <span className="text-xs text-[#8F8F8F] font-medium">{user.preferred_work_mode || 'Remote'}</span>
+                        </div>
+                    </div>
+
+                    {/* Phone Number */}
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-semibold uppercase tracking-wider text-[#8F8F8F] ml-0.5">Phone Number</label>
+                        <div className="px-4 py-3 bg-[#FAFAFA] border border-[#EBEBEB] rounded-md font-semibold text-sm flex items-center gap-3">
+                            <Phone className="w-4 h-4 text-[#8F8F8F]" /> {user.phone_number || 'Not Configured'}
+                        </div>
+                    </div>
+
+                    {/* Experience Level & Referral */}
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-semibold uppercase tracking-wider text-[#8F8F8F] ml-0.5">Experience Level & Referral</label>
+                        <div className="px-4 py-3 bg-[#FAFAFA] border border-[#EBEBEB] rounded-md font-semibold text-sm flex items-center justify-between">
+                            <span>{user.experience_level || 'Beginner'}</span>
+                            <span className="text-xs text-[#8F8F8F] font-medium">Ref: {user.referral_source || 'Direct'}</span>
+                        </div>
+                    </div>
+
+                    {/* Social profiles & links */}
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-semibold uppercase tracking-wider text-[#8F8F8F] ml-0.5">Professional Networks & Portfolio</label>
+                        <div className="flex gap-2">
+                            {user.linkedin_url ? (
+                                <a href={user.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex-1 px-3 py-2 bg-[#FAFAFA] border border-[#EBEBEB] rounded-md hover:bg-[#F5F5F5] transition-colors flex items-center justify-center gap-2 text-xs font-semibold text-[#4D4D4D] truncate">
+                                    <Linkedin className="w-3.5 h-3.5 text-[#0077B5] shrink-0" /> LinkedIn
+                                </a>
+                            ) : (
+                                <div className="flex-1 px-3 py-2 bg-[#FAFAFA] border border-[#EBEBEB] border-dashed rounded-md flex items-center justify-center gap-2 text-xs text-[#8F8F8F] font-semibold">
+                                    <Linkedin className="w-3.5 h-3.5 opacity-40 shrink-0" /> No LinkedIn
+                                </div>
+                            )}
+
+                            {user.github_url ? (
+                                <a href={user.github_url} target="_blank" rel="noopener noreferrer" className="flex-1 px-3 py-2 bg-[#FAFAFA] border border-[#EBEBEB] rounded-md hover:bg-[#F5F5F5] transition-colors flex items-center justify-center gap-2 text-xs font-semibold text-[#4D4D4D] truncate">
+                                    <Github className="w-3.5 h-3.5 text-[#171717] shrink-0" /> GitHub
+                                </a>
+                            ) : (
+                                <div className="flex-1 px-3 py-2 bg-[#FAFAFA] border border-[#EBEBEB] border-dashed rounded-md flex items-center justify-center gap-2 text-xs text-[#8F8F8F] font-semibold">
+                                    <Github className="w-3.5 h-3.5 opacity-40 shrink-0" /> No GitHub
+                                </div>
+                            )}
+
+                            {user.portfolio_url ? (
+                                <a href={user.portfolio_url} target="_blank" rel="noopener noreferrer" className="flex-1 px-3 py-2 bg-[#FAFAFA] border border-[#EBEBEB] rounded-md hover:bg-[#F5F5F5] transition-colors flex items-center justify-center gap-2 text-xs font-semibold text-[#4D4D4D] truncate">
+                                    <Globe className="w-3.5 h-3.5 text-emerald-600" /> Portfolio
+                                </a>
+                            ) : (
+                                <div className="flex-1 px-3 py-2 bg-[#FAFAFA] border border-[#EBEBEB] border-dashed rounded-md flex items-center justify-center gap-2 text-xs text-[#8F8F8F] font-semibold">
+                                    <Globe className="w-3.5 h-3.5 opacity-40 animate-pulse shrink-0" /> No Website
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Professional Summary */}
+                <div className="space-y-2">
+                    <label className="text-[10px] font-semibold uppercase tracking-wider text-[#8F8F8F] ml-0.5">Professional Summary</label>
+                    <div className="px-4 py-3 bg-[#FAFAFA] border border-[#EBEBEB] rounded-md text-[#4D4D4D] text-xs leading-relaxed font-medium">
+                        {user.professional_summary || 'No professional summary set. Complete your profile details to fill this.'}
+                    </div>
+                </div>
+
+                {/* Skills Section */}
+                <div className="space-y-2">
+                    <label className="text-[10px] font-semibold uppercase tracking-wider text-[#8F8F8F] ml-0.5">Skills Inventory</label>
+                    <div className="flex flex-wrap gap-1.5 p-4 bg-[#FAFAFA] border border-[#EBEBEB] rounded-md min-h-[50px]">
+                        {Array.isArray(user.skills) && user.skills.length > 0 ? (
+                            user.skills.map((skill: string, index: number) => (
+                                <Badge key={index} className="bg-white border border-[#EBEBEB] text-[#4D4D4D] text-[10px] font-semibold uppercase tracking-wider py-1 px-2.5 rounded shadow-sm hover:bg-[#FAFAFA]">
+                                    {skill}
+                                </Badge>
+                            ))
+                        ) : (
+                            <span className="text-xs text-[#8F8F8F] italic">No skills listed yet.</span>
+                        )}
+                    </div>
+                </div>
+
+                {/* Education Section */}
+                {user.education && (
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-semibold uppercase tracking-wider text-[#8F8F8F] ml-0.5">Education Registry</label>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+                            {/* Tenth */}
+                            {user.education.tenth?.institution && (
+                                <div className="p-4 bg-[#FAFAFA] border border-[#EBEBEB] rounded-lg space-y-1 shadow-sm">
+                                    <div className="text-[9px] font-bold uppercase tracking-wider text-[#8F8F8F]">Class 10th / Secondary</div>
+                                    <div className="font-semibold text-xs text-[#171717] truncate">{user.education.tenth.institution}</div>
+                                    <div className="text-[10px] text-[#4D4D4D] font-medium flex justify-between">
+                                        <span>Year: {user.education.tenth.passingYear}</span>
+                                        <span>Score: {user.education.tenth.score}</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Twelfth / Diploma */}
+                            {user.education.diploma?.enabled && user.education.diploma?.institution ? (
+                                <div className="p-4 bg-[#FAFAFA] border border-[#EBEBEB] rounded-lg space-y-1 shadow-sm">
+                                    <div className="text-[9px] font-bold uppercase tracking-wider text-[#8F8F8F]">Diploma / Equivalent</div>
+                                    <div className="font-semibold text-xs text-[#171717] truncate">{user.education.diploma.institution}</div>
+                                    <div className="text-[10px] text-[#4D4D4D] font-medium flex justify-between">
+                                        <span>Year: {user.education.diploma.passingYear}</span>
+                                        <span>Score: {user.education.diploma.score}</span>
+                                    </div>
+                                </div>
+                            ) : user.education.twelfth?.institution ? (
+                                <div className="p-4 bg-[#FAFAFA] border border-[#EBEBEB] rounded-lg space-y-1 shadow-sm">
+                                    <div className="text-[9px] font-bold uppercase tracking-wider text-[#8F8F8F]">Class 12th / Senior Secondary</div>
+                                    <div className="font-semibold text-xs text-[#171717] truncate">{user.education.twelfth.institution}</div>
+                                    <div className="text-[10px] text-[#4D4D4D] font-medium flex justify-between">
+                                        <span>Year: {user.education.twelfth.passingYear}</span>
+                                        <span>Score: {user.education.twelfth.score}</span>
+                                    </div>
+                                </div>
+                            ) : null}
+
+                            {/* Undergraduate (B.Tech/BE/etc.) */}
+                            {user.education.btech?.institution ? (
+                                <div className="p-4 bg-[#FAFAFA] border border-[#EBEBEB] rounded-lg space-y-1 shadow-sm">
+                                    <div className="text-[9px] font-bold uppercase tracking-wider text-[#8F8F8F]">Undergraduate / B.Tech</div>
+                                    <div className="font-semibold text-xs text-[#171717] truncate">{user.education.btech.institution}</div>
+                                    <div className="text-[10px] text-[#4D4D4D] font-medium flex justify-between">
+                                        <span>Year: {user.education.btech.passingYear}</span>
+                                        <span>Score: {user.education.btech.score}</span>
+                                    </div>
+                                </div>
+                            ) : (
+                                user.college && (
+                                    <div className="p-4 bg-[#FAFAFA] border border-[#EBEBEB] rounded-lg space-y-1 shadow-sm">
+                                        <div className="text-[9px] font-bold uppercase tracking-wider text-[#8F8F8F]">Undergraduate College</div>
+                                        <div className="font-semibold text-xs text-[#171717] truncate">{user.college}</div>
+                                        <div className="text-[10px] text-[#8F8F8F] italic font-medium">Details incomplete</div>
+                                    </div>
+                                )
+                            )}
+
+                            {/* Post Graduate (Masters) */}
+                            {user.education.masters?.enabled && user.education.masters?.institution && (
+                                <div className="p-4 bg-[#FAFAFA] border border-[#EBEBEB] rounded-lg space-y-1 shadow-sm col-span-1 md:col-span-3">
+                                    <div className="text-[9px] font-bold uppercase tracking-wider text-[#8F8F8F]">Postgraduate / Masters</div>
+                                    <div className="font-semibold text-xs text-[#171717] truncate">{user.education.masters.institution}</div>
+                                    <div className="text-[10px] text-[#4D4D4D] font-medium flex gap-6">
+                                        <span>Year: {user.education.masters.passingYear}</span>
+                                        <span>Score: {user.education.masters.score}</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Support CTA */}
