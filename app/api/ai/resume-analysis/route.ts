@@ -70,17 +70,19 @@ export async function POST(req: NextRequest) {
             throw new Error("Invalid response format received from AI provider.");
           }
 
-          // 2. Store in database
+          // 2. Store in database (using upsert to prevent unique key constraint violations on resume_id)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const { data: dbData, error: dbError } = await (supabase as any)
             .from('resume_analysis')
-            .insert({
+            .upsert({
               resume_id: resumeId,
               user_id: userId,
               ats_score: aiResponse.ats_score,
               strengths: aiResponse.strengths,
               missing_skills: aiResponse.missing_skills,
               improvements: aiResponse.improvements
+            }, {
+              onConflict: 'resume_id'
             })
             .select()
             .single();
@@ -105,7 +107,9 @@ export async function POST(req: NextRequest) {
           });
 
         } catch (error: unknown) {
-          const msg = error instanceof Error ? error.message : 'Unknown error';
+          const msg = error && typeof error === 'object' && 'message' in error
+            ? (error as any).message
+            : String(error);
           console.error('[Resume Analysis SSE Stream] Error:', msg);
           sendEvent('error', { error: msg });
         } finally {
