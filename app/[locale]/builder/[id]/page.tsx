@@ -195,20 +195,44 @@ export default function BuilderPage() {
     async function handleSave() {
         if (!resumeData) return;
         setSaving(true);
-        const { error } = await supabase.from('resumes').update({ resume_json: resumeData, title, updated_at: new Date().toISOString() }).eq('id', id);
-        if (error) {
-            console.error('[Save Error]', error);
-            alert('Failed to save resume: ' + error.message);
-        } else {
-            setInitialData(JSON.stringify(resumeData));
+        try {
+            const res = await fetch(`/api/resume/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ resumeData, title })
+            });
+            const result = await res.json();
+            if (res.ok && result.success) {
+                setInitialData(JSON.stringify(resumeData));
+            } else {
+                console.error('[Save Error]', result.error || 'Failed to save');
+                alert('Failed to save resume: ' + (result.details || result.error || 'Unknown error'));
+            }
+        } catch (err: any) {
+            console.error('[Save Error]', err);
+            alert('Failed to save resume: ' + err.message);
+        } finally {
+            setSaving(false);
         }
-        setSaving(false);
     }
 
     async function handleSelectTemplate(tId: string) {
         setSelectedTemplate(tId);
-        await supabase.from('resumes').update({ template_selected: tId }).eq('id', id);
-        setStep('optimize');
+        try {
+            const res = await fetch(`/api/resume/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ templateSelected: tId })
+            });
+            const result = await res.json();
+            if (res.ok && result.success) {
+                setStep('optimize');
+            } else {
+                console.error('[Select Template Error]', result.error || 'Failed to update template');
+            }
+        } catch (err: any) {
+            console.error('[Select Template Error]', err);
+        }
     }
 
     async function handleGenerateSummary() {
