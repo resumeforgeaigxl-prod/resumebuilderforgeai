@@ -31,10 +31,16 @@ export async function POST(req: NextRequest) {
 
     // Create SSE stream
     const encoder = new TextEncoder();
+    let isCancelled = false;
     const stream = new ReadableStream({
       async start(controller) {
         const sendEvent = (event: string, data: unknown) => {
-          controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
+          if (isCancelled) return;
+          try {
+            controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
+          } catch (err) {
+            console.warn('[MentorForge] Stream enqueue error (client likely disconnected):', err);
+          }
         };
 
         // Send initial thinking event
@@ -82,8 +88,18 @@ export async function POST(req: NextRequest) {
           console.error('MentorForge Agent Loop Error:', msg);
           sendEvent('error', { error: msg });
         } finally {
-          controller.close();
+          if (!isCancelled) {
+            try {
+              controller.close();
+            } catch (err) {
+              console.warn('[MentorForge] Stream close error:', err);
+            }
+          }
         }
+      },
+      cancel() {
+        isCancelled = true;
+        console.log(`[MentorForge] Client closed connection for user: ${userId}`);
       }
     });
 
