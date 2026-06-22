@@ -9,6 +9,14 @@ interface Message {
   content: string;
 }
 
+export interface AgentProgressEvent {
+  type: 'tool_start' | 'tool_end' | 'thinking';
+  name: string;
+  args?: Record<string, unknown>;
+  status?: 'running' | 'finished' | 'error';
+  iteration?: number;
+}
+
 export interface AgentResult {
   reply: string;
   suggestedAction?: string;
@@ -67,7 +75,8 @@ export async function runAgenticLoop(
   message: string,
   history: Message[],
   userId: string,
-  mode: string
+  mode: string,
+  onProgress?: (event: AgentProgressEvent) => void
 ): Promise<AgentResult> {
   const chain = TASK_ROUTING_CHAINS['mentor'] || ['gemini', 'groq', 'openrouter', 'together', 'mistral', 'deepseek'];
   console.log(`[AgentLoop] Starting task loop for 'mentor' task | Chain: ${JSON.stringify(chain)}`);
@@ -152,16 +161,43 @@ Guidelines:
             console.log(`[AgentLoop] Iteration ${iterations}: Gemini requested ${functionCalls.length} tool call(s)`);
 
             const responsesParts = await Promise.all(functionCalls.map(async (call: any) => {
+              // Emit tool_start event
+              onProgress?.({
+                type: 'tool_start',
+                name: call.name,
+                args: call.args || {},
+                status: 'running',
+                iteration: iterations
+              });
+
               const tool = toolsRegistry[call.name];
               let toolResult;
               if (!tool) {
                 toolResult = { error: `Tool '${call.name}' not registered.` };
+                onProgress?.({
+                  type: 'tool_end',
+                  name: call.name,
+                  status: 'error',
+                  iteration: iterations
+                });
               } else {
                 try {
                   toolResult = await tool.execute(call.args, userId);
+                  onProgress?.({
+                    type: 'tool_end',
+                    name: call.name,
+                    status: 'finished',
+                    iteration: iterations
+                  });
                 } catch (err: any) {
                   console.error(`[AgentLoop] Tool execution failed [${call.name}]:`, err.message);
                   toolResult = { error: `Failed to execute: ${err.message}` };
+                  onProgress?.({
+                    type: 'tool_end',
+                    name: call.name,
+                    status: 'error',
+                    iteration: iterations
+                  });
                 }
               }
               return {
@@ -249,19 +285,47 @@ Guidelines:
               console.log(`[AgentLoop] ${provider} requested ${toolCalls.length} tool call(s)`);
 
               const toolOutputs = await Promise.all(toolCalls.map(async (call: any) => {
+                const parsedArgs = typeof call.function.arguments === 'string'
+                  ? (() => { try { return JSON.parse(call.function.arguments); } catch { return {}; } })()
+                  : call.function.arguments || {};
+
+                // Emit tool_start event
+                onProgress?.({
+                  type: 'tool_start',
+                  name: call.function.name,
+                  args: parsedArgs,
+                  status: 'running',
+                  iteration: iterations
+                });
+
                 const tool = toolsRegistry[call.function.name];
                 let toolResult;
                 if (!tool) {
                   toolResult = { error: `Tool '${call.function.name}' not registered.` };
+                  onProgress?.({
+                    type: 'tool_end',
+                    name: call.function.name,
+                    status: 'error',
+                    iteration: iterations
+                  });
                 } else {
                   try {
-                    const args = typeof call.function.arguments === 'string'
-                      ? JSON.parse(call.function.arguments)
-                      : call.function.arguments;
-                    toolResult = await tool.execute(args, userId);
+                    toolResult = await tool.execute(parsedArgs, userId);
+                    onProgress?.({
+                      type: 'tool_end',
+                      name: call.function.name,
+                      status: 'finished',
+                      iteration: iterations
+                    });
                   } catch (err: any) {
                     console.error(`[AgentLoop] Tool execution failed [${call.function.name}]:`, err.message);
                     toolResult = { error: `Failed to execute: ${err.message}` };
+                    onProgress?.({
+                      type: 'tool_end',
+                      name: call.function.name,
+                      status: 'error',
+                      iteration: iterations
+                    });
                   }
                 }
                 return {

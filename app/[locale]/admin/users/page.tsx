@@ -2,13 +2,27 @@
 export const dynamic = 'force-dynamic';
 ;
 import { useState, useEffect } from 'react';
-import { Ban, Loader2, Phone, User, Unlock, Infinity, ShieldCheck } from 'lucide-react';
+import { Ban, Loader2, Phone, User, Unlock, Infinity, ShieldCheck, Eye, X } from 'lucide-react';
 
 interface UserRow {
     id: string; email: string; phone_number: string | null;
     role: string; is_blocked: boolean; resume_count: number;
     terms_accepted: boolean; created_at: string;
     is_free_override: boolean; free_unlimited: boolean;
+    full_name?: string | null;
+    linkedin_url?: string | null;
+    github_url?: string | null;
+    portfolio_url?: string | null;
+    college?: string | null;
+    skills?: string[] | null;
+    experience_level?: string | null;
+    referral_source?: string | null;
+    target_role?: string | null;
+    preferred_work_mode?: string | null;
+    professional_summary?: string | null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    education?: any | null;
+    profile_completed?: boolean;
 }
 
 export default function AdminUsersPage() {
@@ -16,6 +30,7 @@ export default function AdminUsersPage() {
     const [loading, setLoading] = useState(true);
     const [toggling, setToggling] = useState<string | null>(null);
     const [search, setSearch] = useState('');
+    const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
 
     async function loadUsers() {
         setLoading(true);
@@ -129,7 +144,13 @@ export default function AdminUsersPage() {
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-[#171717] font-medium">{u.email}</span>
+                                                        <span 
+                                                            onClick={() => setSelectedUser(u)} 
+                                                            className="text-[#171717] font-medium hover:text-indigo-600 hover:underline cursor-pointer transition-colors"
+                                                            title="Inspect full profile data"
+                                                        >
+                                                            {u.email}
+                                                        </span>
                                                         <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-tighter ${u.role === 'admin' ? 'bg-red-50 border border-red-100 text-red-600' : 'bg-blue-50 border border-blue-100 text-blue-600'}`}>
                                                             {u.role}
                                                         </span>
@@ -187,6 +208,13 @@ export default function AdminUsersPage() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        onClick={() => setSelectedUser(u)}
+                                                        className="p-2 rounded-lg bg-neutral-50 text-[#8F8F8F] hover:text-[#171717] hover:bg-neutral-100 border border-[#EBEBEB] transition-all active:scale-95"
+                                                        title="Inspect full profile data"
+                                                    >
+                                                        <Eye className="w-4 h-4" />
+                                                    </button>
                                                     {u.role !== 'admin' && (
                                                         <>
                                                             <button
@@ -239,7 +267,13 @@ export default function AdminUsersPage() {
                                 <div className="flex items-start justify-between">
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-[#171717] font-semibold truncate block">{u.email}</span>
+                                            <span 
+                                                onClick={() => setSelectedUser(u)}
+                                                className="text-[#171717] font-semibold truncate block hover:text-indigo-600 hover:underline cursor-pointer transition-colors"
+                                                title="Inspect full profile data"
+                                            >
+                                                {u.email}
+                                            </span>
                                             <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-tighter shrink-0 ${u.role === 'admin' ? 'bg-red-50 border border-red-100 text-red-600' : 'bg-blue-50 border border-blue-100 text-blue-600'}`}>
                                                 {u.role}
                                             </span>
@@ -263,6 +297,13 @@ export default function AdminUsersPage() {
                                         </div>
                                     </div>
                                 </div>
+
+                                <button
+                                    onClick={() => setSelectedUser(u)}
+                                    className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-neutral-50 hover:bg-neutral-100 text-[#4D4D4D] border border-[#EBEBEB] text-xs font-semibold transition-all active:scale-98 shadow-sm"
+                                >
+                                    <Eye className="w-4 h-4" /> Inspect User Profile Form
+                                </button>
 
                                 {u.role !== 'admin' && (
                                     <div className="flex flex-wrap gap-2 pt-2 border-t border-[#EBEBEB]">
@@ -326,6 +367,225 @@ export default function AdminUsersPage() {
                             <p className="text-sm text-[#8F8F8F] mt-1">Try adjusting your search filters.</p>
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* User Profile Detail Modal */}
+            {selectedUser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm select-text">
+                    <div className="relative w-full max-w-4xl max-h-[90vh] bg-white border border-[#EBEBEB] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slide-in">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-6 border-b border-[#EBEBEB] bg-[#FAFAFA]">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-[#171717] flex items-center justify-center text-white font-bold">
+                                    {selectedUser.full_name ? selectedUser.full_name.charAt(0).toUpperCase() : 'U'}
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold text-[#171717]">{selectedUser.full_name || 'Anonymous User'}</h2>
+                                    <p className="text-xs text-[#8F8F8F] font-mono">{selectedUser.id}</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => setSelectedUser(null)}
+                                className="p-2 rounded-lg hover:bg-neutral-100 text-[#8F8F8F] hover:text-[#171717] transition-all"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        {/* Modal Body: Complete Form Data (Scrollable) */}
+                        <div className="flex-1 p-6 md:p-8 overflow-y-auto space-y-8 custom-scrollbar text-sm text-[#171717]">
+                            
+                            {/* Section 1: Core Credentials Form */}
+                            <div>
+                                <h3 className="text-xs font-bold text-[#8F8F8F] uppercase tracking-wider mb-4 border-b border-neutral-100 pb-2">Core Identity Form</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider">Full Name</label>
+                                        <input readOnly value={selectedUser.full_name || ''} className="w-full px-3 py-2 bg-neutral-50 border border-[#EBEBEB] rounded-lg text-xs font-medium cursor-default focus:outline-none" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider">Email Address</label>
+                                        <input readOnly value={selectedUser.email || ''} className="w-full px-3 py-2 bg-neutral-50 border border-[#EBEBEB] rounded-lg text-xs font-medium cursor-default focus:outline-none" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider">Phone Number</label>
+                                        <input readOnly value={selectedUser.phone_number || 'Not Configured'} className="w-full px-3 py-2 bg-neutral-50 border border-[#EBEBEB] rounded-lg text-xs font-medium cursor-default focus:outline-none" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider">Role & Permissions</label>
+                                        <input readOnly value={selectedUser.role.toUpperCase()} className="w-full px-3 py-2 bg-neutral-50 border border-[#EBEBEB] rounded-lg text-xs font-bold cursor-default focus:outline-none text-indigo-600" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Section 2: Professional Profile Form */}
+                            <div>
+                                <h3 className="text-xs font-bold text-[#8F8F8F] uppercase tracking-wider mb-4 border-b border-neutral-100 pb-2">Professional Profile Form</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider">Target Job Role</label>
+                                        <input readOnly value={selectedUser.target_role || 'Not Configured'} className="w-full px-3 py-2 bg-neutral-50 border border-[#EBEBEB] rounded-lg text-xs font-medium cursor-default focus:outline-none" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider">Experience Level</label>
+                                        <input readOnly value={selectedUser.experience_level || 'Beginner'} className="w-full px-3 py-2 bg-neutral-50 border border-[#EBEBEB] rounded-lg text-xs font-medium cursor-default focus:outline-none" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider">Work Preference</label>
+                                        <input readOnly value={selectedUser.preferred_work_mode || 'Remote'} className="w-full px-3 py-2 bg-neutral-50 border border-[#EBEBEB] rounded-lg text-xs font-medium cursor-default focus:outline-none" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider">Undergraduate College</label>
+                                        <input readOnly value={selectedUser.college || 'Not Configured'} className="w-full px-3 py-2 bg-neutral-50 border border-[#EBEBEB] rounded-lg text-xs font-medium cursor-default focus:outline-none" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider">Referral Source</label>
+                                        <input readOnly value={selectedUser.referral_source || 'Direct'} className="w-full px-3 py-2 bg-neutral-50 border border-[#EBEBEB] rounded-lg text-xs font-medium cursor-default focus:outline-none" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider">Profile Completed Status</label>
+                                        <input readOnly value={selectedUser.profile_completed ? 'COMPLETE' : 'INCOMPLETE'} className={`w-full px-3 py-2 bg-neutral-50 border border-[#EBEBEB] rounded-lg text-xs font-bold cursor-default focus:outline-none ${selectedUser.profile_completed ? 'text-emerald-600' : 'text-red-500'}`} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Section 3: Social & Portfolio Links Form */}
+                            <div>
+                                <h3 className="text-xs font-bold text-[#8F8F8F] uppercase tracking-wider mb-4 border-b border-neutral-100 pb-2">Social & Portfolio Links</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider">LinkedIn URL</label>
+                                        {selectedUser.linkedin_url ? (
+                                            <a href={selectedUser.linkedin_url} target="_blank" rel="noopener noreferrer" className="block w-full px-3 py-2 bg-blue-50/50 hover:bg-blue-50 border border-blue-100 text-blue-600 rounded-lg text-xs font-medium truncate">
+                                                {selectedUser.linkedin_url}
+                                            </a>
+                                        ) : (
+                                            <input readOnly value="No LinkedIn linked" className="w-full px-3 py-2 bg-neutral-50 border border-[#EBEBEB] rounded-lg text-xs font-medium cursor-default focus:outline-none text-[#8F8F8F]" />
+                                        )}
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider">GitHub URL</label>
+                                        {selectedUser.github_url ? (
+                                            <a href={selectedUser.github_url} target="_blank" rel="noopener noreferrer" className="block w-full px-3 py-2 bg-neutral-50 hover:bg-neutral-100 border border-[#EBEBEB] text-[#171717] rounded-lg text-xs font-medium truncate">
+                                                {selectedUser.github_url}
+                                            </a>
+                                        ) : (
+                                            <input readOnly value="No GitHub linked" className="w-full px-3 py-2 bg-neutral-50 border border-[#EBEBEB] rounded-lg text-xs font-medium cursor-default focus:outline-none text-[#8F8F8F]" />
+                                        )}
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider">Portfolio URL</label>
+                                        {selectedUser.portfolio_url ? (
+                                            <a href={selectedUser.portfolio_url} target="_blank" rel="noopener noreferrer" className="block w-full px-3 py-2 bg-emerald-50/50 hover:bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-lg text-xs font-medium truncate">
+                                                {selectedUser.portfolio_url}
+                                            </a>
+                                        ) : (
+                                            <input readOnly value="No Portfolio linked" className="w-full px-3 py-2 bg-neutral-50 border border-[#EBEBEB] rounded-lg text-xs font-medium cursor-default focus:outline-none text-[#8F8F8F]" />
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Section 4: Professional Summary Form */}
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider">Professional Summary Abstract</label>
+                                <textarea readOnly value={selectedUser.professional_summary || 'No professional summary set.'} rows={3} className="w-full px-4 py-3 bg-neutral-50 border border-[#EBEBEB] rounded-lg text-xs leading-relaxed font-medium cursor-default focus:outline-none resize-none font-sans" />
+                            </div>
+
+                            {/* Section 5: Skills Inventory Form */}
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider">Skills Inventory</label>
+                                <div className="flex flex-wrap gap-1.5 p-4 bg-neutral-50 border border-[#EBEBEB] rounded-lg min-h-[50px]">
+                                    {Array.isArray(selectedUser.skills) && selectedUser.skills.length > 0 ? (
+                                        selectedUser.skills.map((skill: string, index: number) => (
+                                            <span key={index} className="bg-white border border-[#EBEBEB] text-[#4D4D4D] text-[10px] font-bold uppercase tracking-wider py-1 px-2.5 rounded shadow-sm">
+                                                {skill}
+                                            </span>
+                                        ))
+                                    ) : (
+                                        <span className="text-xs text-[#8F8F8F] italic">No skills listed.</span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Section 6: Education Registry Form */}
+                            {selectedUser.education && (
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider">Education Registry Path</label>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Tenth */}
+                                        {selectedUser.education.tenth?.institution && (
+                                            <div className="p-4 bg-neutral-50 border border-[#EBEBEB] rounded-xl space-y-1 shadow-sm">
+                                                <div className="text-[9px] font-black uppercase tracking-wider text-[#8F8F8F]">Class 10th / Secondary</div>
+                                                <div className="font-semibold text-xs text-[#171717]">{selectedUser.education.tenth.institution}</div>
+                                                <div className="text-[10px] text-[#4D4D4D] font-medium flex justify-between">
+                                                    <span>Passing Year: {selectedUser.education.tenth.passingYear}</span>
+                                                    <span>Score: {selectedUser.education.tenth.score}</span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Twelfth / Diploma */}
+                                        {selectedUser.education.diploma?.enabled && selectedUser.education.diploma?.institution ? (
+                                            <div className="p-4 bg-neutral-50 border border-[#EBEBEB] rounded-xl space-y-1 shadow-sm">
+                                                <div className="text-[9px] font-black uppercase tracking-wider text-[#8F8F8F]">Diploma / Equivalent</div>
+                                                <div className="font-semibold text-xs text-[#171717]">{selectedUser.education.diploma.institution}</div>
+                                                <div className="text-[10px] text-[#4D4D4D] font-medium flex justify-between">
+                                                    <span>Passing Year: {selectedUser.education.diploma.passingYear}</span>
+                                                    <span>Score: {selectedUser.education.diploma.score}</span>
+                                                </div>
+                                            </div>
+                                        ) : selectedUser.education.twelfth?.institution ? (
+                                            <div className="p-4 bg-neutral-50 border border-[#EBEBEB] rounded-xl space-y-1 shadow-sm">
+                                                <div className="text-[9px] font-black uppercase tracking-wider text-[#8F8F8F]">Class 12th / Senior Secondary</div>
+                                                <div className="font-semibold text-xs text-[#171717]">{selectedUser.education.twelfth.institution}</div>
+                                                <div className="text-[10px] text-[#4D4D4D] font-medium flex justify-between">
+                                                    <span>Passing Year: {selectedUser.education.twelfth.passingYear}</span>
+                                                    <span>Score: {selectedUser.education.twelfth.score}</span>
+                                                </div>
+                                            </div>
+                                        ) : null}
+
+                                        {/* Undergraduate B.Tech */}
+                                        {selectedUser.education.btech?.institution && (
+                                            <div className="p-4 bg-neutral-50 border border-[#EBEBEB] rounded-xl space-y-1 shadow-sm">
+                                                <div className="text-[9px] font-black uppercase tracking-wider text-[#8F8F8F]">Undergraduate / B.Tech</div>
+                                                <div className="font-semibold text-xs text-[#171717]">{selectedUser.education.btech.institution}</div>
+                                                <div className="text-[10px] text-[#4D4D4D] font-medium flex justify-between">
+                                                    <span>Passing Year: {selectedUser.education.btech.passingYear}</span>
+                                                    <span>Score: {selectedUser.education.btech.score}</span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Postgraduate Masters */}
+                                        {selectedUser.education.masters?.enabled && selectedUser.education.masters?.institution && (
+                                            <div className="p-4 bg-neutral-50 border border-[#EBEBEB] rounded-xl space-y-1 shadow-sm">
+                                                <div className="text-[9px] font-black uppercase tracking-wider text-[#8F8F8F]">Postgraduate / Masters</div>
+                                                <div className="font-semibold text-xs text-[#171717]">{selectedUser.education.masters.institution}</div>
+                                                <div className="text-[10px] text-[#4D4D4D] font-medium flex justify-between">
+                                                    <span>Passing Year: {selectedUser.education.masters.passingYear}</span>
+                                                    <span>Score: {selectedUser.education.masters.score}</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-6 border-t border-[#EBEBEB] bg-[#FAFAFA] flex justify-end">
+                            <button 
+                                onClick={() => setSelectedUser(null)}
+                                className="h-9 px-4 rounded-lg bg-[#171717] hover:bg-[#333333] text-white font-semibold text-xs transition-all shadow-sm"
+                            >
+                                Close Inspector
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { Bot, User, Rocket, MessageSquare, Code, GraduationCap, BrainCircuit, Terminal, ChevronRight, Copy, Check, FileDown } from 'lucide-react';
+import { Bot, User, Rocket, MessageSquare, Code, GraduationCap, BrainCircuit, Terminal, ChevronRight, Copy, Check, FileDown, CheckCircle2, Loader2, AlertCircle, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { useToast } from '@/components/ui/use-toast';
@@ -64,6 +64,12 @@ interface Message {
   analysis?: Record<string, unknown>;
 }
 
+interface AgentActivity {
+  name: string;
+  args?: Record<string, unknown>;
+  status: 'running' | 'finished' | 'error';
+}
+
 const SUGGESTIONS = [
   { text: "Learn DevOps Linux commands", icon: Terminal, mode: 'Learning' },
   { text: "Prepare for Amazon SDE interview", icon: MessageSquare, mode: 'Interview' },
@@ -76,6 +82,8 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeMode, setActiveMode] = useState('General');
+  const [agentActivities, setAgentActivities] = useState<AgentActivity[]>([]);
+  const [activityExpanded, setActivityExpanded] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const router = useRouter();
@@ -88,7 +96,7 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, isLoading]);
+  }, [messages, isLoading, agentActivities]);
 
   const fetchHistory = async () => {
     try {
@@ -122,6 +130,8 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsLoading(true);
+    setAgentActivities([]);
+    setActivityExpanded(true);
 
     try {
       const response = await fetch('/api/mentorforge/chat', {
@@ -133,15 +143,79 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
           mode: mode || activeMode
         })
       });
-      const data = await response.json();
 
-      if (data.reply) {
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          content: data.reply,
-          suggestedAction: data.suggestedAction,
-          analysis: data.analysis
-        }]);
+      // Check if SSE stream
+      const contentType = response.headers.get('content-type') || '';
+
+      if (contentType.includes('text/event-stream')) {
+        // SSE streaming response — read real agent activity
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error('No stream reader');
+
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          let eventType = '';
+          for (const line of lines) {
+            if (line.startsWith('event: ')) {
+              eventType = line.slice(7).trim();
+            } else if (line.startsWith('data: ') && eventType) {
+              try {
+                const data = JSON.parse(line.slice(6));
+
+                if (eventType === 'progress') {
+                  if (data.type === 'tool_start') {
+                    setAgentActivities(prev => [
+                      ...prev,
+                      { name: data.name, args: data.args, status: 'running' }
+                    ]);
+                  } else if (data.type === 'tool_end') {
+                    setAgentActivities(prev =>
+                      prev.map(a =>
+                        a.name === data.name && a.status === 'running'
+                          ? { ...a, status: data.status || 'finished' }
+                          : a
+                      )
+                    );
+                  }
+                } else if (eventType === 'result') {
+                  if (data.reply) {
+                    setMessages(prev => [...prev, {
+                      role: 'assistant',
+                      content: data.reply,
+                      suggestedAction: data.suggestedAction,
+                      analysis: data.analysis
+                    }]);
+                  }
+                } else if (eventType === 'error') {
+                  toast({ variant: "destructive", title: "AI Error", description: data.error || "Agent failed." });
+                }
+              } catch {
+                // ignore parse errors for partial data
+              }
+              eventType = '';
+            }
+          }
+        }
+      } else {
+        // Fallback: standard JSON response (non-streaming)
+        const data = await response.json();
+        if (data.reply) {
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: data.reply,
+            suggestedAction: data.suggestedAction,
+            analysis: data.analysis
+          }]);
+        }
       }
     } catch {
       toast({ variant: "destructive", title: "AI Error", description: "Failed to connect to MentorForge." });
@@ -166,6 +240,8 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
   };
 
   const showWelcome = messages.length < 2 && !isLoading;
+  const finishedCount = agentActivities.filter(a => a.status === 'finished').length;
+  const runningCount = agentActivities.filter(a => a.status === 'running').length;
 
   return (
     <div className="flex flex-col h-full bg-[#FAFAFA] text-[#171717] overflow-hidden relative">
@@ -256,38 +332,124 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
             </motion.div>
           ))}
 
-          {/* Agent Running Status Widget */}
+          {/* Real Agent Activity Widget */}
           {isLoading && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex gap-4 p-5 rounded-xl border border-blue-100 bg-blue-50/20 max-w-xl shadow-sm my-4"
+              className="max-w-xl my-4"
             >
-              <div className="w-9 h-9 rounded-lg bg-[#171717] flex items-center justify-center shrink-0 shadow-md">
-                <BrainCircuit className="w-4 h-4 text-white animate-pulse" />
-              </div>
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-semibold text-blue-700 tracking-wider font-mono uppercase">Agentic Intelligence Active</div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                    </span>
-                    <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest font-mono">Running</span>
-                  </div>
+              <div className="flex gap-4 items-start">
+                <div className="w-9 h-9 rounded-lg bg-[#171717] flex items-center justify-center shrink-0 shadow-md">
+                  <BrainCircuit className="w-4 h-4 text-white animate-pulse" />
                 </div>
-                <p className="text-xs text-[#4D4D4D] leading-relaxed">
-                  MentorForge Central Brain is evaluating goals, inspecting ecosystem datasets, and routing instructions to specialist spoke subagents...
-                </p>
-                {/* Visual subagent activity bar */}
-                <div className="h-1.5 w-full bg-blue-100/50 rounded-full overflow-hidden relative">
-                  <motion.div 
-                    initial={{ left: "-30%", width: "30%" }}
-                    animate={{ left: "100%" }}
-                    transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-                    className="absolute top-0 h-full bg-blue-600 rounded-full"
-                  />
+                <div className="flex-1 space-y-2">
+                  {/* Real Agent Activity Panel */}
+                  <div className="border border-[#EBEBEB] rounded-xl bg-white shadow-sm overflow-hidden">
+                    {/* Collapsible Header */}
+                    <button
+                      onClick={() => setActivityExpanded(!activityExpanded)}
+                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-[#FAFAFA] transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <BrainCircuit className="w-4 h-4 text-[#171717]" />
+                        <span className="text-xs font-bold text-[#171717] tracking-wide">Real Agent Activity</span>
+                        {agentActivities.length > 0 && (
+                          <span className="text-[10px] font-bold text-[#8F8F8F] bg-[#F5F5F5] px-1.5 py-0.5 rounded">
+                            {agentActivities.length}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {runningCount > 0 && (
+                          <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+                          </span>
+                        )}
+                        <ChevronDown className={cn("w-3.5 h-3.5 text-[#8F8F8F] transition-transform", activityExpanded && "rotate-180")} />
+                      </div>
+                    </button>
+
+                    {/* Activity List */}
+                    <AnimatePresence>
+                      {activityExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="border-t border-[#EBEBEB] px-4 py-3 space-y-2.5 bg-[#FAFAFA]/50 max-h-64 overflow-y-auto custom-scrollbar">
+                            {agentActivities.length === 0 && (
+                              <div className="flex items-center gap-2 text-xs text-[#8F8F8F]">
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                                <span className="font-mono">Agents are working...</span>
+                              </div>
+                            )}
+                            {agentActivities.map((activity, idx) => (
+                              <motion.div
+                                key={`${activity.name}-${idx}`}
+                                initial={{ opacity: 0, x: -8 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.25 }}
+                                className="space-y-1"
+                              >
+                                {/* Tool name + status */}
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    {activity.status === 'finished' ? (
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                                    ) : activity.status === 'error' ? (
+                                      <AlertCircle className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                                    ) : (
+                                      <Loader2 className="w-3.5 h-3.5 text-blue-500 animate-spin shrink-0" />
+                                    )}
+                                    <code className="text-[11px] font-mono font-bold text-[#171717]">{activity.name}</code>
+                                  </div>
+                                  <span className={cn(
+                                    "text-[10px] font-bold uppercase tracking-wider font-mono",
+                                    activity.status === 'finished' ? "text-emerald-600" :
+                                    activity.status === 'error' ? "text-red-500" :
+                                    "text-blue-500"
+                                  )}>
+                                    {activity.status === 'finished' ? 'Finished' : activity.status === 'error' ? 'Error' : 'Running'}
+                                  </span>
+                                </div>
+                                {/* Tool args preview */}
+                                {activity.args && Object.keys(activity.args).length > 0 && (
+                                  <pre className="text-[10px] font-mono text-[#8F8F8F] bg-white border border-[#EBEBEB] rounded-lg px-3 py-2 overflow-x-auto max-h-24 custom-scrollbar whitespace-pre-wrap break-all">
+                                    {JSON.stringify(activity.args, null, 2)}
+                                  </pre>
+                                )}
+                              </motion.div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Bottom status line */}
+                  <div className="flex items-center gap-2 px-1">
+                    {runningCount > 0 ? (
+                      <>
+                        <Loader2 className="w-3 h-3 text-blue-500 animate-spin" />
+                        <span className="text-[10px] text-[#8F8F8F] font-mono">Agents are working...</span>
+                      </>
+                    ) : agentActivities.length > 0 ? (
+                      <>
+                        <Loader2 className="w-3 h-3 text-[#8F8F8F] animate-spin" />
+                        <span className="text-[10px] text-[#8F8F8F] font-mono">Composing response...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Loader2 className="w-3 h-3 text-blue-500 animate-spin" />
+                        <span className="text-[10px] text-[#8F8F8F] font-mono">Agents are working...</span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </motion.div>

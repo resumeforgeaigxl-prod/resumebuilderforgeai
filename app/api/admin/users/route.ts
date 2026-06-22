@@ -16,7 +16,7 @@ export async function GET() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: profiles, error } = await (admin as any)
         .from('users')
-        .select('id, email, full_name, phone_number, role, is_blocked, terms_accepted, profile_completed, created_at, is_free_override, free_unlimited')
+        .select('*')
         .order('created_at', { ascending: false });
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
