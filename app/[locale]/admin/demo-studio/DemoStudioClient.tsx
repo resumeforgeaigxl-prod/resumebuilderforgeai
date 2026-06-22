@@ -222,36 +222,36 @@ export default function DemoStudioClient() {
     <div className="space-y-8 pb-20">
       <header className="flex items-end justify-between">
         <div>
-          <div className="flex items-center gap-2 text-indigo-400 font-bold tracking-widest text-[10px] uppercase mb-4">
+          <div className="flex items-center gap-2 text-indigo-600 font-bold tracking-widest text-[10px] uppercase mb-4">
             <Video className="w-3.5 h-3.5" /> Marketing tools
           </div>
-          <h1 className="text-4xl font-bold tracking-tighter text-white">Demo Studio</h1>
-          <p className="text-slate-400 mt-2 text-lg">Create AI-powered product demo videos.</p>
+          <h1 className="text-4xl font-bold tracking-tighter text-[#171717]">Demo Studio</h1>
+          <p className="text-[#8F8F8F] mt-2 text-lg">Create AI-powered product demo videos.</p>
         </div>
         <div className="w-64">
-          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Project Name</label>
+          <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-widest mb-2 block">Project Name</label>
           <Input 
             value={projectName} 
             onChange={(e) => setProjectName(e.target.value)}
             placeholder="E.g. LinkedIn Demo"
-            className="bg-white/5 border-white/10 text-white"
+            className="bg-white border-[#EBEBEB] text-[#171717]"
           />
         </div>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <Card className="p-6 bg-white/[0.02] border-white/5 space-y-4">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Camera className="w-5 h-5 text-indigo-400" /> Record Demo
+        <Card className="p-6 bg-white/[0.02] border-[#EBEBEB] space-y-4">
+          <h2 className="text-xl font-bold text-[#171717] flex items-center gap-2">
+            <Camera className="w-5 h-5 text-indigo-600" /> Record Demo
           </h2>
-          <div className="aspect-video bg-black rounded-xl border border-white/5 flex items-center justify-center relative overflow-hidden">
+          <div className="aspect-video bg-black rounded-xl border border-[#EBEBEB] flex items-center justify-center relative overflow-hidden">
             {recordedVideo ? (
               <video src={recordedVideo} controls className="w-full h-full object-contain" />
             ) : (
-              <p className="text-slate-600 text-sm italic">No recording yet</p>
+              <p className="text-[#8F8F8F] text-sm italic">No recording yet</p>
             )}
             {isRecording && (
-              <div className="absolute top-4 right-4 flex items-center gap-2 bg-red-500/20 px-3 py-1 rounded-full border border-red-500/50 animate-pulse">
+              <div className="absolute top-4 right-4 flex items-center gap-2 bg-red-50 border border-red-100 px-3 py-1 rounded-full border border-red-500/50 animate-pulse">
                 <div className="w-2 h-2 rounded-full bg-red-500" />
                 <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">Recording</span>
               </div>
@@ -268,7 +268,7 @@ export default function DemoStudioClient() {
               </Button>
             )}
             {recordedVideo && (
-              <Button asChild variant="outline" className="border-white/10 hover:bg-white/5">
+              <Button asChild variant="outline" className="border-[#EBEBEB] hover:bg-white">
                 <a href={recordedVideo} download="demo_recording.webm">
                   <Download className="w-4 h-4" />
                 </a>
@@ -277,11 +277,11 @@ export default function DemoStudioClient() {
           </div>
         </Card>
 
-        <Card className="p-6 bg-white/[0.02] border-white/5 space-y-4">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Wand2 className="w-5 h-5 text-purple-400" /> AI Script Generator
+        <Card className="p-6 bg-white/[0.02] border-[#EBEBEB] space-y-4">
+          <h2 className="text-xl font-bold text-[#171717] flex items-center gap-2">
+            <Wand2 className="w-5 h-5 text-purple-600" /> AI Script Generator
           </h2>
-          <p className="text-sm text-slate-500">Generate a high-converting demo script using Gemini Flash.</p>
+          <p className="text-sm text-[#8F8F8F]">Generate a high-converting demo script using Gemini Flash.</p>
           <Button 
             onClick={generateAIScript} 
             disabled={isGenerating}
@@ -294,30 +294,30 @@ export default function DemoStudioClient() {
 
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-white">Scene Editor</h2>
-          <Button onClick={addScene} variant="outline" size="sm" className="border-white/10 hover:bg-white/5">
+          <h2 className="text-2xl font-bold text-[#171717]">Scene Editor</h2>
+          <Button onClick={addScene} variant="outline" size="sm" className="border-[#EBEBEB] hover:bg-white">
             <Plus className="w-4 h-4 mr-2" /> Add Scene
           </Button>
         </div>
 
         <div className="space-y-4">
           {scenes.map((scene, index) => (
-            <Card key={index} className="p-4 bg-white/[0.01] border-white/5 flex gap-6 items-start">
-              <div className="pt-2 text-slate-600 cursor-grab active:cursor-grabbing">
+            <Card key={index} className="p-4 bg-white/[0.01] border-[#EBEBEB] flex gap-6 items-start">
+              <div className="pt-2 text-[#8F8F8F] cursor-grab active:cursor-grabbing">
                 <GripVertical className="w-5 h-5" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Image URL</label>
+                  <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-widest">Image URL</label>
                   <div className="flex gap-2">
                     <Input 
                       value={scene.image} 
                       onChange={(e) => updateScene(index, 'image', e.target.value)}
                       placeholder="Enter URL or upload"
-                      className="bg-white/5 border-white/10 text-white h-9 text-xs"
+                      className="bg-white border-[#EBEBEB] text-[#171717] h-9 text-xs"
                     />
-                    <label className="shrink-0 h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer hover:bg-white/10 transition-colors">
-                      <Upload className="w-4 h-4 text-slate-400" />
+                    <label className="shrink-0 h-9 w-9 rounded-lg bg-white border border-[#EBEBEB] flex items-center justify-center cursor-pointer hover:bg-neutral-100 transition-colors">
+                      <Upload className="w-4 h-4 text-[#8F8F8F]" />
                       <input 
                         type="file" 
                         className="hidden" 
@@ -328,28 +328,28 @@ export default function DemoStudioClient() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Title</label>
+                  <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-widest">Title</label>
                   <Input 
                     value={scene.title} 
                     onChange={(e) => updateScene(index, 'title', e.target.value)}
-                    className="bg-white/5 border-white/10 text-white h-9"
+                    className="bg-white border-[#EBEBEB] text-[#171717] h-9"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Subtitle</label>
+                  <label className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-widest">Subtitle</label>
                   <Input 
                     value={scene.subtitle} 
                     onChange={(e) => updateScene(index, 'subtitle', e.target.value)}
-                    className="bg-white/5 border-white/10 text-white h-9"
+                    className="bg-white border-[#EBEBEB] text-[#171717] h-9"
                   />
                 </div>
                 <div className="space-y-2">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Scene Duration (s)</p>
+                  <p className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-widest">Scene Duration (s)</p>
                   <Input 
                     type="number"
                     value={scene.duration} 
                     onChange={(e) => updateScene(index, 'duration', parseInt(e.target.value))}
-                    className="bg-white/5 border-white/10 text-white h-9"
+                    className="bg-white border-[#EBEBEB] text-[#171717] h-9"
                   />
                 </div>
               </div>
@@ -358,7 +358,7 @@ export default function DemoStudioClient() {
                 <Button 
                   size="sm" 
                   variant="ghost" 
-                  className="h-8 w-8 p-0 hover:bg-white/10 text-purple-400"
+                  className="h-8 w-8 p-0 hover:bg-neutral-100 text-purple-600"
                   onClick={() => generateSceneVoiceover(index)}
                   disabled={generatingVoiceIndex === index}
                 >
@@ -373,7 +373,7 @@ export default function DemoStudioClient() {
                     <audio src={scene.audio} className="hidden" id={`audio-${index}`} />
                     <button 
                       onClick={() => (document.getElementById(`audio-${index}`) as HTMLAudioElement).play()}
-                      className="h-8 w-8 flex items-center justify-center bg-indigo-500/20 text-indigo-400 rounded-lg hover:bg-indigo-500/30 transition-colors"
+                      className="h-8 w-8 flex items-center justify-center bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-lg hover:bg-indigo-500/30 transition-colors"
                     >
                       <Play className="w-3 h-3" />
                     </button>
@@ -381,7 +381,7 @@ export default function DemoStudioClient() {
                 )}
                 <button 
                   onClick={() => removeScene(index)}
-                  className="h-8 w-8 flex items-center justify-center text-slate-600 hover:text-red-400 transition-colors"
+                  className="h-8 w-8 flex items-center justify-center text-[#8F8F8F] hover:text-red-600 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -389,8 +389,8 @@ export default function DemoStudioClient() {
             </Card>
           ))}
           {scenes.length === 0 && (
-            <div className="h-32 border-2 border-dashed border-white/5 rounded-2xl flex items-center justify-center">
-              <p className="text-slate-600 italic">No scenes defined. Generate with AI or add manually.</p>
+            <div className="h-32 border-2 border-dashed border-[#EBEBEB] rounded-2xl flex items-center justify-center">
+              <p className="text-[#8F8F8F] italic">No scenes defined. Generate with AI or add manually.</p>
             </div>
           )}
         </div>
@@ -401,7 +401,7 @@ export default function DemoStudioClient() {
           onClick={saveProject} 
           disabled={isSaving || isExporting} 
           variant="outline" 
-          className="border-white/10 hover:bg-white/5"
+          className="border-[#EBEBEB] hover:bg-white"
         >
           <Save className="w-4 h-4 mr-2" /> {isSaving ? 'Saving...' : 'Save Project'}
         </Button>
@@ -416,12 +416,12 @@ export default function DemoStudioClient() {
 
       <div className="mt-12 space-y-6">
         <div className="flex items-center justify-between">
-          <h3 className="text-xl font-bold text-white">Recent Renders</h3>
+          <h3 className="text-xl font-bold text-[#171717]">Recent Renders</h3>
           <Button 
             onClick={fetchRecentRenders} 
             variant="ghost" 
             size="sm" 
-            className="text-slate-500 hover:text-white"
+            className="text-[#8F8F8F] hover:text-[#171717]"
           >
             <RefreshCcw className="w-3.5 h-3.5 mr-2" /> Refresh
           </Button>
@@ -430,22 +430,22 @@ export default function DemoStudioClient() {
         {recentRenders.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {recentRenders.map((render) => (
-              <Card key={render.id} className="p-4 bg-white/[0.02] border-white/5 flex items-center justify-between hover:bg-white/[0.04] transition-colors">
+              <Card key={render.id} className="p-4 bg-white/[0.02] border-[#EBEBEB] flex items-center justify-between hover:bg-white/[0.04] transition-colors">
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-white truncate max-w-[150px]">{render.name}</p>
+                  <p className="text-sm font-medium text-[#171717] truncate max-w-[150px]">{render.name}</p>
                   <div className="flex items-center gap-2">
                     <span className={`w-1.5 h-1.5 rounded-full ${
                       render.status === 'completed' ? 'bg-green-500' : 
                       render.status === 'processing' ? 'bg-blue-500 animate-pulse' : 
                       'bg-slate-500'
                     }`} />
-                    <p className="text-[10px] text-slate-500 uppercase tracking-widest">{render.status}</p>
+                    <p className="text-[10px] text-[#8F8F8F] uppercase tracking-widest">{render.status}</p>
                   </div>
                 </div>
                 {render.video_url && (
                   <Button size="sm" variant="ghost" className="h-8 w-8 p-0" asChild>
                     <a href={render.video_url} download>
-                      <Download className="w-4 h-4 text-indigo-400" />
+                      <Download className="w-4 h-4 text-indigo-600" />
                     </a>
                   </Button>
                 )}
@@ -453,7 +453,7 @@ export default function DemoStudioClient() {
             ))}
           </div>
         ) : (
-          <div className="h-24 border border-dashed border-white/5 rounded-xl flex items-center justify-center text-slate-600 italic text-sm">
+          <div className="h-24 border border-dashed border-[#EBEBEB] rounded-xl flex items-center justify-center text-[#8F8F8F] italic text-sm">
             No recent renders found. Save a project or export to see history.
           </div>
         )}

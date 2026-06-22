@@ -28,47 +28,47 @@ export default async function AdminResumeScoresPage() {
         <div className="space-y-6">
             <div>
                 <h1 className="text-2xl font-bold flex items-center gap-2">
-                    <Activity className="w-6 h-6 text-blue-400" />
+                    <Activity className="w-6 h-6 text-blue-600" />
                     ATS Score Checks
                 </h1>
-                <p className="text-slate-500 text-sm mt-1">
+                <p className="text-[#8F8F8F] text-sm mt-1">
                     Track all ATS score checks performed by users
                 </p>
             </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
-                    <div className="inline-flex p-3 rounded-xl bg-blue-500/10 mb-4">
-                        <Target className="w-5 h-5 text-blue-400" />
+                <div className="p-6 bg-white border border-[#EBEBEB] rounded-2xl">
+                    <div className="inline-flex p-3 rounded-xl bg-blue-50 mb-4">
+                        <Target className="w-5 h-5 text-blue-600" />
                     </div>
-                    <div className="text-3xl font-bold text-white mb-1">{totalChecks}</div>
-                    <div className="text-sm text-slate-400">Total ATS Checks</div>
+                    <div className="text-3xl font-bold text-[#171717] mb-1">{totalChecks}</div>
+                    <div className="text-sm text-[#8F8F8F]">Total ATS Checks</div>
                 </div>
-                <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
-                    <div className="inline-flex p-3 rounded-xl bg-amber-500/10 mb-4">
-                        <Star className="w-5 h-5 text-amber-400" />
+                <div className="p-6 bg-white border border-[#EBEBEB] rounded-2xl">
+                    <div className="inline-flex p-3 rounded-xl bg-amber-50 mb-4">
+                        <Star className="w-5 h-5 text-amber-600" />
                     </div>
-                    <div className="text-3xl font-bold text-white mb-1">{avgScore}%</div>
-                    <div className="text-sm text-slate-400">Average Score</div>
+                    <div className="text-3xl font-bold text-[#171717] mb-1">{avgScore}%</div>
+                    <div className="text-sm text-[#8F8F8F]">Average Score</div>
                 </div>
-                <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
-                    <div className="inline-flex p-3 rounded-xl bg-emerald-500/10 mb-4">
-                        <Activity className="w-5 h-5 text-emerald-400" />
+                <div className="p-6 bg-white border border-[#EBEBEB] rounded-2xl">
+                    <div className="inline-flex p-3 rounded-xl bg-emerald-50 mb-4">
+                        <Activity className="w-5 h-5 text-emerald-600" />
                     </div>
-                    <div className="text-3xl font-bold text-white mb-1">{highScores}</div>
-                    <div className="text-sm text-slate-400">High Scores (≥80%)</div>
+                    <div className="text-3xl font-bold text-[#171717] mb-1">{highScores}</div>
+                    <div className="text-sm text-[#8F8F8F]">High Scores (≥80%)</div>
                 </div>
             </div>
 
             {/* Table */}
-            <div className="bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-white/5">
+            <div className="bg-white/[0.02] border border-[#EBEBEB] rounded-2xl overflow-hidden">
+                <div className="px-6 py-4 border-b border-[#EBEBEB]">
                     <h2 className="font-semibold text-sm">Recent ATS Score Checks</h2>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                        <thead className="border-b border-white/5 text-xs text-slate-500 uppercase tracking-wider">
+                        <thead className="border-b border-[#EBEBEB] text-xs text-[#8F8F8F] uppercase tracking-wider">
                             <tr>
                                 <th className="px-6 py-3 text-left font-bold">User</th>
                                 <th className="px-6 py-3 text-center font-bold">ATS Score</th>
@@ -77,11 +77,11 @@ export default async function AdminResumeScoresPage() {
                                 <th className="px-6 py-3 text-left font-bold">Checked At</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-[#EBEBEB]">
                             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                             {(scores as any[] ?? []).length === 0 && (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-slate-600">
+                                    <td colSpan={5} className="px-6 py-12 text-center text-[#8F8F8F]">
                                         No ATS checks recorded yet. Events will appear here once users check their resume score.
                                     </td>
                                 </tr>
@@ -90,8 +90,8 @@ export default async function AdminResumeScoresPage() {
                             {(scores as any[] ?? []).map((s: any) => {
                                 const userObj = Array.isArray(s.users) ? s.users[0] : s.users;
                                 const score = s.score ?? 0;
-                                const scoreColor = score >= 80 ? 'text-emerald-400' : score >= 60 ? 'text-yellow-400' : 'text-red-400';
-                                const scoreBg = score >= 80 ? 'bg-emerald-500/10 border-emerald-500/20' : score >= 60 ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-red-500/10 border-red-500/20';
+                                const scoreColor = score >= 80 ? 'text-emerald-600' : score >= 60 ? 'text-amber-600' : 'text-red-600';
+                                const scoreBg = score >= 80 ? 'bg-emerald-50 border-emerald-500/20' : score >= 60 ? 'bg-amber-50 border-yellow-500/20' : 'bg-red-50 border-red-500/20';
 
                                 return (
                                     <tr key={s.id} className="hover:bg-white/[0.02] transition-colors">
@@ -102,9 +102,9 @@ export default async function AdminResumeScoresPage() {
                                                 </div>
                                                 <div>
                                                     {userObj?.full_name && (
-                                                        <p className="text-slate-200 font-semibold text-xs">{userObj.full_name}</p>
+                                                        <p className="text-[#171717] font-semibold text-xs">{userObj.full_name}</p>
                                                     )}
-                                                    <p className="text-slate-500 text-[11px]">{userObj?.email || 'Unknown'}</p>
+                                                    <p className="text-[#8F8F8F] text-[11px]">{userObj?.email || 'Unknown'}</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -113,14 +113,14 @@ export default async function AdminResumeScoresPage() {
                                                 <Star className="w-3 h-3" /> {score}%
                                             </span>
                                         </td>
-                                        <td className="px-6 py-3 text-center text-slate-400 text-xs">
+                                        <td className="px-6 py-3 text-center text-[#8F8F8F] text-xs">
                                             {s.keyword_match ?? 0}%
                                         </td>
-                                        <td className="px-6 py-3 text-center text-slate-400 text-xs">
+                                        <td className="px-6 py-3 text-center text-[#8F8F8F] text-xs">
                                             {s.skill_match ?? 0}%
                                         </td>
                                         <td className="px-6 py-3">
-                                            <div className="flex items-center gap-2 text-slate-500 text-xs">
+                                            <div className="flex items-center gap-2 text-[#8F8F8F] text-xs">
                                                 <Calendar className="w-3 h-3" />
                                                 {s.created_at
                                                     ? formatDistanceToNow(new Date(s.created_at), { addSuffix: true })

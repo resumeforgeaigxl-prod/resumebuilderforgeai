@@ -77,15 +77,15 @@ export default function AdminPosts() {
           <h1 className="text-3xl font-bold">Manage Posts</h1>
           <p className="text-muted-foreground mt-1 text-sm">Create and update platform update posts.</p>
         </div>
-        <Link href="/admin/posts/new" className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-blue-600/20 transition-all">
+        <Link href="/admin/posts/new" className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-[#171717] rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-blue-600/20 transition-all">
           <Plus size={20} /> New Post
         </Link>
       </div>
 
-      <div className="glass-card overflow-hidden border border-white/5 bg-[#0f111a]/50 backdrop-blur-xl rounded-3xl">
+      <div className="glass-card overflow-hidden border border-[#EBEBEB] bg-[#0f111a]/50 backdrop-blur-xl rounded-3xl">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-white/5 border-b border-white/10 uppercase font-black tracking-widest text-[10px] text-slate-500">
+            <tr className="bg-white border-b border-[#EBEBEB] uppercase font-black tracking-widest text-[10px] text-[#8F8F8F]">
               <th className="p-6">Post Details</th>
               <th className="p-6">Author</th>
               <th className="p-6">Status</th>
@@ -98,7 +98,7 @@ export default function AdminPosts() {
                 <tr>
                     <td colSpan={5} className="p-20 text-center">
                         <Loader2 className="animate-spin mx-auto text-blue-500 mb-2" size={32} />
-                        <span className="text-xs font-bold uppercase tracking-widest text-slate-500">Loading platform records...</span>
+                        <span className="text-xs font-bold uppercase tracking-widest text-[#8F8F8F]">Loading platform records...</span>
                     </td>
                 </tr>
             ) : posts.length === 0 ? (
@@ -109,35 +109,35 @@ export default function AdminPosts() {
                 </td>
               </tr>
             ) : posts.map((post) => (
-              <tr key={post.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
+              <tr key={post.id} className="border-b border-[#EBEBEB] hover:bg-white/[0.02] transition-colors group">
                 <td className="p-6">
-                  <div className="font-bold text-white group-hover:text-blue-400 transition-colors">{post.title}</div>
-                  <div className="text-[10px] text-slate-500 font-mono mt-1 opacity-60">/{post.slug}</div>
+                  <div className="font-bold text-[#171717] group-hover:text-blue-600 transition-colors">{post.title}</div>
+                  <div className="text-[10px] text-[#8F8F8F] font-mono mt-1 opacity-60">/{post.slug}</div>
                 </td>
                 <td className="p-6">
-                    <span className="px-3 py-1 bg-white/5 rounded-lg text-xs font-medium">{post.author}</span>
+                    <span className="px-3 py-1 bg-white rounded-lg text-xs font-medium">{post.author}</span>
                 </td>
                 <td className="p-6">
                   <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${
-                    post.status === 'published' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+                    post.status === 'published' ? 'bg-emerald-50 text-emerald-600 border border-emerald-500/20' : 'bg-amber-50 text-amber-600 border border-yellow-500/20'
                   }`}>
                     {post.status}
                   </span>
                 </td>
-                <td className="p-6 text-[11px] text-slate-400 font-medium">
+                <td className="p-6 text-[11px] text-[#8F8F8F] font-medium">
                   {post.published_at ? format(new Date(post.published_at), 'MMM dd, yyyy') : 'Drafted'}
                 </td>
                 <td className="p-6 text-right space-x-1">
-                  <Link href={`/posts/${post.slug}`} target="_blank" className="p-2.5 hover:bg-white/5 rounded-xl inline-block text-slate-400 hover:text-white transition-all">
+                  <Link href={`/posts/${post.slug}`} target="_blank" className="p-2.5 hover:bg-white rounded-xl inline-block text-[#8F8F8F] hover:text-[#171717] transition-all">
                     <Eye size={18} />
                   </Link>
-                  <Link href={`/admin/posts/edit/${post.id}`} className="p-2.5 hover:bg-blue-500/10 text-blue-400 rounded-xl inline-block transition-all">
+                  <Link href={`/admin/posts/edit/${post.id}`} className="p-2.5 hover:bg-blue-50 text-blue-600 rounded-xl inline-block transition-all">
                     <Edit size={18} />
                   </Link>
                   <button 
                     onClick={() => handleDelete(post.id)}
                     disabled={deletingId === post.id}
-                    className="p-2.5 hover:bg-red-500/10 text-red-400 rounded-xl transition-all disabled:opacity-50"
+                    className="p-2.5 hover:bg-red-50 text-red-600 rounded-xl transition-all disabled:opacity-50"
                   >
                     {deletingId === post.id ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
                   </button>

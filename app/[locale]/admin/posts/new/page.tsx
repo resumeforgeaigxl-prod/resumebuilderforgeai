@@ -74,7 +74,7 @@ export default function NewPostPage() {
       <div className="flex items-center gap-4 mb-8">
         <Link 
           href="/admin/posts" 
-          className="p-2 hover:bg-white/10 rounded-xl transition-all"
+          className="p-2 hover:bg-neutral-100 rounded-xl transition-all"
         >
           <ArrowLeft size={20} />
         </Link>
@@ -89,31 +89,31 @@ export default function NewPostPage() {
         <div className="col-span-2 space-y-6">
           <div className="glass-card p-6 space-y-4">
             <div>
-              <label className="block text-xs font-black uppercase text-slate-500 mb-2 tracking-widest">Post Title</label>
+              <label className="block text-xs font-black uppercase text-[#8F8F8F] mb-2 tracking-widest">Post Title</label>
               <input
                 required
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
                 placeholder="E.g., Welcome to ResumeForgeAI 2.0"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="w-full bg-white border border-[#EBEBEB] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-black uppercase text-slate-500 mb-2 tracking-widest">URL Slug</label>
+              <label className="block text-xs font-black uppercase text-[#8F8F8F] mb-2 tracking-widest">URL Slug</label>
               <input
                 required
                 name="slug"
                 value={formData.slug}
                 onChange={handleChange}
                 placeholder="welcome-to-v2"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="w-full bg-white border border-[#EBEBEB] rounded-xl px-4 py-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-black uppercase text-slate-500 mb-2 tracking-widest">Content (Markdown)</label>
+              <label className="block text-xs font-black uppercase text-[#8F8F8F] mb-2 tracking-widest">Content (Markdown)</label>
               <textarea
                 required
                 name="content"
@@ -121,7 +121,7 @@ export default function NewPostPage() {
                 onChange={handleChange}
                 rows={15}
                 placeholder="Write your platform update here..."
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 font-sans"
+                className="w-full bg-white border border-[#EBEBEB] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-sans"
               />
             </div>
           </div>
@@ -131,22 +131,22 @@ export default function NewPostPage() {
         <div className="space-y-6">
           <div className="glass-card p-6 space-y-4">
             <div>
-              <label className="block text-xs font-black uppercase text-slate-500 mb-2 tracking-widest">Author</label>
+              <label className="block text-xs font-black uppercase text-[#8F8F8F] mb-2 tracking-widest">Author</label>
               <input
                 name="author"
                 value={formData.author}
                 onChange={handleChange}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="w-full bg-white border border-[#EBEBEB] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-black uppercase text-slate-500 mb-2 tracking-widest">Status</label>
+              <label className="block text-xs font-black uppercase text-[#8F8F8F] mb-2 tracking-widest">Status</label>
               <select
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none"
+                className="w-full bg-black/50 border border-[#EBEBEB] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 appearance-none"
               >
                 <option value="draft">Draft</option>
                 <option value="published">Published</option>
@@ -154,19 +154,19 @@ export default function NewPostPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-black uppercase text-slate-500 mb-2 tracking-widest">SEO Description</label>
+              <label className="block text-xs font-black uppercase text-[#8F8F8F] mb-2 tracking-widest">SEO Description</label>
               <textarea
                 name="seo_description"
                 value={formData.seo_description}
                 onChange={handleChange}
                 rows={3}
                 placeholder="Brief summary for Google..."
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
+                className="w-full bg-white border border-[#EBEBEB] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-black uppercase text-slate-500 mb-2 tracking-widest">Cover Image or Video</label>
+              <label className="block text-xs font-black uppercase text-[#8F8F8F] mb-2 tracking-widest">Cover Image or Video</label>
               <div className="space-y-3">
                 <div className="relative">
                   <input
@@ -174,9 +174,9 @@ export default function NewPostPage() {
                     value={formData.cover_image}
                     onChange={handleChange}
                     placeholder="https://... or upload below"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-xs"
+                    className="w-full bg-white border border-[#EBEBEB] rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-xs"
                   />
-                  <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                  <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8F8F8F]" size={18} />
                 </div>
                 
                 <div className="flex gap-2">
@@ -221,7 +221,7 @@ export default function NewPostPage() {
                   <button
                     type="button"
                     onClick={() => document.getElementById('media-upload')?.click()}
-                    className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[10px] font-bold uppercase py-2 rounded-lg transition-all"
+                    className="flex-1 bg-white hover:bg-neutral-100 border border-[#EBEBEB] text-[#171717] text-[10px] font-bold uppercase py-2 rounded-lg transition-all"
                   >
                     Upload Image/Video
                   </button>
@@ -232,14 +232,14 @@ export default function NewPostPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-blue-600/20 transition-all font-black uppercase tracking-widest"
+              className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-[#171717] font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-blue-600/20 transition-all font-black uppercase tracking-widest"
             >
               {loading ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
               {formData.status === 'published' ? 'Publish Now' : 'Save Draft'}
             </button>
           </div>
 
-          <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl">
+          <div className="p-4 bg-amber-50 border border-yellow-500/20 rounded-2xl">
             <h4 className="text-yellow-500 text-xs font-bold uppercase mb-1">Markdown Tip</h4>
             <p className="text-[10px] text-yellow-500/70 leading-relaxed uppercase font-black">
               Use # for headers, * for lists, and [text](link) for URLs.

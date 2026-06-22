@@ -86,7 +86,7 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                 <div className={`h-16 flex items-center border-b border-[#EBEBEB] overflow-hidden shrink-0 ${isCollapsed ? 'md:px-0 md:justify-center px-4' : 'px-6'}`}>
                     {!isCollapsed ? (
                         <div className="flex items-center gap-3 px-2">
-                            <div className="w-8 h-8 rounded-full bg-[#171717] flex items-center justify-center text-white font-semibold text-xs shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-[#171717] flex items-center justify-center text-[#171717] font-semibold text-xs shrink-0">
                                 RF
                             </div>
                             <span className="font-semibold text-sm tracking-tight text-[#171717] whitespace-nowrap">
@@ -94,7 +94,7 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                             </span>
                         </div>
                     ) : (
-                        <div className="w-8 h-8 rounded-full bg-[#171717] flex items-center justify-center text-white font-semibold text-xs">
+                        <div className="w-8 h-8 rounded-full bg-[#171717] flex items-center justify-center text-[#171717] font-semibold text-xs">
                             RF
                         </div>
                     )}
@@ -252,32 +252,32 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                 }
 
                 /* Text Colors */
-                .admin-container .text-white,
-                .admin-container .text-slate-100,
-                .admin-container .text-slate-200,
-                .admin-container .text-slate-300,
+                .admin-container .text-[#171717],
+                .admin-container .text-[#171717],
+                .admin-container .text-[#171717],
+                .admin-container .text-[#4D4D4D],
                 .admin-container .text-gray-100,
                 .admin-container .text-gray-250,
                 .admin-container .text-gray-300 {
                     color: #171717 !important;
                 }
 
-                .admin-container .text-slate-400,
-                .admin-container .text-slate-500,
+                .admin-container .text-[#8F8F8F],
+                .admin-container .text-[#8F8F8F],
                 .admin-container .text-gray-400,
                 .admin-container .text-gray-500 {
                     color: #4d4d4d !important; /* Vercel body grey */
                 }
 
-                .admin-container .text-slate-600,
-                .admin-container .text-slate-700,
+                .admin-container .text-[#8F8F8F],
+                .admin-container .text-[#8F8F8F],
                 .admin-container .text-gray-600,
                 .admin-container .text-gray-700 {
                     color: #8f8f8f !important; /* Vercel mute copy */
                 }
 
                 /* User list avatar blocks */
-                .admin-container .bg-slate-800 {
+                .admin-container .bg-white {
                     background-color: #fafafa !important;
                     border: 1px solid #ebebeb !important;
                     color: #171717 !important;
@@ -313,7 +313,7 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                     color: #047857 !important;
                 }
 
-                .admin-container .text-emerald-400,
+                .admin-container .text-emerald-600,
                 .admin-container .text-emerald-500 {
                     color: #047857 !important;
                 }
@@ -333,8 +333,8 @@ export default function AdminLayoutClient({ children, profile, locale }: { child
                 }
 
                 /* Accent color mappings: Purple / Indigo */
-                .admin-container .text-purple-400,
-                .admin-container .text-indigo-400,
+                .admin-container .text-purple-600,
+                .admin-container .text-indigo-600,
                 .admin-container .text-purple-500,
                 .admin-container .text-indigo-500 {
                     color: #4f46e5 !important;

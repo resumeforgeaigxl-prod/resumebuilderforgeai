@@ -68,10 +68,10 @@ export default function JobSourcesClient({ initialStats }: { initialStats: Recor
     };
 
     const sources = [
-        { id: 'jsearch', name: 'JSearch API', icon: Database, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-        { id: 'adzuna', name: 'Adzuna API', icon: Zap, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-        { id: 'apify', name: 'Apify Scraper', icon: Globe, color: 'text-orange-400', bg: 'bg-orange-500/10' },
-        { id: 'jobforgecollector', name: 'JobForgeCollector AI', icon: Shield, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
+        { id: 'jsearch', name: 'JSearch API', icon: Database, color: 'text-blue-600', bg: 'bg-blue-50' },
+        { id: 'adzuna', name: 'Adzuna API', icon: Zap, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+        { id: 'apify', name: 'Apify Scraper', icon: Globe, color: 'text-orange-600', bg: 'bg-orange-50' },
+        { id: 'jobforgecollector', name: 'JobForgeCollector AI', icon: Shield, color: 'text-indigo-600', bg: 'bg-indigo-50' },
     ];
 
     const [apifyUrl, setApifyUrl] = useState('');
@@ -80,14 +80,14 @@ export default function JobSourcesClient({ initialStats }: { initialStats: Recor
         <div className="space-y-8">
             <div className="flex flex-wrap gap-4 items-center justify-between glass-card p-6">
                 <div>
-                    <h2 className="text-xl font-bold text-white">Advanced Controls</h2>
-                    <p className="text-sm text-slate-500">Global orchestration operations for the JobForge pipeline.</p>
+                    <h2 className="text-xl font-bold text-[#171717]">Advanced Controls</h2>
+                    <p className="text-sm text-[#8F8F8F]">Global orchestration operations for the JobForge pipeline.</p>
                 </div>
                 <div className="flex gap-4">
                     <button
                         onClick={runDeduplication}
                         disabled={loading.dedupe}
-                        className="bg-red-500/10 hover:bg-red-500/20 text-red-400 px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-2 border border-red-500/20 transition-all disabled:opacity-50"
+                        className="bg-red-50 hover:bg-red-50 border border-red-100 text-red-600 px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-2 border border-red-500/20 transition-all disabled:opacity-50"
                     >
                         {loading.dedupe ? <Loader2 className="w-5 h-5 animate-spin" /> : <Database className="w-5 h-5" />}
                         Remove Duplicates
@@ -95,7 +95,7 @@ export default function JobSourcesClient({ initialStats }: { initialStats: Recor
                     <button
                         onClick={runGlobalSync}
                         disabled={loading.global}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-[#171717] px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50"
                     >
                         {loading.global ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5" />}
                         Run Global Sync
@@ -112,13 +112,13 @@ export default function JobSourcesClient({ initialStats }: { initialStats: Recor
                                     <source.icon className={`w-6 h-6 ${source.color}`} />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold text-white">{source.name}</h3>
-                                    <p className="text-sm text-slate-500">Manual trigger for legacy and AI sources.</p>
+                                    <h3 className="text-xl font-bold text-[#171717]">{source.name}</h3>
+                                    <p className="text-sm text-[#8F8F8F]">Manual trigger for legacy and AI sources.</p>
                                 </div>
                             </div>
                             <div className="text-right">
-                                <div className="text-2xl font-bold text-white">{(stats[source.id] || 0) .toLocaleString()}</div>
-                                <div className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Total Jobs</div>
+                                <div className="text-2xl font-bold text-[#171717]">{(stats[source.id] || 0) .toLocaleString()}</div>
+                                <div className="text-[10px] text-[#8F8F8F] uppercase font-black tracking-widest">Total Jobs</div>
                             </div>
                         </div>
 
@@ -129,10 +129,10 @@ export default function JobSourcesClient({ initialStats }: { initialStats: Recor
                                     placeholder="Scrape specific job URL (optional)..."
                                     value={apifyUrl}
                                     onChange={(e) => setApifyUrl(e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-orange-500/50"
+                                    className="w-full bg-white border border-[#EBEBEB] rounded-lg px-4 py-2 text-xs text-[#171717] focus:outline-none focus:ring-1 focus:ring-orange-500/50"
                                 />
                                 {!apifyUrl && (
-                                    <p className="text-[10px] text-slate-500 mt-2 px-1 italic">
+                                    <p className="text-[10px] text-[#8F8F8F] mt-2 px-1 italic">
                                         Note: Requires APIFY_LINKEDIN_DATASET_ID in .env.local for full scraping.
                                     </p>
                                 )}
@@ -142,7 +142,7 @@ export default function JobSourcesClient({ initialStats }: { initialStats: Recor
                         <div className="mt-8 flex items-center justify-between gap-4">
                             <div className="flex-1 min-w-0">
                                 {messages[source.id] && (
-                                    <p className={`text-[10px] font-mono leading-tight truncate ${messages[source.id].includes('Failed') ? 'text-red-400' : 'text-indigo-400'} animate-in fade-in slide-in-from-left-2`}>
+                                    <p className={`text-[10px] font-mono leading-tight truncate ${messages[source.id].includes('Failed') ? 'text-red-600' : 'text-indigo-600'} animate-in fade-in slide-in-from-left-2`}>
                                         {messages[source.id]}
                                     </p>
                                 )}
@@ -150,7 +150,7 @@ export default function JobSourcesClient({ initialStats }: { initialStats: Recor
                             <button
                                 onClick={() => runIngestion(source.id)}
                                 disabled={loading[source.id]}
-                                className="bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all disabled:opacity-50 flex-shrink-0"
+                                className="bg-white hover:bg-neutral-100 text-[#171717] px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all disabled:opacity-50 flex-shrink-0"
                             >
                                 {loading[source.id] ? (
                                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -166,15 +166,15 @@ export default function JobSourcesClient({ initialStats }: { initialStats: Recor
 
             <div className="glass-card p-6 flex items-center justify-between bg-emerald-500/5 border-emerald-500/10">
                 <div className="flex gap-4 items-center">
-                    <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                        <Database className="w-5 h-5 text-emerald-400" />
+                    <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
+                        <Database className="w-5 h-5 text-emerald-600" />
                     </div>
                     <div>
-                        <h4 className="text-white font-bold">Total Job Base</h4>
-                        <p className="text-xs text-slate-500">Unified database count across all sources.</p>
+                        <h4 className="text-[#171717] font-bold">Total Job Base</h4>
+                        <p className="text-xs text-[#8F8F8F]">Unified database count across all sources.</p>
                     </div>
                 </div>
-                <div className="text-2xl font-black text-emerald-400">
+                <div className="text-2xl font-black text-emerald-600">
                     {Object.values(stats).reduce((a, b) => a + b, 0).toLocaleString()}
                 </div>
             </div>

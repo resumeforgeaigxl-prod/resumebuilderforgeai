@@ -20,7 +20,7 @@ export default async function AdminKnowledge() {
         </div>
         <div className="flex gap-4">
            <Link href="/admin/knowledge-runner" className="btn-secondary">
-             <PlayCircle size={20} className="text-indigo-400" /> Run Knowledge Runner
+             <PlayCircle size={20} className="text-indigo-600" /> Run Knowledge Runner
            </Link>
            <Link href="/admin/knowledge/categories/new" className="btn-primary">
              <Plus size={20} /> New Category
@@ -31,23 +31,23 @@ export default async function AdminKnowledge() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <section>
           <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-            <FolderTree size={20} className="text-indigo-400" /> Categories
+            <FolderTree size={20} className="text-indigo-600" /> Categories
           </h2>
           <div className="space-y-4">
             {categories?.map((cat) => (
-              <div key={cat.id} className="glass-card p-6 flex items-center justify-between hover:border-white/20 transition-all cursor-pointer group">
+              <div key={cat.id} className="glass-card p-6 flex items-center justify-between hover:border-neutral-200 transition-all cursor-pointer group">
                 <div>
                    <h3 className="text-lg font-bold">{cat.name}</h3>
                    <p className="text-sm text-muted-foreground">{cat.knowledge_topics?.[0]?.count || 0} Topics published</p>
                 </div>
                 <div className="flex items-center gap-4">
-                   <button className="text-sm text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">Edit</button>
+                   <button className="text-sm text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">Edit</button>
                    <ChevronRight className="text-muted-foreground" />
                 </div>
               </div>
             ))}
             {(!categories || categories.length === 0) && (
-              <div className="p-12 text-center border border-dashed border-white/10 rounded-xl">
+              <div className="p-12 text-center border border-dashed border-[#EBEBEB] rounded-xl">
                  <p className="text-muted-foreground">No categories yet.</p>
               </div>
             )}
@@ -57,9 +57,9 @@ export default async function AdminKnowledge() {
         <section>
           <div className="flex justify-between items-center mb-6">
              <h2 className="text-xl font-bold flex items-center gap-2">
-               <BookOpen size={20} className="text-emerald-400" /> Recent Topics
+               <BookOpen size={20} className="text-emerald-600" /> Recent Topics
              </h2>
-             <Link href="/admin/knowledge/topics/new" className="text-sm text-indigo-400 hover:underline">View All Topics</Link>
+             <Link href="/admin/knowledge/topics/new" className="text-sm text-indigo-600 hover:underline">View All Topics</Link>
           </div>
           
           <div className="glass-card overflow-hidden">

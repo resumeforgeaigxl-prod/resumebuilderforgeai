@@ -54,7 +54,7 @@ export default async function AdminForgeHub({ params }: { params: { locale: stri
             count: scansRes.count || 0, 
             status: 'Operational', 
             signal: 'SCANNING',
-            color: 'text-purple-400',
+            color: 'text-purple-600',
             desc: 'Real-time semantic JD analysis'
         },
         { 
@@ -63,7 +63,7 @@ export default async function AdminForgeHub({ params }: { params: { locale: stri
             count: networkRes.count || 0, 
             status: 'Maintenance', 
             signal: 'SYNCING',
-            color: 'text-blue-400',
+            color: 'text-blue-600',
             desc: 'Outreach automation & networking'
         },
         { 
@@ -72,7 +72,7 @@ export default async function AdminForgeHub({ params }: { params: { locale: stri
             count: jobsRes.count || 0, 
             status: 'Operational', 
             signal: 'INDEXED',
-            color: 'text-emerald-400',
+            color: 'text-emerald-600',
             desc: 'Semantic job discovery engine'
         }
     ];
@@ -81,20 +81,20 @@ export default async function AdminForgeHub({ params }: { params: { locale: stri
         <div className="space-y-12 pb-20">
             <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                    <Link href={`/${locale}/admin`} className="flex items-center gap-2 text-slate-500 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest mb-6 group">
+                    <Link href={`/${locale}/admin`} className="flex items-center gap-2 text-[#8F8F8F] hover:text-[#171717] transition-colors text-xs font-bold uppercase tracking-widest mb-6 group">
                         <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" /> Back to Governance
                     </Link>
-                    <div className="flex items-center gap-2 text-orange-400 font-bold tracking-widest text-[10px] uppercase mb-4">
+                    <div className="flex items-center gap-2 text-orange-600 font-bold tracking-widest text-[10px] uppercase mb-4">
                         <ShieldCheck className="w-3.5 h-3.5" /> Enterprise Control Node
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-white">
+                    <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-[#171717]">
                         Forge Management
                     </h1>
-                    <p className="text-slate-400 mt-2 text-lg">Centralized governance for platform-wide AI career modules.</p>
+                    <p className="text-[#8F8F8F] mt-2 text-lg">Centralized governance for platform-wide AI career modules.</p>
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <Button className="bg-white/5 border border-white/10 text-white hover:bg-white/10 rounded-xl px-6 h-12 text-sm font-bold">
+                    <Button className="bg-white border border-[#EBEBEB] text-[#171717] hover:bg-neutral-100 rounded-xl px-6 h-12 text-sm font-bold">
                         <Settings className="w-4 h-4 mr-2" /> Global Config
                     </Button>
                 </div>
@@ -110,22 +110,22 @@ export default async function AdminForgeHub({ params }: { params: { locale: stri
                              </Badge>
                         </div>
                         
-                        <div className="w-12 h-12 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-center mb-6 group-hover:border-[#00D4A0]/30 transition-all">
+                        <div className="w-12 h-12 rounded-xl bg-white/[0.03] border border-[#EBEBEB] flex items-center justify-center mb-6 group-hover:border-[#00D4A0]/30 transition-all">
                             <stat.icon className={`w-6 h-6 ${stat.color}`} />
                         </div>
                         
                         <div className="space-y-1">
-                            <h3 className="text-xl font-bold text-white uppercase tracking-tight">{stat.name}</h3>
-                            <p className="text-xs text-slate-500 font-medium">{stat.desc}</p>
+                            <h3 className="text-xl font-bold text-[#171717] uppercase tracking-tight">{stat.name}</h3>
+                            <p className="text-xs text-[#8F8F8F] font-medium">{stat.desc}</p>
                         </div>
 
-                        <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+                        <div className="mt-8 pt-6 border-t border-[#EBEBEB] flex items-center justify-between">
                             <div>
-                                <div className="text-[10px] text-slate-600 font-black uppercase tracking-[0.15em] mb-1">Lifetime Calls</div>
-                                <div className="text-2xl font-bold text-white tracking-tighter">{stat.count.toLocaleString()}</div>
+                                <div className="text-[10px] text-[#8F8F8F] font-black uppercase tracking-[0.15em] mb-1">Lifetime Calls</div>
+                                <div className="text-2xl font-bold text-[#171717] tracking-tighter">{stat.count.toLocaleString()}</div>
                             </div>
                             <div className="text-right">
-                                <div className="text-[10px] text-slate-600 font-black uppercase tracking-[0.15em] mb-1">State</div>
+                                <div className="text-[10px] text-[#8F8F8F] font-black uppercase tracking-[0.15em] mb-1">State</div>
                                 <div className={`text-xs font-bold ${stat.status === 'Operational' ? 'text-emerald-500' : 'text-amber-500'}`}>
                                     {stat.status}
                                 </div>
@@ -139,28 +139,28 @@ export default async function AdminForgeHub({ params }: { params: { locale: stri
                 {/* Deployment Control */}
                 <div className="lg:col-span-2 glass-card p-10">
                     <div className="flex items-center justify-between mb-10">
-                        <h2 className="text-xl font-bold text-white flex items-center gap-3">
-                            <Database className="w-5 h-5 text-indigo-400" />
+                        <h2 className="text-xl font-bold text-[#171717] flex items-center gap-3">
+                            <Database className="w-5 h-5 text-indigo-600" />
                             Model Governance
                         </h2>
-                        <Badge className="bg-indigo-500/10 text-indigo-400 border-none font-bold uppercase text-[10px]">Neural v4.2 Active</Badge>
+                        <Badge className="bg-indigo-50 text-indigo-600 border-none font-bold uppercase text-[10px]">Neural v4.2 Active</Badge>
                     </div>
 
                     <div className="space-y-6">
                         {['SalaryForge', 'AtsLive', 'JobForge'].map((forge) => (
-                            <div key={forge} className="p-6 rounded-2xl bg-white/[0.01] border border-white/5 flex items-center justify-between group hover:bg-white/[0.02] transition-all">
+                            <div key={forge} className="p-6 rounded-2xl bg-white/[0.01] border border-[#EBEBEB] flex items-center justify-between group hover:bg-white/[0.02] transition-all">
                                 <div className="flex items-center gap-6">
-                                    <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center border border-white/5 text-slate-400">
+                                    <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center border border-[#EBEBEB] text-[#8F8F8F]">
                                         <Lock className="w-4 h-4" />
                                     </div>
                                     <div>
-                                        <h4 className="text-sm font-bold text-white">{forge} Engine</h4>
-                                        <p className="text-[10px] text-slate-500 font-medium uppercase tracking-widest mt-1">Route: /api/{forge.toLowerCase()}/negotiate</p>
+                                        <h4 className="text-sm font-bold text-[#171717]">{forge} Engine</h4>
+                                        <p className="text-[10px] text-[#8F8F8F] font-medium uppercase tracking-widest mt-1">Route: /api/{forge.toLowerCase()}/negotiate</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <Badge variant="outline" className="border-white/5 text-slate-500 text-[10px] font-bold">GPT-4o</Badge>
-                                    <Button size="sm" variant="outline" className="h-8 text-[10px] font-black uppercase border-white/5 hover:bg-white/5">Configure</Button>
+                                    <Badge variant="outline" className="border-[#EBEBEB] text-[#8F8F8F] text-[10px] font-bold">GPT-4o</Badge>
+                                    <Button size="sm" variant="outline" className="h-8 text-[10px] font-black uppercase border-[#EBEBEB] hover:bg-white">Configure</Button>
                                 </div>
                             </div>
                         ))}
@@ -169,38 +169,38 @@ export default async function AdminForgeHub({ params }: { params: { locale: stri
 
                 {/* Performance Signal */}
                 <div className="glass-card p-10">
-                    <h2 className="text-xl font-bold text-white mb-8 flex items-center gap-3">
-                        <Activity className="w-5 h-5 text-emerald-400" />
+                    <h2 className="text-xl font-bold text-[#171717] mb-8 flex items-center gap-3">
+                        <Activity className="w-5 h-5 text-emerald-600" />
                         Live Latency
                     </h2>
                     
                     <div className="space-y-8">
                         <div>
                             <div className="flex justify-between items-center mb-2">
-                                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Inference Speed</span>
-                                <span className="text-xs font-mono text-emerald-400">240ms</span>
+                                <span className="text-xs font-bold text-[#8F8F8F] uppercase tracking-widest">Inference Speed</span>
+                                <span className="text-xs font-mono text-emerald-600">240ms</span>
                             </div>
-                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                            <div className="h-1.5 w-full bg-white rounded-full overflow-hidden">
                                 <div className="h-full w-[85%] bg-emerald-500/50 rounded-full" />
                             </div>
                         </div>
 
                         <div>
                             <div className="flex justify-between items-center mb-2">
-                                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Memory Load</span>
-                                <span className="text-xs font-mono text-indigo-400">12%</span>
+                                <span className="text-xs font-bold text-[#8F8F8F] uppercase tracking-widest">Memory Load</span>
+                                <span className="text-xs font-mono text-indigo-600">12%</span>
                             </div>
-                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                            <div className="h-1.5 w-full bg-white rounded-full overflow-hidden">
                                 <div className="h-full w-[12%] bg-indigo-500/50 rounded-full" />
                             </div>
                         </div>
 
                         <div>
                             <div className="flex justify-between items-center mb-2">
-                                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">API Reliability</span>
-                                <span className="text-xs font-mono text-white">99.9%</span>
+                                <span className="text-xs font-bold text-[#8F8F8F] uppercase tracking-widest">API Reliability</span>
+                                <span className="text-xs font-mono text-[#171717]">99.9%</span>
                             </div>
-                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                            <div className="h-1.5 w-full bg-white rounded-full overflow-hidden">
                                 <div className="h-full w-[99.9%] bg-white/30 rounded-full" />
                             </div>
                         </div>
@@ -210,8 +210,8 @@ export default async function AdminForgeHub({ params }: { params: { locale: stri
                         <div className="flex items-center gap-2 text-[#00D4A0] font-black text-[10px] uppercase tracking-[0.2em] mb-2">
                              <TrendingUp className="w-3.5 h-3.5" /> Growth Vector
                         </div>
-                        <p className="text-xs text-slate-400 leading-relaxed">
-                            Forge modules are currently experiencing a <span className="text-white font-bold">24% MoM increase</span> in high-ticket usage.
+                        <p className="text-xs text-[#8F8F8F] leading-relaxed">
+                            Forge modules are currently experiencing a <span className="text-[#171717] font-bold">24% MoM increase</span> in high-ticket usage.
                         </p>
                     </div>
                 </div>

@@ -44,28 +44,28 @@ export default function AdminInterviewIntelPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold flex items-center gap-2">
-                        <TrendingUp className="w-6 h-6 text-indigo-400" /> Interview Intelligence
+                        <TrendingUp className="w-6 h-6 text-indigo-600" /> Interview Intelligence
                     </h1>
-                    <p className="text-slate-500 text-sm mt-1">Global platform performance: {avgReadiness}% Avg Readiness</p>
+                    <p className="text-[#8F8F8F] text-sm mt-1">Global platform performance: {avgReadiness}% Avg Readiness</p>
                 </div>
                 <div className="relative">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8F8F8F]" />
                     <input
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="Search user email…"
-                        className="pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 w-full sm:w-72"
+                        className="pl-9 pr-4 py-2 bg-white border border-[#EBEBEB] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 w-full sm:w-72"
                     />
                 </div>
             </div>
 
             {loading ? (
-                <div className="flex items-center justify-center h-48"><Loader2 className="w-6 h-6 animate-spin text-indigo-400" /></div>
+                <div className="flex items-center justify-center h-48"><Loader2 className="w-6 h-6 animate-spin text-indigo-600" /></div>
             ) : (
-                <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden overflow-x-auto">
+                <div className="bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden overflow-x-auto">
                     <table className="w-full text-sm min-w-[1000px]">
-                        <thead className="border-b border-white/10 bg-white/5">
-                            <tr className="text-left text-xs text-slate-500 uppercase tracking-wider">
+                        <thead className="border-b border-[#EBEBEB] bg-white">
+                            <tr className="text-left text-xs text-[#8F8F8F] uppercase tracking-wider">
                                 <th className="px-6 py-4">User</th>
                                 <th className="px-6 py-4">Readiness</th>
                                 <th className="px-6 py-4">Technical</th>
@@ -76,31 +76,31 @@ export default function AdminInterviewIntelPage() {
                                 <th className="px-6 py-4">Action</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-[#EBEBEB]">
                             {filtered.map(score => (
-                                <tr key={score.id} className="hover:bg-white/5 transition-colors">
+                                <tr key={score.id} className="hover:bg-white transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center">
-                                                <User className="w-4 h-4 text-slate-500" />
+                                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
+                                                <User className="w-4 h-4 text-[#8F8F8F]" />
                                             </div>
-                                            <span className="text-white font-medium">{score.user_email}</span>
+                                            <span className="text-[#171717] font-medium">{score.user_email}</span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-400 font-black">
+                                        <span className="px-3 py-1 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 font-black">
                                             {score.overall_readiness}%
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-slate-300 font-mono">{score.technical_score}/10</td>
-                                    <td className="px-6 py-4 text-slate-300 font-mono">{score.communication_score}</td>
-                                    <td className="px-6 py-4 text-slate-300 font-mono">{score.confidence_score}</td>
-                                    <td className="px-6 py-4 text-slate-300 font-mono">{score.problem_solving_score}</td>
-                                    <td className="px-6 py-4 text-slate-500 text-xs">
+                                    <td className="px-6 py-4 text-[#4D4D4D] font-mono">{score.technical_score}/10</td>
+                                    <td className="px-6 py-4 text-[#4D4D4D] font-mono">{score.communication_score}</td>
+                                    <td className="px-6 py-4 text-[#4D4D4D] font-mono">{score.confidence_score}</td>
+                                    <td className="px-6 py-4 text-[#4D4D4D] font-mono">{score.problem_solving_score}</td>
+                                    <td className="px-6 py-4 text-[#8F8F8F] text-xs">
                                         {format(new Date(score.created_at), 'MMM dd, HH:mm')}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <button className="text-indigo-400 hover:text-indigo-300 font-bold text-xs uppercase tracking-widest">
+                                        <button className="text-indigo-600 hover:text-indigo-300 font-bold text-xs uppercase tracking-widest">
                                             Report
                                         </button>
                                     </td>
@@ -109,7 +109,7 @@ export default function AdminInterviewIntelPage() {
                         </tbody>
                     </table>
                     {filtered.length === 0 && (
-                        <div className="py-20 text-center text-slate-500">No session data found.</div>
+                        <div className="py-20 text-center text-[#8F8F8F]">No session data found.</div>
                     )}
                 </div>
             )}

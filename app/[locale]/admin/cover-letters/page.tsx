@@ -46,71 +46,71 @@ export default function AdminCoverLettersPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold flex items-center gap-2">
-                        <FileHeart className="w-6 h-6 text-pink-400" />
+                        <FileHeart className="w-6 h-6 text-pink-600" />
                         Cover Letters
                     </h1>
-                    <p className="text-slate-500 text-sm mt-1">
+                    <p className="text-[#8F8F8F] text-sm mt-1">
                         All AI-generated cover letters across the platform
                     </p>
                 </div>
                 <button
                     onClick={fetchData}
-                    className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold transition-all"
+                    className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-neutral-100 border border-[#EBEBEB] rounded-xl text-xs font-bold transition-all"
                 >
-                    <RefreshCw className="w-3.5 h-3.5 text-pink-400" />
+                    <RefreshCw className="w-3.5 h-3.5 text-pink-600" />
                     Refresh
                 </button>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
-                    <div className="inline-flex p-3 rounded-xl bg-pink-500/10 mb-4">
-                        <FileHeart className="w-5 h-5 text-pink-400" />
+                <div className="p-6 bg-white border border-[#EBEBEB] rounded-2xl">
+                    <div className="inline-flex p-3 rounded-xl bg-pink-50 mb-4">
+                        <FileHeart className="w-5 h-5 text-pink-600" />
                     </div>
-                    <div className="text-3xl font-bold text-white mb-1">{total}</div>
-                    <div className="text-sm text-slate-400">Total Generated</div>
+                    <div className="text-3xl font-bold text-[#171717] mb-1">{total}</div>
+                    <div className="text-sm text-[#8F8F8F]">Total Generated</div>
                 </div>
-                <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
-                    <div className="inline-flex p-3 rounded-xl bg-purple-500/10 mb-4">
-                        <Briefcase className="w-5 h-5 text-purple-400" />
+                <div className="p-6 bg-white border border-[#EBEBEB] rounded-2xl">
+                    <div className="inline-flex p-3 rounded-xl bg-purple-50 mb-4">
+                        <Briefcase className="w-5 h-5 text-purple-600" />
                     </div>
-                    <div className="text-3xl font-bold text-white mb-1">
+                    <div className="text-3xl font-bold text-[#171717] mb-1">
                         {new Set(coverLetters.map(c => c.role_title).filter(Boolean)).size}
                     </div>
-                    <div className="text-sm text-slate-400">Unique Roles</div>
+                    <div className="text-sm text-[#8F8F8F]">Unique Roles</div>
                 </div>
-                <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
-                    <div className="inline-flex p-3 rounded-xl bg-blue-500/10 mb-4">
-                        <Building2 className="w-5 h-5 text-blue-400" />
+                <div className="p-6 bg-white border border-[#EBEBEB] rounded-2xl">
+                    <div className="inline-flex p-3 rounded-xl bg-blue-50 mb-4">
+                        <Building2 className="w-5 h-5 text-blue-600" />
                     </div>
-                    <div className="text-3xl font-bold text-white mb-1">
+                    <div className="text-3xl font-bold text-[#171717] mb-1">
                         {new Set(coverLetters.map(c => c.company_name).filter(Boolean)).size}
                     </div>
-                    <div className="text-sm text-slate-400">Unique Companies</div>
+                    <div className="text-sm text-[#8F8F8F]">Unique Companies</div>
                 </div>
             </div>
 
             {/* Table */}
-            <div className="bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-white/5 flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-pink-400" />
+            <div className="bg-white/[0.02] border border-[#EBEBEB] rounded-2xl overflow-hidden">
+                <div className="px-6 py-4 border-b border-[#EBEBEB] flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-pink-600" />
                     <h2 className="font-semibold text-sm">Recent Cover Letters</h2>
-                    <span className="ml-auto text-xs text-slate-600">Auto-refreshes every 10s</span>
+                    <span className="ml-auto text-xs text-[#8F8F8F]">Auto-refreshes every 10s</span>
                 </div>
 
                 {loading ? (
                     <div className="flex items-center justify-center py-16">
-                        <Loader2 className="w-7 h-7 animate-spin text-pink-400 opacity-50" />
+                        <Loader2 className="w-7 h-7 animate-spin text-pink-600 opacity-50" />
                     </div>
                 ) : coverLetters.length === 0 ? (
-                    <div className="py-16 text-center text-slate-600 text-sm">
+                    <div className="py-16 text-center text-[#8F8F8F] text-sm">
                         No cover letters generated yet. They will appear here once users generate them.
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
-                            <thead className="border-b border-white/5 text-xs text-slate-500 uppercase tracking-wider">
+                            <thead className="border-b border-[#EBEBEB] text-xs text-[#8F8F8F] uppercase tracking-wider">
                                 <tr>
                                     <th className="px-6 py-3 text-left font-bold">User ID</th>
                                     <th className="px-6 py-3 text-left font-bold">Role</th>
@@ -119,24 +119,24 @@ export default function AdminCoverLettersPage() {
                                     <th className="px-6 py-3 text-left font-bold">Generated</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/5">
+                            <tbody className="divide-y divide-[#EBEBEB]">
                                 {coverLetters.map(cl => (
                                     <tr key={cl.id} className="hover:bg-white/[0.02] transition-colors">
-                                        <td className="px-6 py-3 font-mono text-xs text-slate-500">
+                                        <td className="px-6 py-3 font-mono text-xs text-[#8F8F8F]">
                                             {cl.user_id?.slice(0, 8)}…
                                         </td>
-                                        <td className="px-6 py-3 text-slate-200 font-medium">
-                                            {cl.role_title || <span className="text-slate-600 italic">Unknown Role</span>}
+                                        <td className="px-6 py-3 text-[#171717] font-medium">
+                                            {cl.role_title || <span className="text-[#8F8F8F] italic">Unknown Role</span>}
                                         </td>
-                                        <td className="px-6 py-3 text-slate-400">
-                                            {cl.company_name || <span className="text-slate-600 italic">Not specified</span>}
+                                        <td className="px-6 py-3 text-[#8F8F8F]">
+                                            {cl.company_name || <span className="text-[#8F8F8F] italic">Not specified</span>}
                                         </td>
                                         <td className="px-6 py-3">
-                                            <span className="px-2 py-0.5 bg-pink-500/10 border border-pink-500/20 text-pink-400 rounded-md text-[11px] font-bold">
+                                            <span className="px-2 py-0.5 bg-pink-50 border border-pink-500/20 text-pink-600 rounded-md text-[11px] font-bold">
                                                 {cl.word_count || 0}w
                                             </span>
                                         </td>
-                                        <td className="px-6 py-3 text-slate-500 text-xs flex items-center gap-2">
+                                        <td className="px-6 py-3 text-[#8F8F8F] text-xs flex items-center gap-2">
                                             <Calendar className="w-3 h-3" />
                                             {new Date(cl.created_at).toLocaleString('en-IN', {
                                                 day: '2-digit', month: 'short',

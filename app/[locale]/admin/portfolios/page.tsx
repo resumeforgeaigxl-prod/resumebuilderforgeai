@@ -52,24 +52,24 @@ export default function AdminPortfoliosPage() {
         <div className="p-4 sm:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold flex items-center gap-2"><LayoutTemplate className="w-6 h-6 text-pink-400" />Portfolio Monitoring</h1>
-                    <p className="text-slate-500 text-sm mt-1">{portfolios.length} live portfolios</p>
+                    <h1 className="text-2xl font-bold flex items-center gap-2"><LayoutTemplate className="w-6 h-6 text-pink-600" />Portfolio Monitoring</h1>
+                    <p className="text-[#8F8F8F] text-sm mt-1">{portfolios.length} live portfolios</p>
                 </div>
                 <div className="relative">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8F8F8F]" />
                     <input value={search} onChange={e => setSearch(e.target.value)}
                         placeholder="Search username or email…"
-                        className="pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/50 w-full sm:w-64" />
+                        className="pl-9 pr-4 py-2 bg-white border border-[#EBEBEB] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/50 w-full sm:w-64" />
                 </div>
             </div>
 
             {loading ? (
-                <div className="flex items-center justify-center h-48"><Loader2 className="w-6 h-6 animate-spin text-pink-400" /></div>
+                <div className="flex items-center justify-center h-48"><Loader2 className="w-6 h-6 animate-spin text-pink-600" /></div>
             ) : (
-                <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden overflow-x-auto">
+                <div className="bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden overflow-x-auto">
                     <table className="w-full text-sm min-w-[800px]">
-                        <thead className="border-b border-white/10 bg-white/5">
-                            <tr className="text-left text-xs text-slate-500 uppercase tracking-wider">
+                        <thead className="border-b border-[#EBEBEB] bg-white">
+                            <tr className="text-left text-xs text-[#8F8F8F] uppercase tracking-wider">
                                 <th className="px-5 py-3">Portfolio Username</th>
                                 <th className="px-5 py-3">Owner User</th>
                                 <th className="px-5 py-3">Theme</th>
@@ -78,43 +78,43 @@ export default function AdminPortfoliosPage() {
                                 <th className="px-5 py-3">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-[#EBEBEB]">
                             {filtered.map(p => (
-                                <tr key={p.id} className={`hover:bg-white/5 transition-colors ${!p.is_public ? 'opacity-60' : ''}`}>
+                                <tr key={p.id} className={`hover:bg-white transition-colors ${!p.is_public ? 'opacity-60' : ''}`}>
                                     <td className="px-5 py-4">
                                         <div className="flex items-center gap-2">
-                                            <LayoutTemplate className="w-4 h-4 text-slate-500 shrink-0" />
-                                            <Link href={`/portfolio/${p.username}`} target="_blank" className="font-medium text-pink-400 hover:text-pink-300 flex items-center gap-1.5 transition-colors">
+                                            <LayoutTemplate className="w-4 h-4 text-[#8F8F8F] shrink-0" />
+                                            <Link href={`/portfolio/${p.username}`} target="_blank" className="font-medium text-pink-600 hover:text-pink-300 flex items-center gap-1.5 transition-colors">
                                                 {p.username}
                                                 <ExternalLink className="w-3 h-3" />
                                             </Link>
                                         </div>
                                     </td>
                                     <td className="px-5 py-4">
-                                        <div className="flex items-center gap-1.5 text-slate-400">
-                                            <User className="w-3.5 h-3.5 text-slate-500" />
+                                        <div className="flex items-center gap-1.5 text-[#8F8F8F]">
+                                            <User className="w-3.5 h-3.5 text-[#8F8F8F]" />
                                             {p.user_email}
                                         </div>
                                     </td>
-                                    <td className="px-5 py-4 text-slate-300 capitalize">{p.theme || 'minimal'}</td>
-                                    <td className="px-5 py-4 text-slate-400">
+                                    <td className="px-5 py-4 text-[#4D4D4D] capitalize">{p.theme || 'minimal'}</td>
+                                    <td className="px-5 py-4 text-[#8F8F8F]">
                                         <div className="flex items-center gap-1.5">
-                                            <Calendar className="w-3 h-3 text-slate-500" />
+                                            <Calendar className="w-3 h-3 text-[#8F8F8F]" />
                                             {formatDistanceToNow(new Date(p.created_at), { addSuffix: true })}
                                         </div>
                                     </td>
                                     <td className="px-5 py-4">
                                         {p.is_public ? (
-                                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400 flex items-center gap-1.5 w-fit"><Globe className="w-3 h-3" /> Public</span>
+                                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center gap-1.5 w-fit"><Globe className="w-3 h-3" /> Public</span>
                                         ) : (
-                                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/20 text-red-400 flex items-center gap-1.5 w-fit"><GlobeLock className="w-3 h-3" /> Disabled</span>
+                                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 border border-red-100 text-red-600 flex items-center gap-1.5 w-fit"><GlobeLock className="w-3 h-3" /> Disabled</span>
                                         )}
                                     </td>
                                     <td className="px-5 py-4">
                                         <button
                                             onClick={() => toggleVisibility(p.id, p.is_public)}
                                             disabled={toggling === p.id}
-                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${p.is_public ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20' : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'} disabled:opacity-50`}>
+                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${p.is_public ? 'bg-red-50 text-red-600 hover:bg-red-50 border border-red-100' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-50 border border-emerald-100'} disabled:opacity-50`}>
                                             {toggling === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : (p.is_public ? <GlobeLock className="w-3 h-3" /> : <Globe className="w-3 h-3" />)}
                                             {p.is_public ? 'Force Disable' : 'Enable Public'}
                                         </button>
@@ -123,7 +123,7 @@ export default function AdminPortfoliosPage() {
                             ))}
                         </tbody>
                     </table>
-                    {filtered.length === 0 && <div className="text-center py-12 text-slate-500">No portfolios found matching your search.</div>}
+                    {filtered.length === 0 && <div className="text-center py-12 text-[#8F8F8F]">No portfolios found matching your search.</div>}
                 </div>
             )}
         </div>

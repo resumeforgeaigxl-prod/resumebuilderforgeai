@@ -60,11 +60,11 @@ export default function AnalyticsDashboard() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-white italic uppercase tracking-tighter">User Intelligence Dashboard</h1>
-                    <p className="text-slate-500 font-medium">Real-time behavior tracking and system performance.</p>
+                    <h1 className="text-3xl font-black text-[#171717] italic uppercase tracking-tighter">User Intelligence Dashboard</h1>
+                    <p className="text-[#8F8F8F] font-medium">Real-time behavior tracking and system performance.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button variant="glass" size="sm" className="bg-white/5 border-white/10 hover:bg-white/10">
+                    <Button variant="glass" size="sm" className="bg-white border-[#EBEBEB] hover:bg-neutral-100">
                         <Calendar className="w-4 h-4 mr-2" />
                         Last 7 Days
                     </Button>
@@ -77,7 +77,7 @@ export default function AnalyticsDashboard() {
             {/* Top Stat Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {statCards.map((stat, i) => (
-                    <Card key={i} glass className="p-6 border-white/5 relative overflow-hidden group hover:scale-[1.02] transition-all">
+                    <Card key={i} glass className="p-6 border-[#EBEBEB] relative overflow-hidden group hover:scale-[1.02] transition-all">
                         <div className={`absolute -right-6 -top-6 w-24 h-24 bg-${stat.color}-500/10 rounded-full blur-2xl group-hover:bg-${stat.color}-500/20 transition-all`} />
                         <div className="flex justify-between items-start mb-4">
                             <div className={`p-3 rounded-2xl bg-${stat.color}-500/10 border border-${stat.color}-500/20`}>
@@ -88,23 +88,23 @@ export default function AnalyticsDashboard() {
                                 {stat.trend}
                             </div>
                         </div>
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">{stat.title}</h3>
-                        <p className="text-3xl font-black text-white tracking-tighter italic">{stat.value.toLocaleString()}</p>
+                        <h3 className="text-[10px] font-black uppercase tracking-widest text-[#8F8F8F] mb-1">{stat.title}</h3>
+                        <p className="text-3xl font-black text-[#171717] tracking-tighter italic">{stat.value.toLocaleString()}</p>
                     </Card>
                 ))}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Feature Usage Chart (Simulated) */}
-                <Card glass className="lg:col-span-2 p-8 border-white/5 flex flex-col h-[500px]">
+                <Card glass className="lg:col-span-2 p-8 border-[#EBEBEB] flex flex-col h-[500px]">
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-emerald-500/10"><BarChart3 className="w-5 h-5 text-emerald-500" /></div>
-                            <h2 className="font-black italic uppercase tracking-wider text-white">System Feature Usage</h2>
+                            <div className="p-2 rounded-lg bg-emerald-50"><BarChart3 className="w-5 h-5 text-emerald-500" /></div>
+                            <h2 className="font-black italic uppercase tracking-wider text-[#171717]">System Feature Usage</h2>
                         </div>
                         <div className="flex gap-2">
                              {['Hourly', 'Daily', 'Monthly'].map(t => (
-                                 <button key={t} className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full transition-all ${t === 'Daily' ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-white'}`}>{t}</button>
+                                 <button key={t} className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full transition-all ${t === 'Daily' ? 'bg-neutral-100 text-[#171717]' : 'text-[#8F8F8F] hover:text-[#171717]'}`}>{t}</button>
                              ))}
                         </div>
                     </div>
@@ -121,48 +121,48 @@ export default function AnalyticsDashboard() {
                              </div>
                          ))}
                     </div>
-                    <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-600 pt-4 border-t border-white/5">
+                    <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-[#8F8F8F] pt-4 border-t border-[#EBEBEB]">
                         <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
                     </div>
                 </Card>
 
                 {/* Top Visited Pages */}
-                <Card glass className="p-8 border-white/5 flex flex-col h-[500px]">
+                <Card glass className="p-8 border-[#EBEBEB] flex flex-col h-[500px]">
                     <div className="flex items-center gap-3 mb-8">
-                        <div className="p-2 rounded-lg bg-purple-500/10"><PieChart className="w-5 h-5 text-purple-500" /></div>
-                        <h2 className="font-black italic uppercase tracking-wider text-white">Top Target Pages</h2>
+                        <div className="p-2 rounded-lg bg-purple-50"><PieChart className="w-5 h-5 text-purple-500" /></div>
+                        <h2 className="font-black italic uppercase tracking-wider text-[#171717]">Top Target Pages</h2>
                     </div>
 
                     <div className="space-y-6 flex-1 overflow-y-auto pr-2">
                         {stats.top_pages.map((p, i) => (
                             <div key={i} className="flex items-center justify-between group cursor-pointer">
                                 <div className="space-y-1">
-                                    <p className="text-xs font-black text-white uppercase tracking-wider group-hover:text-purple-400 transition-colors">{p.path}</p>
-                                    <div className="w-48 h-1 bg-white/5 rounded-full overflow-hidden">
+                                    <p className="text-xs font-black text-[#171717] uppercase tracking-wider group-hover:text-purple-600 transition-colors">{p.path}</p>
+                                    <div className="w-48 h-1 bg-white rounded-full overflow-hidden">
                                         <div style={{ width: `${(p.visits / stats.top_pages[0].visits) * 100}%` }} className="h-full bg-purple-500 rounded-full" />
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-black text-white italic">{p.visits.toLocaleString()}</p>
-                                    <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest italic">Visits</p>
+                                    <p className="text-sm font-black text-[#171717] italic">{p.visits.toLocaleString()}</p>
+                                    <p className="text-[10px] font-medium text-[#8F8F8F] uppercase tracking-widest italic">Visits</p>
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    <Button variant="glass" className="w-full mt-6 bg-white/5 border-white/10 hover:bg-white/10 text-[10px] font-black uppercase tracking-[0.2em] italic">View Detailed Traffic</Button>
+                    <Button variant="glass" className="w-full mt-6 bg-white border-[#EBEBEB] hover:bg-neutral-100 text-[10px] font-black uppercase tracking-[0.2em] italic">View Detailed Traffic</Button>
                 </Card>
             </div>
 
             {/* Bottom Row: User Context & Device Split */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Card glass className="p-8 border-white/5">
+                <Card glass className="p-8 border-[#EBEBEB]">
                     <div className="flex items-center justify-between mb-8">
                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-blue-500/10"><Globe className="w-5 h-5 text-blue-500" /></div>
-                            <h2 className="font-black italic uppercase tracking-wider text-white">Browser / Geo Split</h2>
+                            <div className="p-2 rounded-lg bg-blue-50"><Globe className="w-5 h-5 text-blue-500" /></div>
+                            <h2 className="font-black italic uppercase tracking-wider text-[#171717]">Browser / Geo Split</h2>
                         </div>
-                        <Button size="sm" variant="glass" className="text-[10px] font-black uppercase tracking-widest text-slate-400">View Map</Button>
+                        <Button size="sm" variant="glass" className="text-[10px] font-black uppercase tracking-widest text-[#8F8F8F]">View Map</Button>
                     </div>
                     <div className="space-y-4">
                         {[
@@ -172,11 +172,11 @@ export default function AnalyticsDashboard() {
                             { name: 'Other', pct: 5, color: 'slate' }
                         ].map((b, i) => (
                             <div key={i} className="space-y-2">
-                                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest italic text-slate-500">
+                                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest italic text-[#8F8F8F]">
                                     <span>{b.name}</span>
-                                    <span className="text-white">{b.pct}%</span>
+                                    <span className="text-[#171717]">{b.pct}%</span>
                                 </div>
-                                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                <div className="h-1.5 w-full bg-white rounded-full overflow-hidden">
                                     <div style={{ width: `${b.pct}%` }} className={`h-full bg-${b.color}-500 rounded-full`} />
                                 </div>
                             </div>
@@ -184,28 +184,28 @@ export default function AnalyticsDashboard() {
                     </div>
                 </Card>
 
-                <Card glass className="p-8 border-white/5">
+                <Card glass className="p-8 border-[#EBEBEB]">
                     <div className="flex items-center justify-between mb-8">
                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-amber-500/10"><Smartphone className="w-5 h-5 text-amber-500" /></div>
-                            <h2 className="font-black italic uppercase tracking-wider text-white">Device Breakdown</h2>
+                            <div className="p-2 rounded-lg bg-amber-50"><Smartphone className="w-5 h-5 text-amber-500" /></div>
+                            <h2 className="font-black italic uppercase tracking-wider text-[#171717]">Device Breakdown</h2>
                         </div>
-                        <Button size="sm" variant="glass" className="text-[10px] font-black uppercase tracking-widest text-slate-400">View Network</Button>
+                        <Button size="sm" variant="glass" className="text-[10px] font-black uppercase tracking-widest text-[#8F8F8F]">View Network</Button>
                     </div>
                     <div className="flex justify-around items-center h-40">
                          <div className="text-center group cursor-pointer">
-                             <div className="w-16 h-16 rounded-[1.5rem] bg-amber-500/10 flex items-center justify-center mx-auto mb-4 border border-amber-500/20 group-hover:scale-110 transition-all shadow-lg group-hover:shadow-amber-500/20">
+                             <div className="w-16 h-16 rounded-[1.5rem] bg-amber-50 flex items-center justify-center mx-auto mb-4 border border-amber-500/20 group-hover:scale-110 transition-all shadow-lg group-hover:shadow-amber-500/20">
                                  <Smartphone className="w-6 h-6 text-amber-500" />
                              </div>
-                             <p className="text-lg font-black text-white italic">72%</p>
-                             <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Mobile</p>
+                             <p className="text-lg font-black text-[#171717] italic">72%</p>
+                             <p className="text-[10px] font-black uppercase tracking-widest text-[#8F8F8F]">Mobile</p>
                          </div>
                          <div className="text-center group cursor-pointer">
-                             <div className="w-16 h-16 rounded-[1.5rem] bg-indigo-500/10 flex items-center justify-center mx-auto mb-4 border border-indigo-500/20 group-hover:scale-110 transition-all shadow-lg group-hover:shadow-indigo-500/20">
+                             <div className="w-16 h-16 rounded-[1.5rem] bg-indigo-50 flex items-center justify-center mx-auto mb-4 border border-indigo-500/20 group-hover:scale-110 transition-all shadow-lg group-hover:shadow-indigo-500/20">
                                  <MonitorIcon className="w-6 h-6 text-indigo-500" />
                              </div>
-                             <p className="text-lg font-black text-white italic">28%</p>
-                             <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Desktop</p>
+                             <p className="text-lg font-black text-[#171717] italic">28%</p>
+                             <p className="text-[10px] font-black uppercase tracking-widest text-[#8F8F8F]">Desktop</p>
                          </div>
                     </div>
                 </Card>

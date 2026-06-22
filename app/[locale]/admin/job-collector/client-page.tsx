@@ -93,7 +93,7 @@ export default function JobCollectorClient() {
                     <button
                         onClick={() => runAction('collector', 'Collector')}
                         disabled={loading.collector}
-                        className="w-full py-3 bg-indigo-600 hover:bg-indigo-750 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm md:text-base shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
+                        className="w-full py-3 bg-indigo-600 hover:bg-indigo-750 text-[#171717] font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-sm md:text-base shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
                     >
                         {loading.collector ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
                         Start Collector

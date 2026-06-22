@@ -21,11 +21,11 @@ export default async function JobSourcesPage() {
     return (
         <div className="space-y-8 pb-20">
             <header>
-                <div className="flex items-center gap-2 text-indigo-400 font-bold tracking-widest text-[10px] uppercase mb-4">
+                <div className="flex items-center gap-2 text-indigo-600 font-bold tracking-widest text-[10px] uppercase mb-4">
                     <ShieldCheck className="w-3.5 h-3.5" /> Source Governance
                 </div>
-                <h1 className="text-4xl font-bold tracking-tighter text-white">Job Ingestion Sources</h1>
-                <p className="text-slate-400 mt-2">Monitor and manually trigger job aggregation pipelines.</p>
+                <h1 className="text-4xl font-bold tracking-tighter text-[#171717]">Job Ingestion Sources</h1>
+                <p className="text-[#8F8F8F] mt-2">Monitor and manually trigger job aggregation pipelines.</p>
             </header>
 
             <JobSourcesClient initialStats={stats} />

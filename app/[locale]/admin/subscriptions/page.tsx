@@ -36,19 +36,19 @@ interface SubscriptionRow {
 
 function planColor(plan: string) {
     switch (plan.toLowerCase()) {
-        case 'career': return 'text-amber-400';
-        case 'premium': return 'text-purple-400';
-        case 'pro': return 'text-blue-400';
-        default: return 'text-slate-400';
+        case 'career': return 'text-amber-600';
+        case 'premium': return 'text-purple-600';
+        case 'pro': return 'text-blue-600';
+        default: return 'text-[#8F8F8F]';
     }
 }
 
 function methodBadge(method: string) {
-    if (method === 'coupon_free') return 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20';
-    if (method === 'coupon_partial') return 'bg-purple-500/15 text-purple-400 border border-purple-500/20';
-    if (method === 'razorpay') return 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20';
+    if (method === 'coupon_free') return 'bg-indigo-500/15 text-indigo-600 border border-indigo-500/20';
+    if (method === 'coupon_partial') return 'bg-purple-500/15 text-purple-600 border border-purple-500/20';
+    if (method === 'razorpay') return 'bg-emerald-500/15 text-emerald-600 border border-emerald-500/20';
     if (method === 'admin_override') return 'bg-amber-500/15 text-amber-500 border border-amber-500/20';
-    return 'bg-slate-500/15 text-slate-400 border border-slate-700';
+    return 'bg-slate-500/15 text-[#8F8F8F] border border-slate-700';
 }
 
 function methodLabel(method: string) {
@@ -151,18 +151,18 @@ export default function AdminSubscriptionsPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
                     <h1 className="text-2xl font-bold flex items-center gap-2">
-                        <CreditCard className="w-6 h-6 text-emerald-400" />
+                        <CreditCard className="w-6 h-6 text-emerald-600" />
                         Subscriptions & Payments
                     </h1>
-                    <p className="text-slate-500 text-sm mt-1">{subscriptions.length} billing records</p>
+                    <p className="text-[#8F8F8F] text-sm mt-1">{subscriptions.length} billing records</p>
                 </div>
                 <div className="relative">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8F8F8F]" />
                     <input
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="Search email, plan, coupon…"
-                        className="pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 w-full sm:w-72"
+                        className="pl-9 pr-4 py-2 bg-white border border-[#EBEBEB] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 w-full sm:w-72"
                     />
                 </div>
             </div>
@@ -170,16 +170,16 @@ export default function AdminSubscriptionsPage() {
             {/* Stats strip */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                 {[
-                    { label: 'Total Records', value: subscriptions.length, icon: <CreditCard className="w-4 h-4 text-slate-400" /> },
-                    { label: 'Active Now', value: activeCount, icon: <CheckCircle className="w-4 h-4 text-emerald-400" /> },
-                    { label: 'Revenue Collected', value: `₹${(totalRevenue / 100).toFixed(0)}+`, icon: <IndianRupee className="w-4 h-4 text-amber-400" /> },
-                    { label: 'Overrides', value: overrideCount, icon: <Zap className="w-4 h-4 text-amber-400" /> },
+                    { label: 'Total Records', value: subscriptions.length, icon: <CreditCard className="w-4 h-4 text-[#8F8F8F]" /> },
+                    { label: 'Active Now', value: activeCount, icon: <CheckCircle className="w-4 h-4 text-emerald-600" /> },
+                    { label: 'Revenue Collected', value: `₹${(totalRevenue / 100).toFixed(0)}+`, icon: <IndianRupee className="w-4 h-4 text-amber-600" /> },
+                    { label: 'Overrides', value: overrideCount, icon: <Zap className="w-4 h-4 text-amber-600" /> },
                 ].slice(0, 4).map(stat => (
-                    <div key={stat.label} className="p-4 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3">
+                    <div key={stat.label} className="p-4 rounded-xl bg-white border border-[#EBEBEB] flex items-center gap-3">
                         {stat.icon}
                         <div>
-                            <p className="text-xs text-slate-500">{stat.label}</p>
-                            <p className="text-lg font-bold text-white">{stat.value}</p>
+                            <p className="text-xs text-[#8F8F8F]">{stat.label}</p>
+                            <p className="text-lg font-bold text-[#171717]">{stat.value}</p>
                         </div>
                     </div>
                 ))}
@@ -187,13 +187,13 @@ export default function AdminSubscriptionsPage() {
 
             {loading ? (
                 <div className="flex items-center justify-center h-48">
-                    <Loader2 className="w-6 h-6 animate-spin text-emerald-400" />
+                    <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
                 </div>
             ) : (
-                <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden overflow-x-auto">
+                <div className="bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden overflow-x-auto">
                     <table className="w-full text-sm min-w-[1100px]">
-                        <thead className="border-b border-white/10 bg-white/5">
-                            <tr className="text-left text-xs text-slate-500 uppercase tracking-wider">
+                        <thead className="border-b border-[#EBEBEB] bg-white">
+                            <tr className="text-left text-xs text-[#8F8F8F] uppercase tracking-wider">
                                 <th className="px-5 py-3">User</th>
                                 <th className="px-5 py-3">Plan</th>
                                 <th className="px-5 py-3">Original Price</th>
@@ -206,27 +206,27 @@ export default function AdminSubscriptionsPage() {
                                 <th className="px-5 py-3">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-[#EBEBEB]">
                             {filtered.map(s => {
                                 const isExpired = s.expires_at && new Date(s.expires_at) < new Date();
                                 const statusColor = isExpired
                                     ? 'bg-rose-500/20 text-rose-400'
                                     : s.status === 'active'
-                                        ? 'bg-emerald-500/20 text-emerald-400'
-                                        : 'bg-slate-500/20 text-slate-400';
+                                        ? 'bg-emerald-50 border border-emerald-100 text-emerald-600'
+                                        : 'bg-slate-500/20 text-[#8F8F8F]';
                                 const isExpanded = expandedId === s.id;
                                 const hasDiscount = s.discount_amount > 0;
 
                                 return (
                                     <>
-                                        <tr key={s.id} className="hover:bg-white/5 transition-colors">
+                                        <tr key={s.id} className="hover:bg-white transition-colors">
                                             {/* User */}
                                             <td className="px-5 py-4">
-                                                <div className="flex items-center gap-2 font-medium text-white text-xs mb-0.5">
-                                                    <User className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                                                <div className="flex items-center gap-2 font-medium text-[#171717] text-xs mb-0.5">
+                                                    <User className="w-3.5 h-3.5 text-[#8F8F8F] shrink-0" />
                                                     {s.user_email}
                                                 </div>
-                                                <div className="text-[10px] text-slate-600 font-mono">{s.user_id.slice(0, 8)}…</div>
+                                                <div className="text-[10px] text-[#8F8F8F] font-mono">{s.user_id.slice(0, 8)}…</div>
                                             </td>
 
                                             {/* Plan */}
@@ -238,7 +238,7 @@ export default function AdminSubscriptionsPage() {
                                             </td>
 
                                             <td className="px-5 py-4">
-                                                <span className={`text-xs font-semibold ${hasDiscount ? 'line-through text-slate-500' : 'text-white'}`}>
+                                                <span className={`text-xs font-semibold ${hasDiscount ? 'line-through text-[#8F8F8F]' : 'text-[#171717]'}`}>
                                                     {s.original_price > 0 ? fmt(s.original_price, s.currency) : '—'}
                                                 </span>
                                             </td>
@@ -246,25 +246,25 @@ export default function AdminSubscriptionsPage() {
                                             {/* Coupon Used */}
                                             <td className="px-5 py-4">
                                                 {s.coupon_code ? (
-                                                    <div className="flex items-center gap-1 text-xs font-mono px-2 py-1 rounded bg-indigo-500/10 text-indigo-400 w-fit border border-indigo-500/20">
+                                                    <div className="flex items-center gap-1 text-xs font-mono px-2 py-1 rounded bg-indigo-50 text-indigo-600 w-fit border border-indigo-500/20">
                                                         <Tag className="w-3 h-3" />{s.coupon_code}
                                                     </div>
-                                                ) : <span className="text-slate-600">—</span>}
+                                                ) : <span className="text-[#8F8F8F]">—</span>}
                                             </td>
 
                                             {/* Discount */}
                                             <td className="px-5 py-4">
                                                 {hasDiscount ? (
-                                                    <span className="text-xs font-bold text-emerald-400">
+                                                    <span className="text-xs font-bold text-emerald-600">
                                                         −{fmt(s.discount_amount, s.currency)}
                                                     </span>
-                                                ) : <span className="text-slate-600">—</span>}
+                                                ) : <span className="text-[#8F8F8F]">—</span>}
                                             </td>
 
                                             <td className="px-5 py-4">
                                                 {s.amount === 0
-                                                    ? <span className="text-emerald-400 font-bold text-xs">Free</span>
-                                                    : <span className="text-white font-bold">{fmt(s.amount, s.currency)}</span>
+                                                    ? <span className="text-emerald-600 font-bold text-xs">Free</span>
+                                                    : <span className="text-[#171717] font-bold">{fmt(s.amount, s.currency)}</span>
                                                 }
                                             </td>
 
@@ -280,22 +280,22 @@ export default function AdminSubscriptionsPage() {
                                                     ) : '—'}
                                                 </span>
                                                 {s.razorpay_payment_id && (
-                                                    <div className="text-[10px] text-slate-600 font-mono mt-0.5 truncate max-w-[120px]">{s.razorpay_payment_id}</div>
+                                                    <div className="text-[10px] text-[#8F8F8F] font-mono mt-0.5 truncate max-w-[120px]">{s.razorpay_payment_id}</div>
                                                 )}
                                             </td>
 
                                             {/* Dates */}
-                                            <td className="px-5 py-4 text-slate-300 text-xs">
+                                            <td className="px-5 py-4 text-[#4D4D4D] text-xs">
                                                 <div className="flex items-center gap-1.5 mb-1">
-                                                    <Calendar className="w-3 h-3 text-slate-500" />
+                                                    <Calendar className="w-3 h-3 text-[#8F8F8F]" />
                                                     {format(new Date(s.created_at), 'MMM dd, yyyy')}
                                                 </div>
                                                 {s.expires_at ? (
-                                                    <div className={`flex items-center gap-1 text-[10px] ${isExpired ? 'text-rose-400' : 'text-slate-500'}`}>
+                                                    <div className={`flex items-center gap-1 text-[10px] ${isExpired ? 'text-rose-400' : 'text-[#8F8F8F]'}`}>
                                                         <Clock className="w-3 h-3" />
                                                         {formatDistanceToNow(new Date(s.expires_at), { addSuffix: true })}
                                                     </div>
-                                                ) : <span className="text-[10px] text-slate-600">Lifetime</span>}
+                                                ) : <span className="text-[10px] text-[#8F8F8F]">Lifetime</span>}
                                             </td>
 
                                             {/* Invoice */}
@@ -303,7 +303,7 @@ export default function AdminSubscriptionsPage() {
                                                 {s.invoice_id ? (
                                                     <button
                                                         onClick={() => window.open(`/api/invoices/${s.invoice_id}/download`, '_blank')}
-                                                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/20 transition-all"
+                                                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-600 hover:bg-indigo-50 border border-indigo-100 border border-indigo-500/20 transition-all"
                                                         title={s.invoice_number ?? 'View Invoice'}
                                                     >
                                                         <FileText className="w-3 h-3" />
@@ -313,13 +313,13 @@ export default function AdminSubscriptionsPage() {
                                                     <button
                                                         onClick={() => fixSubInvoice(s.id)}
                                                         disabled={fixing === s.id}
-                                                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 border border-amber-500/20 transition-all"
+                                                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-50 text-amber-500 hover:bg-amber-500/20 border border-amber-500/20 transition-all"
                                                         title="Generate & Send missing Invoice"
                                                     >
                                                         {fixing === s.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
                                                         Fix & Send
                                                     </button>
-                                                ) : <span className="text-slate-600 text-xs">—</span>}
+                                                ) : <span className="text-[#8F8F8F] text-xs">—</span>}
                                             </td>
 
                                             {/* Actions */}
@@ -328,7 +328,7 @@ export default function AdminSubscriptionsPage() {
                                                     <button
                                                         onClick={() => extendSub(s.id)}
                                                         disabled={extending === s.id}
-                                                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50"
+                                                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all bg-emerald-50 text-emerald-600 hover:bg-emerald-50 border border-emerald-100 disabled:opacity-50"
                                                         title="Add 30 Days"
                                                     >
                                                         {extending === s.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
@@ -337,7 +337,7 @@ export default function AdminSubscriptionsPage() {
                                                     {s.billing_address && (
                                                         <button
                                                             onClick={() => setExpandedId(isExpanded ? null : s.id)}
-                                                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-700 text-slate-300 hover:bg-slate-600 transition-all"
+                                                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-700 text-[#4D4D4D] hover:bg-slate-600 transition-all"
                                                             title="View Billing Details"
                                                         >
                                                             <MapPin className="w-3 h-3" />
@@ -350,31 +350,31 @@ export default function AdminSubscriptionsPage() {
 
                                         {/* Expanded billing details */}
                                         {isExpanded && (
-                                            <tr key={`${s.id}-billing`} className="bg-slate-900/60">
+                                            <tr key={`${s.id}-billing`} className="bg-[#FAFAFA]/60">
                                                 <td colSpan={10} className="px-5 py-4">
                                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                                        <div className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
-                                                            <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Contact</p>
+                                                        <div className="p-3 rounded-xl bg-white border border-[#EBEBEB] space-y-1">
+                                                            <p className="text-[10px] text-[#8F8F8F] uppercase tracking-wider font-bold">Contact</p>
                                                             {s.billing_name && (
-                                                                <div className="flex items-center gap-1.5 text-xs text-slate-300">
-                                                                    <User className="w-3 h-3 text-slate-500" /> {s.billing_name}
+                                                                <div className="flex items-center gap-1.5 text-xs text-[#4D4D4D]">
+                                                                    <User className="w-3 h-3 text-[#8F8F8F]" /> {s.billing_name}
                                                                 </div>
                                                             )}
                                                             {s.billing_phone && (
-                                                                <div className="flex items-center gap-1.5 text-xs text-slate-300">
-                                                                    <Smartphone className="w-3 h-3 text-slate-500" /> {s.billing_phone}
+                                                                <div className="flex items-center gap-1.5 text-xs text-[#4D4D4D]">
+                                                                    <Smartphone className="w-3 h-3 text-[#8F8F8F]" /> {s.billing_phone}
                                                                 </div>
                                                             )}
                                                             {s.billing_company && (
-                                                                <div className="flex items-center gap-1.5 text-xs text-slate-300">
-                                                                    <Building2 className="w-3 h-3 text-slate-500" /> {s.billing_company}
+                                                                <div className="flex items-center gap-1.5 text-xs text-[#4D4D4D]">
+                                                                    <Building2 className="w-3 h-3 text-[#8F8F8F]" /> {s.billing_company}
                                                                 </div>
                                                             )}
                                                         </div>
-                                                        <div className="sm:col-span-2 p-3 rounded-xl bg-white/5 border border-white/10">
-                                                            <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-1">Billing Address</p>
-                                                            <div className="flex items-start gap-1.5 text-xs text-slate-300">
-                                                                <MapPin className="w-3 h-3 text-slate-500 mt-0.5 shrink-0" />
+                                                        <div className="sm:col-span-2 p-3 rounded-xl bg-white border border-[#EBEBEB]">
+                                                            <p className="text-[10px] text-[#8F8F8F] uppercase tracking-wider font-bold mb-1">Billing Address</p>
+                                                            <div className="flex items-start gap-1.5 text-xs text-[#4D4D4D]">
+                                                                <MapPin className="w-3 h-3 text-[#8F8F8F] mt-0.5 shrink-0" />
                                                                 <span>{s.billing_address}</span>
                                                             </div>
                                                         </div>
@@ -388,7 +388,7 @@ export default function AdminSubscriptionsPage() {
                         </tbody>
                     </table>
                     {filtered.length === 0 && (
-                        <div className="text-center py-12 text-slate-500">No subscriptions match your search.</div>
+                        <div className="text-center py-12 text-[#8F8F8F]">No subscriptions match your search.</div>
                     )}
                 </div>
             )}
