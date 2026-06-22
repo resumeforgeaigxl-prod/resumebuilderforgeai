@@ -24,7 +24,11 @@ const CodeBlock = ({ className, children, ...props }: any) => {
   };
 
   if (isInline) {
-    return <code className={className} {...props}>{children}</code>;
+    return (
+      <code className="px-1.5 py-0.5 rounded font-mono text-xs font-semibold bg-[#F5F5F5] border border-[#EBEBEB] text-[#171717]" {...props}>
+        {children}
+      </code>
+    );
   }
 
   return (
@@ -280,11 +284,54 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
                     ? "bg-[#FAFAFA] text-[#171717] border-[#EBEBEB]"
                     : "bg-white text-[#171717] border-[#EBEBEB] shadow-sm"
                 )}>
-                  <article className="prose prose-sm max-w-none text-[#171717] prose-headings:text-[#171717] prose-strong:text-[#171717] prose-code:text-[#171717] prose-code:bg-[#FAFAFA] prose-code:border prose-code:border-[#EBEBEB] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-[#FAFAFA] prose-pre:border prose-pre:border-[#EBEBEB] prose-pre:rounded-lg prose-p:my-1.5 prose-a:text-[#0070F3] hover:prose-a:underline">
+                  <article className="max-w-none text-[#171717]">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       components={{
-                        code: CodeBlock
+                        code: CodeBlock,
+                        table: ({ children }) => (
+                          <div className="overflow-x-auto my-4 border border-[#EBEBEB] rounded-xl shadow-sm bg-white">
+                            <table className="min-w-full divide-y divide-[#EBEBEB] text-left text-xs">
+                              {children}
+                            </table>
+                          </div>
+                        ),
+                        thead: ({ children }) => (
+                          <thead className="bg-[#FAFAFA] border-b border-[#EBEBEB]">{children}</thead>
+                        ),
+                        tbody: ({ children }) => (
+                          <tbody className="divide-y divide-[#EBEBEB] bg-white">{children}</tbody>
+                        ),
+                        tr: ({ children }) => (
+                          <tr className="hover:bg-[#FAFAFA]/50 transition-colors">{children}</tr>
+                        ),
+                        th: ({ children }) => (
+                          <th className="px-4 py-3 text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider font-mono border-r border-[#EBEBEB] last:border-r-0">{children}</th>
+                        ),
+                        td: ({ children }) => (
+                          <td className="px-4 py-3 text-[#4D4D4D] font-medium border-r border-[#EBEBEB] last:border-r-0">{children}</td>
+                        ),
+                        h1: ({ children }) => (
+                          <h1 className="text-base font-bold text-[#171717] mt-5 mb-2.5 tracking-tight">{children}</h1>
+                        ),
+                        h2: ({ children }) => (
+                          <h2 className="text-sm font-bold text-[#171717] mt-4 mb-2 tracking-tight">{children}</h2>
+                        ),
+                        h3: ({ children }) => (
+                          <h3 className="text-xs font-bold text-[#4D4D4D] mt-3 mb-1.5 tracking-tight">{children}</h3>
+                        ),
+                        p: ({ children }) => (
+                          <p className="text-xs text-[#4D4D4D] leading-relaxed my-2">{children}</p>
+                        ),
+                        ul: ({ children }) => (
+                          <ul className="list-disc pl-5 my-2.5 space-y-1.5 text-xs text-[#4D4D4D]">{children}</ul>
+                        ),
+                        ol: ({ children }) => (
+                          <ol className="list-decimal pl-5 my-2.5 space-y-1.5 text-xs text-[#4D4D4D]">{children}</ol>
+                        ),
+                        li: ({ children }) => (
+                          <li className="pl-0.5 leading-relaxed">{children}</li>
+                        )
                       }}
                     >
                       {msg.content}
