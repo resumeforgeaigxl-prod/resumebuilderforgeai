@@ -56,6 +56,7 @@ export default function FooterWrapper({ children }: { children: ReactNode }) {
         pathname?.includes('/data-deletion') ||
         pathname?.includes('/signup') ||
         pathname?.includes('/pricing') ||
+        pathname?.includes('/blogs') ||
         pathname?.includes('/login');
 
     if (isInternalApp || isLandingPage) {

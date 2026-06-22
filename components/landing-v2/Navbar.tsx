@@ -9,7 +9,7 @@ const getNavLinks = (locale: string) => [
   { label: "Features", href: `/${locale}#features` },
   { label: "Templates", href: `/${locale}#templates` },
   { label: "ATS Score", href: `/${locale}#ats-score` },
-  { label: "Blog", href: `/${locale}/posts` },
+  { label: "Blog", href: `/${locale}/blogs` },
   { label: "Pricing", href: `/${locale}/pricing` },
 ] as const;
 

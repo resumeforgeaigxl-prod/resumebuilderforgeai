@@ -33,7 +33,7 @@ const columns = (locale: string) => [
     title: "Resources",
     links: [
       { label: "Documentation", href: "#" },
-      { label: "Blog", href: "#" },
+      { label: "Blog", href: `/${locale}/blogs` },
       { label: "Changelog", href: "#" },
       { label: "Support", href: "#" },
     ],

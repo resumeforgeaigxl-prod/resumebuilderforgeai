@@ -59,6 +59,12 @@ export default async function Header({ lang = 'en', region = 'in' }: { lang?: st
                     >
                         {t('pricing')}
                     </a>
+                    <Link 
+                        href={`/${locale}/blogs`} 
+                        className="text-[#4D4D4D] transition-colors duration-200 hover:text-[#171717] font-mono text-[13px] uppercase font-semibold tracking-wider"
+                    >
+                        Blogs
+                    </Link>
                 </div>
 
                 {/* Right side actions */}

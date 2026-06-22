@@ -116,7 +116,7 @@ export default function Footer() {
                         <ul className="space-y-4">
                             <li><Link href="#" className="text-sm font-medium text-slate-500 hover:text-white transition-all">Support Center</Link></li>
                             <li><Link href="#" className="text-sm font-medium text-slate-500 hover:text-white transition-all">Templates Library</Link></li>
-                            <li><Link href="#" className="text-sm font-medium text-slate-500 hover:text-white transition-all">Career Blog</Link></li>
+                            <li><Link href={`/${locale}-${region}/blogs`} className="text-sm font-medium text-slate-500 hover:text-white transition-all">Career Blog</Link></li>
                             <li><Link href="#" className="text-sm font-medium text-slate-500 hover:text-white transition-all">API Reference</Link></li>
                         </ul>
                     </div>
