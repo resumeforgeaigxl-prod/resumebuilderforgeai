@@ -1,112 +1,144 @@
 export const dynamic = 'force-dynamic';
-import { NextResponse } from 'next/server';
-import { generateAIResponse } from '@/lib/ai-core/rag-engine';
+import { NextRequest } from 'next/server';
+import { runResumeAnalysisAgent, type ResumeAgentProgressEvent } from '@/lib/ai-core/resume-agent';
 import { createClient } from '@/lib/supabase/server';
 import { getSession } from '@/lib/auth/jwt';
 import { aiCache } from '@/lib/cache/redis';
 
-const ANALYSIS_PROMPT = `
-You are a professional Resume Strategist and ATS (Applicant Tracking System) Expert. 
-Analyze the provided resume and provide a detailed analysis to help the user improve their chances of getting hired.
+export async function POST(req: NextRequest) {
+  try {
+    const session = await getSession();
+    if (!session?.userId) {
+      return new Response(JSON.stringify({ success: false, message: "Unauthorized" }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+    const userId = session.userId;
 
-Return the analysis in JSON format with the following keys:
-1. ats_score: A number between 0 and 100 representing how well the resume is structured and keyword-optimized.
-2. strengths: An array of strings highlighting the key professional highlights and well-written sections.
-3. missing_skills: An array of 5-8 technical or soft skills that are industry-relevant but missing from the resume.
-4. improvements: An array of specific, actionable advice to make the resume more impactful.
+    const { resumeId, resumeData } = await req.json();
 
-Focus on:
-- Quantitative impact (numbers, %, etc.)
-- Action verbs
-- Section clarity
-- Visual hierarchy and structure
+    if (!resumeId || !resumeData) {
+      return new Response(JSON.stringify({ success: false, message: "Missing resume data" }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
 
-Resume Data:
-{{RESUME_DATA}}
-`;
+    const supabase = createClient();
+    const encoder = new TextEncoder();
+    let isCancelled = false;
 
-export async function POST(req: Request) {
-    try {
-        const session = await getSession();
-        if (!session?.userId) {
-            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-        }
+    const stream = new ReadableStream({
+      async start(controller) {
+        const sendEvent = (event: string, data: unknown) => {
+          if (isCancelled) return;
+          try {
+            controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
+          } catch (err) {
+            console.warn('[Resume Analysis] SSE enqueue warning (client likely disconnected):', err);
+          }
+        };
 
-        const { resumeId, resumeData } = await req.json();
+        try {
+          // 1. Check Cache first
+          const cacheKey = aiCache.generateKey({ resumeData, promptType: 'resume_intelligence' });
+          let aiResponse = await aiCache.get<any>(cacheKey);
 
-        if (!resumeId || !resumeData) {
-            return NextResponse.json({ success: false, message: "Missing resume data" }, { status: 400 });
-        }
+          if (aiResponse) {
+            console.log('[Resume Analysis] Cache hit. Simulating progressive agent steps...');
+            // Simulating progressive steps for cache hits so the user gets the visual experience
+            sendEvent('progress', { type: 'tool_start', name: 'verify_resume_structure', status: 'running', step: 1 });
+            await new Promise(r => setTimeout(r, 400));
+            sendEvent('progress', { type: 'tool_end', name: 'verify_resume_structure', status: 'finished', step: 1 });
 
-        const supabase = createClient();
+            sendEvent('progress', { type: 'tool_start', name: 'assess_keywords_density', status: 'running', step: 2 });
+            await new Promise(r => setTimeout(r, 400));
+            sendEvent('progress', { type: 'tool_end', name: 'assess_keywords_density', status: 'finished', step: 2 });
 
-        // 1. Check Cache first
-        const cacheKey = aiCache.generateKey({ resumeData, promptType: 'resume_intelligence' });
-        let aiResponse = await aiCache.get<any>(cacheKey);
-
-        if (!aiResponse) {
-            // 2. Generate AI Analysis (if not in cache)
-            const prompt = ANALYSIS_PROMPT.replace('{{RESUME_DATA}}', JSON.stringify(resumeData));
-            aiResponse = await generateAIResponse(prompt, {
-                userId: session!.userId,
-                contextType: 'general',
-                jsonMode: true,
-                systemPrompt: "You are a Resume Intelligence AI."
+            sendEvent('progress', { type: 'tool_start', name: 'generate_ats_optimization_strategy', status: 'running', step: 3 });
+            await new Promise(r => setTimeout(r, 300));
+            sendEvent('progress', { type: 'tool_end', name: 'generate_ats_optimization_strategy', status: 'finished', step: 3 });
+          } else {
+            console.log('[Resume Analysis] Cache miss. Running real-time agentic analysis loop...');
+            // Run progressive analysis with LLM integration
+            aiResponse = await runResumeAnalysisAgent(resumeData, userId, (event: ResumeAgentProgressEvent) => {
+              sendEvent('progress', event);
             });
 
-            // 3. Save to Cache (24h TTL)
+            // Save to Cache (24h TTL)
             if (aiResponse) {
-                await aiCache.set(cacheKey, aiResponse, 86400);
+              await aiCache.set(cacheKey, aiResponse, 86400);
             }
-        }
+          }
 
-        if (!aiResponse || typeof aiResponse.ats_score !== 'number') {
-            throw new Error("Invalid AI response");
-        }
+          if (!aiResponse || typeof aiResponse.ats_score !== 'number') {
+            throw new Error("Invalid response format received from AI provider.");
+          }
 
-        // 2. Store in database
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error } = await (supabase as any)
+          // 2. Store in database
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: dbData, error: dbError } = await (supabase as any)
             .from('resume_analysis')
             .insert({
-                resume_id: resumeId,
-                user_id: session.userId,
-                ats_score: aiResponse.ats_score,
-                strengths: aiResponse.strengths,
-                missing_skills: aiResponse.missing_skills,
-                improvements: aiResponse.improvements
+              resume_id: resumeId,
+              user_id: userId,
+              ats_score: aiResponse.ats_score,
+              strengths: aiResponse.strengths,
+              missing_skills: aiResponse.missing_skills,
+              improvements: aiResponse.improvements
             })
             .select()
             .single();
 
-        if (error) throw error;
+          if (dbError) throw dbError;
 
-        // 3. Log usage
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (supabase as any)
+          // 3. Log usage
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await (supabase as any)
             .from('ai_usage_logs')
             .insert({
-                user_id: session.userId,
-                feature: 'resume_intelligence',
-                model_used: 'gemini-2.0-flash',
-                tokens_used: Math.floor(JSON.stringify(aiResponse).length / 4)
+              user_id: userId,
+              feature: 'resume_intelligence',
+              model_used: 'gemini-2.0-flash',
+              tokens_used: Math.floor(JSON.stringify(aiResponse).length / 4)
             });
 
-        return NextResponse.json({
+          // Send final completed result event
+          sendEvent('result', {
             success: true,
-            analysis: data
-        });
+            analysis: dbData
+          });
 
-    } catch (error: unknown) {
-        console.error('[Resume Analysis API] Error:', error);
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return NextResponse.json({
-            success: false,
-            message: "Failed to analyze resume",
-            debug: message
-        }, { status: 500 });
-    }
+        } catch (error: unknown) {
+          const msg = error instanceof Error ? error.message : 'Unknown error';
+          console.error('[Resume Analysis SSE Stream] Error:', msg);
+          sendEvent('error', { error: msg });
+        } finally {
+          if (!isCancelled) {
+            try {
+              controller.close();
+            } catch (err) {
+              console.warn('[Resume Analysis] SSE close warning:', err);
+            }
+          }
+        }
+      },
+      cancel() {
+        isCancelled = true;
+        console.log(`[Resume Analysis] SSE stream cancelled by client for user: ${userId}`);
+      }
+    });
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache, no-transform',
+        'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no',
+      }
+    });
+
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[Resume Analysis SSE Setup] Error:', msg);
+    return new Response(JSON.stringify({ success: false, message: msg }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 }
-
-
-
