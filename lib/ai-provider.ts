@@ -40,33 +40,60 @@ export function stripMarkdown(text: string): string {
  * Supports both objects {...} and arrays [...]
  */
 export function extractJson(text: string): string {
-    // Try to find the LARGEST possible block between ```json and ```
-    // This avoids terminating early at code blocks nested INSIDE the JSON strings
-    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*)\s*```/i);
-    if (jsonMatch && jsonMatch[1]) {
-        return jsonMatch[1].trim();
+    const trimmed = text.trim();
+
+    // 1. Try direct parse if it looks like a JSON object/array
+    if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+        try {
+            JSON.parse(trimmed);
+            return trimmed;
+        } catch {
+            // Keep going if it's not valid JSON
+        }
     }
 
-    // Try to find the first and last array brackets
+    // 2. Try to find block between ```json and ``` that is valid JSON
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*)\s*```/i);
+    if (jsonMatch && jsonMatch[1]) {
+        const candidate = jsonMatch[1].trim();
+        try {
+            JSON.parse(candidate);
+            return candidate;
+        } catch {
+            // If the block is not valid JSON, it might be an embedded code block (e.g. ```python)
+            // inside a larger JSON string. We fall through to brace extraction.
+        }
+    }
+
+    // 3. Try to find the outer-most braces/brackets
     const firstBracket = text.indexOf('[');
     const lastBracket = text.lastIndexOf(']');
-
-    // Try to find the first and last braces
     const firstBrace = text.indexOf('{');
     const lastBrace = text.lastIndexOf('}');
 
-    // Determine if we should treat it as an array or object based on which appears first
     const hasArray = firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket;
     const hasObject = firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace;
 
     if (hasArray && (!hasObject || firstBracket < firstBrace)) {
-        return text.substring(firstBracket, lastBracket + 1).trim();
-    } else if (hasObject) {
-        return text.substring(firstBrace, lastBrace + 1).trim();
+        const candidate = text.substring(firstBracket, lastBracket + 1).trim();
+        try {
+            JSON.parse(candidate);
+            return candidate;
+        } catch {}
+        return candidate;
+    } 
+    
+    if (hasObject) {
+        const candidate = text.substring(firstBrace, lastBrace + 1).trim();
+        try {
+            JSON.parse(candidate);
+            return candidate;
+        } catch {}
+        return candidate;
     }
 
-    // If no brackets but maybe valid JSON string
-    return text.trim();
+    // 4. Default fallback
+    return trimmed;
 }
 
 // OpenRouter API Keys list for rotation to avoid rate limits
