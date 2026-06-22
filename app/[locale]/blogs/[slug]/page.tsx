@@ -58,7 +58,7 @@ export default async function BlogPostPage({ params }: { params: { locale: strin
 
   return (
     <div className="min-h-screen bg-[#F5F5F3] text-[#171717] font-sans pb-0">
-      <div className="max-w-[1200px] mx-auto px-6 md:px-20 py-12">
+      <div className="max-w-[1200px] mx-auto px-6 md:px-20 pt-28 pb-12">
         
         {/* Back Button */}
         <Link 
