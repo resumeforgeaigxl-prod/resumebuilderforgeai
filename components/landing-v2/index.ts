@@ -8,3 +8,5 @@ export { default as ATSDashboard } from './ATSDashboard';
 export { default as PricingSection } from './PricingSection';
 export { default as FinalCTA } from './FinalCTA';
 export { default as FooterSection } from './FooterSection';
+export { default as MentorForgeSection } from './MentorForgeSection';
+

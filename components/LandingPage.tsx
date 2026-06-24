@@ -14,7 +14,7 @@ const FeaturesGrid = dynamic(() => import("@/components/landing-v2/FeaturesGrid"
 const WorkflowTimeline = dynamic(() => import("@/components/landing-v2/WorkflowTimeline"), { ssr: true });
 const PlatformEcosystem = dynamic(() => import("@/components/landing-v2/PlatformEcosystem"), { ssr: true });
 const ATSDashboard = dynamic(() => import("@/components/landing-v2/ATSDashboard"), { ssr: false });
-const PricingSection = dynamic(() => import("@/components/landing-v2/PricingSection"), { ssr: false });
+const MentorForgeSection = dynamic(() => import("@/components/landing-v2/MentorForgeSection"), { ssr: false });
 const FinalCTA = dynamic(() => import("@/components/landing-v2/FinalCTA"), { ssr: false });
 const FooterSection = dynamic(() => import("@/components/landing-v2/FooterSection"), { ssr: false });
 const CookieBanner = dynamic(() => import("@/components/ui/CookieBanner"), { ssr: false });
@@ -48,7 +48,7 @@ export default function LandingPage({
         <WorkflowTimeline />
         <PlatformEcosystem locale={locale} />
         <ATSDashboard />
-        <PricingSection locale={locale} />
+        <MentorForgeSection />
         <FinalCTA locale={locale} />
       </main>
 
