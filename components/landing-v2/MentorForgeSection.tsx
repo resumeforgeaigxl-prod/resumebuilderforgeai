@@ -3,372 +3,335 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Brain, 
   FileText, 
   Terminal, 
   Mic, 
   BookOpen, 
   Briefcase, 
-  Sparkles,
-  ArrowRight,
-  Cpu
+  Cpu 
 } from "lucide-react";
 
-interface SubAgent {
+interface AgentItem {
   id: string;
   name: string;
   sub: string;
-  icon: any;
+  badge: string;
+  tagline: string;
+  desc: string;
   color: string;
-  shadow: string;
-  left: string;
-  top: string;
-  x: number;
-  y: number;
+  renderPlayground: () => React.ReactNode;
 }
 
-const subAgents: SubAgent[] = [
-  { 
-    id: "resume", 
-    name: "Resume Agent", 
-    sub: "Document Synth", 
-    icon: FileText, 
-    color: "#3B82F6", 
-    shadow: "rgba(59, 130, 246, 0.4)",
-    left: "50%", 
-    top: "12.5%",
-    x: 200,
-    y: 50
+const agents: AgentItem[] = [
+  {
+    id: "resume",
+    name: "Resume Agent",
+    sub: "Document Synth",
+    badge: "Resume Agent",
+    tagline: "AI-driven real-time resume compilation & structure audits.",
+    desc: "Instantly compiles developer experience and audits structural compliance against target roles to maximize ATS readiness.",
+    color: "#3b82f6",
+    renderPlayground: () => (
+      <div className="flex flex-col h-full justify-between">
+        <div className="border border-[#e7e5e4] rounded-xl p-4 bg-white space-y-3 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+          <div className="flex justify-between items-center text-xs">
+            <span className="font-mono text-stone-400">RESUME_BUILDER_AGENT</span>
+            <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-bold text-[10px]">ACTIVE</span>
+          </div>
+          <div className="space-y-1.5">
+            <div className="text-[11px] text-stone-500 font-mono">▸ Initializing document synthesis...</div>
+            <div className="text-[11px] text-stone-500 font-mono">▸ Injecting ATS schema descriptors...</div>
+            <div className="text-[11px] text-emerald-600 font-mono">✓ Successfully optimized experience section (+24% score)</div>
+          </div>
+        </div>
+        <div className="flex gap-2.5 mt-4">
+          <div className="flex-1 border border-[#e7e5e4] rounded-lg p-3 text-center bg-white">
+            <div className="text-[9px] font-mono text-stone-400">PDF COMPLIANCE</div>
+            <div className="font-bold text-base text-stone-900 mt-0.5">100%</div>
+          </div>
+          <div className="flex-1 border border-[#e7e5e4] rounded-lg p-3 text-center bg-white">
+            <div className="text-[9px] font-mono text-stone-400">ATS MATCH SCORE</div>
+            <div className="font-bold text-base text-emerald-600 mt-0.5">96/100</div>
+          </div>
+        </div>
+      </div>
+    )
   },
-  { 
-    id: "coding", 
-    name: "Coding Agent", 
-    sub: "Code & Compiler", 
-    icon: Terminal, 
-    color: "#10B981", 
-    shadow: "rgba(16, 185, 129, 0.4)",
-    left: "82.5%", 
-    top: "35%",
-    x: 330,
-    y: 140
+  {
+    id: "coding",
+    name: "Coding Agent",
+    sub: "Code & Compiler",
+    badge: "Coding Agent",
+    tagline: "Execution compilation sandboxes & real-time tutorial audits.",
+    desc: "Watches code submissions, identifies syntax bugs, compiles target runs, and provides interactive line-by-line coding corrections.",
+    color: "#10b981",
+    renderPlayground: () => (
+      <div className="flex flex-col h-full justify-between font-mono text-[10.5px]">
+        <div className="border border-[#e7e5e4] rounded-xl p-3 bg-stone-950 text-stone-300 space-y-1.5 overflow-hidden flex-1 select-none">
+          <div className="text-stone-500 border-b border-stone-800 pb-1.5 mb-1.5 flex justify-between">
+            <span>coding_sandbox.go</span>
+            <span className="text-emerald-500 font-bold">RUNNING</span>
+          </div>
+          <div><span className="text-purple-400">func</span> <span className="text-blue-400">binarySearch</span>(arr []<span className="text-green-400">int</span>, target <span className="text-green-400">int</span>) <span className="text-green-400">int</span> &#123;</div>
+          <div className="pl-3 text-stone-550">// Debugger output:</div>
+          <div className="pl-3 text-emerald-400">✓ Array sorted in 0.04ms</div>
+          <div className="pl-3 text-amber-450">⚠ Warning: potential integer overflow at mid calculation</div>
+          <div className="pl-3 text-stone-350">✓ Corrected mid logic to: low + (high-low)/2</div>
+        </div>
+        <div className="mt-3 flex items-center justify-between text-xs font-sans">
+          <span className="text-stone-500 font-semibold">Test cases passed:</span>
+          <span className="font-bold text-stone-900">12 / 12</span>
+        </div>
+      </div>
+    )
   },
-  { 
-    id: "interview", 
-    name: "Interview Agent", 
-    sub: "Speech & Audio", 
-    icon: Mic, 
-    color: "#EC4899", 
-    shadow: "rgba(236, 72, 153, 0.4)",
-    left: "70%", 
-    top: "77.5%",
-    x: 280,
-    y: 310
+  {
+    id: "interview",
+    name: "Interview Agent",
+    sub: "Speech & Audio",
+    badge: "Interview Agent",
+    tagline: "Multimodal speech evaluation & real-time audio transcriptions.",
+    desc: "Analyzes conversational response audio, extracts transcription indices, evaluates vocabulary confidence, and gives real-time rating assessments.",
+    color: "#ec4899",
+    renderPlayground: () => (
+      <div className="flex flex-col h-full justify-between">
+        <div className="flex items-center gap-3 border border-[#e7e5e4] rounded-xl p-3 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+          <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center shrink-0">
+            <Mic className="w-4 h-4 text-pink-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[10px] font-mono text-stone-400">SPEECH WAVEFORM</div>
+            <div className="flex gap-0.5 items-center h-4 mt-1">
+              {[1, 3, 2, 4, 3, 5, 2, 6, 4, 2, 3, 5, 3, 1, 2].map((h, i) => (
+                <div key={i} className="bg-pink-500 w-1 rounded-full transition-all" style={{ height: `${h * 15}%` }} />
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="space-y-2 mt-3 text-xs">
+          <div className="flex justify-between">
+            <span className="text-stone-500">Vocabulary richness:</span>
+            <span className="font-bold text-stone-900">High</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-stone-500">Pronunciation accuracy:</span>
+            <span className="font-bold text-stone-900">94%</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-stone-500">Confidence index:</span>
+            <span className="font-bold text-emerald-600">Excellent</span>
+          </div>
+        </div>
+      </div>
+    )
   },
-  { 
-    id: "knowledge", 
-    name: "Knowledge Agent", 
-    sub: "RAG Curriculum", 
-    icon: BookOpen, 
-    color: "#F59E0B", 
-    shadow: "rgba(245, 158, 11, 0.4)",
-    left: "30%", 
-    top: "77.5%",
-    x: 120,
-    y: 310
+  {
+    id: "knowledge",
+    name: "Knowledge Agent",
+    sub: "RAG Curriculum",
+    badge: "Knowledge Agent",
+    tagline: "Dynamic study curriculum & conceptual RAG query indices.",
+    desc: "Indexes reference documents, matches concept levels, and populates step-by-step roadmap syllabuses for any technical gap.",
+    color: "#f59e0b",
+    renderPlayground: () => (
+      <div className="flex flex-col h-full justify-between">
+        <div className="space-y-2">
+          <div className="text-[10px] font-mono font-semibold text-stone-450 uppercase tracking-wider">RECOMMENDED SYLLABUS</div>
+          {[
+            { title: "Database Indexing Foundations", desc: "B-Trees & Hash Indexing models", done: true },
+            { title: "Query Performance Tuning", desc: "Explain Analyze execution plans", done: true },
+            { title: "Connection Pooling", desc: "PgBouncer & sizing metrics", done: false }
+          ].map((item, i) => (
+            <div key={i} className="flex gap-2.5 items-start p-2 border border-[#e7e5e4] rounded-lg bg-white shadow-[0_1px_3px_rgba(0,0,0,0.01)]">
+              <span className={`text-xs ${item.done ? "text-emerald-500 font-bold" : "text-amber-500"}`}>
+                {item.done ? "✓" : "○"}
+              </span>
+              <div>
+                <div className="text-[11px] font-bold text-stone-900 leading-tight">{item.title}</div>
+                <div className="text-[9.5px] text-stone-500 mt-0.5">{item.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
   },
-  { 
-    id: "job", 
-    name: "Job Agent", 
-    sub: "ATS & Matching", 
-    icon: Briefcase, 
-    color: "#8B5CF6", 
-    shadow: "rgba(139, 92, 246, 0.4)",
-    left: "17.5%", 
-    top: "35%",
-    x: 70,
-    y: 140
+  {
+    id: "job",
+    name: "Job Agent",
+    sub: "ATS & Matching",
+    badge: "Job Agent",
+    tagline: "Real-time market analytics & target position match recommendations.",
+    desc: "Scrapes technical job openings, cross-references candidate experience proficiency, and scores job alignment indices automatically.",
+    color: "#8b5cf6",
+    renderPlayground: () => (
+      <div className="flex flex-col h-full justify-between">
+        <div className="space-y-2">
+          {[
+            { company: "Vercel", role: "Frontend Developer", score: 92 },
+            { company: "Stripe", role: "Full Stack Engineer", score: 78 }
+          ].map((job, idx) => (
+            <div key={idx} className="flex items-center justify-between p-2.5 border border-[#e7e5e4] rounded-xl bg-white shadow-[0_1px_3px_rgba(0,0,0,0.01)]">
+              <div>
+                <div className="text-[11px] font-bold text-stone-900">{job.role}</div>
+                <div className="text-[9.5px] text-stone-500 mt-0.5">{job.company}</div>
+              </div>
+              <div className={`text-[11px] font-mono font-black ${job.score >= 85 ? "text-emerald-600" : "text-amber-600"}`}>
+                {job.score}% Match
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="bg-purple-50 border border-purple-100 rounded-lg p-2.5 text-[10px] text-purple-700 font-medium flex gap-1.5 mt-3">
+          <span>ℹ</span>
+          <span>2 positions are highly competitive based on your current resume score.</span>
+        </div>
+      </div>
+    )
   }
 ];
 
 export default function MentorForgeSection() {
-  const [hoveredAgent, setHoveredAgent] = useState<string | null>(null);
-  
-  // Parallax states for 3D card tilt
-  const [rotateX, setRotateX] = useState(0);
-  const [rotateY, setRotateY] = useState(0);
-  const [mouseX, setMouseX] = useState(0);
-  const [mouseY, setMouseY] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const card = e.currentTarget;
-    const rect = card.getBoundingClientRect();
-    const xPx = e.clientX - rect.left;
-    const yPx = e.clientY - rect.top;
-    
-    setMouseX(xPx);
-    setMouseY(yPx);
-    
-    const x = xPx / rect.width - 0.5;
-    const y = yPx / rect.height - 0.5;
-    setRotateX(-y * 5); // Subtle 5deg max
-    setRotateY(x * 5);
-  };
-
-  const handleMouseEnter = () => setIsHovered(true);
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    setRotateX(0);
-    setRotateY(0);
-  };
+  const [activeTab, setActiveTab] = useState(0);
+  const current = agents[activeTab];
 
   return (
-    <section id="mentorforge" className="w-full bg-[#070709] text-white py-24 border-t border-stone-900 relative overflow-hidden select-none">
-      {/* Background neon ambient gradients */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-[300px] h-[300px] bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
-
-      <div className="max-w-[1200px] mx-auto px-6 md:px-10">
+    <section id="mentorforge" className="w-full bg-[#fafaf9] relative overflow-hidden select-none">
+      <div className="max-w-[1200px] mx-auto border-x border-[#e7e5e4] bg-white">
         
-        {/* Header Block */}
-        <div className="text-left mb-16">
-          <span className="font-mono text-[14px] text-blue-500 font-semibold uppercase leading-4 block mb-3">
+        {/* Header Block (Full-width, left-aligned, matching FeaturesGrid) */}
+        <div className="px-6 md:px-10 py-16 text-left border-b border-[#e7e5e4]">
+          <span className="font-mono text-[14px] text-rose-500 font-semibold uppercase leading-4 block mb-3 select-none">
             #05 — MentorForge AI
           </span>
           <h2
-            className="text-white font-bold leading-[1.1] text-3xl md:text-[clamp(32px,4vw,48px)] tracking-tight max-w-[720px] font-display"
+            className="text-[#1c1917] font-bold leading-[1.15] text-2xl md:text-[clamp(28px,3vw,40px)] tracking-tight max-w-[640px]"
+            style={{
+              fontFamily: "var(--font-display)",
+              fontStyle: "italic",
+            }}
           >
-            The Central Brain.{" "}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500">
-              A System-Wide Agentic Mesh.
-            </span>
+            The Central Brain. A system-wide cognitive mesh.
           </h2>
-          <p className="text-stone-400 mt-4 text-sm md:text-base max-w-[620px] leading-relaxed">
-            Instead of isolated tool modules, ResumeForgeAI runs on a unified master-subagent orchestrator. 
-            It binds all educational paths, mock speech interviews, coding submissions, and ATS job matches into a single cohesive memory.
+          <p className="text-sm md:text-base text-stone-500 mt-3 max-w-[560px] leading-relaxed">
+            Rather than isolated assistants, ResumeForgeAI runs a unified Master-Subagent orchestrator. 
+            It binds all educational paths, coding submissions, mock tests, and job matching databases in a self-improving loop.
           </p>
         </div>
 
-        {/* 3D Interactive Container Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-12 items-center">
+        {/* Content Layout matching the split grid style of FeaturesGrid */}
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] divide-y lg:divide-y-0 lg:divide-x divide-[#e7e5e4]">
           
-          {/* LEFT: 3D Cognitive Connection Mesh Diagram */}
-          <div 
-            onMouseMove={handleMouseMove}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            className="relative bg-stone-950/40 border border-stone-900 rounded-3xl p-6 sm:p-10 flex items-center justify-center aspect-square max-w-[500px] mx-auto w-full shadow-2xl"
-            style={{
-              transformStyle: "preserve-3d",
-              transform: isHovered 
-                ? `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)` 
-                : 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
-              transition: isHovered 
-                ? 'transform 0.08s ease-out, box-shadow 0.08s ease-out' 
-                : 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-              boxShadow: isHovered 
-                ? "0 25px 50px -12px rgba(59, 130, 246, 0.15)" 
-                : "0 10px 30px -15px rgba(0, 0, 0, 0.5)",
-            }}
-          >
-            {/* Interactive Glow Spotlight */}
-            <div 
-              className="absolute inset-0 pointer-events-none z-10 transition-opacity duration-300 rounded-3xl"
-              style={{
-                background: isHovered 
-                  ? `radial-gradient(350px circle at ${mouseX}px ${mouseY}px, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.03), transparent 60%)` 
-                  : 'none',
-              }}
-            />
-
-            {/* Connection Paths (SVG) */}
-            <div className="absolute inset-0 z-0">
-              <svg width="100%" height="100%" viewBox="0 0 400 400" className="w-full h-full">
-                <defs>
-                  <linearGradient id="glowLineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#6366F1" stopOpacity="0.8" />
-                    <stop offset="100%" stopColor="#EC4899" stopOpacity="0.8" />
-                  </linearGradient>
-                  <filter id="svgConnectionGlow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="8" result="blur" />
-                    <feMerge>
-                      <feMergeNode in="blur" />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
-                </defs>
-
-                {subAgents.map((agent) => {
-                  const isActive = hoveredAgent === agent.id || hoveredAgent === null;
-                  return (
-                    <g key={agent.id}>
-                      <motion.path
-                        d={`M 200,200 L ${agent.x},${agent.y}`}
-                        stroke="url(#glowLineGrad)"
-                        strokeWidth={isActive ? 3 : 1}
-                        strokeOpacity={isActive ? 0.6 : 0.15}
-                        fill="none"
-                        filter={isActive ? "url(#svgConnectionGlow)" : "none"}
-                        transition={{ duration: 0.3 }}
-                      />
-                      {isActive && (
-                        <motion.circle
-                          r="4"
-                          fill="#818CF8"
-                          filter="url(#svgConnectionGlow)"
-                          animate={{
-                            cx: [200, agent.x],
-                            cy: [200, agent.y]
-                          }}
-                          transition={{
-                            duration: 2.2,
-                            repeat: Infinity,
-                            ease: "linear"
-                          }}
-                        />
-                      )}
-                    </g>
-                  );
-                })}
-              </svg>
-            </div>
-
-            {/* Nodes Container */}
-            <div className="absolute inset-0 z-20 pointer-events-none" style={{ transformStyle: "preserve-3d" }}>
-              
-              {/* CENTRAL BRAIN NODE */}
-              <div 
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto"
-                style={{ transform: "translate(-50%, -50%) translateZ(30px)" }}
+          {/* LEFT: Sidebar tabs selector */}
+          <div className="p-5 bg-[#fafaf9] space-y-2">
+            <p className="text-[9.5px] font-mono font-semibold text-[#78716c] uppercase tracking-wider px-2.5 mb-2">
+              Agentic Orchestrator
+            </p>
+            {agents.map((agent, idx) => (
+              <button
+                key={agent.id}
+                onClick={() => setActiveTab(idx)}
+                className={`w-full text-left p-3 rounded-xl border flex items-center gap-3.5 transition-all cursor-pointer ${
+                  activeTab === idx
+                    ? "bg-white border-[#e7e5e4] shadow-[0_2px_8px_rgba(0,0,0,0.02)] text-[#1c1917]"
+                    : "bg-transparent border-transparent text-[#78716c] hover:bg-[#e7e5e4]/30 hover:text-[#1c1917]"
+                }`}
               >
-                <div 
-                  className="w-20 h-20 bg-indigo-950/80 border-2 border-indigo-500 rounded-full flex flex-col items-center justify-center shadow-[0_0_30px_rgba(99,102,241,0.4)] relative group cursor-pointer"
+                <div
+                  className="w-9 h-9 rounded-lg border flex items-center justify-center bg-white transition-all shrink-0"
+                  style={{
+                    borderColor: activeTab === idx ? agent.color : "#e7e5e4",
+                    backgroundColor: activeTab === idx ? `${agent.color}0a` : "transparent"
+                  }}
                 >
-                  <Brain className="w-8 h-8 text-indigo-400 group-hover:scale-110 transition-transform" />
-                  <span className="text-[9px] font-mono font-bold text-indigo-300 uppercase tracking-widest mt-1">Brain</span>
-                  <div className="absolute inset-0 rounded-full border border-indigo-400 animate-ping opacity-25 pointer-events-none" />
+                  {agent.id === "resume" && <FileText className="w-4.5 h-4.5" style={{ color: activeTab === idx ? agent.color : "#a8a29e" }} />}
+                  {agent.id === "coding" && <Terminal className="w-4.5 h-4.5" style={{ color: activeTab === idx ? agent.color : "#a8a29e" }} />}
+                  {agent.id === "interview" && <Mic className="w-4.5 h-4.5" style={{ color: activeTab === idx ? agent.color : "#a8a29e" }} />}
+                  {agent.id === "knowledge" && <BookOpen className="w-4.5 h-4.5" style={{ color: activeTab === idx ? agent.color : "#a8a29e" }} />}
+                  {agent.id === "job" && <Briefcase className="w-4.5 h-4.5" style={{ color: activeTab === idx ? agent.color : "#a8a29e" }} />}
                 </div>
-              </div>
-
-              {/* SUBAGENT NODES */}
-              {subAgents.map((agent) => {
-                const Icon = agent.icon;
-                const isCurrentHovered = hoveredAgent === agent.id;
-                const isAnyHovered = hoveredAgent !== null;
-                
-                return (
-                  <div
-                    key={agent.id}
-                    className="absolute pointer-events-auto cursor-pointer"
-                    style={{
-                      left: agent.left,
-                      top: agent.top,
-                      transform: "translate(-50%, -50%) translateZ(18px)"
-                    }}
-                    onMouseEnter={() => setHoveredAgent(agent.id)}
-                    onMouseLeave={() => setHoveredAgent(null)}
-                  >
-                    <div 
-                      className="flex flex-col items-center p-2.5 rounded-2xl bg-stone-900/90 border transition-all duration-300"
-                      style={{
-                        borderColor: isCurrentHovered ? agent.color : "#1C1917",
-                        boxShadow: isCurrentHovered 
-                          ? `0 0 20px ${agent.shadow}` 
-                          : "0 4px 12px rgba(0,0,0,0.3)",
-                        opacity: isAnyHovered && !isCurrentHovered ? 0.4 : 1,
-                        transform: isCurrentHovered ? "scale(1.08)" : "scale(1)"
-                      }}
-                    >
-                      <div 
-                        className="w-9 h-9 rounded-xl border flex items-center justify-center transition-colors"
-                        style={{
-                          borderColor: isCurrentHovered ? agent.color : "#2E2A27",
-                          backgroundColor: isCurrentHovered ? `${agent.color}15` : "transparent"
-                        }}
-                      >
-                        <Icon 
-                          className="w-4 h-4" 
-                          style={{ color: isCurrentHovered ? agent.color : "#A8A29E" }}
-                        />
-                      </div>
-                      <div className="text-center mt-1.5 hidden sm:block">
-                        <span className="text-[10px] font-bold block text-white">{agent.name}</span>
-                        <span className="text-[8px] font-mono text-stone-500 block leading-tight mt-0.5">{agent.sub}</span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                <div className="min-w-0">
+                  <h4 className="text-[12px] font-bold leading-tight truncate">
+                    {agent.name}
+                  </h4>
+                  <p className="text-[9.5px] text-[#78716c] mt-0.5 font-mono">
+                    {agent.sub}
+                  </p>
+                </div>
+              </button>
+            ))}
           </div>
 
-          {/* RIGHT: Cognitive Loop Details */}
-          <div className="space-y-6 flex flex-col justify-center">
+          {/* RIGHT: Chrome browser mockup and agent console */}
+          <div className="p-6 md:p-10 bg-white flex flex-col justify-center min-h-[420px]">
             
-            {/* Feature 1 */}
+            {/* Chrome Frame */}
             <div 
-              className={`p-6 border rounded-2xl transition-all duration-300 ${
-                hoveredAgent === 'resume' || hoveredAgent === 'job'
-                  ? 'border-indigo-500/40 bg-indigo-950/10 shadow-[0_4px_20px_rgba(99,102,241,0.05)]'
-                  : 'border-stone-900 bg-stone-950/40'
-              }`}
+              className="w-full overflow-hidden flex flex-col border border-[#e5e5e5]"
+              style={{
+                background: "rgba(255,255,255,1)",
+                borderRadius: "14px",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.03)",
+              }}
             >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
-                  <Cpu className="w-5 h-5 text-indigo-400" />
+              {/* Top Bar */}
+              <div className="h-11 bg-[#FAFAFA] border-b border-[#e7e5e4] px-4 flex items-center justify-between select-none shrink-0">
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-white">Dynamic Intent Routing</h3>
-                  <p className="text-[11px] font-mono text-indigo-400 mt-0.5">Resume Agent + Job Agent</p>
+                <div className="flex items-center gap-1.5">
+                  <Cpu className="w-3.5 h-3.5 text-[#8F8F8F]" />
+                  <span className="text-[11px] font-mono text-[#8F8F8F]">Agentic Workspace — {current.badge}</span>
                 </div>
+                <div className="w-[60px]" />
               </div>
-              <p className="text-xs text-stone-400 mt-3 leading-relaxed">
-                When you target a role, the orchestrator mesh delegates tasks. It directs the Job Agent to parse requirements, while coordinating with the Resume Agent to align document structure, bullet points, and ATS compliance.
-              </p>
-            </div>
 
-            {/* Feature 2 */}
-            <div 
-              className={`p-6 border rounded-2xl transition-all duration-300 ${
-                hoveredAgent === 'coding' || hoveredAgent === 'knowledge'
-                  ? 'border-emerald-500/40 bg-emerald-950/10 shadow-[0_4px_20px_rgba(16,185,129,0.05)]'
-                  : 'border-stone-900 bg-stone-950/40'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50/5 flex items-center justify-center border border-emerald-500/20">
-                  <Sparkles className="w-5 h-5 text-emerald-400" />
+              {/* Split inside browser */}
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_1.2fr] divide-y md:divide-y-0 md:divide-x divide-[#e7e5e4]">
+                
+                {/* Description column */}
+                <div className="p-6 flex flex-col justify-between min-h-[220px]">
+                  <div>
+                    <span 
+                      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium border font-mono"
+                      style={{ 
+                        borderColor: `${current.color}30`, 
+                        backgroundColor: `${current.color}0a`,
+                        color: current.color 
+                      }}
+                    >
+                      {current.badge}
+                    </span>
+                    <h3 className="text-[14px] font-bold text-stone-900 mt-3 leading-tight">{current.tagline}</h3>
+                    <p className="text-xs text-stone-500 mt-2 leading-relaxed">{current.desc}</p>
+                  </div>
+                  
+                  <div className="pt-4 border-t border-stone-100 mt-6 flex items-center justify-between text-[10px] font-mono text-stone-400">
+                    <span>STATUS: ACTIVE</span>
+                    <span style={{ color: current.color }}>SYNCED TO BRAIN ✓</span>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-white">Unified Skill Memory Matrix</h3>
-                  <p className="text-[11px] font-mono text-emerald-400 mt-0.5">Coding Agent + Knowledge Agent</p>
-                </div>
-              </div>
-              <p className="text-xs text-stone-400 mt-3 leading-relaxed">
-                Tracks all code compile attempts, sandboxed tests, and curriculum benchmarks. If a user hits a block, StudyForge customizes curriculum maps while CodingForge populates focused target practice questions.
-              </p>
-            </div>
 
-            {/* Feature 3 */}
-            <div 
-              className={`p-6 border rounded-2xl transition-all duration-300 ${
-                hoveredAgent === 'interview'
-                  ? 'border-pink-500/40 bg-pink-950/10 shadow-[0_4px_20px_rgba(236,72,153,0.05)]'
-                  : 'border-stone-900 bg-stone-950/40'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-pink-50/5 flex items-center justify-center border border-pink-500/20">
-                  <Mic className="w-5 h-5 text-pink-400" />
+                {/* Playground simulation column */}
+                <div className="p-6 bg-[#fafaf9] flex flex-col justify-center min-h-[220px]">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={current.id}
+                      initial={{ opacity: 0, scale: 0.98 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.98 }}
+                      transition={{ duration: 0.25 }}
+                      className="w-full h-full"
+                    >
+                      {current.renderPlayground()}
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-white">Multi-Modal Audio Speech Evaluation</h3>
-                  <p className="text-[11px] font-mono text-pink-400 mt-0.5">Interview Agent</p>
-                </div>
+
               </div>
-              <p className="text-xs text-stone-400 mt-3 leading-relaxed">
-                Powers real-time mock interviews with speech assessment. Evaluates voice responses for vocabulary, conceptual indexing, code logic definitions, and behavioral structure to grade developer readiness.
-              </p>
+
             </div>
 
           </div>
