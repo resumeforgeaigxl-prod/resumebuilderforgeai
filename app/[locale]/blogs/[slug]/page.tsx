@@ -30,9 +30,32 @@ export async function generateMetadata({ params }: { params: { locale: string, s
   const post = await getBlogPostBySlug(params.slug, params.locale.split('-')[0]) as BlogPost | null;
   if (!post) return {};
 
+  const baseUrl = 'https://resumeforgeai.in';
+  const canonicalUrl = `${baseUrl}/${params.locale}/blogs/${params.slug}`;
+
+  // Region-locale mapping for multilingual SEO alternates
+  const languages: Record<string, string> = {
+    'x-default': `${baseUrl}/en-in/blogs/${params.slug}`,
+    'en-in': `${baseUrl}/en-in/blogs/${params.slug}`,
+    'en-us': `${baseUrl}/en-us/blogs/${params.slug}`,
+    'en-eu': `${baseUrl}/en-eu/blogs/${params.slug}`,
+    'hi-in': `${baseUrl}/hi-in/blogs/${params.slug}`,
+    'te-in': `${baseUrl}/te-in/blogs/${params.slug}`,
+    'ta-in': `${baseUrl}/ta-in/blogs/${params.slug}`,
+    'ml-in': `${baseUrl}/ml-in/blogs/${params.slug}`,
+    'es-us': `${baseUrl}/es-us/blogs/${params.slug}`,
+    'es-eu': `${baseUrl}/es-eu/blogs/${params.slug}`,
+    'fr-eu': `${baseUrl}/fr-eu/blogs/${params.slug}`,
+    'de-eu': `${baseUrl}/de-eu/blogs/${params.slug}`,
+  };
+
   return {
     title: `${post.title} | ResumeForgeAI`,
     description: post.seo_description,
+    alternates: {
+      canonical: canonicalUrl,
+      languages,
+    },
     openGraph: {
       title: post.title,
       description: post.seo_description,
@@ -56,8 +79,37 @@ export default async function BlogPostPage({ params }: { params: { locale: strin
   
   if (!post) notFound();
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": post.seo_description,
+    "image": post.cover_image ? `https://resumeforgeai.in${post.cover_image}` : 'https://resumeforgeai.in/og-blog.png',
+    "datePublished": post.published_at,
+    "author": {
+      "@type": "Person",
+      "name": post.author
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "ResumeForgeAI",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://resumeforgeai.in/favicon.ico"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://resumeforgeai.in/${locale}/blogs/${slug}`
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F5F5F3] text-[#171717] font-sans pb-0">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="max-w-[1200px] mx-auto px-6 md:px-20 pt-28 pb-12">
         
         {/* Back Button */}
@@ -90,7 +142,7 @@ export default async function BlogPostPage({ params }: { params: { locale: strin
               </div>
 
               {post.cover_image && (
-                <div className="rounded-none overflow-hidden border border-neutral-200 shadow-md mb-10 relative max-w-[600px] mx-auto aspect-square bg-neutral-50">
+                <div className="rounded-none overflow-hidden border border-neutral-200 shadow-md mb-10 mx-auto max-w-[800px] bg-neutral-50 flex items-center justify-center">
                   {post.cover_image.endsWith('.mp4') ? (
                     <video 
                       src={post.cover_image}
@@ -99,16 +151,13 @@ export default async function BlogPostPage({ params }: { params: { locale: strin
                       loop
                       playsInline
                       controls
-                      className="w-full h-full object-cover"
+                      className="w-full h-auto"
                     />
                   ) : (
-                    <Image 
+                    <img 
                       src={post.cover_image} 
                       alt={post.title} 
-                      fill
-                      priority
-                      sizes="(max-width: 600px) 100vw, 600px"
-                      className="w-full h-full object-cover" 
+                      className="w-full h-auto object-contain" 
                     />
                   )}
                 </div>

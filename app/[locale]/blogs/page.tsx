@@ -11,10 +11,33 @@ import { Playfair_Display, Lora } from 'next/font/google';
 const playfair = Playfair_Display({ subsets: ['latin'], weight: ['400', '600', '700'] });
 const lora = Lora({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
+  const baseUrl = 'https://resumeforgeai.in';
+  const canonicalUrl = `${baseUrl}/${params.locale}/blogs`;
+
+  // Region-locale mapping for multilingual SEO alternates
+  const languages: Record<string, string> = {
+    'x-default': `${baseUrl}/en-in/blogs`,
+    'en-in': `${baseUrl}/en-in/blogs`,
+    'en-us': `${baseUrl}/en-us/blogs`,
+    'en-eu': `${baseUrl}/en-eu/blogs`,
+    'hi-in': `${baseUrl}/hi-in/blogs`,
+    'te-in': `${baseUrl}/te-in/blogs`,
+    'ta-in': `${baseUrl}/ta-in/blogs`,
+    'ml-in': `${baseUrl}/ml-in/blogs`,
+    'es-us': `${baseUrl}/es-us/blogs`,
+    'es-eu': `${baseUrl}/es-eu/blogs`,
+    'fr-eu': `${baseUrl}/fr-eu/blogs`,
+    'de-eu': `${baseUrl}/de-eu/blogs`,
+  };
+
   return {
     title: "Blog & Updates | ResumeForgeAI",
     description: "Stay updated with the latest features, career tips, and platform updates from ResumeForgeAI.",
+    alternates: {
+      canonical: canonicalUrl,
+      languages,
+    }
   };
 }
 
@@ -22,8 +45,30 @@ export default async function BlogHome({ params }: { params: { locale: string } 
   const { locale } = params;
   const posts = await getBlogPosts(locale.split('-')[0]); // Use lang part for db filter
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "ResumeForgeAI Blog",
+    "description": "Stay updated with the latest product updates, career preparation tips, and engineering insights from ResumeForgeAI.",
+    "url": `https://resumeforgeai.in/${locale}/blogs`,
+    "blogPost": posts.map(post => ({
+      "@type": "BlogPosting",
+      "headline": post.title,
+      "url": `https://resumeforgeai.in/${locale}/blogs/${post.slug}`,
+      "datePublished": post.published_at,
+      "author": {
+        "@type": "Person",
+        "name": post.author
+      }
+    }))
+  };
+
   return (
     <div className={`${lora.className} min-h-screen bg-[#F5F5F3] text-[#171717] pb-0`}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="container mx-auto px-6 py-20 max-w-[1200px]">
         
         {/* Header Block in Vercel/AutoSend style */}
@@ -50,7 +95,7 @@ export default async function BlogHome({ params }: { params: { locale: string } 
                     alt={post.title} 
                     fill
                     sizes="(max-width: 768px) 100vw, 320px"
-                    className="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500"
+                    className="w-full h-full object-contain bg-neutral-950 group-hover:scale-[1.01] transition-transform duration-500"
                   />
                 </div>
               )}

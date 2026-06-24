@@ -3,7 +3,6 @@
 import { Sidebar } from "@/components/ui/Sidebar";
 import { TopNav } from "@/components/ui/TopNav";
 import { usePathname } from "next/navigation";
-import { ForgeAssistant } from "@/components/shared/ForgeAssistant";
 import { SidebarProvider, useSidebar } from "@/hooks/use-sidebar";
 import { cn } from "@/lib/utils";
 
@@ -42,8 +41,6 @@ function DashboardContent({
                     {children}
                 </main>
             </div>
-
-            <ForgeAssistant locale={locale} />
         </div>
     );
 }
