@@ -25,9 +25,34 @@ export default function AdminPosts() {
   // Broadcast States
   const [showBroadcastModal, setShowBroadcastModal] = useState(false);
   const [broadcastEmails, setBroadcastEmails] = useState<string[]>([]);
+  const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
+  const [emailSearch, setEmailSearch] = useState('');
   const [isBroadcasting, setIsBroadcasting] = useState(false);
   const [broadcastResult, setBroadcastResult] = useState<string | null>(null);
   const [broadcastFileName, setBroadcastFileName] = useState<string | null>(null);
+
+  const handleToggleEmail = (email: string) => {
+    setSelectedEmails(prev => {
+      if (prev.includes(email)) {
+        return prev.filter(e => e !== email);
+      } else {
+        if (prev.length >= 50) return prev;
+        return [...prev, email];
+      }
+    });
+  };
+
+  const handleSelectAll = () => {
+    setSelectedEmails(broadcastEmails.slice(0, 50));
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedEmails([]);
+  };
+
+  const filteredEmails = broadcastEmails.filter(email => 
+    email.toLowerCase().includes(emailSearch.toLowerCase())
+  );
 
   // Excel File Upload Handler
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,6 +92,7 @@ export default function AdminPosts() {
         });
 
         setBroadcastEmails(sheetEmails);
+        setSelectedEmails(sheetEmails.slice(0, 50));
       } catch (err) {
         console.error('Failed to parse Excel file:', err);
         alert('Failed to parse spreadsheet file.');
@@ -78,7 +104,7 @@ export default function AdminPosts() {
 
   // Trigger Newsletter Broadcast
   const triggerBroadcast = async () => {
-    if (broadcastEmails.length === 0) return;
+    if (selectedEmails.length === 0) return;
     setIsBroadcasting(true);
     setBroadcastResult(null);
 
@@ -86,13 +112,14 @@ export default function AdminPosts() {
       const res = await fetch('/api/admin/broadcast-blog', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ emails: broadcastEmails })
+        body: JSON.stringify({ emails: selectedEmails })
       });
 
       const data = await res.json();
       if (res.ok && data.success) {
         setBroadcastResult(`Successfully sent email batch to ${data.count} subscribers! Article: "${data.postTitle}"`);
         setBroadcastEmails([]);
+        setSelectedEmails([]);
       } else {
         alert('Broadcast failed: ' + (data.error || 'Unknown error'));
       }
@@ -247,6 +274,8 @@ export default function AdminPosts() {
               onClick={() => {
                 setShowBroadcastModal(false);
                 setBroadcastEmails([]);
+                setSelectedEmails([]);
+                setEmailSearch('');
                 setBroadcastFileName(null);
                 setBroadcastResult(null);
               }}
@@ -284,6 +313,8 @@ export default function AdminPosts() {
                     onClick={() => {
                       setBroadcastFileName(null);
                       setBroadcastEmails([]);
+                      setSelectedEmails([]);
+                      setEmailSearch('');
                       setBroadcastResult(null);
                     }}
                     className="text-xs font-bold text-red-600 hover:text-red-800 transition-colors"
@@ -292,10 +323,83 @@ export default function AdminPosts() {
                   </button>
                 </div>
 
+                {/* Searchable Checkbox List for parsed emails */}
                 {broadcastEmails.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-4">
+                      <input 
+                        type="text"
+                        placeholder="Search emails..."
+                        value={emailSearch}
+                        onChange={(e) => setEmailSearch(e.target.value)}
+                        className="px-3 py-1.5 border border-[#E2E8F0] rounded-xl text-xs w-full max-w-[200px] focus:outline-none focus:border-blue-500 bg-neutral-50/50 font-medium"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={handleSelectAll}
+                          className="px-2.5 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-[10px] font-bold rounded-lg transition-colors"
+                        >
+                          Select First 50
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleDeselectAll}
+                          className="px-2.5 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-[10px] font-bold rounded-lg transition-colors"
+                        >
+                          Deselect All
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="border border-[#E2E8F0] rounded-2xl max-h-48 overflow-y-auto bg-white divide-y divide-neutral-100 shadow-inner">
+                      {filteredEmails.length === 0 ? (
+                        <div className="p-8 text-center text-xs text-neutral-450 font-medium">
+                          No matching emails found.
+                        </div>
+                      ) : (
+                        filteredEmails.map((email) => {
+                          const isChecked = selectedEmails.includes(email);
+                          const isLimitReached = selectedEmails.length >= 50;
+                          const isDisabled = !isChecked && isLimitReached;
+                          return (
+                            <label 
+                              key={email} 
+                              className={`flex items-center gap-3 px-4 py-2 hover:bg-neutral-50/50 cursor-pointer select-none transition-colors ${isChecked ? 'bg-blue-50/10' : ''}`}
+                            >
+                              <input 
+                                type="checkbox" 
+                                checked={isChecked}
+                                disabled={isDisabled}
+                                onChange={() => handleToggleEmail(email)}
+                                className="rounded border-[#E2E8F0] text-blue-600 focus:ring-blue-500/20 disabled:opacity-40"
+                              />
+                              <span className={`text-xs font-mono truncate ${isChecked ? 'text-neutral-900 font-bold' : 'text-neutral-600'} ${isDisabled ? 'opacity-40' : ''}`}>
+                                {email}
+                              </span>
+                            </label>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-neutral-500 font-medium">
+                        Selected: <strong className="text-neutral-900">{selectedEmails.length}</strong> / {broadcastEmails.length}
+                      </span>
+                      {selectedEmails.length >= 50 && (
+                        <span className="text-blue-600 font-bold">
+                          Maximum limit of 50 reached
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {selectedEmails.length > 0 && (
                   <div className="text-xs text-neutral-600 bg-amber-50 border border-amber-200/50 rounded-xl p-4 flex gap-2.5 font-medium">
                     <span className="font-bold text-amber-700">Note:</span>
-                    <span>This batch will deliver the latest published article from your blogs database to the **first 50 email addresses** extracted from this sheet.</span>
+                    <span>This batch will deliver the latest published article from your blogs database to the selected email addresses (up to 50 max).</span>
                   </div>
                 )}
 
@@ -314,6 +418,8 @@ export default function AdminPosts() {
                     onClick={() => {
                       setShowBroadcastModal(false);
                       setBroadcastEmails([]);
+                      setSelectedEmails([]);
+                      setEmailSearch('');
                       setBroadcastFileName(null);
                       setBroadcastResult(null);
                     }}
@@ -324,7 +430,7 @@ export default function AdminPosts() {
                   </button>
                   <button
                     onClick={triggerBroadcast}
-                    disabled={broadcastEmails.length === 0 || isBroadcasting}
+                    disabled={selectedEmails.length === 0 || isBroadcasting}
                     className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold rounded-xl text-sm flex items-center gap-2 shadow-lg shadow-blue-600/20 transition-all"
                   >
                     {isBroadcasting ? (
