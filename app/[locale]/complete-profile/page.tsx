@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { ResumeUpload } from '@/components/dashboard/resume-upload';
 
 const REFERRAL_OPTIONS = [
     { label: "LinkedIn", value: "linkedin" },
@@ -67,6 +68,35 @@ export default function CompleteProfilePage() {
     const [error, setError] = useState<string | null>(null);
     const [currentStep, setCurrentStep] = useState(1);
     const totalSteps = 8;
+
+    const [showManualOnboarding, setShowManualOnboarding] = useState(false);
+    const [isAutoUploading, setIsAutoUploading] = useState(false);
+
+    const handleResumeUploadSuccess = useCallback(async () => {
+        setIsAutoUploading(true);
+        try {
+            const res = await fetch('/api/user/profile');
+            if (res.ok) {
+                const data = await res.json();
+                if (data?.user?.profile_completed) {
+                    router.push(`/${locale}/dashboard?onboarding=success`);
+                    router.refresh();
+                    return;
+                }
+            }
+            router.push(`/${locale}/dashboard?onboarding=success`);
+            router.refresh();
+        } catch (err) {
+            console.error("Profile complete redirect failed", err);
+            setError("Resume parsed, but session refresh failed. Please refresh your page.");
+        } finally {
+            setIsAutoUploading(false);
+        }
+    }, [locale, router]);
+
+    const handleResumeUploadError = useCallback((errStr: string) => {
+        setError(errStr);
+    }, []);
 
     const [form, setForm] = useState({
         referralSource: '',
@@ -406,32 +436,84 @@ export default function CompleteProfilePage() {
                         </div>
                     </div>
 
-                    {/* Right Pane: Wizard Steps */}
+                    {/* Right Pane: Onboarding Form or Resume Upload */}
                     <div className="w-full md:w-1/2 flex flex-col justify-center p-6 md:p-12 bg-white min-h-[500px]">
                         <div className="w-full max-w-md mx-auto space-y-6">
-                            {/* Step Indicator */}
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-7 h-7 bg-[#171717] rounded-full flex items-center justify-center font-bold text-white text-[10px] tracking-tight border border-[#171717] shadow-sm select-none">
-                                        RF
+                            {!showManualOnboarding ? (
+                                <div className="space-y-6 animate-slide-in">
+                                    <div className="space-y-2">
+                                        <h2 className="text-2xl font-bold tracking-tight text-[#171717]">
+                                            Complete Your Profile Instantly
+                                        </h2>
+                                        <p className="text-sm text-[#4D4D4D] leading-relaxed">
+                                            Upload your resume to automatically import your education, skills, target role, and experience in 1 click.
+                                        </p>
                                     </div>
-                                    <span className="text-[#171717] font-semibold text-xs tracking-tight">Onboarding</span>
+
+                                    {error && (
+                                        <div className="p-3.5 bg-rose-50 border border-rose-100 rounded-xl text-xs text-rose-600 flex items-start gap-2.5">
+                                            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                                            <span>{error}</span>
+                                        </div>
+                                    )}
+
+                                    {isAutoUploading ? (
+                                        <div className="py-12 flex flex-col items-center justify-center space-y-3">
+                                            <Loader2 className="w-8 h-8 animate-spin text-[#171717]" />
+                                            <p className="text-xs font-mono text-stone-500">Creating your account workspace...</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-6">
+                                            <ResumeUpload 
+                                                onUploadSuccess={handleResumeUploadSuccess} 
+                                                onUploadError={handleResumeUploadError} 
+                                            />
+
+                                            <div className="relative flex py-2 items-center">
+                                                <div className="flex-grow border-t border-[#EBEBEB]" />
+                                                <span className="flex-shrink mx-4 text-[10px] font-mono text-stone-455 uppercase tracking-widest text-stone-400">Or</span>
+                                                <div className="flex-grow border-t border-[#EBEBEB]" />
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowManualOnboarding(true)}
+                                                className="w-full py-3.5 bg-[#FAFAFA] border border-[#EBEBEB] hover:bg-[#F5F5F5] hover:border-[#171717]/25 text-[#171717] rounded-xl text-xs font-semibold transition-all cursor-pointer text-center"
+                                            >
+                                                Fill details manually (8 steps)
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    <p className="text-[10px] text-center text-[#8F8F8F] leading-normal px-4">
+                                        By uploading your resume, you agree to our <Link href={`/${locale}/terms`} className="underline hover:text-[#171717]">Terms of Service</Link> and <Link href={`/${locale}/privacy`} className="underline hover:text-[#171717]">Privacy Policy</Link>.
+                                    </p>
                                 </div>
-                                <span className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">
-                                    Step {currentStep} of {totalSteps}
-                                </span>
-                            </div>
+                            ) : (
+                                <div className="space-y-6">
+                                    {/* Step Indicator */}
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-7 h-7 bg-[#171717] rounded-full flex items-center justify-center font-bold text-white text-[10px] tracking-tight border border-[#171717] shadow-sm select-none">
+                                                RF
+                                            </div>
+                                            <span className="text-[#171717] font-semibold text-xs tracking-tight">Onboarding</span>
+                                        </div>
+                                        <span className="text-[10px] font-mono font-semibold text-[#8F8F8F] uppercase tracking-wider">
+                                            Step {currentStep} of {totalSteps}
+                                        </span>
+                                    </div>
+                                    
+                                    {/* Progress Bar */}
+                                    <div className="w-full bg-[#FAFAFA] border border-[#EBEBEB] h-1.5 rounded-full overflow-hidden">
+                                        <div 
+                                            className="bg-[#171717] h-full transition-all duration-300 rounded-full"
+                                            style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+                                        />
+                                    </div>
 
-                            {/* Progress Bar */}
-                            <div className="w-full bg-[#FAFAFA] border border-[#EBEBEB] h-1.5 rounded-full overflow-hidden">
-                                <div 
-                                    className="bg-[#171717] h-full transition-all duration-300 rounded-full"
-                                    style={{ width: `${(currentStep / totalSteps) * 100}%` }}
-                                />
-                            </div>
-
-                            {/* Form Screen wrapper */}
-                            <form onSubmit={handleSubmit} className="space-y-6">
+                                    {/* Form Screen wrapper */}
+                                    <form onSubmit={handleSubmit} className="space-y-6">
                         
                         {/* STEP 1: Referral */}
                         {currentStep === 1 && (
@@ -1054,7 +1136,9 @@ export default function CompleteProfilePage() {
                             )}
                         </div>
 
-                            </form>
+                                    </form>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

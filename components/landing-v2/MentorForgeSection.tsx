@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   FileText, 
@@ -73,10 +73,10 @@ const agents: AgentItem[] = [
             <span className="text-emerald-500 font-bold">RUNNING</span>
           </div>
           <div><span className="text-purple-400">func</span> <span className="text-blue-400">binarySearch</span>(arr []<span className="text-green-400">int</span>, target <span className="text-green-400">int</span>) <span className="text-green-400">int</span> &#123;</div>
-          <div className="pl-3 text-stone-550">// Debugger output:</div>
+          <div className="pl-3 text-stone-400">// Debugger output:</div>
           <div className="pl-3 text-emerald-400">✓ Array sorted in 0.04ms</div>
-          <div className="pl-3 text-amber-450">⚠ Warning: potential integer overflow at mid calculation</div>
-          <div className="pl-3 text-stone-350">✓ Corrected mid logic to: low + (high-low)/2</div>
+          <div className="pl-3 text-amber-500">⚠ Warning: potential integer overflow at mid calculation</div>
+          <div className="pl-3 text-stone-300">✓ Corrected mid logic to: low + (high-low)/2</div>
         </div>
         <div className="mt-3 flex items-center justify-between text-xs font-sans">
           <span className="text-stone-500 font-semibold">Test cases passed:</span>
@@ -136,7 +136,7 @@ const agents: AgentItem[] = [
     renderPlayground: () => (
       <div className="flex flex-col h-full justify-between">
         <div className="space-y-2">
-          <div className="text-[10px] font-mono font-semibold text-stone-450 uppercase tracking-wider">RECOMMENDED SYLLABUS</div>
+          <div className="text-[10px] font-mono font-semibold text-stone-400 uppercase tracking-wider">RECOMMENDED SYLLABUS</div>
           {[
             { title: "Database Indexing Foundations", desc: "B-Trees & Hash Indexing models", done: true },
             { title: "Query Performance Tuning", desc: "Explain Analyze execution plans", done: true },
@@ -195,12 +195,47 @@ export default function MentorForgeSection() {
   const [activeTab, setActiveTab] = useState(0);
   const current = agents[activeTab];
 
+  // 3D Interactive Parallax States
+  const [rotateX, setRotateX] = useState(0);
+  const [rotateY, setRotateY] = useState(0);
+  const [mouseX, setMouseX] = useState(0);
+  const [mouseY, setMouseY] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const xPx = e.clientX - rect.left;
+    const yPx = e.clientY - rect.top;
+    
+    setMouseX(xPx);
+    setMouseY(yPx);
+    
+    const x = xPx / rect.width - 0.5;
+    const y = yPx / rect.height - 0.5;
+    const maxRotate = 6;
+    setRotateX(-y * maxRotate);
+    setRotateY(x * maxRotate);
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setRotateX(0);
+    setRotateY(0);
+  };
+
+  const ease = [0.16, 1, 0.3, 1] as const;
+
   return (
     <section id="mentorforge" className="w-full bg-[#fafaf9] relative overflow-hidden select-none">
       <div className="max-w-[1200px] mx-auto border-x border-[#e7e5e4] bg-white">
         
-        {/* Header Block (Full-width, left-aligned, matching FeaturesGrid) */}
-        <div className="px-6 md:px-10 py-16 text-left border-b border-[#e7e5e4]">
+        {/* Header Block (Full-width inside section, matching FeaturesGrid and ATSDashboard) */}
+        <div className="px-6 md:px-10 py-16 text-left">
           <span className="font-mono text-[14px] text-rose-500 font-semibold uppercase leading-4 block mb-3 select-none">
             #05 — MentorForge AI
           </span>
@@ -219,63 +254,63 @@ export default function MentorForgeSection() {
           </p>
         </div>
 
-        {/* Content Layout matching the split grid style of FeaturesGrid */}
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] divide-y lg:divide-y-0 lg:divide-x divide-[#e7e5e4]">
-          
-          {/* LEFT: Sidebar tabs selector */}
-          <div className="p-5 bg-[#fafaf9] space-y-2">
-            <p className="text-[9.5px] font-mono font-semibold text-[#78716c] uppercase tracking-wider px-2.5 mb-2">
-              Agentic Orchestrator
-            </p>
-            {agents.map((agent, idx) => (
-              <button
-                key={agent.id}
-                onClick={() => setActiveTab(idx)}
-                className={`w-full text-left p-3 rounded-xl border flex items-center gap-3.5 transition-all cursor-pointer ${
-                  activeTab === idx
-                    ? "bg-white border-[#e7e5e4] shadow-[0_2px_8px_rgba(0,0,0,0.02)] text-[#1c1917]"
-                    : "bg-transparent border-transparent text-[#78716c] hover:bg-[#e7e5e4]/30 hover:text-[#1c1917]"
-                }`}
-              >
-                <div
-                  className="w-9 h-9 rounded-lg border flex items-center justify-center bg-white transition-all shrink-0"
-                  style={{
-                    borderColor: activeTab === idx ? agent.color : "#e7e5e4",
-                    backgroundColor: activeTab === idx ? `${agent.color}0a` : "transparent"
-                  }}
-                >
-                  {agent.id === "resume" && <FileText className="w-4.5 h-4.5" style={{ color: activeTab === idx ? agent.color : "#a8a29e" }} />}
-                  {agent.id === "coding" && <Terminal className="w-4.5 h-4.5" style={{ color: activeTab === idx ? agent.color : "#a8a29e" }} />}
-                  {agent.id === "interview" && <Mic className="w-4.5 h-4.5" style={{ color: activeTab === idx ? agent.color : "#a8a29e" }} />}
-                  {agent.id === "knowledge" && <BookOpen className="w-4.5 h-4.5" style={{ color: activeTab === idx ? agent.color : "#a8a29e" }} />}
-                  {agent.id === "job" && <Briefcase className="w-4.5 h-4.5" style={{ color: activeTab === idx ? agent.color : "#a8a29e" }} />}
-                </div>
-                <div className="min-w-0">
-                  <h4 className="text-[12px] font-bold leading-tight truncate">
-                    {agent.name}
-                  </h4>
-                  <p className="text-[9.5px] text-[#78716c] mt-0.5 font-mono">
-                    {agent.sub}
-                  </p>
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {/* RIGHT: Chrome browser mockup and agent console */}
-          <div className="p-6 md:p-10 bg-white flex flex-col justify-center min-h-[420px]">
-            
-            {/* Chrome Frame */}
-            <div 
-              className="w-full overflow-hidden flex flex-col border border-[#e5e5e5]"
+        {/* Mockup Window Container with Landscape Background (FeaturesGrid/ATSDashboard Style) */}
+        <div className="px-6 md:px-10 pb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.7, ease }}
+            className="relative flex items-center justify-center p-3 sm:p-6 md:p-10 w-full overflow-hidden rounded-2xl"
+          >
+            {/* Landscape Background Layer */}
+            <div
+              className="absolute inset-0 bg-cover bg-center pointer-events-none"
               style={{
-                background: "rgba(255,255,255,1)",
-                borderRadius: "14px",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.03)",
+                backgroundImage: "url('/hero-landscape.png')",
+                zIndex: 0,
+              }}
+            />
+            {/* Dark overlay for contrast */}
+            <div className="absolute inset-0 bg-slate-950/20 z-0 pointer-events-none" />
+
+            {/* Mockup Window Frame (Glassmorphic 3D Parallax Card) */}
+            <div 
+              onMouseMove={handleMouseMove}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              className="relative z-10 w-full max-w-[1040px] overflow-hidden flex flex-col border border-white/10"
+              style={{
+                background: "rgba(255,255,255,0.96)",
+                borderRadius: "16px",
+                transformStyle: "preserve-3d",
+                transform: isHovered 
+                  ? `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.015, 1.015, 1.015)` 
+                  : 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
+                transition: isHovered 
+                  ? 'transform 0.1s ease-out, box-shadow 0.1s ease-out' 
+                  : 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                boxShadow: isHovered 
+                  ? "0 35px 70px rgba(0,0,0,0.28), 0 12px 24px rgba(0,0,0,0.16)" 
+                  : "0 8px 40px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.15)",
               }}
             >
-              {/* Top Bar */}
-              <div className="h-11 bg-[#FAFAFA] border-b border-[#e7e5e4] px-4 flex items-center justify-between select-none shrink-0">
+              {/* Radial gradient shine matching the mouse coordinates */}
+              <div 
+                className="absolute inset-0 pointer-events-none z-30 transition-opacity duration-300"
+                style={{
+                  background: isHovered 
+                    ? `radial-gradient(500px circle at ${mouseX}px ${mouseY}px, rgba(59, 130, 246, 0.12), rgba(168, 85, 247, 0.04), transparent 60%)` 
+                    : 'none',
+                  mixBlendMode: 'screen',
+                }}
+              />
+
+              {/* Chrome Top Bar */}
+              <div 
+                className="h-11 bg-[#FAFAFA] border-b border-[#e7e5e4] px-5 flex items-center justify-between select-none shrink-0"
+                style={{ transform: "translateZ(8px)" }}
+              >
                 <div className="flex items-center gap-1.5 shrink-0">
                   <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
                   <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
@@ -288,12 +323,65 @@ export default function MentorForgeSection() {
                 <div className="w-[60px]" />
               </div>
 
-              {/* Split inside browser */}
-              <div className="grid grid-cols-1 md:grid-cols-[1fr_1.2fr] divide-y md:divide-y-0 md:divide-x divide-[#e7e5e4]">
-                
-                {/* Description column */}
-                <div className="p-6 flex flex-col justify-between min-h-[220px]">
-                  <div>
+              {/* Split inside browser frame - 3 Columns */}
+              <div 
+                className="grid grid-cols-1 lg:grid-cols-[240px_1fr_1.1fr] divide-y lg:divide-y-0 lg:divide-x divide-[#e7e5e4] bg-white flex-1 overflow-hidden"
+                style={{ transformStyle: "preserve-3d" }}
+              >
+                {/* COL 1: Subagents list (styled exactly like ATSDashboard targets selector) */}
+                <div 
+                  className="p-4 bg-[#fafaf9]"
+                  style={{ transformStyle: "preserve-3d" }}
+                >
+                  <div style={{ transform: "translateZ(12px)" }} className="space-y-1.5">
+                    <p className="text-[9px] font-mono font-semibold text-[#78716c] uppercase tracking-wider px-2.5 mb-2">
+                      Agentic Orchestrator
+                    </p>
+                    {agents.map((agent, idx) => {
+                      const isActive = activeTab === idx;
+                      return (
+                        <button
+                          key={agent.id}
+                          onClick={() => setActiveTab(idx)}
+                          className={`w-full text-left p-2.5 rounded-xl border flex items-center gap-3 transition-all cursor-pointer ${
+                            isActive
+                              ? "bg-white border-[#e7e5e4] shadow-[0_2px_8px_rgba(0,0,0,0.02)] text-[#1c1917]"
+                              : "bg-transparent border-transparent text-[#78716c] hover:bg-[#e7e5e4]/30 hover:text-[#1c1917]"
+                          }`}
+                        >
+                          <div
+                            className="w-8 h-8 rounded-lg border flex items-center justify-center bg-white transition-all shrink-0"
+                            style={{
+                              borderColor: isActive ? agent.color : "#e7e5e4",
+                              backgroundColor: isActive ? `${agent.color}0a` : "transparent"
+                            }}
+                          >
+                            {agent.id === "resume" && <FileText className="w-3.5 h-3.5" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
+                            {agent.id === "coding" && <Terminal className="w-3.5 h-3.5" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
+                            {agent.id === "interview" && <Mic className="w-3.5 h-3.5" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
+                            {agent.id === "knowledge" && <BookOpen className="w-3.5 h-3.5" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
+                            {agent.id === "job" && <Briefcase className="w-3.5 h-3.5" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="text-[11px] font-bold leading-tight truncate">
+                              {agent.name}
+                            </h4>
+                            <p className="text-[9.5px] text-[#78716c] mt-0.5 font-mono">
+                              {agent.sub}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* COL 2: Agent Info */}
+                <div 
+                  className="p-6 flex flex-col justify-between min-h-[240px] bg-white"
+                  style={{ transformStyle: "preserve-3d" }}
+                >
+                  <div style={{ transform: "translateZ(20px)" }}>
                     <span 
                       className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium border font-mono"
                       style={{ 
@@ -304,18 +392,24 @@ export default function MentorForgeSection() {
                     >
                       {current.badge}
                     </span>
-                    <h3 className="text-[14px] font-bold text-stone-900 mt-3 leading-tight">{current.tagline}</h3>
-                    <p className="text-xs text-stone-500 mt-2 leading-relaxed">{current.desc}</p>
+                    <h3 className="text-[14px] font-bold text-stone-900 mt-4 leading-snug">{current.tagline}</h3>
+                    <p className="text-xs text-stone-500 mt-3 leading-relaxed">{current.desc}</p>
                   </div>
                   
-                  <div className="pt-4 border-t border-stone-100 mt-6 flex items-center justify-between text-[10px] font-mono text-stone-400">
+                  <div 
+                    className="pt-4 border-t border-stone-100 mt-6 flex items-center justify-between text-[10px] font-mono text-stone-400"
+                    style={{ transform: "translateZ(12px)" }}
+                  >
                     <span>STATUS: ACTIVE</span>
                     <span style={{ color: current.color }}>SYNCED TO BRAIN ✓</span>
                   </div>
                 </div>
 
-                {/* Playground simulation column */}
-                <div className="p-6 bg-[#fafaf9] flex flex-col justify-center min-h-[220px]">
+                {/* COL 3: Playground simulation */}
+                <div 
+                  className="p-6 bg-[#fafaf9] flex flex-col justify-center min-h-[240px]"
+                  style={{ transformStyle: "preserve-3d" }}
+                >
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={current.id}
@@ -324,6 +418,7 @@ export default function MentorForgeSection() {
                       exit={{ opacity: 0, scale: 0.98 }}
                       transition={{ duration: 0.25 }}
                       className="w-full h-full"
+                      style={{ transform: "translateZ(24px)" }}
                     >
                       {current.renderPlayground()}
                     </motion.div>
@@ -333,9 +428,7 @@ export default function MentorForgeSection() {
               </div>
 
             </div>
-
-          </div>
-
+          </motion.div>
         </div>
 
       </div>

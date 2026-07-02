@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getSession } from '@/lib/auth/jwt';
+import { getSession, createSession } from '@/lib/auth/jwt';
 import { generateAIResponse, logAIUsage } from '@/lib/ai-provider';
 import mammoth from 'mammoth';
 
@@ -171,13 +171,104 @@ ${rawText}
       throw new Error('AI returned invalid data structure.');
     }
 
+    // Auto-update user profile if onboarding is incomplete
+    const { data: userProfile } = await supabase
+      .from('users')
+      .select('profile_completed')
+      .eq('id', session.userId)
+      .single();
+
+    if (userProfile && !userProfile.profile_completed) {
+      const parsedEducation = {
+        tenth: { institution: '', passingYear: '', score: '' },
+        twelfth: { institution: '', passingYear: '', score: '' },
+        diploma: { institution: '', passingYear: '', score: '', enabled: false },
+        btech: { institution: '', passingYear: '', score: '' },
+        masters: { institution: '', passingYear: '', score: '', enabled: false }
+      };
+
+      if (parsed.education && parsed.education.length > 0) {
+        const firstEdu = parsed.education[0];
+        parsedEducation.btech = {
+          institution: firstEdu.school || '',
+          passingYear: firstEdu.duration || '',
+          score: firstEdu.cgpa || ''
+        };
+        
+        if (parsed.education.length > 1) {
+          const secondEdu = parsed.education[1];
+          if (secondEdu.degree?.toLowerCase().includes('master') || secondEdu.degree?.toLowerCase().includes('m.tech') || secondEdu.degree?.toLowerCase().includes('ms')) {
+            parsedEducation.masters = {
+              institution: secondEdu.school || '',
+              passingYear: secondEdu.duration || '',
+              score: secondEdu.cgpa || '',
+              enabled: true
+            };
+          } else {
+            parsedEducation.twelfth = {
+              institution: secondEdu.school || '',
+              passingYear: secondEdu.duration || '',
+              score: secondEdu.cgpa || ''
+            };
+          }
+        }
+      }
+
+      const skillsArr = Array.isArray(parsed.skills) ? parsed.skills : [];
+      
+      const { error: profileErr } = await supabase
+        .from('users')
+        .update({
+          full_name: parsed.name || null,
+          phone_number: parsed.phone || null,
+          college: parsedEducation.btech.institution || null,
+          skills: skillsArr,
+          education: parsedEducation,
+          professional_summary: parsed.summary || null,
+          linkedin_url: parsed.linkedin || null,
+          github_url: parsed.github || null,
+          target_role: parsed.experience?.[0]?.role || null,
+          profile_completed: true,
+          terms_accepted: true,
+          terms_accepted_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', session.userId);
+
+      if (profileErr) {
+        console.error('[Parse] Auto profile update failed:', profileErr.message);
+      } else {
+        console.log('[Parse] Auto profile update succeeded for user:', session.userId);
+        
+        // Save first resume to database
+        const { error: resumeSaveErr } = await supabase
+          .from('resumes')
+          .insert({
+            user_id: session.userId,
+            title: parsed.name ? `${parsed.name}'s Resume` : 'Imported Resume',
+            resume_json: parsed,
+            template_selected: 'harvard'
+          });
+        
+        if (resumeSaveErr) {
+          console.error('[Parse] Auto resume save failed:', resumeSaveErr.message);
+        }
+
+        // Refresh user session cookies
+        await createSession({
+          ...session,
+          profileCompleted: true,
+          termsAccepted: true
+        });
+      }
+    }
+
     if (formData.get('returnJson') === 'true') {
       return NextResponse.json({ success: true, data: parsed });
     }
 
     const { data: row, error: dbErr } = await supabase
       .from('resumes')
-
       .insert({
         user_id: session.userId,
         title: parsed.name ? `${parsed.name}'s Resume` : 'Imported Resume',
