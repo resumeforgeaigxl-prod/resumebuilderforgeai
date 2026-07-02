@@ -53,7 +53,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Add blog posts
     posts.forEach((post: any) => {
       sitemapData.push({
-        url: `${baseUrl}/${post.locale}-${primaryLocale.split('-')[1]}/posts/${post.slug}`,
+        url: `${baseUrl}/${post.locale}-${primaryLocale.split('-')[1]}/blogs/${post.slug}`,
         lastModified: new Date(),
         changeFrequency: 'monthly',
         priority: 0.6,

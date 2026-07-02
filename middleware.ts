@@ -332,6 +332,7 @@ export async function middleware(request: NextRequest) {
         normalizedPath.startsWith('/jobforgeai') ||
         normalizedPath.startsWith('/sitemap') ||
         normalizedPath.startsWith('/knowledge') ||
+        normalizedPath.startsWith('/blogs') ||
         normalizedPath.startsWith('/posts') ||
         normalizedPath.startsWith('/jobs') ||
         normalizedPath.startsWith('/job/') ||
