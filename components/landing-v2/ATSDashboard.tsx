@@ -242,6 +242,7 @@ function ScoreGauge({
 export default function ATSDashboard() {
   const [activeTab, setActiveTab] = useState(0);
   const [showImprove, setShowImprove] = useState(false);
+  const [mobileActiveView, setMobileActiveView] = useState<'score' | 'keywords'>('score');
   const current = roleTargets[activeTab];
 
   // 3D Interactive Parallax States
@@ -376,10 +377,64 @@ export default function ATSDashboard() {
                 <div className="w-[60px]" />
               </div>
 
+              {/* Mobile/Tablet Horizontal Role Selector */}
+              <div className="lg:hidden p-3 bg-[#fafaf9] border-b border-[#e7e5e4] overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex gap-2 w-full shrink-0 select-none">
+                {roleTargets.map((role, idx) => (
+                  <button
+                    key={role.role}
+                    onClick={() => setActiveTab(idx)}
+                    className={`flex-none px-3.5 py-2 rounded-xl border flex items-center gap-2.5 transition-all cursor-pointer text-xs font-semibold ${
+                      activeTab === idx
+                        ? "bg-white border-[#e7e5e4] shadow-[0_2px_8px_rgba(0,0,0,0.02)] text-[#1c1917]"
+                        : "bg-transparent border-transparent text-[#78716c] hover:bg-[#e7e5e4]/30 hover:text-[#1c1917]"
+                    }`}
+                  >
+                    <div
+                      className="w-5 h-5 rounded-md border flex items-center justify-center bg-white transition-all shrink-0"
+                      style={{
+                        borderColor: activeTab === idx ? role.accentColor : "#e7e5e4",
+                      }}
+                    >
+                      <Target
+                        className="w-2.5 h-2.5 transition-colors"
+                        style={{
+                          color: activeTab === idx ? role.accentColor : "#a8a29e",
+                        }}
+                      />
+                    </div>
+                    <span className="truncate">{role.role}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Mobile Sub-Tab Toggle (Score vs Keywords) */}
+              <div className="lg:hidden flex border-b border-[#e7e5e4] bg-[#fafaf9] p-1.5 gap-1 shrink-0">
+                <button
+                  onClick={() => setMobileActiveView('score')}
+                  className={`flex-1 py-2 text-center rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    mobileActiveView === 'score'
+                      ? "bg-white border border-[#e7e5e4] text-[#1c1917] shadow-sm"
+                      : "text-[#78716c] hover:text-[#1c1917]"
+                  }`}
+                >
+                  Match Score
+                </button>
+                <button
+                  onClick={() => setMobileActiveView('keywords')}
+                  className={`flex-1 py-2 text-center rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    mobileActiveView === 'keywords'
+                      ? "bg-white border border-[#e7e5e4] text-[#1c1917] shadow-sm"
+                      : "text-[#78716c] hover:text-[#1c1917]"
+                  }`}
+                >
+                  Keyword Analysis
+                </button>
+              </div>
+
               <div className="grid grid-cols-1 lg:grid-cols-[210px_1fr_2.2fr] divide-y lg:divide-y-0 lg:divide-x divide-[#e7e5e4]" style={{ transformStyle: "preserve-3d" }}>
                 {/* COL 1: Role Targets */}
                 <div 
-                  className="p-4 bg-[#fafaf9]"
+                  className="hidden lg:block p-4 bg-[#fafaf9]"
                   style={{ transformStyle: "preserve-3d" }}
                 >
                   <div style={{ transform: "translateZ(12px)" }} className="space-y-2">
@@ -430,7 +485,7 @@ export default function ATSDashboard() {
 
                 {/* COL 2: Score + Quick Stats */}
                 <div 
-                  className="p-6 flex flex-col items-center justify-center bg-white min-h-[280px]"
+                  className={`p-6 flex flex-col items-center justify-center bg-white min-h-[280px] lg:flex ${mobileActiveView === 'score' ? 'flex' : 'hidden'}`}
                   style={{ transformStyle: "preserve-3d" }}
                 >
                   <div style={{ transform: "translateZ(28px)" }} className="flex flex-col items-center justify-center gap-5 w-full">
@@ -507,7 +562,7 @@ export default function ATSDashboard() {
 
                 {/* COL 3: Keywords + Improvements */}
                 <div 
-                  className="p-6 bg-white min-h-[300px] flex flex-col"
+                  className={`p-6 bg-white min-h-[300px] flex flex-col lg:flex ${mobileActiveView === 'keywords' ? 'flex' : 'hidden'}`}
                   style={{ transformStyle: "preserve-3d" }}
                 >
                   <div style={{ transform: "translateZ(20px)" }} className="flex flex-col flex-1">

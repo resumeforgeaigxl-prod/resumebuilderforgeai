@@ -193,6 +193,7 @@ const agents: AgentItem[] = [
 
 export default function MentorForgeSection() {
   const [activeTab, setActiveTab] = useState(0);
+  const [mobileActiveView, setMobileActiveView] = useState<'capabilities' | 'console'>('capabilities');
   const current = agents[activeTab];
 
   // 3D Interactive Parallax States
@@ -323,6 +324,63 @@ export default function MentorForgeSection() {
                 <div className="w-[60px]" />
               </div>
 
+              {/* Mobile/Tablet Horizontal Agent Selector */}
+              <div className="lg:hidden p-3 bg-[#fafaf9] border-b border-[#e7e5e4] overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex gap-2 w-full shrink-0 select-none">
+                {agents.map((agent, idx) => {
+                  const isActive = activeTab === idx;
+                  return (
+                    <button
+                      key={agent.id}
+                      onClick={() => setActiveTab(idx)}
+                      className={`flex-none px-3.5 py-2 rounded-xl border flex items-center gap-2.5 transition-all cursor-pointer text-xs font-semibold ${
+                        isActive
+                          ? "bg-white border-[#e7e5e4] shadow-[0_2px_8px_rgba(0,0,0,0.02)] text-[#1c1917]"
+                          : "bg-transparent border-transparent text-[#78716c] hover:bg-[#e7e5e4]/30 hover:text-[#1c1917]"
+                      }`}
+                    >
+                      <div
+                        className="w-5 h-5 rounded-md border flex items-center justify-center bg-white transition-all shrink-0"
+                        style={{
+                          borderColor: isActive ? agent.color : "#e7e5e4",
+                          backgroundColor: isActive ? `${agent.color}0a` : "transparent"
+                        }}
+                      >
+                        {agent.id === "resume" && <FileText className="w-3 h-3" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
+                        {agent.id === "coding" && <Terminal className="w-3 h-3" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
+                        {agent.id === "interview" && <Mic className="w-3 h-3" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
+                        {agent.id === "knowledge" && <BookOpen className="w-3 h-3" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
+                        {agent.id === "job" && <Briefcase className="w-3 h-3" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
+                      </div>
+                      <span className="truncate">{agent.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Mobile Sub-Tab Toggle (Capabilities vs Console) */}
+              <div className="lg:hidden flex border-b border-[#e7e5e4] bg-[#fafaf9] p-1.5 gap-1 shrink-0">
+                <button
+                  onClick={() => setMobileActiveView('capabilities')}
+                  className={`flex-1 py-2 text-center rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    mobileActiveView === 'capabilities'
+                      ? "bg-white border border-[#e7e5e4] text-[#1c1917] shadow-sm"
+                      : "text-[#78716c] hover:text-[#1c1917]"
+                  }`}
+                >
+                  Capabilities
+                </button>
+                <button
+                  onClick={() => setMobileActiveView('console')}
+                  className={`flex-1 py-2 text-center rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    mobileActiveView === 'console'
+                      ? "bg-white border border-[#e7e5e4] text-[#1c1917] shadow-sm"
+                      : "text-[#78716c] hover:text-[#1c1917]"
+                  }`}
+                >
+                  Live Console
+                </button>
+              </div>
+
               {/* Split inside browser frame - 3 Columns */}
               <div 
                 className="grid grid-cols-1 lg:grid-cols-[240px_1fr_1.1fr] divide-y lg:divide-y-0 lg:divide-x divide-[#e7e5e4] bg-white flex-1 overflow-hidden"
@@ -330,7 +388,7 @@ export default function MentorForgeSection() {
               >
                 {/* COL 1: Subagents list (styled exactly like ATSDashboard targets selector) */}
                 <div 
-                  className="p-4 bg-[#fafaf9]"
+                  className="hidden lg:block p-4 bg-[#fafaf9]"
                   style={{ transformStyle: "preserve-3d" }}
                 >
                   <div style={{ transform: "translateZ(12px)" }} className="space-y-1.5">
@@ -378,7 +436,7 @@ export default function MentorForgeSection() {
 
                 {/* COL 2: Agent Info */}
                 <div 
-                  className="p-6 flex flex-col justify-between min-h-[240px] bg-white"
+                  className={`p-6 flex flex-col justify-between min-h-[240px] bg-white lg:flex ${mobileActiveView === 'capabilities' ? 'flex' : 'hidden'}`}
                   style={{ transformStyle: "preserve-3d" }}
                 >
                   <div style={{ transform: "translateZ(20px)" }}>
@@ -407,7 +465,7 @@ export default function MentorForgeSection() {
 
                 {/* COL 3: Playground simulation */}
                 <div 
-                  className="p-6 bg-[#fafaf9] flex flex-col justify-center min-h-[240px]"
+                  className={`p-6 bg-[#fafaf9] flex flex-col justify-center min-h-[240px] lg:flex ${mobileActiveView === 'console' ? 'flex' : 'hidden'}`}
                   style={{ transformStyle: "preserve-3d" }}
                 >
                   <AnimatePresence mode="wait">
