@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   FileText, 
@@ -193,7 +193,6 @@ const agents: AgentItem[] = [
 
 export default function MentorForgeSection() {
   const [activeTab, setActiveTab] = useState(0);
-  const [mobileActiveView, setMobileActiveView] = useState<'capabilities' | 'console'>('capabilities');
   const current = agents[activeTab];
 
   // 3D Interactive Parallax States
@@ -229,6 +228,38 @@ export default function MentorForgeSection() {
     setRotateY(0);
   };
 
+  // Proportional Scaling States
+  const [scale, setScale] = useState(1);
+  const [mockupHeight, setMockupHeight] = useState(520);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mockupRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (!containerRef.current || !mockupRef.current) return;
+      const containerWidth = containerRef.current.offsetWidth;
+      const mockupWidth = 1040;
+      const currentScale = containerWidth < mockupWidth ? containerWidth / mockupWidth : 1;
+      setScale(currentScale);
+      setMockupHeight(mockupRef.current.offsetHeight);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    const observer = new ResizeObserver(() => {
+      handleResize();
+    });
+    if (mockupRef.current) {
+      observer.observe(mockupRef.current);
+    }
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      observer.disconnect();
+    };
+  }, []);
+
   const ease = [0.16, 1, 0.3, 1] as const;
 
   return (
@@ -262,7 +293,7 @@ export default function MentorForgeSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.7, ease }}
-            className="relative flex items-center justify-center p-3 sm:p-6 md:p-10 w-full overflow-hidden rounded-2xl"
+            className="relative flex items-center justify-center w-full overflow-hidden rounded-2xl"
           >
             {/* Landscape Background Layer */}
             <div
@@ -275,216 +306,178 @@ export default function MentorForgeSection() {
             {/* Dark overlay for contrast */}
             <div className="absolute inset-0 bg-slate-950/20 z-0 pointer-events-none" />
 
-            {/* Mockup Window Frame (Glassmorphic 3D Parallax Card) */}
+            {/* Dynamic Scaling Wrapper */}
             <div 
-              onMouseMove={handleMouseMove}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-              className="relative z-10 w-full max-w-[1040px] overflow-hidden flex flex-col border border-white/10"
-              style={{
-                background: "rgba(255,255,255,0.96)",
-                borderRadius: "16px",
-                transformStyle: "preserve-3d",
-                transform: isHovered 
-                  ? `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.015, 1.015, 1.015)` 
-                  : 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
-                transition: isHovered 
-                  ? 'transform 0.1s ease-out, box-shadow 0.1s ease-out' 
-                  : 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-                boxShadow: isHovered 
-                  ? "0 35px 70px rgba(0,0,0,0.28), 0 12px 24px rgba(0,0,0,0.16)" 
-                  : "0 8px 40px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.15)",
-              }}
+              ref={containerRef} 
+              className="relative z-10 w-full flex items-start justify-center overflow-hidden py-4 select-none"
+              style={{ height: `${mockupHeight * scale}px` }}
             >
-              {/* Radial gradient shine matching the mouse coordinates */}
-              <div 
-                className="absolute inset-0 pointer-events-none z-30 transition-opacity duration-300"
+              {/* Scaled Inner mockup container */}
+              <div
                 style={{
-                  background: isHovered 
-                    ? `radial-gradient(500px circle at ${mouseX}px ${mouseY}px, rgba(59, 130, 246, 0.12), rgba(168, 85, 247, 0.04), transparent 60%)` 
-                    : 'none',
-                  mixBlendMode: 'screen',
+                  width: '1040px',
+                  transform: `scale(${scale})`,
+                  transformOrigin: 'top center',
+                  transition: 'transform 0.1s ease-out',
                 }}
-              />
-
-              {/* Chrome Top Bar */}
-              <div 
-                className="h-11 bg-[#FAFAFA] border-b border-[#e7e5e4] px-5 flex items-center justify-between select-none shrink-0"
-                style={{ transform: "translateZ(8px)" }}
+                className="shrink-0"
               >
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Cpu className="w-3.5 h-3.5 text-[#8F8F8F]" />
-                  <span className="text-[11px] font-mono text-[#8F8F8F]">Agentic Workspace — {current.badge}</span>
-                </div>
-                <div className="w-[60px]" />
-              </div>
-
-              {/* Mobile/Tablet Horizontal Agent Selector */}
-              <div className="lg:hidden p-3 bg-[#fafaf9] border-b border-[#e7e5e4] overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex gap-2 w-full shrink-0 select-none">
-                {agents.map((agent, idx) => {
-                  const isActive = activeTab === idx;
-                  return (
-                    <button
-                      key={agent.id}
-                      onClick={() => setActiveTab(idx)}
-                      className={`flex-none px-3.5 py-2 rounded-xl border flex items-center gap-2.5 transition-all cursor-pointer text-xs font-semibold ${
-                        isActive
-                          ? "bg-white border-[#e7e5e4] shadow-[0_2px_8px_rgba(0,0,0,0.02)] text-[#1c1917]"
-                          : "bg-transparent border-transparent text-[#78716c] hover:bg-[#e7e5e4]/30 hover:text-[#1c1917]"
-                      }`}
-                    >
-                      <div
-                        className="w-5 h-5 rounded-md border flex items-center justify-center bg-white transition-all shrink-0"
-                        style={{
-                          borderColor: isActive ? agent.color : "#e7e5e4",
-                          backgroundColor: isActive ? `${agent.color}0a` : "transparent"
-                        }}
-                      >
-                        {agent.id === "resume" && <FileText className="w-3 h-3" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
-                        {agent.id === "coding" && <Terminal className="w-3 h-3" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
-                        {agent.id === "interview" && <Mic className="w-3 h-3" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
-                        {agent.id === "knowledge" && <BookOpen className="w-3 h-3" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
-                        {agent.id === "job" && <Briefcase className="w-3 h-3" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
-                      </div>
-                      <span className="truncate">{agent.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Mobile Sub-Tab Toggle (Capabilities vs Console) */}
-              <div className="lg:hidden flex border-b border-[#e7e5e4] bg-[#fafaf9] p-1.5 gap-1 shrink-0">
-                <button
-                  onClick={() => setMobileActiveView('capabilities')}
-                  className={`flex-1 py-2 text-center rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    mobileActiveView === 'capabilities'
-                      ? "bg-white border border-[#e7e5e4] text-[#1c1917] shadow-sm"
-                      : "text-[#78716c] hover:text-[#1c1917]"
-                  }`}
-                >
-                  Capabilities
-                </button>
-                <button
-                  onClick={() => setMobileActiveView('console')}
-                  className={`flex-1 py-2 text-center rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    mobileActiveView === 'console'
-                      ? "bg-white border border-[#e7e5e4] text-[#1c1917] shadow-sm"
-                      : "text-[#78716c] hover:text-[#1c1917]"
-                  }`}
-                >
-                  Live Console
-                </button>
-              </div>
-
-              {/* Split inside browser frame - 3 Columns */}
-              <div 
-                className="grid grid-cols-1 lg:grid-cols-[240px_1fr_1.1fr] divide-y lg:divide-y-0 lg:divide-x divide-[#e7e5e4] bg-white flex-1 overflow-hidden"
-                style={{ transformStyle: "preserve-3d" }}
-              >
-                {/* COL 1: Subagents list (styled exactly like ATSDashboard targets selector) */}
+                {/* Mockup Window Frame (Glassmorphic 3D Parallax Card) */}
                 <div 
-                  className="hidden lg:block p-4 bg-[#fafaf9]"
-                  style={{ transformStyle: "preserve-3d" }}
+                  ref={mockupRef}
+                  onMouseMove={handleMouseMove}
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                  className="relative w-full overflow-hidden flex flex-col border border-white/10"
+                  style={{
+                    background: "rgba(255,255,255,0.96)",
+                    borderRadius: "16px",
+                    transformStyle: "preserve-3d",
+                    transform: isHovered 
+                      ? `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.015, 1.015, 1.015)` 
+                      : 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
+                    transition: isHovered 
+                      ? 'transform 0.1s ease-out, box-shadow 0.1s ease-out' 
+                      : 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                    boxShadow: isHovered 
+                      ? "0 35px 70px rgba(0,0,0,0.28), 0 12px 24px rgba(0,0,0,0.16)" 
+                      : "0 8px 40px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.15)",
+                  }}
                 >
-                  <div style={{ transform: "translateZ(12px)" }} className="space-y-1.5">
-                    <p className="text-[9px] font-mono font-semibold text-[#78716c] uppercase tracking-wider px-2.5 mb-2">
-                      Agentic Orchestrator
-                    </p>
-                    {agents.map((agent, idx) => {
-                      const isActive = activeTab === idx;
-                      return (
-                        <button
-                          key={agent.id}
-                          onClick={() => setActiveTab(idx)}
-                          className={`w-full text-left p-2.5 rounded-xl border flex items-center gap-3 transition-all cursor-pointer ${
-                            isActive
-                              ? "bg-white border-[#e7e5e4] shadow-[0_2px_8px_rgba(0,0,0,0.02)] text-[#1c1917]"
-                              : "bg-transparent border-transparent text-[#78716c] hover:bg-[#e7e5e4]/30 hover:text-[#1c1917]"
-                          }`}
-                        >
-                          <div
-                            className="w-8 h-8 rounded-lg border flex items-center justify-center bg-white transition-all shrink-0"
-                            style={{
-                              borderColor: isActive ? agent.color : "#e7e5e4",
-                              backgroundColor: isActive ? `${agent.color}0a` : "transparent"
-                            }}
-                          >
-                            {agent.id === "resume" && <FileText className="w-3.5 h-3.5" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
-                            {agent.id === "coding" && <Terminal className="w-3.5 h-3.5" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
-                            {agent.id === "interview" && <Mic className="w-3.5 h-3.5" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
-                            {agent.id === "knowledge" && <BookOpen className="w-3.5 h-3.5" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
-                            {agent.id === "job" && <Briefcase className="w-3.5 h-3.5" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
-                          </div>
-                          <div className="min-w-0">
-                            <h4 className="text-[11px] font-bold leading-tight truncate">
-                              {agent.name}
-                            </h4>
-                            <p className="text-[9.5px] text-[#78716c] mt-0.5 font-mono">
-                              {agent.sub}
-                            </p>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* COL 2: Agent Info */}
-                <div 
-                  className={`p-6 flex flex-col justify-between min-h-[240px] bg-white lg:flex ${mobileActiveView === 'capabilities' ? 'flex' : 'hidden'}`}
-                  style={{ transformStyle: "preserve-3d" }}
-                >
-                  <div style={{ transform: "translateZ(20px)" }}>
-                    <span 
-                      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium border font-mono"
-                      style={{ 
-                        borderColor: `${current.color}30`, 
-                        backgroundColor: `${current.color}0a`,
-                        color: current.color 
-                      }}
-                    >
-                      {current.badge}
-                    </span>
-                    <h3 className="text-[14px] font-bold text-stone-900 mt-4 leading-snug">{current.tagline}</h3>
-                    <p className="text-xs text-stone-500 mt-3 leading-relaxed">{current.desc}</p>
-                  </div>
-                  
+                  {/* Radial gradient shine matching the mouse coordinates */}
                   <div 
-                    className="pt-4 border-t border-stone-100 mt-6 flex items-center justify-between text-[10px] font-mono text-stone-400"
-                    style={{ transform: "translateZ(12px)" }}
+                    className="absolute inset-0 pointer-events-none z-30 transition-opacity duration-300"
+                    style={{
+                      background: isHovered 
+                        ? `radial-gradient(500px circle at ${mouseX}px ${mouseY}px, rgba(59, 130, 246, 0.12), rgba(168, 85, 247, 0.04), transparent 60%)` 
+                        : 'none',
+                      mixBlendMode: 'screen',
+                    }}
+                  />
+
+                  {/* Chrome Top Bar */}
+                  <div 
+                    className="h-11 bg-[#FAFAFA] border-b border-[#e7e5e4] px-5 flex items-center justify-between select-none shrink-0"
+                    style={{ transform: "translateZ(8px)" }}
                   >
-                    <span>STATUS: ACTIVE</span>
-                    <span style={{ color: current.color }}>SYNCED TO BRAIN ✓</span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-stone-200" />
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Cpu className="w-3.5 h-3.5 text-[#8F8F8F]" />
+                      <span className="text-[11px] font-mono text-[#8F8F8F]">Agentic Workspace — {current.badge}</span>
+                    </div>
+                    <div className="w-[60px]" />
                   </div>
-                </div>
 
-                {/* COL 3: Playground simulation */}
-                <div 
-                  className={`p-6 bg-[#fafaf9] flex flex-col justify-center min-h-[240px] lg:flex ${mobileActiveView === 'console' ? 'flex' : 'hidden'}`}
-                  style={{ transformStyle: "preserve-3d" }}
-                >
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={current.id}
-                      initial={{ opacity: 0, scale: 0.98 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.98 }}
-                      transition={{ duration: 0.25 }}
-                      className="w-full h-full"
-                      style={{ transform: "translateZ(24px)" }}
+                  {/* Split inside browser frame - 3 Columns */}
+                  <div 
+                    className="grid grid-cols-[240px_1fr_1.1fr] divide-x divide-[#e7e5e4] bg-white flex-1 overflow-hidden"
+                    style={{ transformStyle: "preserve-3d" }}
+                  >
+                    {/* COL 1: Subagents list (styled exactly like ATSDashboard targets selector) */}
+                    <div 
+                      className="p-4 bg-[#fafaf9] shrink-0"
+                      style={{ transformStyle: "preserve-3d" }}
                     >
-                      {current.renderPlayground()}
-                    </motion.div>
-                  </AnimatePresence>
+                      <div style={{ transform: "translateZ(12px)" }} className="space-y-1.5">
+                        <p className="text-[9px] font-mono font-semibold text-[#78716c] uppercase tracking-wider px-2.5 mb-2">
+                          Agentic Orchestrator
+                        </p>
+                        {agents.map((agent, idx) => {
+                          const isActive = activeTab === idx;
+                          return (
+                            <button
+                              key={agent.id}
+                              onClick={() => setActiveTab(idx)}
+                              className={`w-full text-left p-2.5 rounded-xl border flex items-center gap-3 transition-all cursor-pointer ${
+                                isActive
+                                  ? "bg-white border-[#e7e5e4] shadow-[0_2px_8px_rgba(0,0,0,0.02)] text-[#1c1917]"
+                                  : "bg-transparent border-transparent text-[#78716c] hover:bg-[#e7e5e4]/30 hover:text-[#1c1917]"
+                              }`}
+                            >
+                              <div
+                                className="w-8 h-8 rounded-lg border flex items-center justify-center bg-white transition-all shrink-0"
+                                style={{
+                                  borderColor: isActive ? agent.color : "#e7e5e4",
+                                  backgroundColor: isActive ? `${agent.color}0a` : "transparent"
+                                }}
+                              >
+                                {agent.id === "resume" && <FileText className="w-3.5 h-3.5" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
+                                {agent.id === "coding" && <Terminal className="w-3.5 h-3.5" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
+                                {agent.id === "interview" && <Mic className="w-3.5 h-3.5" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
+                                {agent.id === "knowledge" && <BookOpen className="w-3.5 h-3.5" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
+                                {agent.id === "job" && <Briefcase className="w-3.5 h-3.5" style={{ color: isActive ? agent.color : "#a8a29e" }} />}
+                              </div>
+                              <div className="min-w-0">
+                                <h4 className="text-[11px] font-bold leading-tight truncate">
+                                  {agent.name}
+                                </h4>
+                                <p className="text-[9.5px] text-[#78716c] mt-0.5 font-mono">
+                                  {agent.sub}
+                                </p>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* COL 2: Agent Info */}
+                    <div 
+                      className="p-6 flex flex-col justify-between min-h-[240px] bg-white"
+                      style={{ transformStyle: "preserve-3d" }}
+                    >
+                      <div style={{ transform: "translateZ(20px)" }}>
+                        <span 
+                          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium border font-mono"
+                          style={{ 
+                            borderColor: `${current.color}30`, 
+                            backgroundColor: `${current.color}0a`,
+                            color: current.color 
+                          }}
+                        >
+                          {current.badge}
+                        </span>
+                        <h3 className="text-[14px] font-bold text-stone-900 mt-4 leading-snug">{current.tagline}</h3>
+                        <p className="text-xs text-stone-500 mt-3 leading-relaxed">{current.desc}</p>
+                      </div>
+                      
+                      <div 
+                        className="pt-4 border-t border-stone-100 mt-6 flex items-center justify-between text-[10px] font-mono text-stone-400"
+                        style={{ transform: "translateZ(12px)" }}
+                      >
+                        <span>STATUS: ACTIVE</span>
+                        <span style={{ color: current.color }}>SYNCED TO BRAIN ✓</span>
+                      </div>
+                    </div>
+
+                    {/* COL 3: Playground simulation */}
+                    <div 
+                      className="p-6 bg-[#fafaf9] flex flex-col justify-center min-h-[240px]"
+                      style={{ transformStyle: "preserve-3d" }}
+                    >
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={current.id}
+                          initial={{ opacity: 0, scale: 0.98 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.98 }}
+                          transition={{ duration: 0.25 }}
+                          className="w-full h-full"
+                          style={{ transform: "translateZ(24px)" }}
+                        >
+                          {current.renderPlayground()}
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
+
+                  </div>
+
                 </div>
-
               </div>
-
             </div>
           </motion.div>
         </div>
