@@ -2,7 +2,7 @@
 # This script pings key production routes to ensure they are live and returning 200 OK.
 
 $baseUrl = "https://resumeforgeai.in"
-$routes = @("/en-in", "/en-in/login", "/en-in/ai-resume-builder", "/en-in/jobs")
+$routes = @("/en-in", "/en-in/login", "/en-in/resumes", "/en-in/jobs")
 $successCount = 0
 
 Write-Host "--- ResumeForgeAI Production Health Check ---" -ForegroundColor Cyan

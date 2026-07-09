@@ -768,7 +768,7 @@ export default function HeroSection({ locale = "en-in" }: HeroSectionProps) {
         {/* CTA row */}
         <motion.div variants={fadeUp} className="flex justify-center gap-3 mb-14">
           <Link
-            href={`/${locale}/ai-resume-builder`}
+            href={`/${locale}/resumes`}
             className="inline-flex items-center justify-center rounded-full bg-[#171717] px-6 h-11 text-white transition-opacity duration-200 hover:opacity-85"
             style={{
               fontFamily: "var(--font-geist-sans)",
@@ -819,7 +819,7 @@ export default function HeroSection({ locale = "en-in" }: HeroSectionProps) {
               </div>
               <div className="border-t border-stone-200 px-6 py-3 bg-stone-50/50">
                 <Link
-                  href={`/${locale}/ai-resume-builder`}
+                  href={`/${locale}/resumes`}
                   className="font-mono text-[10px] tracking-wider text-[#7c3aed] font-bold hover:text-[#6d28d9] transition-colors"
                 >
                   TRY IT →
@@ -841,7 +841,7 @@ export default function HeroSection({ locale = "en-in" }: HeroSectionProps) {
               </div>
               <div className="border-t border-stone-200 px-6 py-3 bg-stone-50/50">
                 <Link
-                  href={`/${locale}/ai-resume-builder`}
+                  href={`/${locale}/resumes`}
                   className="font-mono text-[10px] tracking-wider text-[#7c3aed] font-bold hover:text-[#6d28d9] transition-colors"
                 >
                   TRY IT →
@@ -863,7 +863,7 @@ export default function HeroSection({ locale = "en-in" }: HeroSectionProps) {
               </div>
               <div className="border-t border-stone-200 px-6 py-3 bg-stone-50/50">
                 <Link
-                  href={`/${locale}/ai-resume-builder`}
+                  href={`/${locale}/resumes`}
                   className="font-mono text-[10px] tracking-wider text-[#7c3aed] font-bold hover:text-[#6d28d9] transition-colors"
                 >
                   TRY IT →

@@ -8,7 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static public routes
   const staticRoutes = [
     { path: '', priority: 1.0 },
-    { path: '/ai-resume-builder', priority: 0.9 },
+    { path: '/resumes', priority: 0.9 },
     { path: '/ats-resume-builder', priority: 0.9 },
     { path: '/ai-mock-interview', priority: 0.9 },
     { path: '/job-interview-ai-coach', priority: 0.9 },

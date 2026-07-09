@@ -3,11 +3,24 @@ import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
 import { generateAIResponse, logAIUsage } from '@/lib/ai-provider';
+import { checkDailyLimit, logUsage } from '@/lib/usage';
 
 export async function POST(request: Request) {
     try {
         const session = await getSession();
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        // Daily Limit Check
+        const limitStatus = await checkDailyLimit(session.userId, 'ai_enhance');
+        if (!limitStatus.allowed) {
+            return NextResponse.json(
+                {
+                    error: `Daily limit reached (${limitStatus.used}/${limitStatus.limit} credits used). Upgrade to Pro for unlimited matching operations.`,
+                    requiresUpgrade: true
+                },
+                { status: 429 }
+            );
+        }
 
         const body = await request.json();
         const { resumeId, resumeData, jdText } = body;
@@ -53,6 +66,10 @@ ${JSON.stringify(resumeData).slice(0, 3000)}`;
         const aiResult = await generateAIResponse(prompt);
         const aiResponse = aiResult.text;
         const endTime = Date.now();
+        
+        // Log credit consumption
+        await logUsage(session.userId, 'ai_enhance');
+
         await logAIUsage(supabase, session.userId, null, aiResult, endTime - startTime);
 
         let parsedResult;

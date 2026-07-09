@@ -33,13 +33,18 @@ export async function checkForgeAccess(forge: ForgeType): Promise<ForgeAccessRes
   if (session.role === 'admin') return { hasAccess: true, isAdmin: true };
 
   const supabase = createClient();
-  const { data: user, error } = await supabase
+
+  // 1. Fetch user plan details first (columns that always exist)
+  const { data: user, error: userError } = await supabase
     .from('users')
-    .select('plan, plan_type, free_resume_count, free_coding_runs, free_interview_sessions, free_prep_questions, free_job_views, free_project_creates')
+    .select('plan, plan_type')
     .eq('id', session.userId)
     .single();
 
-  if (error || !user) return { hasAccess: false, reason: 'user_not_found' };
+  if (userError || !user) {
+    console.error('[checkForgeAccess] User fetch failed:', userError?.message);
+    return { hasAccess: false, reason: 'user_not_found' };
+  }
 
   // Paid bypass
   const currentPlan = (user.plan_type || user.plan || 'FREE').toUpperCase();
@@ -51,15 +56,37 @@ export async function checkForgeAccess(forge: ForgeType): Promise<ForgeAccessRes
       return { hasAccess: false, reason: 'upgrade_required' };
   }
 
-  const usageMap: Record<string, number> = {
-    resumeforge: user.free_resume_count ?? 0,
-    codingforge: user.free_coding_runs ?? 0,
-    interviewforge: user.free_interview_sessions ?? 0,
-    prepforge: user.free_prep_questions ?? 0,
-    jobforge: user.free_job_views ?? 0,
-    projectforge: user.free_project_creates ?? 0,
-    resumecount: 0, // Placeholder, handled by special check
+  // 2. Safely fetch optional usage counters. If the columns do not exist in the DB,
+  // we catch the failure and fallback to default (0).
+  let usageMap: Record<string, number> = {
+    resumeforge: 0,
+    codingforge: 0,
+    interviewforge: 0,
+    prepforge: 0,
+    jobforge: 0,
+    projectforge: 0,
+    resumecount: 0,
   };
+
+  const { data: userUsage, error: usageError } = await supabase
+    .from('users')
+    .select('free_resume_count, free_coding_runs, free_interview_sessions, free_prep_questions, free_job_views, free_project_creates')
+    .eq('id', session.userId)
+    .single();
+
+  if (!usageError && userUsage) {
+    usageMap = {
+      resumeforge: userUsage.free_resume_count ?? 0,
+      codingforge: userUsage.free_coding_runs ?? 0,
+      interviewforge: userUsage.free_interview_sessions ?? 0,
+      prepforge: userUsage.free_prep_questions ?? 0,
+      jobforge: userUsage.free_job_views ?? 0,
+      projectforge: userUsage.free_project_creates ?? 0,
+      resumecount: 0,
+    };
+  } else {
+    console.warn('[checkForgeAccess] Usage columns missing or select failed, defaulting to 0:', usageError?.message);
+  }
 
   // Special check for max resumes
   if (forge === 'resumecount') {
@@ -97,26 +124,31 @@ export async function incrementForgeUsage(forge: ForgeType) {
     };
 
     const columnName = columnMap[forge];
+    if (columnName === 'none' || !columnName) return;
     
-    // Check if we are in pro plan (bypass)
-    const { data: user } = await supabase.from('users').select('plan_type').eq('id', session.userId).single();
-    if (user && user.plan_type !== 'free') return;
+    try {
+        // Check if we are in pro plan (bypass)
+        const { data: user } = await supabase.from('users').select('plan_type').eq('id', session.userId).single();
+        if (user && user.plan_type !== 'free') return;
 
-    // Use RPC if available, otherwise fetch and update (fallback)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: rpcError } = await (supabase as any).rpc('increment_user_usage', { 
-        user_id_p: session.userId, 
-        column_name: columnName 
-    });
+        // Use RPC if available, otherwise fetch and update (fallback)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error: rpcError } = await (supabase as any).rpc('increment_user_usage', { 
+            user_id_p: session.userId, 
+            column_name: columnName 
+        });
 
-    if (rpcError) {
-        console.warn('[Usage] RPC failed, falling back to manual update:', rpcError.message);
-        // Manual fallback for dev if function not exists
-        const { data: userRecord } = await supabase.from('users').select(columnName).eq('id', session.userId).single();
-        if (userRecord) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const currentCount = (userRecord as any)[columnName] || 0;
-            await supabase.from('users').update({ [columnName]: currentCount + 1 }).eq('id', session.userId);
+        if (rpcError) {
+            console.warn('[Usage] RPC failed, falling back to manual update:', rpcError.message);
+            // Manual fallback for dev if function not exists
+            const { data: userRecord } = await supabase.from('users').select(columnName).eq('id', session.userId).single();
+            if (userRecord && columnName in userRecord) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const currentCount = (userRecord as any)[columnName] || 0;
+                await supabase.from('users').update({ [columnName]: currentCount + 1 }).eq('id', session.userId);
+            }
         }
+    } catch (err) {
+        console.warn('[Usage] incrementForgeUsage failed:', err);
     }
 }

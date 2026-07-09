@@ -1,6 +1,5 @@
 "use client";
-
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Bell, Search, User, LogOut, ChevronRight, Menu } from "lucide-react";
 import { Button } from "./Button";
 import {
@@ -26,6 +25,32 @@ interface TopNavProps {
 export function TopNav({ userName = "User", pageTitle, locale = "en" }: TopNavProps) {
   const pathname = usePathname();
   const { collapsed, toggle, isMounted } = useSidebar();
+  const [profile, setProfile] = useState<{ fullName: string; planType: string } | null>(null);
+
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const res = await fetch("/api/user/profile");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.user) {
+            setProfile({
+              fullName: data.user.full_name || data.user.email?.split("@")[0] || "User",
+              planType: data.user.plan_type || "FREE",
+            });
+          }
+        }
+      } catch (err) {
+        console.error("[TopNav] Error fetching user profile:", err);
+      }
+    }
+    fetchProfile();
+  }, []);
+
+  const displayName = profile?.fullName || userName;
+  const planType = (profile?.planType || "FREE").toUpperCase();
+  const isPro = ["DAILY", "WEEKLY", "MONTHLY", "PROFESSIONAL", "PRO"].includes(planType);
+  const planName = planType === "FREE" ? "Free Member" : `${profile?.planType || "Pro"} Member`;
 
   return (
     <header className={cn(
@@ -69,8 +94,10 @@ export function TopNav({ userName = "User", pageTitle, locale = "en" }: TopNavPr
         {/* User Profile */}
         <div className="flex items-center gap-3 pl-4 border-l border-[#EBEBEB]">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-semibold text-[#171717] leading-none whitespace-nowrap">{userName}</p>
-            <p className="text-[10px] text-[#0070F3] mt-1 uppercase tracking-widest font-semibold">Pro Member</p>
+            <p className="text-sm font-semibold text-[#171717] leading-none whitespace-nowrap">{displayName}</p>
+            <p className={`text-[10px] mt-1 uppercase tracking-widest font-semibold ${isPro ? 'text-[#0070F3]' : 'text-stone-500'}`}>
+              {planName}
+            </p>
           </div>
 
           <DropdownMenu>

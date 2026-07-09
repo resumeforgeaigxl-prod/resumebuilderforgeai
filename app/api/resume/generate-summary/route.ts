@@ -3,11 +3,24 @@ import { NextResponse } from 'next/server';
 import { generateAIResponse, logAIUsage, stripMarkdown } from '@/lib/ai-provider';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
+import { checkDailyLimit, logUsage } from '@/lib/usage';
 
 export async function POST(request: Request) {
     try {
         const session = await getSession();
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        // Daily Limit Check
+        const limitStatus = await checkDailyLimit(session.userId, 'ai_enhance');
+        if (!limitStatus.allowed) {
+            return NextResponse.json(
+                {
+                    error: `Daily limit reached (${limitStatus.used}/${limitStatus.limit} credits used). Upgrade to Pro for unlimited summary generations.`,
+                    requiresUpgrade: true
+                },
+                { status: 429 }
+            );
+        }
 
         const body = await request.json();
         let { role, skills, experienceText, educationText, projectsText, jobDescription } = body;
@@ -30,7 +43,7 @@ export async function POST(request: Request) {
                     experienceText = `Experience Level: ${userProfile.experience_level}`;
                 }
             }
-        } catch {
+        } catch (profileErr) {
             // Safe to ignore — frontend params will be used
         }
 
@@ -77,6 +90,10 @@ Return the result in a JSON object.`;
         summary = stripMarkdown(summary);
 
         const supabase = createClient();
+        
+        // Log credit consumption
+        await logUsage(session.userId, 'ai_enhance');
+
         await logAIUsage(supabase, session.userId, null, aiResult, endTime - startTime);
 
         return NextResponse.json({ success: true, summary });

@@ -18,7 +18,7 @@ export async function GET() {
         let user: any = null;
         const firstTry = await supabase
             .from('users')
-            .select('email, full_name, role, phone_number, linkedin_url, github_url, professional_summary, education, skills, experience_level, referral_source, portfolio_url, target_role, preferred_work_mode')
+            .select('email, full_name, role, phone_number, linkedin_url, github_url, professional_summary, education, skills, experience_level, referral_source, portfolio_url, target_role, preferred_work_mode, plan_type')
             .eq('id', session.userId)
             .single();
 
@@ -26,7 +26,7 @@ export async function GET() {
             console.warn('[user/profile] New columns missing, falling back to legacy columns...', firstTry.error.message);
             const fallbackQuery = await supabase
                 .from('users')
-                .select('email, full_name, role, phone_number, linkedin_url, github_url, referral_source')
+                .select('email, full_name, role, phone_number, linkedin_url, github_url, referral_source, plan_type')
                 .eq('id', session.userId)
                 .single();
 
@@ -60,6 +60,7 @@ export async function GET() {
                 portfolio_url: user.portfolio_url ?? null,
                 target_role: user.target_role ?? null,
                 preferred_work_mode: user.preferred_work_mode ?? null,
+                plan_type: user.plan_type ?? 'FREE',
             }
         });
     } catch (err) {

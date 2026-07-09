@@ -5,11 +5,24 @@ import { ResumeData } from '@/types/resume';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
 import { AI_MESSAGES } from '@/lib/ai/safety';
+import { checkDailyLimit, logUsage } from '@/lib/usage';
 
 export async function POST(request: Request) {
     try {
         const session = await getSession();
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        // Daily Limit Check
+        const limitStatus = await checkDailyLimit(session.userId, 'generate_resume');
+        if (!limitStatus.allowed) {
+            return NextResponse.json(
+                {
+                    error: `Daily limit reached (${limitStatus.used}/${limitStatus.limit} credits used). Upgrade to Pro for unlimited optimizations.`,
+                    requiresUpgrade: true
+                },
+                { status: 429 }
+            );
+        }
 
         const body = await request.json();
         const resumeData: ResumeData = body.resumeData;
@@ -46,6 +59,9 @@ export async function POST(request: Request) {
         try {
             const result = await ResumeForge.optimize(resumeData, jobDescription, session.userId, profileContext);
             
+            // Log credit consumption
+            await logUsage(session.userId, 'generate_resume');
+
             return NextResponse.json({
                 success: true,
                 optimizedData: result.optimized_resume || resumeData,

@@ -127,7 +127,7 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
             Sign In
           </Link>
           <Link
-            href={`/${locale}/ai-resume-builder`}
+            href={`/${locale}/resumes`}
             className="inline-flex items-center justify-center rounded-xl bg-[#7c3aed] border border-[#6d28d9] px-5 h-10 text-white transition-all duration-75 hover:bg-[#6d28d9] active:scale-95 font-mono text-[13px] uppercase font-semibold"
             style={{
               fontFamily: "monospace",
@@ -198,7 +198,7 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
                   Sign In
                 </Link>
                 <Link
-                  href={`/${locale}/ai-resume-builder`}
+                  href={`/${locale}/resumes`}
                   onClick={() => setMobileOpen(false)}
                   className="inline-flex items-center justify-center rounded-xl bg-[#7c3aed] border border-[#6d28d9] px-5 h-10 text-white transition-all duration-75 hover:bg-[#6d28d9] active:scale-95 font-mono text-[13px] uppercase font-semibold"
                   style={{
