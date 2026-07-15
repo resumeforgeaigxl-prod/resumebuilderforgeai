@@ -69,7 +69,7 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
       <Navbar locale={locale} />
 
       {/* Main Content: Stacked A4 Sheets */}
-      <div className="max-w-[1200px] mx-auto px-6 md:px-20 pt-28 pb-12 space-y-16">
+      <div className="max-w-[1200px] mx-auto px-4 md:px-0 pt-28 pb-12 space-y-16">
         
         {/* A4 SHEET 1: Proposal Cover & Value Proposition */}
         <article className={`${lora.className} bg-white border border-[#E2E8F0] rounded-none p-8 md:p-16 shadow-[0_8px_30px_rgba(0,0,0,0.03)] min-h-[1130px] flex flex-col justify-between`}>
