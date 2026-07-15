@@ -8,30 +8,34 @@ import {
   HelpCircle, ChevronDown, Award, Users, ShieldCheck, HeartHandshake, Compass, Workflow
 } from 'lucide-react';
 import { Accordion } from '@/components/ui/Accordion';
+import { Playfair_Display, Lora } from 'next/font/google';
+
+const playfair = Playfair_Display({ subsets: ['latin'], weight: ['400', '600', '700'] });
+const lora = Lora({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
 
 export default async function ProjectServicesLandingPage({ params }: { params: { locale: string } }) {
   const { locale } = params;
 
   const features = [
-    { title: 'Industry-Level Projects', desc: 'Get projects built with production-grade code, architecture, and documentation.', icon: <Code className="w-5 h-5" /> },
-    { title: 'Expert Developers', desc: 'Work with skilled software engineers and AI/ML professionals.', icon: <Users className="w-5 h-5" /> },
-    { title: 'Complete Documentation', desc: 'Receive high-quality thesis, system reports, design diagrams, and setup guides.', icon: <FileText className="w-5 h-5" /> },
-    { title: 'IEEE & Research Support', desc: 'IEEE base paper selection, research gap analyses, and implementation.', icon: <Award className="w-5 h-5" /> },
-    { title: 'Deployment Assistance', desc: 'Zero-configuration cloud setup on platforms like Vercel, Render, AWS, and GCP.', icon: <Server className="w-5 h-5" /> },
-    { title: 'Post Delivery Support', desc: 'We provide viva preparation guides, training sessions, and continuous help.', icon: <HeartHandshake className="w-5 h-5" /> },
+    { title: 'Industry-Level Projects', desc: 'Get projects built with production-grade code, architecture, and documentation.', icon: <Code className="w-4.5 h-4.5" /> },
+    { title: 'Expert Developers', desc: 'Work with skilled software engineers and AI/ML professionals.', icon: <Users className="w-4.5 h-4.5" /> },
+    { title: 'Complete Documentation', desc: 'Receive high-quality thesis, system reports, design diagrams, and setup guides.', icon: <FileText className="w-4.5 h-4.5" /> },
+    { title: 'IEEE & Research Support', desc: 'IEEE base paper selection, research gap analyses, and implementation.', icon: <Award className="w-4.5 h-4.5" /> },
+    { title: 'Deployment Assistance', desc: 'Zero-configuration cloud setup on platforms like Vercel, Render, AWS, and GCP.', icon: <Server className="w-4.5 h-4.5" /> },
+    { title: 'Post Delivery Support', desc: 'We provide viva preparation guides, training sessions, and continuous help.', icon: <HeartHandshake className="w-4.5 h-4.5" /> },
   ];
 
   const services = [
-    { title: 'Major Projects', desc: 'End-to-end B.Tech/M.Tech final year projects with detailed research, execution, and documentation.', icon: <Layers className="w-6 h-6 text-[#7c3aed]" /> },
-    { title: 'Minor Projects', desc: 'Focused mid-semester projects designed to master individual technology scopes.', icon: <Compass className="w-6 h-6 text-[#7c3aed]" /> },
-    { title: 'Mini Projects', desc: 'Simple, fast, and high-quality lab assignments and small projects.', icon: <Award className="w-6 h-6 text-[#7c3aed]" /> },
-    { title: 'AI & ML Projects', desc: 'State of the art models, datasets training, deep learning architectures, CV, and NLP solutions.', icon: <Cpu className="w-6 h-6 text-[#7c3aed]" /> },
-    { title: 'Full Stack Projects', desc: 'Modern web applications developed using MERN stack, Next.js, Django, or Spring Boot.', icon: <Code className="w-6 h-6 text-[#7c3aed]" /> },
-    { title: 'Mobile App Projects', desc: 'Fully responsive Android and iOS apps built with React Native or Flutter.', icon: <Smartphone className="w-6 h-6 text-[#7c3aed]" /> },
-    { title: 'IEEE Projects', desc: 'Implementation of the latest IEEE transaction papers with source code validation.', icon: <FileText className="w-6 h-6 text-[#7c3aed]" /> },
-    { title: 'Research Projects', desc: 'Custom project execution targeting international journals and paper submissions.', icon: <BookOpen className="w-6 h-6 text-[#7c3aed]" /> },
-    { title: 'Documentation Only', desc: 'Comprehensive technical project reports, design diagrams, PPTs, and synopses.', icon: <FileText className="w-6 h-6 text-[#7c3aed]" /> },
-    { title: 'Deployment Support', desc: 'Deployment of your existing source code to production servers with database sync.', icon: <Server className="w-6 h-6 text-[#7c3aed]" /> },
+    { title: 'Major Projects', desc: 'End-to-end B.Tech/M.Tech final year projects with detailed research, execution, and documentation.', icon: <Layers className="w-5 h-5 text-[#7c3aed]" /> },
+    { title: 'Minor Projects', desc: 'Focused mid-semester projects designed to master individual technology scopes.', icon: <Compass className="w-5 h-5 text-[#7c3aed]" /> },
+    { title: 'Mini Projects', desc: 'Simple, fast, and high-quality lab assignments and small projects.', icon: <Award className="w-5 h-5 text-[#7c3aed]" /> },
+    { title: 'AI & ML Projects', desc: 'State of the art models, datasets training, deep learning architectures, CV, and NLP solutions.', icon: <Cpu className="w-5 h-5 text-[#7c3aed]" /> },
+    { title: 'Full Stack Projects', desc: 'Modern web applications developed using MERN stack, Next.js, Django, or Spring Boot.', icon: <Code className="w-5 h-5 text-[#7c3aed]" /> },
+    { title: 'Mobile App Projects', desc: 'Fully responsive Android and iOS apps built with React Native or Flutter.', icon: <Smartphone className="w-5 h-5 text-[#7c3aed]" /> },
+    { title: 'IEEE Projects', desc: 'Implementation of the latest IEEE transaction papers with source code validation.', icon: <FileText className="w-5 h-5 text-[#7c3aed]" /> },
+    { title: 'Research Projects', desc: 'Custom project execution targeting international journals and paper submissions.', icon: <BookOpen className="w-5 h-5 text-[#7c3aed]" /> },
+    { title: 'Documentation Only', desc: 'Comprehensive technical project reports, design diagrams, PPTs, and synopses.', icon: <FileText className="w-5 h-5 text-[#7c3aed]" /> },
+    { title: 'Deployment Support', desc: 'Deployment of your existing source code to production servers with database sync.', icon: <Server className="w-5 h-5 text-[#7c3aed]" /> },
   ];
 
   const domains = [
@@ -64,141 +68,200 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
     <div className="bg-[#fafaf9] min-h-screen text-[#171717]">
       <Navbar locale={locale} />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 px-6 border-b border-[#e7e5e4] bg-white">
-        <div className="mx-auto max-w-[1200px] text-center">
-          <span className="font-mono text-[11px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-4">
-            # academic excellence
-          </span>
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-[#171717] max-w-[850px] mx-auto leading-[1.1]">
-            Build Your Final Year Project With Expert Guidance
-          </h1>
-          <p className="text-stone-500 mt-6 text-base md:text-lg max-w-[650px] mx-auto leading-relaxed">
-            From idea to deployment, we help students build production-ready academic projects with documentation, reports, presentations, deployment, and ongoing support.
-          </p>
-          <div className="flex justify-center gap-4 mt-8">
-            <Link
-              href={`/${locale}/project-services/request`}
-              className="inline-flex items-center justify-center rounded-xl bg-[#7c3aed] border border-[#6d28d9] px-6 h-11 text-white transition-all duration-75 hover:bg-[#6d28d9] active:scale-95 font-mono text-[13px] uppercase font-semibold"
-            >
-              Request Project
-            </Link>
-            <a
-              href="#domains"
-              className="inline-flex items-center justify-center rounded-xl border border-[#EBEBEB] bg-white px-6 h-11 text-[#171717] transition-all duration-75 hover:bg-[#F2F2F2] active:scale-95 font-mono text-[13px] uppercase font-semibold"
-            >
-              Explore Domains
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose Us */}
-      <section className="py-20 px-6 border-b border-[#e7e5e4] mx-auto max-w-[1200px]">
-        <div className="text-center mb-16">
-          <span className="font-mono text-[11px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-2">
-            Why Choose Us
-          </span>
-          <h2 className="text-3xl font-bold tracking-tight">Ecosystem Highlights</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {features.map((feat) => (
-            <div key={feat.title} className="border border-stone-200 bg-white p-6 rounded-xl hover:shadow-sm transition-all">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#7c3aed]/10 text-[#7c3aed] mb-4">
-                {feat.icon}
-              </div>
-              <h3 className="font-sans font-bold text-[#171717] text-base mb-2">{feat.title}</h3>
-              <p className="text-stone-500 text-sm leading-relaxed">{feat.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Services Grid */}
-      <section className="py-20 px-6 border-b border-[#e7e5e4] bg-white">
-        <div className="mx-auto max-w-[1200px]">
-          <div className="text-center mb-16">
-            <span className="font-mono text-[11px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-2">
-              Our Services
-            </span>
-            <h2 className="text-3xl font-bold tracking-tight">Structured Deliverables</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {services.map((svc) => (
-              <div key={svc.title} className="flex gap-4 p-6 border border-stone-200 rounded-xl hover:shadow-sm transition-all bg-[#fafaf9]">
-                <div className="shrink-0 flex h-12 w-12 items-center justify-center rounded-xl bg-white border border-stone-200">
-                  {svc.icon}
-                </div>
-                <div>
-                  <h3 className="font-sans font-bold text-[#171717] text-base mb-1">{svc.title}</h3>
-                  <p className="text-stone-500 text-sm leading-relaxed">{svc.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Domains */}
-      <section id="domains" className="py-20 px-6 border-b border-[#e7e5e4] mx-auto max-w-[1200px]">
-        <div className="text-center mb-16">
-          <span className="font-mono text-[11px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-2">
-            Technical Domains
-          </span>
-          <h2 className="text-3xl font-bold tracking-tight">Technologies We Support</h2>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {domains.map((dom) => (
-            <div key={dom} className="border border-stone-200 bg-white px-4 py-3 rounded-lg flex items-center gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-[#7c3aed]" />
-              <span className="text-sm font-semibold text-stone-700">{dom}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Process Timeline */}
-      <section className="py-20 px-6 border-b border-[#e7e5e4] bg-white">
-        <div className="mx-auto max-w-[1200px]">
-          <div className="text-center mb-16">
-            <span className="font-mono text-[11px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-2 text-center">
-              Our Process
-            </span>
-            <h2 className="text-3xl font-bold tracking-tight text-center">Workflow Execution</h2>
-          </div>
-          <div className="relative pl-6 border-l-2 border-[#e7e5e4] space-y-12 max-w-[700px] mx-auto">
-            {timelineSteps.map((step) => (
-              <div key={step.step} className="relative">
-                <div className="absolute -left-[37px] top-0 flex h-6 w-6 items-center justify-center rounded-full bg-[#7c3aed] text-white text-[11px] font-bold font-mono">
-                  {step.step}
-                </div>
-                <h3 className="font-sans font-bold text-base text-[#171717]">{step.title}</h3>
-                <p className="text-stone-500 text-sm mt-1 leading-relaxed">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Accordion */}
-      <section className="py-20 px-6 mx-auto max-w-[800px]">
-        <div className="text-center mb-16">
-          <span className="font-mono text-[11px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-2">
-            Have Questions?
-          </span>
-          <h2 className="text-3xl font-bold tracking-tight">Frequently Asked Questions</h2>
-        </div>
+      {/* Main Content: Stacked A4 Sheets */}
+      <div className="max-w-[1200px] mx-auto px-6 md:px-20 pt-28 pb-12 space-y-16">
         
-        <div className="space-y-4 text-left">
-          {faqs.map((faq, index) => (
-            <Accordion key={index} title={faq.q}>
-              <p className="text-stone-500 text-sm leading-relaxed">
-                {faq.a}
+        {/* A4 SHEET 1: Proposal Cover & Value Proposition */}
+        <article className={`${lora.className} bg-white border border-[#E2E8F0] rounded-none p-8 md:p-16 shadow-[0_8px_30px_rgba(0,0,0,0.03)] min-h-[1130px] flex flex-col justify-between`}>
+          <div>
+            {/* Header Block */}
+            <header className="mb-12 text-center select-none">
+              <div className="border-t-2 border-b border-neutral-900 py-3 mb-8 flex justify-between items-center text-[10px] font-mono tracking-widest text-neutral-500 uppercase">
+                <span>Academic Services</span>
+                <span className="font-bold text-neutral-900">ResumeForge AI</span>
+                <span>Ref: RF-PRJ-2026</span>
+              </div>
+            </header>
+
+            {/* Hero Section */}
+            <div className="text-center py-6">
+              <span className="font-mono text-[11px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-4">
+                # ACADEMIC EXCELLENCE
+              </span>
+              <h1 className={`${playfair.className} text-4xl md:text-5xl font-bold tracking-tight text-[#171717] leading-[1.15] max-w-[700px] mx-auto`}>
+                Build Your Final Year Project With Expert Guidance
+              </h1>
+              <p className="text-stone-500 mt-6 text-sm md:text-base max-w-[580px] mx-auto leading-relaxed">
+                From idea to deployment, we help students build production-ready academic projects with documentation, reports, presentations, deployment, and ongoing support.
               </p>
-            </Accordion>
-          ))}
-        </div>
-      </section>
+              <div className="flex justify-center gap-4 mt-8">
+                <Link
+                  href={`/${locale}/project-services/request`}
+                  className="inline-flex items-center justify-center rounded-xl bg-[#7c3aed] border border-[#6d28d9] px-6 h-11 text-white transition-all duration-75 hover:bg-[#6d28d9] active:scale-95 font-mono text-[12px] uppercase font-semibold shadow-sm"
+                >
+                  Request Project
+                </Link>
+                <a
+                  href="#domains"
+                  className="inline-flex items-center justify-center rounded-xl border border-stone-200 bg-white px-6 h-11 text-[#171717] transition-all duration-75 hover:bg-[#F2F2F2] active:scale-95 font-mono text-[12px] uppercase font-semibold shadow-sm"
+                >
+                  Explore Domains
+                </a>
+              </div>
+            </div>
+
+            {/* Why Choose Us */}
+            <div className="mt-16">
+              <div className="text-center mb-10">
+                <span className="font-mono text-[10px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-1">
+                  Why Choose Us
+                </span>
+                <h2 className={`${playfair.className} text-2xl font-bold tracking-tight text-neutral-800`}>Ecosystem Highlights</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                {features.map((feat) => (
+                  <div key={feat.title} className="border border-stone-150 p-5 rounded-xl hover:shadow-[0_4px_20px_rgba(0,0,0,0.01)] transition-all bg-stone-50/30">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#7c3aed]/10 text-[#7c3aed] mb-3">
+                      {feat.icon}
+                    </div>
+                    <h3 className="font-sans font-bold text-[#171717] text-xs mb-1.5">{feat.title}</h3>
+                    <p className="text-stone-500 text-xs leading-relaxed">{feat.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer block */}
+          <footer className="border-t border-neutral-100 pt-6 mt-12 flex justify-between items-center text-[9px] font-mono tracking-wider text-neutral-400 select-none">
+            <span>CONFIDENTIAL • FOR ACADEMIC INTERNAL USE</span>
+            <span>PAGE 1 OF 3</span>
+          </footer>
+        </article>
+
+        {/* A4 SHEET 2: Services Roster & Technical Domains */}
+        <article className={`${lora.className} bg-white border border-[#E2E8F0] rounded-none p-8 md:p-16 shadow-[0_8px_30px_rgba(0,0,0,0.03)] min-h-[1130px] flex flex-col justify-between`}>
+          <div>
+            {/* Header Block */}
+            <header className="mb-12 text-center select-none">
+              <div className="border-t-2 border-b border-neutral-900 py-3 mb-8 flex justify-between items-center text-[10px] font-mono tracking-widest text-neutral-500 uppercase">
+                <span>Deliverables & Technology</span>
+                <span className="font-bold text-neutral-900">ResumeForge AI</span>
+                <span>Ref: RF-PRJ-2026</span>
+              </div>
+            </header>
+
+            {/* Services Grid */}
+            <div className="text-left">
+              <div className="text-center mb-10">
+                <span className="font-mono text-[10px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-1">
+                  Our Services
+                </span>
+                <h2 className={`${playfair.className} text-2xl font-bold tracking-tight text-neutral-800`}>Structured Deliverables</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {services.map((svc) => (
+                  <div key={svc.title} className="flex gap-4.5 p-5 border border-stone-200 rounded-xl bg-stone-50/20 hover:shadow-[0_4px_20px_rgba(0,0,0,0.01)] transition-all">
+                    <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-stone-200">
+                      {svc.icon}
+                    </div>
+                    <div>
+                      <h3 className="font-sans font-bold text-[#171717] text-xs mb-1">{svc.title}</h3>
+                      <p className="text-stone-500 text-xs leading-relaxed">{svc.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Technical Domains */}
+            <div id="domains" className="mt-16 text-left">
+              <div className="text-center mb-10">
+                <span className="font-mono text-[10px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-1">
+                  Technical Domains
+                </span>
+                <h2 className={`${playfair.className} text-2xl font-bold tracking-tight text-neutral-800`}>Technologies We Support</h2>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3.5">
+                {domains.map((dom) => (
+                  <div key={dom} className="border border-stone-200 bg-white px-4 py-2.5 rounded-lg flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#7c3aed]" />
+                    <span className="text-[11px] font-semibold text-stone-700">{dom}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer block */}
+          <footer className="border-t border-neutral-100 pt-6 mt-12 flex justify-between items-center text-[9px] font-mono tracking-wider text-neutral-400 select-none">
+            <span>CONFIDENTIAL • FOR ACADEMIC INTERNAL USE</span>
+            <span>PAGE 2 OF 3</span>
+          </footer>
+        </article>
+
+        {/* A4 SHEET 3: Development Timeline & FAQs */}
+        <article className={`${lora.className} bg-white border border-[#E2E8F0] rounded-none p-8 md:p-16 shadow-[0_8px_30px_rgba(0,0,0,0.03)] min-h-[1130px] flex flex-col justify-between`}>
+          <div>
+            {/* Header Block */}
+            <header className="mb-12 text-center select-none">
+              <div className="border-t-2 border-b border-neutral-900 py-3 mb-8 flex justify-between items-center text-[10px] font-mono tracking-widest text-neutral-500 uppercase">
+                <span>Workflow & FAQ</span>
+                <span className="font-bold text-neutral-900">ResumeForge AI</span>
+                <span>Ref: RF-PRJ-2026</span>
+              </div>
+            </header>
+
+            {/* Process Timeline */}
+            <div className="text-left">
+              <div className="text-center mb-10">
+                <span className="font-mono text-[10px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-1">
+                  Our Process
+                </span>
+                <h2 className={`${playfair.className} text-2xl font-bold tracking-tight text-neutral-800`}>Workflow Execution</h2>
+              </div>
+              <div className="relative pl-6 border-l border-stone-200 space-y-8 max-w-[650px] mx-auto">
+                {timelineSteps.map((step) => (
+                  <div key={step.step} className="relative">
+                    <div className="absolute -left-[35px] top-0 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-[#7c3aed] text-white text-[9px] font-bold font-mono">
+                      {step.step}
+                    </div>
+                    <h3 className="font-sans font-bold text-xs text-[#171717]">{step.title}</h3>
+                    <p className="text-stone-500 text-xs mt-1 leading-relaxed">{step.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* FAQ Section */}
+            <div className="mt-16 text-left">
+              <div className="text-center mb-10">
+                <span className="font-mono text-[10px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-1">
+                  Have Questions?
+                </span>
+                <h2 className={`${playfair.className} text-2xl font-bold tracking-tight text-neutral-800`}>Frequently Asked Questions</h2>
+              </div>
+              
+              <div className="space-y-4 max-w-[650px] mx-auto">
+                {faqs.map((faq, index) => (
+                  <Accordion key={index} title={faq.q}>
+                    <p className="text-stone-500 text-xs leading-relaxed">
+                      {faq.a}
+                    </p>
+                  </Accordion>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer block */}
+          <footer className="border-t border-neutral-100 pt-6 mt-12 flex justify-between items-center text-[9px] font-mono tracking-wider text-neutral-400 select-none">
+            <span>CONFIDENTIAL • FOR ACADEMIC INTERNAL USE</span>
+            <span>PAGE 3 OF 3</span>
+          </footer>
+        </article>
+
+      </div>
 
       <FooterSection locale={locale} />
     </div>
