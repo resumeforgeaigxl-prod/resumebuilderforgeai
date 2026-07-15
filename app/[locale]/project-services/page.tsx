@@ -179,13 +179,29 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {services.map((svc) => (
-                  <div key={svc.title} className="flex gap-4.5 p-5 border border-stone-200 rounded-xl bg-stone-50/20 hover:shadow-[0_4px_20px_rgba(0,0,0,0.01)] transition-all">
-                    <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-stone-200">
-                      {svc.icon}
+                  <div 
+                    key={svc.title} 
+                    className="group relative flex gap-5 p-6 border border-stone-200/80 bg-[#fafafa]/50 rounded-xl hover:bg-white hover:border-stone-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden select-none"
+                  >
+                    {/* Top border accent line on hover */}
+                    <div className="absolute top-0 left-6 right-6 h-[2px] bg-[#7c3aed]/60 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                    
+                    {/* Premium Layered Icon Container */}
+                    <div className="shrink-0 relative flex h-10 w-10 items-center justify-center rounded-lg bg-white border border-stone-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.02)] group-hover:border-[#7c3aed]/30 group-hover:shadow-[0_2px_8px_rgba(124,58,237,0.04)] transition-all duration-300 text-stone-600 group-hover:text-[#7c3aed]">
+                      <div className="absolute inset-0 bg-[#7c3aed]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
+                      <div className="relative group-hover:scale-105 transition-transform duration-300">
+                        {svc.icon}
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-sans font-bold text-[#171717] text-xs mb-1">{svc.title}</h3>
-                      <p className="text-stone-500 text-xs leading-relaxed">{svc.desc}</p>
+
+                    {/* Content Block */}
+                    <div className="space-y-1.5">
+                      <h3 className="font-sans font-semibold text-stone-900 text-sm tracking-tight">
+                        {svc.title}
+                      </h3>
+                      <p className="text-stone-500 text-xs leading-relaxed font-normal">
+                        {svc.desc}
+                      </p>
                     </div>
                   </div>
                 ))}
