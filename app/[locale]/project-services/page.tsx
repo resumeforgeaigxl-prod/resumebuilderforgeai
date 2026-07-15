@@ -120,12 +120,30 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                 {features.map((feat) => (
-                  <div key={feat.title} className="border border-stone-150 p-5 rounded-xl hover:shadow-[0_4px_20px_rgba(0,0,0,0.01)] transition-all bg-stone-50/30">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#7c3aed]/10 text-[#7c3aed] mb-3">
-                      {feat.icon}
+                  <div 
+                    key={feat.title} 
+                    className="group relative border border-stone-200/80 bg-[#fafafa]/50 p-6 rounded-xl hover:bg-white hover:border-stone-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:-translate-y-0.5 transition-all duration-300 text-left overflow-hidden select-none"
+                  >
+                    {/* Top border accent line on hover */}
+                    <div className="absolute top-0 left-6 right-6 h-[2px] bg-[#7c3aed]/60 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                    
+                    {/* Premium Layered Icon Container */}
+                    <div className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-white border border-stone-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.02)] group-hover:border-[#7c3aed]/30 group-hover:shadow-[0_2px_8px_rgba(124,58,237,0.04)] transition-all duration-300 text-stone-600 group-hover:text-[#7c3aed] mb-5">
+                      <div className="absolute inset-0 bg-[#7c3aed]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
+                      <div className="relative group-hover:scale-105 transition-transform duration-300">
+                        {feat.icon}
+                      </div>
                     </div>
-                    <h3 className="font-sans font-bold text-[#171717] text-xs mb-1.5">{feat.title}</h3>
-                    <p className="text-stone-500 text-xs leading-relaxed">{feat.desc}</p>
+
+                    {/* Content Block */}
+                    <div className="space-y-2">
+                      <h3 className="font-sans font-semibold text-stone-900 text-sm tracking-tight">
+                        {feat.title}
+                      </h3>
+                      <p className="text-stone-500 text-xs leading-relaxed font-normal">
+                        {feat.desc}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
