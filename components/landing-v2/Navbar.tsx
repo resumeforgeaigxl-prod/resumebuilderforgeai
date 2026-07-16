@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, FileText, Layout, Zap } from "lucide-react";
 import Link from "next/link";
 
 interface NavbarProps {
@@ -13,6 +13,7 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
 
   const handleScroll = useCallback(() => {
     setScrolled(window.scrollY > 10);
@@ -49,6 +50,33 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
     { label: "Project Services", href: `/${locale}/project-services` },
     { label: "Blog", href: `/${locale}/blogs` },
     { label: "Pricing", href: `/${locale}/pricing` },
+  ];
+
+  const dropdownItems = [
+    {
+      id: 0,
+      label: "Resume Builder",
+      desc: "ATS-optimized resume generation",
+      href: `/${locale}/resumes`,
+      icon: FileText,
+      color: "text-indigo-600 bg-indigo-50 border-indigo-100",
+    },
+    {
+      id: 1,
+      label: "Resume Templates",
+      desc: "Browse curated design systems",
+      href: `/${locale}#templates`,
+      icon: Layout,
+      color: "text-blue-600 bg-blue-50 border-blue-100",
+    },
+    {
+      id: 2,
+      label: "ATS Scanner",
+      desc: "Calibrate and check score instantly",
+      href: `/${locale}#ats-score`,
+      icon: Zap,
+      color: "text-pink-600 bg-pink-50 border-pink-100",
+    }
   ];
 
   return (
@@ -99,7 +127,7 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
         </Link>
 
         {/* ── Center links (desktop dropdown + static links) ── */}
-        <ul className="hidden md:flex items-center gap-8">
+        <ul className="hidden md:flex items-center gap-8 text-[#171717]">
           <li 
             className="relative"
             onMouseEnter={() => setDropdownOpen(true)}
@@ -118,24 +146,125 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute top-14 left-1/2 -translate-x-1/2 w-64 bg-white border border-[#EBEBEB] rounded-xl shadow-lg p-3 z-50 text-left"
+                  className="absolute top-14 left-1/2 -translate-x-1/2 w-[540px] bg-white border border-[#EBEBEB] rounded-2xl shadow-xl z-50 text-left overflow-hidden grid grid-cols-12"
                 >
-                  <div className="flex flex-col gap-1">
-                    {[
-                      { label: "Resume Builder", desc: "Build ATS-friendly resumes", href: `/${locale}/resumes` },
-                      { label: "Resume Templates", desc: "Browse curated designs", href: `/${locale}#templates` },
-                      { label: "ATS Scanner", desc: "Check score instantly", href: `/${locale}#ats-score` }
-                    ].map((item) => (
-                      <Link
-                        key={item.label}
-                        href={item.href}
-                        onClick={() => setDropdownOpen(false)}
-                        className="flex flex-col p-2.5 rounded-lg hover:bg-stone-50 transition-colors"
-                      >
-                        <span className="text-[12px] font-sans font-bold text-[#171717]">{item.label}</span>
-                        <span className="text-[10px] font-sans text-stone-400 font-medium mt-0.5">{item.desc}</span>
-                      </Link>
-                    ))}
+                  {/* Left Column - Options Stack */}
+                  <div className="col-span-7 flex flex-col divide-y divide-[#EBEBEB]">
+                    {dropdownItems.map((item) => {
+                      const Icon = item.icon;
+                      const isSelected = activeTab === item.id;
+                      return (
+                        <Link
+                          key={item.label}
+                          href={item.href}
+                          onMouseEnter={() => setActiveTab(item.id)}
+                          onClick={() => setDropdownOpen(false)}
+                          className={`flex items-start gap-3.5 p-4 transition-all duration-200 ${
+                            isSelected ? "bg-stone-50" : "bg-white hover:bg-stone-50/50"
+                          }`}
+                        >
+                          <div className={`p-2 rounded-lg border ${item.color} shrink-0`}>
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <span className="text-[12px] font-sans font-bold uppercase tracking-wider text-[#171717]">
+                              {item.label}
+                            </span>
+                            <span className="block text-[10px] font-sans text-stone-400 font-medium mt-1 leading-normal">
+                              {item.desc}
+                            </span>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+
+                  {/* Right Column - Premium Visual Preview Panel */}
+                  <div className="col-span-5 bg-[#FAFAFA] border-l border-[#EBEBEB] p-5 flex flex-col justify-center items-center select-none relative overflow-hidden">
+                    <AnimatePresence mode="wait">
+                      {activeTab === 0 && (
+                        <motion.div
+                          key="builder"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.12 }}
+                          className="w-full h-full flex flex-col justify-center"
+                        >
+                          <div className="bg-white border border-[#EBEBEB] rounded-xl p-3 shadow-sm w-full">
+                            <div className="flex items-center gap-1.5 mb-2 pb-2 border-b border-stone-100">
+                              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                              <span className="text-[8px] font-mono font-bold text-stone-400 uppercase">Live Document Editor</span>
+                            </div>
+                            <div className="space-y-1.5">
+                              <div className="h-1.5 w-3/4 bg-stone-100 rounded" />
+                              <div className="h-1.5 w-1/2 bg-stone-100 rounded" />
+                              <div className="h-px bg-stone-100 rounded mt-2" />
+                              <div className="space-y-1 pt-1.5">
+                                <div className="flex gap-1.5">
+                                  <div className="h-2 w-1/3 bg-indigo-50 border border-indigo-100 rounded" />
+                                  <div className="h-2 w-1/4 bg-stone-100 rounded" />
+                                </div>
+                                <div className="h-1.5 w-full bg-stone-100 rounded" />
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {activeTab === 1 && (
+                        <motion.div
+                          key="templates"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.12 }}
+                          className="w-full h-full flex flex-col justify-center items-center"
+                        >
+                          <div className="relative w-full max-w-[140px] h-[90px] flex items-center justify-center">
+                            {/* Stacked sheets mockup */}
+                            <div className="absolute w-[80px] h-[100px] bg-white border border-stone-200 rounded shadow-sm -rotate-6 transform translate-x-[-12px] opacity-70" />
+                            <div className="absolute w-[80px] h-[100px] bg-white border border-stone-200 rounded shadow-sm rotate-6 transform translate-x-[12px] opacity-70" />
+                            <div className="absolute w-[80px] h-[100px] bg-white border border-[#EBEBEB] rounded shadow-md z-10 p-2 flex flex-col justify-between">
+                              <div className="space-y-1">
+                                <div className="h-1.5 w-1/2 bg-stone-200 rounded" />
+                                <div className="h-1 w-full bg-stone-100 rounded" />
+                                <div className="h-1 w-3/4 bg-stone-100 rounded" />
+                              </div>
+                              <div className="flex justify-between items-center mt-auto">
+                                <div className="h-1.5 w-6 bg-blue-50 border border-blue-100 rounded" />
+                                <div className="h-1 w-3 bg-stone-200 rounded" />
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {activeTab === 2 && (
+                        <motion.div
+                          key="scanner"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.12 }}
+                          className="w-full h-full flex flex-col justify-center items-center"
+                        >
+                          <div className="bg-white border border-[#EBEBEB] rounded-xl p-3 shadow-sm w-full flex flex-col items-center">
+                            <div className="text-[8px] font-mono font-bold text-stone-400 uppercase mb-1.5">ATS Scanner Match</div>
+                            <div className="relative w-12 h-12 flex items-center justify-center mb-1.5">
+                              <svg width="48" height="48" viewBox="0 0 48 48" className="-rotate-90">
+                                <circle cx="24" cy="24" r="20" fill="none" stroke="#F2F2F2" strokeWidth="3" />
+                                <circle cx="24" cy="24" r="20" fill="none" stroke="#ec4899" strokeWidth="3" strokeDasharray="125" strokeDashoffset="20" />
+                              </svg>
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-[11px] font-mono font-bold text-[#171717]">92</span>
+                              </div>
+                            </div>
+                            <span className="text-[8px] font-bold uppercase tracking-wider text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">Highly Compatible</span>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </motion.div>
               )}
