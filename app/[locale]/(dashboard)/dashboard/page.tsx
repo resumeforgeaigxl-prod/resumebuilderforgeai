@@ -158,6 +158,13 @@ export default async function DashboardPage({ params }: { params: { locale: stri
                                 icon={<Bot className="w-5 h-5" />} 
                                 color="purple"
                             />
+                            <ModuleCard 
+                                title="Project Services" 
+                                desc="Expert final year academic projects and thesis guidance." 
+                                href={`/${locale}/dashboard/project-services`} 
+                                icon={<Briefcase className="w-5 h-5" />} 
+                                color="indigo"
+                            />
                         </div>
                     </div>
 
