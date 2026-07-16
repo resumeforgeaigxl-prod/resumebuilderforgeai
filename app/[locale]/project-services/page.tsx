@@ -28,8 +28,14 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
 
   for (let c = 0; c < cols; c++) {
     const progress = c / cols;
-    // Decay: dense at outer edge, drops to 0% at 85% width
-    const baseProbability = Math.max(0, 0.9 * (1 - progress / 0.85));
+    // Density transition (thick state at edge, lite state towards center)
+    let baseProbability = 0;
+    if (progress < 0.15) {
+      baseProbability = 0.95; // Extremely dense edge
+    } else {
+      const decayProgress = (progress - 0.15) / (0.85 - 0.15);
+      baseProbability = Math.max(0, 0.95 * (1 - decayProgress));
+    }
     
     for (let r = 0; r < rows; r++) {
       const isEdgeRow = r < 2 || r > rows - 3;
@@ -37,19 +43,28 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
       
       const leftRand = ((c * 17 + r * 31) % 100) / 100;
       if (leftRand < probability) {
+        // Opacity fades from 15-35% at edge to 4-10% near the fade out point
+        const maxOpacity = Math.max(0.08, 0.35 - (progress * 0.30));
+        const minOpacity = Math.max(0.03, 0.12 - (progress * 0.10));
+        const opacity = minOpacity + leftRand * (maxOpacity - minOpacity);
+
         leftPixels.push({
           x: c * pixelSpacing,
           y: r * pixelSpacing,
-          opacity: 0.08 + leftRand * 0.14,
+          opacity,
         });
       }
 
       const rightRand = ((c * 23 + r * 37) % 100) / 100;
       if (rightRand < probability) {
+        const maxOpacity = Math.max(0.08, 0.35 - (progress * 0.30));
+        const minOpacity = Math.max(0.03, 0.12 - (progress * 0.10));
+        const opacity = minOpacity + rightRand * (maxOpacity - minOpacity);
+
         rightPixels.push({
           x: gridWidth - (c * pixelSpacing) - 4,
           y: r * pixelSpacing,
-          opacity: 0.08 + rightRand * 0.14,
+          opacity,
         });
       }
     }
@@ -124,7 +139,8 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
             </pattern>
             <linearGradient id="left-gradient-mask" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="white" stopOpacity="1" />
-              <stop offset="70%" stopColor="white" stopOpacity="0.4" />
+              <stop offset="30%" stopColor="white" stopOpacity="0.9" />
+              <stop offset="75%" stopColor="white" stopOpacity="0.3" />
               <stop offset="100%" stopColor="white" stopOpacity="0" />
             </linearGradient>
             <mask id="left-svg-mask">
@@ -154,7 +170,8 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
             </pattern>
             <linearGradient id="right-gradient-mask" x1="100%" y1="0%" x2="0%" y2="0%">
               <stop offset="0%" stopColor="white" stopOpacity="1" />
-              <stop offset="70%" stopColor="white" stopOpacity="0.4" />
+              <stop offset="30%" stopColor="white" stopOpacity="0.9" />
+              <stop offset="75%" stopColor="white" stopOpacity="0.3" />
               <stop offset="100%" stopColor="white" stopOpacity="0" />
             </linearGradient>
             <mask id="right-svg-mask">
