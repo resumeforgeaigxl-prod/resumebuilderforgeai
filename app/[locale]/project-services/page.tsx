@@ -16,7 +16,14 @@ const lora = Lora({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
 export default async function ProjectServicesLandingPage({ params }: { params: { locale: string } }) {
   const { locale } = params;
 
-  // Generate deterministic pixel data for decorative repeating grid patterns
+  // Generate deterministic pixel data for decorative repeating grid patterns using a Bayer Ordered Dither Matrix
+  const bayerMatrix = [
+    [0, 8, 2, 10],
+    [12, 4, 14, 6],
+    [3, 11, 1, 9],
+    [15, 7, 13, 5]
+  ];
+
   const pixelSpacing = 6;
   const gridWidth = 240;
   const gridHeight = 120;
@@ -28,47 +35,41 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
 
   for (let c = 0; c < cols; c++) {
     for (let r = 0; r < rows; r++) {
-      // Calculate wave value at coordinate (c, r)
-      // Math.sin(r * 0.3) creates a wavy vertical offset
-      // Math.cos((c + r) * 0.18) adds a secondary diagonal waviness
-      const waveValue = Math.sin(r * 0.3) * 6 + Math.cos((c + r) * 0.18) * 3;
+      // Calculate vertical sine wave horizontal shift
+      const waveShift = Math.sin(r * 0.3) * 6;
+      const adjustedCol = c - waveShift;
       
-      // Calculate adjusted progress: c = 0 is left edge, offset shifts the transition horizontally
-      const adjustedCol = c - waveValue;
+      // Calculate normalized progress (0 = outer edge, 1 = inner edge)
       const progress = Math.max(0, Math.min(1, adjustedCol / cols));
-
-      // Density calculation
-      let baseProbability = 0;
+      
+      // Map progress to 0-16 for dither matrix comparison
+      let bayerValue = 0;
       if (progress < 0.10) {
-        baseProbability = 0.98; // Solid thick edge
+        bayerValue = 16; // 100% filled outer boundary
+      } else if (progress > 0.85) {
+        bayerValue = 0; // 100% transparent inner boundary
       } else {
-        const decayProgress = (progress - 0.10) / (0.80 - 0.10);
-        baseProbability = Math.max(0, 0.98 * (1 - decayProgress));
+        const normalizedProgress = (progress - 0.10) / (0.85 - 0.10);
+        bayerValue = Math.floor(16 * (1 - normalizedProgress));
       }
 
-      // Add diagonal check pattern / dithering similar to Paxel halftone
-      const ditherFactor = ((c + r) % 2 === 0) ? 1.0 : 0.85;
-      const probability = baseProbability * ditherFactor;
-
-      const leftRand = ((c * 17 + r * 31) % 100) / 100;
-      if (leftRand < probability) {
-        // Opacity transition: thicker at the edge (up to 45%), liter in the middle (down to 4%)
+      // Check if pixel should be rendered using Bayer dither grid comparison
+      const matrixVal = bayerMatrix[r % 4][c % 4];
+      
+      if (bayerValue > matrixVal) {
+        // Opacity transition: thicker at the edge (up to 45%), liter towards center (down to 4%)
         const maxOpacity = Math.max(0.12, 0.45 - (progress * 0.35));
         const minOpacity = Math.max(0.04, 0.18 - (progress * 0.14));
-        const opacity = minOpacity + leftRand * (maxOpacity - minOpacity);
+        
+        // Add subtle deterministic variance to individual pixel opacity
+        const opacityRand = ((c * 17 + r * 31) % 100) / 100;
+        const opacity = minOpacity + opacityRand * (maxOpacity - minOpacity);
 
         leftPixels.push({
           x: c * pixelSpacing,
           y: r * pixelSpacing,
           opacity,
         });
-      }
-
-      const rightRand = ((c * 23 + r * 37) % 100) / 100;
-      if (rightRand < probability) {
-        const maxOpacity = Math.max(0.12, 0.45 - (progress * 0.35));
-        const minOpacity = Math.max(0.04, 0.18 - (progress * 0.14));
-        const opacity = minOpacity + rightRand * (maxOpacity - minOpacity);
 
         rightPixels.push({
           x: gridWidth - (c * pixelSpacing) - 4,
