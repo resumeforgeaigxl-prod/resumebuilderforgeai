@@ -179,14 +179,17 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
                     })}
                   </div>
 
-                  {/* Right Column - Premium Visual Preview Panel */}
-                  <div className="col-span-6 bg-[#FAFAFA] border-l border-[#EBEBEB] p-5 flex flex-col justify-start select-none relative overflow-hidden h-full min-h-[220px]">
-                    {/* Window Controls */}
-                    <div className="flex items-center gap-1.5 pb-3 mb-3 border-b border-stone-200/60 w-full shrink-0">
+                  {/* Right Column - Premium Visual Preview Panel with Custom Background */}
+                  <div 
+                    className="col-span-6 border-l border-[#EBEBEB] p-5 flex flex-col justify-start select-none relative overflow-hidden h-full min-h-[220px] bg-cover bg-center"
+                    style={{ backgroundImage: "url('/resume_forge_pixel_bg.png')" }}
+                  >
+                    {/* Window Controls with Frosted Glass Header */}
+                    <div className="flex items-center gap-1.5 pb-3 mb-3 border-b border-stone-200/50 w-full shrink-0 bg-white/70 backdrop-blur-md -mx-5 -mt-5 px-5 py-3 rounded-tr-2xl">
                       <div className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
                       <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/80" />
                       <div className="w-2.5 h-2.5 rounded-full bg-green-400/80" />
-                      <span className="text-[9px] font-mono text-stone-400 ml-2 font-medium">resume_workspace.app</span>
+                      <span className="text-[9px] font-mono text-stone-500 ml-2 font-bold">resume_workspace.app</span>
                     </div>
 
                     <div className="flex-1 w-full flex flex-col justify-center">
@@ -238,7 +241,7 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
                             className="w-full flex flex-col justify-center"
                           >
                             <div className="space-y-2.5 text-left w-full">
-                              <span className="text-[9px] font-mono font-bold text-stone-400 uppercase tracking-wider block">Active Style Guides</span>
+                              <span className="text-[9px] font-mono font-bold text-stone-600 uppercase tracking-wider block bg-white/40 backdrop-blur-sm py-0.5 px-1.5 rounded w-max border border-stone-200/20">Active Style Guides</span>
                               <div className="grid grid-cols-2 gap-2">
                                 {[
                                   { name: "Minimalist Grid", desc: "For Tech & Product Roles", active: true },
@@ -248,10 +251,10 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
                                 ].map((tpl) => (
                                   <div 
                                     key={tpl.name}
-                                    className={`p-2.5 rounded-lg border text-left transition-colors duration-150 ${
+                                    className={`p-2.5 rounded-lg border text-left transition-colors duration-150 shadow-sm ${
                                       tpl.active 
-                                        ? "border-blue-500 bg-blue-50/30 text-[#171717]" 
-                                        : "border-stone-200 bg-white text-stone-400"
+                                        ? "border-blue-500 bg-white text-[#171717]" 
+                                        : "border-stone-200 bg-white/95 text-stone-400"
                                     }`}
                                   >
                                     <div className="text-[9px] font-sans font-bold">{tpl.name}</div>
