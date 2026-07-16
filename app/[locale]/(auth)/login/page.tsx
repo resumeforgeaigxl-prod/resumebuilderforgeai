@@ -1,6 +1,6 @@
 'use client'
 export const dynamic = 'force-dynamic';
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import { LogIn, Loader2, AlertCircle } from 'lucide-react'
@@ -14,6 +14,34 @@ export default function LoginPage() {
     const initialError = searchParams?.get('error') ?? null
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(initialError)
+    const [isCheckingSession, setIsCheckingSession] = useState(true)
+
+    useEffect(() => {
+        async function checkSession() {
+            try {
+                const res = await fetch('/api/user/profile')
+                if (res.ok) {
+                    const data = await res.json()
+                    if (data.success) {
+                        const redirectTo = searchParams?.get('redirect');
+                        if (redirectTo) {
+                            router.push(redirectTo);
+                        } else if (!data.user?.profileCompleted) {
+                            router.push(`/${locale}/complete-profile`);
+                        } else {
+                            router.push(`/${locale}/dashboard`);
+                        }
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.warn('[Login session check failed]', err);
+            } finally {
+                setIsCheckingSession(false);
+            }
+        }
+        checkSession();
+    }, [locale, router, searchParams]);
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -53,6 +81,14 @@ export default function LoginPage() {
             setError((err as Error).message || 'Login failed')
             setIsLoading(false)
         }
+    }
+
+    if (isCheckingSession) {
+        return (
+            <div className="flex min-h-[300px] items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+            </div>
+        );
     }
 
     return (
