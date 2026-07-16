@@ -19,7 +19,7 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
   // Generate deterministic pixel data for decorative repeating grid patterns
   const pixelSpacing = 6;
   const gridWidth = 240;
-  const gridHeight = 96;
+  const gridHeight = 120;
   const cols = Math.floor(gridWidth / pixelSpacing);
   const rows = Math.floor(gridHeight / pixelSpacing);
 
@@ -27,25 +27,34 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
   const rightPixels: { x: number; y: number; opacity: number }[] = [];
 
   for (let c = 0; c < cols; c++) {
-    const progress = c / cols;
-    // Density transition (thick state at edge, lite state towards center)
-    let baseProbability = 0;
-    if (progress < 0.15) {
-      baseProbability = 0.95; // Extremely dense edge
-    } else {
-      const decayProgress = (progress - 0.15) / (0.85 - 0.15);
-      baseProbability = Math.max(0, 0.95 * (1 - decayProgress));
-    }
-    
     for (let r = 0; r < rows; r++) {
-      const isEdgeRow = r < 2 || r > rows - 3;
-      const probability = isEdgeRow ? baseProbability * 0.7 : baseProbability;
+      // Calculate wave value at coordinate (c, r)
+      // Math.sin(r * 0.3) creates a wavy vertical offset
+      // Math.cos((c + r) * 0.18) adds a secondary diagonal waviness
+      const waveValue = Math.sin(r * 0.3) * 6 + Math.cos((c + r) * 0.18) * 3;
       
+      // Calculate adjusted progress: c = 0 is left edge, offset shifts the transition horizontally
+      const adjustedCol = c - waveValue;
+      const progress = Math.max(0, Math.min(1, adjustedCol / cols));
+
+      // Density calculation
+      let baseProbability = 0;
+      if (progress < 0.10) {
+        baseProbability = 0.98; // Solid thick edge
+      } else {
+        const decayProgress = (progress - 0.10) / (0.80 - 0.10);
+        baseProbability = Math.max(0, 0.98 * (1 - decayProgress));
+      }
+
+      // Add diagonal check pattern / dithering similar to Paxel halftone
+      const ditherFactor = ((c + r) % 2 === 0) ? 1.0 : 0.85;
+      const probability = baseProbability * ditherFactor;
+
       const leftRand = ((c * 17 + r * 31) % 100) / 100;
       if (leftRand < probability) {
-        // Opacity fades from 15-35% at edge to 4-10% near the fade out point
-        const maxOpacity = Math.max(0.08, 0.35 - (progress * 0.30));
-        const minOpacity = Math.max(0.03, 0.12 - (progress * 0.10));
+        // Opacity transition: thicker at the edge (up to 45%), liter in the middle (down to 4%)
+        const maxOpacity = Math.max(0.12, 0.45 - (progress * 0.35));
+        const minOpacity = Math.max(0.04, 0.18 - (progress * 0.14));
         const opacity = minOpacity + leftRand * (maxOpacity - minOpacity);
 
         leftPixels.push({
@@ -57,8 +66,8 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
 
       const rightRand = ((c * 23 + r * 37) % 100) / 100;
       if (rightRand < probability) {
-        const maxOpacity = Math.max(0.08, 0.35 - (progress * 0.30));
-        const minOpacity = Math.max(0.03, 0.12 - (progress * 0.10));
+        const maxOpacity = Math.max(0.12, 0.45 - (progress * 0.35));
+        const minOpacity = Math.max(0.04, 0.18 - (progress * 0.14));
         const opacity = minOpacity + rightRand * (maxOpacity - minOpacity);
 
         rightPixels.push({
@@ -124,7 +133,7 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
       <div className="absolute left-0 top-0 bottom-0 w-[240px] pointer-events-none z-0 hidden xl:block overflow-hidden">
         <svg width="100%" height="100%">
           <defs>
-            <pattern id="left-pixel-pattern" width="240" height="96" patternUnits="userSpaceOnUse">
+            <pattern id="left-pixel-pattern" width="240" height="120" patternUnits="userSpaceOnUse">
               {leftPixels.map((p, i) => (
                 <rect 
                   key={i} 
@@ -155,7 +164,7 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
       <div className="absolute right-0 top-0 bottom-0 w-[240px] pointer-events-none z-0 hidden xl:block overflow-hidden">
         <svg width="100%" height="100%">
           <defs>
-            <pattern id="right-pixel-pattern" width="240" height="96" patternUnits="userSpaceOnUse">
+            <pattern id="right-pixel-pattern" width="240" height="120" patternUnits="userSpaceOnUse">
               {rightPixels.map((p, i) => (
                 <rect 
                   key={i} 
