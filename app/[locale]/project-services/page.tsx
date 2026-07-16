@@ -16,6 +16,44 @@ const lora = Lora({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
 export default async function ProjectServicesLandingPage({ params }: { params: { locale: string } }) {
   const { locale } = params;
 
+  // Generate deterministic pixel data for decorative grids
+  const pixelSpacing = 6;
+  const gridWidth = 180;
+  const gridHeight = 360;
+  const cols = Math.floor(gridWidth / pixelSpacing);
+  const rows = Math.floor(gridHeight / pixelSpacing);
+
+  const leftPixels: { x: number; y: number; opacity: number }[] = [];
+  const rightPixels: { x: number; y: number; opacity: number }[] = [];
+
+  for (let c = 0; c < cols; c++) {
+    const progress = c / cols;
+    const baseProbability = Math.max(0, 0.9 * (1 - progress / 0.8));
+    
+    for (let r = 0; r < rows; r++) {
+      const isEdgeRow = r < 3 || r > rows - 4;
+      const probability = isEdgeRow ? baseProbability * 0.5 : baseProbability;
+      
+      const leftRand = ((c * 17 + r * 31) % 100) / 100;
+      if (leftRand < probability) {
+        leftPixels.push({
+          x: c * pixelSpacing,
+          y: r * pixelSpacing,
+          opacity: 0.03 + leftRand * 0.05,
+        });
+      }
+
+      const rightRand = ((c * 23 + r * 37) % 100) / 100;
+      if (rightRand < probability) {
+        rightPixels.push({
+          x: gridWidth - (c * pixelSpacing) - 4,
+          y: r * pixelSpacing,
+          opacity: 0.03 + rightRand * 0.05,
+        });
+      }
+    }
+  }
+
   const features = [
     { title: 'Industry-Level Projects', desc: 'Get projects built with production-grade code, architecture, and documentation.', icon: <Code className="w-4.5 h-4.5" /> },
     { title: 'Expert Developers', desc: 'Work with skilled software engineers and AI/ML professionals.', icon: <Users className="w-4.5 h-4.5" /> },
@@ -72,7 +110,7 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
       <div className="max-w-[1200px] mx-auto px-4 md:px-0 pt-28 pb-12 space-y-16">
         
         {/* A4 SHEET 1: Proposal Cover & Value Proposition */}
-        <article className={`${lora.className} bg-white border border-[#E2E8F0] rounded-none p-8 md:p-16 shadow-[0_8px_30px_rgba(0,0,0,0.03)] min-h-[1130px] flex flex-col justify-between`}>
+        <article className={`${lora.className} relative overflow-hidden bg-white border border-[#E2E8F0] rounded-none p-8 md:p-16 shadow-[0_8px_30px_rgba(0,0,0,0.03)] min-h-[1130px] flex flex-col justify-between`}>
           <div>
             {/* Header Block */}
             <header className="mb-12 text-center select-none">
@@ -155,6 +193,70 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
             <span>CONFIDENTIAL • FOR ACADEMIC INTERNAL USE</span>
             <span>PAGE 1 OF 3</span>
           </footer>
+
+          {/* Left Edge Procedural Pixel Grid */}
+          <svg 
+            className="absolute left-0 top-[600px] w-[180px] h-[360px] pointer-events-none z-0 hidden lg:block select-none animate-fade-in" 
+            width="180" 
+            height="360" 
+            viewBox="0 0 180 360"
+          >
+            <defs>
+              <linearGradient id="left-fade" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="white" stopOpacity="1" />
+                <stop offset="80%" stopColor="white" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="white" stopOpacity="0" />
+              </linearGradient>
+              <mask id="left-mask">
+                <rect width="180" height="360" fill="url(#left-fade)" />
+              </mask>
+            </defs>
+            <g mask="url(#left-mask)">
+              {leftPixels.map((p, i) => (
+                <rect 
+                  key={i} 
+                  x={p.x} 
+                  y={p.y} 
+                  width="4" 
+                  height="4" 
+                  fill="#7c3aed" 
+                  fillOpacity={p.opacity} 
+                />
+              ))}
+            </g>
+          </svg>
+
+          {/* Right Edge Procedural Pixel Grid */}
+          <svg 
+            className="absolute right-0 top-[600px] w-[180px] h-[360px] pointer-events-none z-0 hidden lg:block select-none animate-fade-in" 
+            width="180" 
+            height="360" 
+            viewBox="0 0 180 360"
+          >
+            <defs>
+              <linearGradient id="right-fade" x1="100%" y1="0%" x2="0%" y2="0%">
+                <stop offset="0%" stopColor="white" stopOpacity="1" />
+                <stop offset="80%" stopColor="white" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="white" stopOpacity="0" />
+              </linearGradient>
+              <mask id="right-mask">
+                <rect width="180" height="360" fill="url(#right-fade)" />
+              </mask>
+            </defs>
+            <g mask="url(#right-mask)">
+              {rightPixels.map((p, i) => (
+                <rect 
+                  key={i} 
+                  x={p.x} 
+                  y={p.y} 
+                  width="4" 
+                  height="4" 
+                  fill="#7c3aed" 
+                  fillOpacity={p.opacity} 
+                />
+              ))}
+            </g>
+          </svg>
         </article>
 
         {/* A4 SHEET 2: Services Roster & Technical Domains */}
