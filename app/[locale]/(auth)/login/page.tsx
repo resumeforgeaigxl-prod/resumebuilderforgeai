@@ -39,8 +39,11 @@ export default function LoginPage() {
                 throw new Error(data.error || 'Login failed')
             }
 
-            // Redirect based on profile completion
-            if (!data.profileCompleted) {
+            // Redirect based on profile completion or explicit redirect param
+            const redirectTo = searchParams?.get('redirect');
+            if (redirectTo) {
+                router.push(redirectTo);
+            } else if (!data.profileCompleted) {
                 router.push(`/${locale}/complete-profile`)
             } else {
                 router.push(`/${locale}/dashboard`)

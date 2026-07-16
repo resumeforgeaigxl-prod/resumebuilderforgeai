@@ -108,6 +108,25 @@ export default function RequestProjectWizard({ params }: { params: { locale: str
   const [successData, setSuccessData] = useState<{ id: string; project_id: string } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
+
+  // 0. Verify session authentication status on mount
+  useEffect(() => {
+    async function verifyAuth() {
+      try {
+        const res = await fetch('/api/user/profile');
+        if (!res.ok) {
+          router.push(`/${locale}/login?redirect=/${locale}/project-services/request`);
+          return;
+        }
+        setIsCheckingSession(false);
+      } catch (err) {
+        console.error('[Session Check Error]', err);
+        router.push(`/${locale}/login?redirect=/${locale}/project-services/request`);
+      }
+    }
+    verifyAuth();
+  }, [locale, router]);
 
   // 1. Restore draft autosave on mount
   useEffect(() => {
@@ -289,6 +308,17 @@ export default function RequestProjectWizard({ params }: { params: { locale: str
       setIsSubmitting(false);
     }
   };
+
+  if (isCheckingSession) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#fafaf9]">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-[#7c3aed] mx-auto mb-4" />
+          <p className="text-xs font-mono text-stone-500">Checking authorization status...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (successData) {
     return (
