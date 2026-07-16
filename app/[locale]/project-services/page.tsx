@@ -16,10 +16,10 @@ const lora = Lora({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
 export default async function ProjectServicesLandingPage({ params }: { params: { locale: string } }) {
   const { locale } = params;
 
-  // Generate deterministic pixel data for decorative grids
+  // Generate deterministic pixel data for decorative repeating grid patterns
   const pixelSpacing = 6;
-  const gridWidth = 180;
-  const gridHeight = 360;
+  const gridWidth = 240;
+  const gridHeight = 96;
   const cols = Math.floor(gridWidth / pixelSpacing);
   const rows = Math.floor(gridHeight / pixelSpacing);
 
@@ -28,11 +28,12 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
 
   for (let c = 0; c < cols; c++) {
     const progress = c / cols;
-    const baseProbability = Math.max(0, 0.9 * (1 - progress / 0.8));
+    // Decay: dense at outer edge, drops to 0% at 85% width
+    const baseProbability = Math.max(0, 0.9 * (1 - progress / 0.85));
     
     for (let r = 0; r < rows; r++) {
-      const isEdgeRow = r < 3 || r > rows - 4;
-      const probability = isEdgeRow ? baseProbability * 0.5 : baseProbability;
+      const isEdgeRow = r < 2 || r > rows - 3;
+      const probability = isEdgeRow ? baseProbability * 0.7 : baseProbability;
       
       const leftRand = ((c * 17 + r * 31) % 100) / 100;
       if (leftRand < probability) {
@@ -103,11 +104,71 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
   ];
 
   return (
-    <div className="bg-[#fafaf9] min-h-screen text-[#171717]">
+    <div className="bg-[#fafaf9] min-h-screen text-[#171717] relative overflow-x-hidden">
+      {/* Left Side Viewport Pixel Grid (scrolls with page) */}
+      <div className="absolute left-0 top-0 bottom-0 w-[240px] pointer-events-none z-0 hidden xl:block overflow-hidden">
+        <svg width="100%" height="100%">
+          <defs>
+            <pattern id="left-pixel-pattern" width="240" height="96" patternUnits="userSpaceOnUse">
+              {leftPixels.map((p, i) => (
+                <rect 
+                  key={i} 
+                  x={p.x} 
+                  y={p.y} 
+                  width="4" 
+                  height="4" 
+                  fill="#7c3aed" 
+                  fillOpacity={p.opacity} 
+                />
+              ))}
+            </pattern>
+            <linearGradient id="left-gradient-mask" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="white" stopOpacity="1" />
+              <stop offset="70%" stopColor="white" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="white" stopOpacity="0" />
+            </linearGradient>
+            <mask id="left-svg-mask">
+              <rect width="240" height="100%" fill="url(#left-gradient-mask)" />
+            </mask>
+          </defs>
+          <rect width="240" height="100%" fill="url(#left-pixel-pattern)" mask="url(#left-svg-mask)" />
+        </svg>
+      </div>
+
+      {/* Right Side Viewport Pixel Grid (scrolls with page) */}
+      <div className="absolute right-0 top-0 bottom-0 w-[240px] pointer-events-none z-0 hidden xl:block overflow-hidden">
+        <svg width="100%" height="100%">
+          <defs>
+            <pattern id="right-pixel-pattern" width="240" height="96" patternUnits="userSpaceOnUse">
+              {rightPixels.map((p, i) => (
+                <rect 
+                  key={i} 
+                  x={p.x} 
+                  y={p.y} 
+                  width="4" 
+                  height="4" 
+                  fill="#7c3aed" 
+                  fillOpacity={p.opacity} 
+                />
+              ))}
+            </pattern>
+            <linearGradient id="right-gradient-mask" x1="100%" y1="0%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="white" stopOpacity="1" />
+              <stop offset="70%" stopColor="white" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="white" stopOpacity="0" />
+            </linearGradient>
+            <mask id="right-svg-mask">
+              <rect width="240" height="100%" fill="url(#right-gradient-mask)" />
+            </mask>
+          </defs>
+          <rect width="240" height="100%" fill="url(#right-pixel-pattern)" mask="url(#right-svg-mask)" />
+        </svg>
+      </div>
+
       <Navbar locale={locale} />
 
       {/* Main Content: Stacked A4 Sheets */}
-      <div className="max-w-[1200px] mx-auto px-4 md:px-0 pt-28 pb-12 space-y-16">
+      <div className="max-w-[1200px] mx-auto px-4 md:px-0 pt-28 pb-12 space-y-16 relative z-10">
         
         {/* A4 SHEET 1: Proposal Cover & Value Proposition */}
         <article className={`${lora.className} relative overflow-hidden bg-white border border-[#E2E8F0] rounded-none p-8 md:p-16 shadow-[0_8px_30px_rgba(0,0,0,0.03)] min-h-[1130px] flex flex-col justify-between`}>
@@ -149,70 +210,7 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
             </div>
 
             {/* Why Choose Us */}
-            <div className="mt-16 relative">
-              {/* Left Edge Procedural Pixel Grid */}
-              <svg 
-                className="absolute -left-16 top-0 w-[180px] h-[360px] pointer-events-none z-0 hidden lg:block select-none animate-fade-in" 
-                width="180" 
-                height="360" 
-                viewBox="0 0 180 360"
-              >
-                <defs>
-                  <linearGradient id="left-fade" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="white" stopOpacity="1" />
-                    <stop offset="80%" stopColor="white" stopOpacity="0.4" />
-                    <stop offset="100%" stopColor="white" stopOpacity="0" />
-                  </linearGradient>
-                  <mask id="left-mask">
-                    <rect width="180" height="360" fill="url(#left-fade)" />
-                  </mask>
-                </defs>
-                <g mask="url(#left-mask)">
-                  {leftPixels.map((p, i) => (
-                    <rect 
-                      key={i} 
-                      x={p.x} 
-                      y={p.y} 
-                      width="4" 
-                      height="4" 
-                      fill="#7c3aed" 
-                      fillOpacity={p.opacity} 
-                    />
-                  ))}
-                </g>
-              </svg>
-
-              {/* Right Edge Procedural Pixel Grid */}
-              <svg 
-                className="absolute -right-16 top-0 w-[180px] h-[360px] pointer-events-none z-0 hidden lg:block select-none animate-fade-in" 
-                width="180" 
-                height="360" 
-                viewBox="0 0 180 360"
-              >
-                <defs>
-                  <linearGradient id="right-fade" x1="100%" y1="0%" x2="0%" y2="0%">
-                    <stop offset="0%" stopColor="white" stopOpacity="1" />
-                    <stop offset="80%" stopColor="white" stopOpacity="0.4" />
-                    <stop offset="100%" stopColor="white" stopOpacity="0" />
-                  </linearGradient>
-                  <mask id="right-mask">
-                    <rect width="180" height="360" fill="url(#right-fade)" />
-                  </mask>
-                </defs>
-                <g mask="url(#right-mask)">
-                  {rightPixels.map((p, i) => (
-                    <rect 
-                      key={i} 
-                      x={p.x} 
-                      y={p.y} 
-                      width="4" 
-                      height="4" 
-                      fill="#7c3aed" 
-                      fillOpacity={p.opacity} 
-                    />
-                  ))}
-                </g>
-              </svg>
+            <div className="mt-16">
 
               <div className="text-center mb-10">
                 <span className="font-mono text-[10px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-1">
