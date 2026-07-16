@@ -37,6 +37,7 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
   }, [mobileOpen]);
 
   const staticLinks = [
+    { label: "Project Services", href: `/${locale}/project-services` },
     { label: "Blog", href: `/${locale}/blogs` },
     { label: "Pricing", href: `/${locale}/pricing` },
   ];
@@ -107,7 +108,7 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
             <button
               className="flex items-center gap-1 text-[#4D4D4D] transition-colors duration-200 hover:text-[#171717] font-mono text-[13px] uppercase font-semibold tracking-[0.04em] h-16 focus:outline-none"
             >
-              Services <ChevronDown className="w-3.5 h-3.5 text-stone-400 group-hover:text-[#171717] transition-transform duration-200" />
+              Resume <ChevronDown className="w-3.5 h-3.5 text-stone-400 group-hover:text-[#171717] transition-transform duration-200" />
             </button>
             
             <AnimatePresence>
@@ -123,8 +124,7 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
                     {[
                       { label: "Resume Builder", desc: "Build ATS-friendly resumes", href: `/${locale}/resumes` },
                       { label: "Resume Templates", desc: "Browse curated designs", href: `/${locale}#templates` },
-                      { label: "ATS Scanner", desc: "Check score instantly", href: `/${locale}#ats-score` },
-                      { label: "Project Services", desc: "Final year B.Tech projects", href: `/${locale}/project-services` }
+                      { label: "ATS Scanner", desc: "Check score instantly", href: `/${locale}#ats-score` }
                     ].map((item) => (
                       <Link
                         key={item.label}
