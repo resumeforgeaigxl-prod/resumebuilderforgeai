@@ -127,7 +127,7 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
         </Link>
 
         {/* ── Center links (desktop dropdown + static links) ── */}
-        <ul className="hidden md:flex items-center gap-8 text-[#171717]">
+        <ul className="hidden lg:flex items-center gap-8 text-[#171717]">
           <li 
             className="relative"
             onMouseEnter={() => setDropdownOpen(true)}
@@ -323,7 +323,7 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
         </ul>
 
         {/* ── Right actions (desktop) ── */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-3">
           <Link
             href={`/${locale}/signup`}
             className="inline-flex items-center justify-center rounded-xl border border-[#EBEBEB] bg-white px-3 h-9 text-[#171717] transition-all duration-75 hover:bg-[#F2F2F2] active:scale-95 font-mono text-[13px] uppercase font-semibold"
@@ -352,7 +352,7 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
         <button
           type="button"
           onClick={() => setMobileOpen((prev) => !prev)}
-          className="md:hidden inline-flex items-center justify-center rounded-[6px] border border-[#EBEBEB] bg-white h-9 w-9 text-[#171717] transition-colors duration-200 hover:bg-[#F2F2F2]"
+          className="lg:hidden inline-flex items-center justify-center rounded-[6px] border border-[#EBEBEB] bg-white h-9 w-9 text-[#171717] transition-colors duration-200 hover:bg-[#F2F2F2]"
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
         >
           {mobileOpen ? (
@@ -371,7 +371,7 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="md:hidden overflow-hidden border-b border-[#EBEBEB] bg-[#FAFAFA]"
+            className="lg:hidden overflow-hidden border-b border-[#EBEBEB] bg-[#FAFAFA]"
           >
             <div className="mx-auto max-w-[1200px] px-6 py-6 flex flex-col gap-4">
               {mobileLinks.map(({ label, href }) => (
