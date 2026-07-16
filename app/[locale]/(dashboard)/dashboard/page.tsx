@@ -124,6 +124,13 @@ export default async function DashboardPage({ params }: { params: { locale: stri
                                 color="indigo"
                             />
                             <ModuleCard 
+                                title="Project Services" 
+                                desc="Expert final year academic projects and thesis guidance." 
+                                href={`/${locale}/dashboard/project-services`} 
+                                icon={<Briefcase className="w-5 h-5" />} 
+                                color="indigo"
+                            />
+                            <ModuleCard 
                                 title="LearnForge" 
                                 desc="AI-powered video learning and roadmap insights." 
                                 href={`/${locale}/learnforge`} 
@@ -157,13 +164,6 @@ export default async function DashboardPage({ params }: { params: { locale: stri
                                 href={`/${locale}/mentorforge`} 
                                 icon={<Bot className="w-5 h-5" />} 
                                 color="purple"
-                            />
-                            <ModuleCard 
-                                title="Project Services" 
-                                desc="Expert final year academic projects and thesis guidance." 
-                                href={`/${locale}/dashboard/project-services`} 
-                                icon={<Briefcase className="w-5 h-5" />} 
-                                color="indigo"
                             />
                         </div>
                     </div>
