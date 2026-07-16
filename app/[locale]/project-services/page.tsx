@@ -39,7 +39,7 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
         leftPixels.push({
           x: c * pixelSpacing,
           y: r * pixelSpacing,
-          opacity: 0.03 + leftRand * 0.05,
+          opacity: 0.08 + leftRand * 0.14,
         });
       }
 
@@ -48,7 +48,7 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
         rightPixels.push({
           x: gridWidth - (c * pixelSpacing) - 4,
           y: r * pixelSpacing,
-          opacity: 0.03 + rightRand * 0.05,
+          opacity: 0.08 + rightRand * 0.14,
         });
       }
     }
@@ -149,7 +149,71 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
             </div>
 
             {/* Why Choose Us */}
-            <div className="mt-16">
+            <div className="mt-16 relative">
+              {/* Left Edge Procedural Pixel Grid */}
+              <svg 
+                className="absolute -left-16 top-0 w-[180px] h-[360px] pointer-events-none z-0 hidden lg:block select-none animate-fade-in" 
+                width="180" 
+                height="360" 
+                viewBox="0 0 180 360"
+              >
+                <defs>
+                  <linearGradient id="left-fade" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="white" stopOpacity="1" />
+                    <stop offset="80%" stopColor="white" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="white" stopOpacity="0" />
+                  </linearGradient>
+                  <mask id="left-mask">
+                    <rect width="180" height="360" fill="url(#left-fade)" />
+                  </mask>
+                </defs>
+                <g mask="url(#left-mask)">
+                  {leftPixels.map((p, i) => (
+                    <rect 
+                      key={i} 
+                      x={p.x} 
+                      y={p.y} 
+                      width="4" 
+                      height="4" 
+                      fill="#7c3aed" 
+                      fillOpacity={p.opacity} 
+                    />
+                  ))}
+                </g>
+              </svg>
+
+              {/* Right Edge Procedural Pixel Grid */}
+              <svg 
+                className="absolute -right-16 top-0 w-[180px] h-[360px] pointer-events-none z-0 hidden lg:block select-none animate-fade-in" 
+                width="180" 
+                height="360" 
+                viewBox="0 0 180 360"
+              >
+                <defs>
+                  <linearGradient id="right-fade" x1="100%" y1="0%" x2="0%" y2="0%">
+                    <stop offset="0%" stopColor="white" stopOpacity="1" />
+                    <stop offset="80%" stopColor="white" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="white" stopOpacity="0" />
+                  </linearGradient>
+                  <mask id="right-mask">
+                    <rect width="180" height="360" fill="url(#right-fade)" />
+                  </mask>
+                </defs>
+                <g mask="url(#right-mask)">
+                  {rightPixels.map((p, i) => (
+                    <rect 
+                      key={i} 
+                      x={p.x} 
+                      y={p.y} 
+                      width="4" 
+                      height="4" 
+                      fill="#7c3aed" 
+                      fillOpacity={p.opacity} 
+                    />
+                  ))}
+                </g>
+              </svg>
+
               <div className="text-center mb-10">
                 <span className="font-mono text-[10px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-1">
                   Why Choose Us
@@ -193,70 +257,6 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
             <span>CONFIDENTIAL • FOR ACADEMIC INTERNAL USE</span>
             <span>PAGE 1 OF 3</span>
           </footer>
-
-          {/* Left Edge Procedural Pixel Grid */}
-          <svg 
-            className="absolute left-0 top-[600px] w-[180px] h-[360px] pointer-events-none z-0 hidden lg:block select-none animate-fade-in" 
-            width="180" 
-            height="360" 
-            viewBox="0 0 180 360"
-          >
-            <defs>
-              <linearGradient id="left-fade" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="white" stopOpacity="1" />
-                <stop offset="80%" stopColor="white" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="white" stopOpacity="0" />
-              </linearGradient>
-              <mask id="left-mask">
-                <rect width="180" height="360" fill="url(#left-fade)" />
-              </mask>
-            </defs>
-            <g mask="url(#left-mask)">
-              {leftPixels.map((p, i) => (
-                <rect 
-                  key={i} 
-                  x={p.x} 
-                  y={p.y} 
-                  width="4" 
-                  height="4" 
-                  fill="#7c3aed" 
-                  fillOpacity={p.opacity} 
-                />
-              ))}
-            </g>
-          </svg>
-
-          {/* Right Edge Procedural Pixel Grid */}
-          <svg 
-            className="absolute right-0 top-[600px] w-[180px] h-[360px] pointer-events-none z-0 hidden lg:block select-none animate-fade-in" 
-            width="180" 
-            height="360" 
-            viewBox="0 0 180 360"
-          >
-            <defs>
-              <linearGradient id="right-fade" x1="100%" y1="0%" x2="0%" y2="0%">
-                <stop offset="0%" stopColor="white" stopOpacity="1" />
-                <stop offset="80%" stopColor="white" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="white" stopOpacity="0" />
-              </linearGradient>
-              <mask id="right-mask">
-                <rect width="180" height="360" fill="url(#right-fade)" />
-              </mask>
-            </defs>
-            <g mask="url(#right-mask)">
-              {rightPixels.map((p, i) => (
-                <rect 
-                  key={i} 
-                  x={p.x} 
-                  y={p.y} 
-                  width="4" 
-                  height="4" 
-                  fill="#7c3aed" 
-                  fillOpacity={p.opacity} 
-                />
-              ))}
-            </g>
-          </svg>
         </article>
 
         {/* A4 SHEET 2: Services Roster & Technical Domains */}
