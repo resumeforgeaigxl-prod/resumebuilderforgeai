@@ -64,6 +64,7 @@ const MODULES = [
         name: 'ProjectForge',
         items: [
             { label: 'Project Generator', href: '/projectforge/app', icon: Zap },
+            { label: 'Project Services', href: '/dashboard/project-services', icon: FileText }
         ]
     },
     {
@@ -122,9 +123,13 @@ export function Sidebar({ isCollapsed, onToggle }: { isCollapsed: boolean, onTog
 
     const modules = [...MODULES];
     if (userRole === 'admin' || userRole === 'recruiter') {
+        const items = [{ label: 'Recruiter Hub', href: '/recruiter/dashboard', icon: ShieldCheck }];
+        if (userRole === 'admin') {
+            items.push({ label: 'Project Admin', href: '/admin/project-services', icon: ShieldCheck });
+        }
         modules.splice(5, 0, {
             name: 'TalentForge',
-            items: [{ label: 'Recruiter Hub', href: '/recruiter/dashboard', icon: ShieldCheck }]
+            items
         });
     }
 
