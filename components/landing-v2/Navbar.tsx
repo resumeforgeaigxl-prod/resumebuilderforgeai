@@ -146,10 +146,10 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute top-14 left-1/2 -translate-x-1/2 w-[540px] bg-white border border-[#EBEBEB] rounded-2xl shadow-xl z-50 text-left overflow-hidden grid grid-cols-12"
+                  className="absolute top-14 left-1/2 -translate-x-1/2 w-[620px] bg-white border border-[#EBEBEB] rounded-2xl shadow-xl z-50 text-left overflow-hidden grid grid-cols-12"
                 >
                   {/* Left Column - Options Stack */}
-                  <div className="col-span-7 flex flex-col divide-y divide-[#EBEBEB]">
+                  <div className="col-span-6 flex flex-col divide-y divide-[#EBEBEB] border-b border-[#EBEBEB]">
                     {dropdownItems.map((item) => {
                       const Icon = item.icon;
                       const isSelected = activeTab === item.id;
@@ -159,11 +159,11 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
                           href={item.href}
                           onMouseEnter={() => setActiveTab(item.id)}
                           onClick={() => setDropdownOpen(false)}
-                          className={`flex items-start gap-3.5 p-4 transition-all duration-200 ${
+                          className={`flex items-start gap-4 p-5 transition-all duration-200 ${
                             isSelected ? "bg-stone-50" : "bg-white hover:bg-stone-50/50"
                           }`}
                         >
-                          <div className={`p-2 rounded-lg border ${item.color} shrink-0`}>
+                          <div className={`p-2.5 rounded-lg border ${item.color} shrink-0`}>
                             <Icon className="w-4 h-4" />
                           </div>
                           <div>
@@ -180,91 +180,127 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
                   </div>
 
                   {/* Right Column - Premium Visual Preview Panel */}
-                  <div className="col-span-5 bg-[#FAFAFA] border-l border-[#EBEBEB] p-5 flex flex-col justify-center items-center select-none relative overflow-hidden">
-                    <AnimatePresence mode="wait">
-                      {activeTab === 0 && (
-                        <motion.div
-                          key="builder"
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.12 }}
-                          className="w-full h-full flex flex-col justify-center"
-                        >
-                          <div className="bg-white border border-[#EBEBEB] rounded-xl p-3 shadow-sm w-full">
-                            <div className="flex items-center gap-1.5 mb-2 pb-2 border-b border-stone-100">
-                              <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                              <span className="text-[8px] font-mono font-bold text-stone-400 uppercase">Live Document Editor</span>
-                            </div>
-                            <div className="space-y-1.5">
-                              <div className="h-1.5 w-3/4 bg-stone-100 rounded" />
-                              <div className="h-1.5 w-1/2 bg-stone-100 rounded" />
-                              <div className="h-px bg-stone-100 rounded mt-2" />
-                              <div className="space-y-1 pt-1.5">
-                                <div className="flex gap-1.5">
-                                  <div className="h-2 w-1/3 bg-indigo-50 border border-indigo-100 rounded" />
-                                  <div className="h-2 w-1/4 bg-stone-100 rounded" />
+                  <div className="col-span-6 bg-[#FAFAFA] border-l border-[#EBEBEB] p-5 flex flex-col justify-start select-none relative overflow-hidden h-full min-h-[220px]">
+                    {/* Window Controls */}
+                    <div className="flex items-center gap-1.5 pb-3 mb-3 border-b border-stone-200/60 w-full shrink-0">
+                      <div className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/80" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-green-400/80" />
+                      <span className="text-[9px] font-mono text-stone-400 ml-2 font-medium">resume_workspace.app</span>
+                    </div>
+
+                    <div className="flex-1 w-full flex flex-col justify-center">
+                      <AnimatePresence mode="wait">
+                        {activeTab === 0 && (
+                          <motion.div
+                            key="builder"
+                            initial={{ opacity: 0, scale: 0.96, y: 5 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.96, y: -5 }}
+                            transition={{ duration: 0.12 }}
+                            className="w-full flex flex-col justify-center"
+                          >
+                            <div className="bg-white border border-[#EBEBEB] rounded-xl p-3 shadow-sm w-full space-y-3">
+                              <div className="flex justify-between items-center bg-stone-50 border border-stone-100 p-2 rounded-lg">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                  <span className="text-[10px] font-sans font-bold text-[#171717]">Full Stack Engineer Resume</span>
                                 </div>
-                                <div className="h-1.5 w-full bg-stone-100 rounded" />
+                                <span className="text-[8px] font-mono text-stone-400 uppercase">92% Match</span>
+                              </div>
+                              
+                              <div className="space-y-2 p-1">
+                                <div className="flex justify-between text-[9px] font-sans text-stone-500 font-bold border-b border-stone-100 pb-1">
+                                  <span>WORK EXPERIENCE</span>
+                                  <span className="text-[8px] font-mono text-emerald-600 uppercase font-extrabold bg-emerald-50 border border-emerald-100 px-1.5 py-0.2 rounded">ATS Calibrated</span>
+                                </div>
+                                <div className="space-y-1">
+                                  <div className="flex justify-between text-[9px] font-sans text-[#171717] font-semibold">
+                                    <span>Senior Engineer — ResumeForge</span>
+                                    <span className="text-stone-400 font-normal">2024 - Pres.</span>
+                                  </div>
+                                  <p className="text-[8px] font-sans text-stone-400 leading-normal">
+                                    • Spearheaded AI parser reducing latency by 35% with Next.js structures.
+                                  </p>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      )}
+                          </motion.div>
+                        )}
 
-                      {activeTab === 1 && (
-                        <motion.div
-                          key="templates"
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.12 }}
-                          className="w-full h-full flex flex-col justify-center items-center"
-                        >
-                          <div className="relative w-full max-w-[140px] h-[90px] flex items-center justify-center">
-                            {/* Stacked sheets mockup */}
-                            <div className="absolute w-[80px] h-[100px] bg-white border border-stone-200 rounded shadow-sm -rotate-6 transform translate-x-[-12px] opacity-70" />
-                            <div className="absolute w-[80px] h-[100px] bg-white border border-stone-200 rounded shadow-sm rotate-6 transform translate-x-[12px] opacity-70" />
-                            <div className="absolute w-[80px] h-[100px] bg-white border border-[#EBEBEB] rounded shadow-md z-10 p-2 flex flex-col justify-between">
-                              <div className="space-y-1">
-                                <div className="h-1.5 w-1/2 bg-stone-200 rounded" />
-                                <div className="h-1 w-full bg-stone-100 rounded" />
-                                <div className="h-1 w-3/4 bg-stone-100 rounded" />
-                              </div>
-                              <div className="flex justify-between items-center mt-auto">
-                                <div className="h-1.5 w-6 bg-blue-50 border border-blue-100 rounded" />
-                                <div className="h-1 w-3 bg-stone-200 rounded" />
+                        {activeTab === 1 && (
+                          <motion.div
+                            key="templates"
+                            initial={{ opacity: 0, scale: 0.96, y: 5 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.96, y: -5 }}
+                            transition={{ duration: 0.12 }}
+                            className="w-full flex flex-col justify-center"
+                          >
+                            <div className="space-y-2.5 text-left w-full">
+                              <span className="text-[9px] font-mono font-bold text-stone-400 uppercase tracking-wider block">Active Style Guides</span>
+                              <div className="grid grid-cols-2 gap-2">
+                                {[
+                                  { name: "Minimalist Grid", desc: "For Tech & Product Roles", active: true },
+                                  { name: "Serif Editorial", desc: "For Creative & Media", active: false },
+                                  { name: "Sleek Executive", desc: "For Finance & Leaders", active: false },
+                                  { name: "Developer Mono", desc: "For Backend Engineers", active: false }
+                                ].map((tpl) => (
+                                  <div 
+                                    key={tpl.name}
+                                    className={`p-2.5 rounded-lg border text-left transition-colors duration-150 ${
+                                      tpl.active 
+                                        ? "border-blue-500 bg-blue-50/30 text-[#171717]" 
+                                        : "border-stone-200 bg-white text-stone-400"
+                                    }`}
+                                  >
+                                    <div className="text-[9px] font-sans font-bold">{tpl.name}</div>
+                                    <div className="text-[8px] font-sans text-stone-400 font-medium mt-0.5">{tpl.desc}</div>
+                                  </div>
+                                ))}
                               </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      )}
+                          </motion.div>
+                        )}
 
-                      {activeTab === 2 && (
-                        <motion.div
-                          key="scanner"
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.12 }}
-                          className="w-full h-full flex flex-col justify-center items-center"
-                        >
-                          <div className="bg-white border border-[#EBEBEB] rounded-xl p-3 shadow-sm w-full flex flex-col items-center">
-                            <div className="text-[8px] font-mono font-bold text-stone-400 uppercase mb-1.5">ATS Scanner Match</div>
-                            <div className="relative w-12 h-12 flex items-center justify-center mb-1.5">
-                              <svg width="48" height="48" viewBox="0 0 48 48" className="-rotate-90">
-                                <circle cx="24" cy="24" r="20" fill="none" stroke="#F2F2F2" strokeWidth="3" />
-                                <circle cx="24" cy="24" r="20" fill="none" stroke="#ec4899" strokeWidth="3" strokeDasharray="125" strokeDashoffset="20" />
-                              </svg>
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-[11px] font-mono font-bold text-[#171717]">92</span>
+                        {activeTab === 2 && (
+                          <motion.div
+                            key="scanner"
+                            initial={{ opacity: 0, scale: 0.96, y: 5 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.96, y: -5 }}
+                            transition={{ duration: 0.12 }}
+                            className="w-full flex flex-col justify-center"
+                          >
+                            <div className="bg-white border border-[#EBEBEB] rounded-xl p-3 shadow-sm w-full space-y-3">
+                              <div className="flex justify-between items-center border-b border-stone-100 pb-2">
+                                <span className="text-[9px] font-mono font-bold text-stone-400 uppercase">ATS Compatibility Report</span>
+                                <span className="text-[8px] font-bold text-pink-600 bg-pink-50 border border-pink-100 px-2 py-0.5 rounded-full">Feasibility OK</span>
+                              </div>
+                              <div className="flex gap-4 items-center">
+                                <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
+                                  <svg width="48" height="48" viewBox="0 0 48 48" className="-rotate-90">
+                                    <circle cx="24" cy="24" r="20" fill="none" stroke="#F2F2F2" strokeWidth="3" />
+                                    <circle cx="24" cy="24" r="20" fill="none" stroke="#ec4899" strokeWidth="3" strokeDasharray="125" strokeDashoffset="18" />
+                                  </svg>
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-[12px] font-mono font-black text-[#171717]">94%</span>
+                                  </div>
+                                </div>
+                                <div className="space-y-1">
+                                  <div className="text-[10px] font-sans font-black text-emerald-600 flex items-center gap-1">
+                                    ✓ Perfect Keyword Density
+                                  </div>
+                                  <p className="text-[8px] font-sans text-stone-400 leading-normal">
+                                    Your profile successfully matched 18 out of 20 critical target job description keywords.
+                                  </p>
+                                </div>
                               </div>
                             </div>
-                            <span className="text-[8px] font-bold uppercase tracking-wider text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">Highly Compatible</span>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
                 </motion.div>
               )}
