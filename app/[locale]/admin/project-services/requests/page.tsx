@@ -187,11 +187,11 @@ export default function AdminRequestsPage({ params }: { params: { locale: string
 
   const filteredRequests = requests.filter(r => {
     const matchesSearch = 
-      r.project_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.college.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.project_title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.email.toLowerCase().includes(searchQuery.toLowerCase());
+      (r.project_id || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (r.full_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (r.college || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (r.project_title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (r.email || '').toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesStatus = statusFilter === 'ALL' || r.status === statusFilter;
     const matchesType = typeFilter === 'ALL' || r.project_type === typeFilter;
