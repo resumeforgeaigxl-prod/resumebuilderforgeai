@@ -56,6 +56,12 @@ export default function JobCollectorClient() {
                 return;
             }
 
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                setStatus(`Error (${res.status}): ${errorData.detail || errorData.error || res.statusText || 'Request failed'}`);
+                return;
+            }
+
             const data = await res.json();
             if (data.success) {
                 const resultStats = data.summary?.unified_collector || data.stats || data.summary;
@@ -63,10 +69,10 @@ export default function JobCollectorClient() {
                 setStatus(`${label} completed successfully.`);
                 fetchJobs();
             } else {
-                setStatus(`Error: ${data.detail || data.error}`);
+                setStatus(`Error: ${data.detail || data.error || 'Operation failed'}`);
             }
-        } catch {
-            setStatus('Failed to connect to API');
+        } catch (err: any) {
+            setStatus(`Failed to connect to API: ${err?.message || 'Network error or timeout'}`);
         } finally {
             setLoading(prev => ({ ...prev, [action]: false }));
         }

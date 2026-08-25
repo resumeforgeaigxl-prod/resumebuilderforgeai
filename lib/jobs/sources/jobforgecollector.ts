@@ -23,9 +23,9 @@ interface AIJobOutput {
 }
 
 // PIPELINE LIMITS
-const MAX_QUERIES = 25; // Balanced for speed
-const MAX_JOBS = 100;
-const MAX_TIME_MS = 180000; // 3 minutes
+const MAX_QUERIES = 8; // Balanced for fast web response
+const MAX_JOBS = 60;
+const MAX_TIME_MS = 25000; // 25 seconds max for serverless web requests
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
