@@ -4,6 +4,7 @@ import { FileText, ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { CreateResumeButton } from '@/components/dashboard/create-resume-button'
 import { getSession } from '@/lib/auth/jwt'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -24,25 +25,38 @@ export default async function ResumesPage({
     searchParams: { page?: string }
 }) {
     const { locale } = params;
-    const supabase = createClient()
     const session = await getSession()
 
-    if (!session) return null;
+    if (!session) {
+        redirect(`/${locale}/login`);
+    }
 
+    const supabase = createClient()
     const page = parseInt(searchParams.page || '1');
     const limit = 8;
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
-    // Fetch resumes with pagination
-    const { data: resumes, error, count } = await supabase
-        .from('resumes')
-        .select('*', { count: 'exact' })
-        .eq('user_id', session.userId)
-        .order('updated_at', { ascending: false })
-        .range(from, to);
+    let resumeItems: ResumeListItem[] = [];
+    let count = 0;
+    let error: any = null;
 
-    const resumeItems = (resumes ?? []) as ResumeListItem[];
+    try {
+        const res = await supabase
+            .from('resumes')
+            .select('*', { count: 'exact' })
+            .eq('user_id', session.userId)
+            .order('updated_at', { ascending: false })
+            .range(from, to);
+        
+        resumeItems = (res.data ?? []) as ResumeListItem[];
+        count = res.count ?? 0;
+        error = res.error;
+    } catch (err: any) {
+        console.error('[ResumesPage] Data fetch error:', err);
+        error = err;
+    }
+
     const totalPages = count ? Math.ceil(count / limit) : 0;
 
     return (

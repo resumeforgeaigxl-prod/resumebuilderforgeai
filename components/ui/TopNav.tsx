@@ -22,22 +22,31 @@ interface TopNavProps {
   locale?: string;
 }
 
+let cachedUserProfile: { fullName: string; planType: string } | null = null;
+
 export function TopNav({ userName = "User", pageTitle, locale = "en" }: TopNavProps) {
   const pathname = usePathname();
   const { collapsed, toggle, isMounted } = useSidebar();
-  const [profile, setProfile] = useState<{ fullName: string; planType: string } | null>(null);
+  const [profile, setProfile] = useState<{ fullName: string; planType: string } | null>(cachedUserProfile);
 
   useEffect(() => {
+    if (cachedUserProfile) {
+      setProfile(cachedUserProfile);
+      return;
+    }
+
     async function fetchProfile() {
       try {
         const res = await fetch("/api/user/profile");
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.user) {
-            setProfile({
+            const userObj = {
               fullName: data.user.full_name || data.user.email?.split("@")[0] || "User",
               planType: data.user.plan_type || "FREE",
-            });
+            };
+            cachedUserProfile = userObj;
+            setProfile(userObj);
           }
         }
       } catch (err) {
