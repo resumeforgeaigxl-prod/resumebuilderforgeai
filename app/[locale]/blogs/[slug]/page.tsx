@@ -13,6 +13,8 @@ import { Calendar, User, ArrowLeft, Share2 } from '@/components/icons';
 import { format } from 'date-fns';
 import { Playfair_Display, Lora } from 'next/font/google';
 import FooterSection from '@/components/landing-v2/FooterSection';
+import BlogShareButton from '@/components/blog/BlogShareButton';
+import BlogNewsletterSignup from '@/components/blog/BlogNewsletterSignup';
 
 const playfair = Playfair_Display({ subsets: ['latin'], weight: ['400', '600', '700'] });
 const lora = Lora({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
@@ -401,30 +403,19 @@ export default async function BlogPostPage({ params }: { params: { locale: strin
             </div>
             
             <div>
-              <button className="inline-flex items-center text-[11px] font-bold bg-white border border-[#EBEBEB] text-[#171717] hover:bg-neutral-50 px-3.5 h-8 rounded-sm transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
-                <Share2 size={12} className="mr-1.5" /> Share Issue
-              </button>
+              <BlogShareButton 
+                title={post.title} 
+                description={post.seo_description} 
+                url={`https://resumeforgeai.in/${locale}/blogs/${slug}`} 
+              />
             </div>
           </footer>
         </article>
       </div>
         
-      {/* Newsletter Signup (Vercel/AutoSend light border box matching the footer width) */}
+      {/* Newsletter Signup */}
       <div className="max-w-[1200px] mx-auto px-6 md:px-20 mb-16">
-        <div className="p-8 md:p-12 bg-white border border-[#EBEBEB] text-center rounded-none shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
-          <h2 className={`${playfair.className} text-2xl font-bold tracking-tight text-[#171717] mb-2`}>Stay in the Loop</h2>
-          <p className="text-sm text-[#4D4D4D] mb-6 max-w-sm mx-auto">Get the latest career tips and ResumeForgeAI updates directly in your inbox.</p>
-          <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-            <input 
-              type="email" 
-              placeholder="Enter your email" 
-              className="flex-1 h-9 px-3 bg-white border border-[#EBEBEB] text-[#171717] placeholder-[#8F8F8F] rounded-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all" 
-            />
-            <button className="bg-[#171717] text-white hover:bg-neutral-800 text-xs font-semibold px-4 h-9 rounded-sm transition-all">
-              Subscribe
-            </button>
-          </div>
-        </div>
+        <BlogNewsletterSignup />
       </div>
 
       <FooterSection locale={locale} />

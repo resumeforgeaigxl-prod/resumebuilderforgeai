@@ -6,6 +6,7 @@ import { getBlogPosts } from '@/lib/seo-service';
 import { Calendar, User, ArrowRight } from '@/components/icons';
 import { format } from 'date-fns';
 import FooterSection from '@/components/landing-v2/FooterSection';
+import BlogNewsletterSignup from '@/components/blog/BlogNewsletterSignup';
 import { Playfair_Display, Lora } from 'next/font/google';
 
 const playfair = Playfair_Display({ subsets: ['latin'], weight: ['400', '600', '700'] });
@@ -136,6 +137,11 @@ export default async function BlogHome({ params }: { params: { locale: string } 
               <p className="text-sm text-[#8F8F8F] uppercase tracking-wider font-mono font-semibold">New updates coming soon!</p>
             </div>
           )}
+        </div>
+
+        {/* Newsletter Subscription */}
+        <div className="mt-16">
+          <BlogNewsletterSignup />
         </div>
 
       </div>

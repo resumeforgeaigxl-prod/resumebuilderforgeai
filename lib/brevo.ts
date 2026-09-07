@@ -486,3 +486,30 @@ export async function sendJobAlertEmail(
   });
 }
 
+// ── 11. Blog Newsletter Subscription Email ─────────────────────────────────────
+
+export async function sendNewsletterWelcomeEmail(to: string, name?: string): Promise<boolean> {
+  const displayName = name || to.split('@')[0];
+  const html = emailWrapper(`
+      ${headingAndSub(`You're Subscribed! 📬`, 'Welcome to the ResumeForge AI Newsletter & Editorial.')}
+      <p style="color:#cbd5e1;font-size:14px;line-height:1.7;margin:0 0 20px;">
+        Hi <strong style="color:#f1f5f9;">${displayName}</strong>, thank you for subscribing to <strong style="color:#a78bfa;">ResumeForge AI Editorial</strong>. 
+        You will receive our latest engineering deep dives, frontier AI research, ATS hiring strategies, and platform updates directly in your inbox.
+      </p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#0d0d1c;border-radius:0px;border:1px solid #1e1b4b;margin-bottom:24px;">
+        <tbody>
+          ${infoRow('✦ Frontier AI Deep Dives', 'Architecture and benchmarks breakdown')}
+          ${infoRow('✦ Career & ATS Insights', 'Actionable resume and interview strategies')}
+          ${infoRow('✦ Engineering & Product', 'Real-world system design and release notes')}
+        </tbody>
+      </table>
+      ${ctaButton('Read the Latest Issues', 'https://resumeforgeai.in/en-in/blogs', '#6366f1')}
+      <p style="text-align:center;color:#64748b;font-size:12px;margin:0;">No spam, ever. Unsubscribe at any time with one click.</p>
+    `);
+
+  return await sendEmail({
+    to: [{ email: to, name: displayName }],
+    subject: `You're on the list! Welcome to ResumeForge AI Newsletter 📬`,
+    html,
+  });
+}
