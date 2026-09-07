@@ -5,6 +5,7 @@ import { DEFAULT_LOCALE } from "@/lib/constants";
 import { useEffect, useState } from "react";
 
 /* ── Eagerly loaded (above the fold) ── */
+import GrowXLabsTopBar from "@/components/ads/GrowXLabsTopBar";
 import Navbar from "@/components/landing-v2/Navbar";
 import HeroSection from "@/components/landing-v2/HeroSection";
 
@@ -39,6 +40,7 @@ export default function LandingPage({
 
   return (
     <div className="landing-light">
+      <GrowXLabsTopBar />
       <Navbar locale={locale} />
 
       <main>

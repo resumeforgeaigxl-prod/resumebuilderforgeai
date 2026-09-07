@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getSession } from '@/lib/auth/jwt'
 import Link from 'next/link'
 import { PaymentSuccessBanner } from '@/components/dashboard/payment-success-banner'
+import GrowXLabsDashboardBanner from '@/components/ads/GrowXLabsDashboardBanner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -54,6 +55,7 @@ export default async function DashboardPage({ params }: { params: { locale: stri
         return (
             <div className="space-y-10 animate-fade-in text-[#171717]">
                 <PaymentSuccessBanner />
+                <GrowXLabsDashboardBanner />
 
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">

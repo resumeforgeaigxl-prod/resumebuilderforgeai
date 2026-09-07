@@ -15,6 +15,8 @@ import { Playfair_Display, Lora } from 'next/font/google';
 import FooterSection from '@/components/landing-v2/FooterSection';
 import BlogShareButton from '@/components/blog/BlogShareButton';
 import BlogNewsletterSignup from '@/components/blog/BlogNewsletterSignup';
+import GrowXLabsInArticleAd from '@/components/ads/GrowXLabsInArticleAd';
+import GrowXLabsSidebarAd from '@/components/ads/GrowXLabsSidebarAd';
 
 const playfair = Playfair_Display({ subsets: ['latin'], weight: ['400', '600', '700'] });
 const lora = Lora({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
@@ -309,8 +311,9 @@ export default async function BlogPostPage({ params }: { params: { locale: strin
           <ArrowLeft className="mr-1.5 w-3.5 h-3.5" /> Back to Blog
         </Link>
 
-        {/* A4 Sheet Article Container */}
-        <article className={`${lora.className} bg-white border border-[#E2E8F0] rounded-none p-6 md:p-16 shadow-[0_8px_30px_rgba(0,0,0,0.03)] overflow-hidden min-h-[1130px] flex flex-col justify-between`}>
+        {/* Article Container with Desktop Sidebar */}
+        <div className="flex flex-col xl:flex-row gap-8 items-start">
+          <article className={`${lora.className} bg-white border border-[#E2E8F0] rounded-none p-6 md:p-16 shadow-[0_8px_30px_rgba(0,0,0,0.03)] overflow-hidden min-h-[1130px] flex flex-col justify-between flex-1 w-full`}>
           <div>
             {/* Newsletter-style Header Block */}
             <header className="mb-10 text-center">
@@ -396,6 +399,9 @@ export default async function BlogPostPage({ params }: { params: { locale: strin
             </div>
           </div>
 
+          {/* GrowXLabs In-Article Native Sponsor Ad */}
+          <GrowXLabsInArticleAd campaignKey="ai_engineering" />
+
           <footer className="mt-16 pt-8 border-t border-neutral-200 flex items-center justify-between font-mono text-xs text-neutral-500">
             <div className="flex items-center gap-2">
               <span>Published by</span>
@@ -411,7 +417,13 @@ export default async function BlogPostPage({ params }: { params: { locale: strin
             </div>
           </footer>
         </article>
+
+        {/* Sticky Desktop GrowXLabs Sidebar Ad */}
+        <aside className="hidden xl:block shrink-0">
+          <GrowXLabsSidebarAd />
+        </aside>
       </div>
+    </div>
         
       {/* Newsletter Signup */}
       <div className="max-w-[1200px] mx-auto px-6 md:px-20 mb-16">
