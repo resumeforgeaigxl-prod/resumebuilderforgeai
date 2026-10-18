@@ -1,21 +1,26 @@
-'use client'
+'use client';
+
 export const dynamic = 'force-dynamic';
-;
+
 import { useState } from 'react';
 import Link from 'next/link';
+import { authHeadingClass, authDescriptionClass, authLabelClass, authInputClass, authButtonClass } from '@/components/auth/styles';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
-import { UserPlus, Loader2, AlertCircle, CheckCircle2 } from '@/components/icons';
+import { Loader2, AlertCircle, CheckCircle2 } from '@/components/icons';
 import { OAuthButtons } from '@/components/auth/oauth-buttons';
+import { resolvePostAuthDestination } from '@/lib/auth/intent';
 
 export default function SignupPage() {
-    const params = useParams() as { locale: string };
-    const { locale } = params;
+    const params = useParams() as { locale?: string };
+    const locale = params?.locale || 'en-in';
     const router = useRouter();
     const searchParams = useSearchParams();
+
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(searchParams?.get('error') || null);
     const [message, setMessage] = useState<string | null>(searchParams?.get('message') || null);
-    const [tcChecked, setTcChecked] = useState(false);
+
+    const searchString = searchParams?.toString() ? `?${searchParams.toString()}` : '';
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -26,7 +31,6 @@ export default function SignupPage() {
         const formData = new FormData(e.currentTarget);
         const email = formData.get('email');
         const password = formData.get('password');
-        const phone_number = formData.get('phone_number');
 
         try {
             const res = await fetch('/api/signup', {
@@ -37,203 +41,177 @@ export default function SignupPage() {
                 body: JSON.stringify({
                     email,
                     password,
-                    phone_number,
-                    tc_accepted: tcChecked,
+                    tc_accepted: true,
                 }),
             });
 
-            // Handle errors before parsing JSON to avoid "Unexpected end of JSON input"
-            if (!res.ok) {
-                let errorMessage = 'Signup failed';
-                try {
-                    const errorData = await res.json();
-                    errorMessage = errorData.message || errorMessage;
-                } catch (e) {
-                    console.error('Error parsing error response:', e);
-                }
-                throw new Error(errorMessage);
-            }
-
             const data = await res.json();
 
-            // Successfully created account
-            setMessage(data.message || 'Account created! Please log in.');
+            if (!res.ok) {
+                throw new Error(data.message || 'Unable to create account. Please try again.');
+            }
 
-            // Short delay before redirecting to login
+            // If auto-logged in, route directly into the intended flow or profile completion
+            if (data.autoLogin) {
+                const destination = resolvePostAuthDestination(
+                    searchParams,
+                    locale,
+                    data.profileCompleted
+                );
+                router.push(destination);
+                router.refresh();
+                return;
+            }
+
+            // Fallback: notify and route to login with preserved flow intent
+            setMessage(data.message || 'Account created! Redirecting to sign in...');
             setTimeout(() => {
-                router.push(`/${locale}/login?message=${encodeURIComponent(data.message || 'Account created! Please log in.')}`);
-            }, 2000);
+                const separator = searchString ? '&' : '?';
+                router.push(`/${locale}/login${searchString}${separator}message=${encodeURIComponent('Account created! Please sign in.')}`);
+            }, 1200);
         } catch (err: unknown) {
-            setError((err as Error).message || 'Signup failed');
+            setError((err as Error).message || 'Signup failed. Please try again.');
             setIsLoading(false);
         }
     }
 
     return (
-        <div className="w-full flex flex-col gap-5">
+        <div className="w-full space-y-4">
+            {/* Auth heading */}
             <div className="text-left">
-                <h1 
-                    className="font-bold tracking-tight mb-1"
-                    style={{
-                        fontFamily: "'Press Start 2P', monospace",
-                        fontSize: "1.6rem",
-                        lineHeight: "1.6",
-                        letterSpacing: "-0.01em",
-                        background: "linear-gradient(135deg, #c084fc, #a855f7, #7c3aed)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent"
-                    }}
-                >
-                    Create Account
+                <h1 className={authHeadingClass}>
+                    Create your account
                 </h1>
-                <p className="text-gray-400 text-sm mt-1 mb-8">
-                    Start building your production-ready resume.
+                <p className={authDescriptionClass}>
+                    Start your job search with Omni.
                 </p>
             </div>
 
+            {/* Error Banner */}
             {error && (
-                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-                    <p className="font-medium text-red-500">{error}</p>
+                <div
+                    role="alert"
+                    className="p-3.5 rounded-[10px] bg-red-950/20 border border-red-900/40 text-red-400 text-[13px] flex items-start gap-2.5"
+                >
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
+                    <p className="leading-relaxed">{error}</p>
                 </div>
             )}
 
+            {/* Success Message Banner */}
             {message && (
-                <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
-                    <p className="font-medium text-emerald-500">{message}</p>
+                <div
+                    role="status"
+                    className="p-3.5 rounded-[10px] bg-emerald-950/20 border border-emerald-900/40 text-emerald-400 text-[13px] flex items-start gap-2.5"
+                >
+                    <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
+                    <p className="leading-relaxed">{message}</p>
                 </div>
             )}
 
-            <div className="flex flex-col gap-4">
-                <OAuthButtons />
+            {/* Social Authentication */}
+            <OAuthButtons />
 
-                <div className="flex items-center gap-3 my-3">
-                    <div className="h-[1px] flex-1" style={{ background: 'linear-gradient(to right, transparent, rgba(139,92,246,0.3))' }} />
-                    <span 
-                        className="text-purple-400/50 tracking-[0.2em] text-[9px] uppercase font-bold flex-shrink-0"
-                        style={{ fontFamily: 'monospace' }}
-                    >
-                        OR CONTINUE WITH EMAIL
+            {/* Simple Divider */}
+            <div className="relative" aria-hidden="true">
+                <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-[#242424]" />
+                </div>
+                <div className="relative flex justify-center text-[12px]">
+                    <span className="bg-[#050505] px-3 text-[#7E7E7E]">
+                        or continue with email
                     </span>
-                    <div className="h-[1px] flex-1" style={{ background: 'linear-gradient(to left, transparent, rgba(139,92,246,0.3))' }} />
+                </div>
+            </div>
+
+            {/* Email / Password Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                    <label
+                        htmlFor="signup-email"
+                        className={authLabelClass + ' mb-2'}
+                    >
+                        Email
+                    </label>
+                    <input
+                        id="signup-email"
+                        type="email"
+                        name="email"
+                        placeholder="you@example.com"
+                        required
+                        disabled={isLoading}
+                        autoComplete="email"
+                        className={authInputClass}
+                    />
                 </div>
 
-                <form className="space-y-4" onSubmit={handleSubmit}>
-                    <div className="flex flex-col">
-                        <label 
-                            className="mb-1.5 uppercase font-medium"
-                            style={{
-                                fontFamily: "'Courier New', monospace",
-                                fontSize: "10px",
-                                letterSpacing: "0.12em",
-                                color: "rgba(192,132,252,0.6)"
-                            }}
-                        >
-                            Email Address
-                        </label>
-                        <input
-                            type="email"
-                            name="email"
-                            placeholder="you@example.com"
-                            required
-                            disabled={isLoading}
-                            className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-gray-600 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/60 focus:outline-none transition-all duration-200"
-                        />
-                    </div>
-                    
-                    <div className="flex flex-col">
-                        <label 
-                            className="mb-1.5 uppercase font-medium"
-                            style={{
-                                fontFamily: "'Courier New', monospace",
-                                fontSize: "10px",
-                                letterSpacing: "0.12em",
-                                color: "rgba(192,132,252,0.6)"
-                            }}
-                        >
-                            Mobile Phone Number <span className="text-purple-500">*</span>
-                        </label>
-                        <input
-                            type="tel"
-                            name="phone_number"
-                            placeholder="+91 98765 43210"
-                            required
-                            disabled={isLoading}
-                            className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-gray-600 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/60 focus:outline-none transition-all duration-200"
-                        />
-                        <p className="text-purple-400/50 text-xs mt-1 italic font-medium">We need this for account verification and updates.</p>
-                    </div>
-
-                    <div className="flex flex-col">
-                        <label 
-                            className="mb-1.5 uppercase font-medium"
-                            style={{
-                                fontFamily: "'Courier New', monospace",
-                                fontSize: "10px",
-                                letterSpacing: "0.12em",
-                                color: "rgba(192,132,252,0.6)"
-                            }}
-                        >
-                            Secure Password <span className="text-purple-500">*</span>
-                        </label>
-                        <input
-                            type="password"
-                            name="password"
-                            placeholder="••••••••"
-                            required
-                            minLength={6}
-                            disabled={isLoading}
-                            className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-gray-600 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/60 focus:outline-none transition-all duration-200"
-                        />
-                    </div>
-
-                    <div className="flex items-start gap-2 text-gray-400 text-xs mt-1">
-                        <input
-                            type="checkbox"
-                            id="tc-checkbox"
-                            required
-                            checked={tcChecked}
-                            onChange={e => setTcChecked(e.target.checked)}
-                            disabled={isLoading}
-                            className="mt-0.5 w-4 h-4 accent-purple-500 rounded border-white/10 bg-white/5 cursor-pointer"
-                        />
-                        <label htmlFor="tc-checkbox" className="cursor-pointer select-none leading-normal">
-                            I agree to the{' '}
-                            <Link href={`/${locale}/terms-of-service`} target="_blank" className="text-purple-400 hover:text-purple-300 underline underline-offset-4 decoration-purple-500/30">
-                                Terms & Conditions
-                            </Link>
-                            {' '}and{' '}
-                            <Link href={`/${locale}/privacy-policy`} target="_blank" className="text-purple-400 hover:text-purple-300 underline underline-offset-4 decoration-purple-500/30">
-                                Privacy Policy
-                            </Link>.
-                            My IP and acceptance time will be recorded.
-                        </label>
-                    </div>
-
-                    <button
-                        type="submit"
-                        disabled={!tcChecked || isLoading}
-                        className="w-full h-12 mt-4 rounded-xl bg-gradient-to-r from-purple-600 to-violet-500 hover:from-purple-500 hover:to-violet-400 shadow-lg shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold hover:scale-[1.01] transition-all duration-200 flex items-center justify-center gap-2"
+                <div>
+                    <label
+                        htmlFor="signup-password"
+                        className={authLabelClass + ' mb-2'}
                     >
-                        {isLoading ? (
-                            <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                                Creating Account...
-                            </>
-                        ) : (
-                            'Create Account'
-                        )}
-                    </button>
-                </form>
+                        Password
+                    </label>
+                    <input
+                        id="signup-password"
+                        type="password"
+                        name="password"
+                        placeholder="•••••••••"
+                        required
+                        minLength={6}
+                        disabled={isLoading}
+                        autoComplete="new-password"
+                        className={authInputClass}
+                    />
+                </div>
 
-                <p className="text-center text-sm text-gray-500 mt-2">
-                    Already have an account?{' '}
-                    <Link href={`/${locale}/login`} className="text-purple-400 hover:text-purple-300 font-semibold transition-colors underline underline-offset-4 decoration-purple-500/30 hover:decoration-purple-400">
-                        Sign in
-                    </Link>
-                </p>
-            </div>
+                {/* Primary Continue Button */}
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    className={authButtonClass}
+                >
+                    {isLoading ? (
+                        <>
+                            <Loader2 className="w-4 h-4 animate-spin text-[#0A0A0A]" />
+                            <span>Creating account...</span>
+                        </>
+                    ) : (
+                        'Continue'
+                    )}
+                </button>
+            </form>
+
+            {/* Terms and Privacy */}
+            <p className="text-center text-[12px] text-[#7E7E7E] leading-relaxed pt-1">
+                By continuing, you agree to{' '}
+                <Link
+                    href={`/${locale}/terms-of-service`}
+                    target="_blank"
+                    className="text-[#BDBDBD] hover:text-white underline underline-offset-4 decoration-[#242424] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#BDBDBD]"
+                >
+                    Terms
+                </Link>{' '}
+                and{' '}
+                <Link
+                    href={`/${locale}/privacy-policy`}
+                    target="_blank"
+                    className="text-[#BDBDBD] hover:text-white underline underline-offset-4 decoration-[#242424] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#BDBDBD]"
+                >
+                    Privacy
+                </Link>.
+            </p>
+
+            {/* Switch to Sign In */}
+            <p className="text-center text-[13px] text-[#7E7E7E] pt-1">
+                Already have an account?{' '}
+                <Link
+                    href={`/${locale}/login${searchString}`}
+                    className="text-white hover:underline font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#BDBDBD]"
+                >
+                    Sign in
+                </Link>
+            </p>
         </div>
     );
 }

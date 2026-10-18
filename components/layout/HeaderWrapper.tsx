@@ -3,61 +3,103 @@
 import { usePathname } from 'next/navigation';
 import { ReactNode } from 'react';
 
+const HIDDEN_SECTION_ROOTS: readonly string[] = [
+    // Dashboard & workspace apps
+    'applications',
+    'dashboard',
+    'account',
+    'resumes',
+    'resumeforge',
+    'jobs',
+    'dashboard-jobs',
+    'omni',
+    'mentorforge',
+    'billing',
+    'invoices',
+    'interview-prep',
+    'support',
+    'project-services',
+    'codingforge',
+    'prepforge',
+    'learnforge',
+    'knowledgeforge',
+    'explainforge',
+    'jobforge',
+    'jobforge-app',
+    'jobforgeai',
+    'careerforge',
+    'interview-intelligence',
+    'interviewforge',
+    'mock-interview',
+    'salaryforge',
+    'studyforge',
+    'tools',
+    'ats-live',
+    'portfolio',
+    'portfolioforge',
+    'recruiter',
+    'roadmap',
+    'job-alerts',
+    'api-keys',
+    'api-platform',
+    'company-prep-interview',
+    'company-prep',
+    'complete-profile',
+    'setup-username',
+    'builder',
+    'mock-test',
+    'resume',
+    'job',
+
+    // Admin
+    'admin',
+
+    // Auth
+    'login',
+    'signup',
+    'forgot-password',
+    'reset-password',
+
+    // Legal
+    'privacy-policy',
+    'terms-of-service',
+    'cookie-policy',
+    'data-deletion',
+    'privacy',
+    'terms',
+
+    // Dedicated marketing layouts
+    'pricing',
+];
+
+function shouldHideHeader(pathname: string | null): boolean {
+    if (!pathname) return true;
+
+    // Check if landing page (e.g. "/" or "/en-in" or "/en-in/")
+    const segments = pathname.split('/').filter(Boolean);
+    if (segments.length === 0) return true;
+
+    // Check if single segment is a locale (e.g. "/en-in")
+    const isLocaleOnly = segments.length === 1 && /^[a-z]{2}(-[a-z]{2})?$/i.test(segments[0]);
+    if (isLocaleOnly) return true;
+
+    // Get the route section (e.g. "applications" from "/en-in/applications")
+    const isFirstLocale = /^[a-z]{2}(-[a-z]{2})?$/i.test(segments[0]);
+    const section = isFirstLocale ? (segments[1] || '').toLowerCase() : segments[0].toLowerCase();
+
+    if (!section || HIDDEN_SECTION_ROOTS.includes(section)) {
+        return true;
+    }
+
+    // Substring fallback check
+    const lower = pathname.toLowerCase();
+    return HIDDEN_SECTION_ROOTS.some((root) => lower.includes(`/${root}`));
+}
+
 export default function HeaderWrapper({ children }: { children: ReactNode }) {
     const pathname = usePathname();
-    const isLandingPage = /^\/[a-z]{2}-[a-z]{2}\/?$/.test(pathname ?? '');
 
-    // Hide main header on all internal dashboard and app routes
-    const isInternalApp = 
-        pathname?.includes('/complete-profile') ||
-        pathname?.includes('/dashboard') || 
-        pathname?.includes('/admin') || 
-        pathname?.includes('/resumes') || 
-        pathname?.includes('/resumeforge') || 
-        pathname?.includes('/prepforge') || 
-        pathname?.includes('/learnforge') || 
-        pathname?.includes('/knowledgeforge') || 
-        pathname?.includes('/explainforge') || 
-        pathname?.includes('/mentorforge') || 
-        pathname?.includes('/jobforge') || 
-        pathname?.includes('/careerforge') || 
-        pathname?.includes('/codingforge') || 
-        pathname?.includes('/projectforge') || 
-        pathname?.includes('/studyforge') || 
-        pathname?.includes('/company-prep') || 
-        pathname?.includes('/company-prep-interview') ||
-        pathname?.includes('/dashboard-jobs') ||
-        pathname?.includes('/jobforge-app') ||
-        pathname?.includes('/interview-intelligence') ||
-        pathname?.includes('/portfolio') ||
-        pathname?.includes('/portfolioforge') ||
-        pathname?.includes('/recruiter') ||
-        pathname?.includes('/roadmap') ||
-        pathname?.includes('/job-alerts') ||
-        pathname?.includes('/api-keys') || 
-        pathname?.includes('/api-platform') || 
-        pathname?.includes('/mock-interview') || 
-        pathname?.includes('/interviewforge') || 
-        pathname?.includes('/jobs') || 
-        pathname?.includes('/jobforgeai') || 
-        pathname?.includes('/tools') ||
-        pathname?.includes('/billing') ||
-        pathname?.includes('/account') ||
-        pathname?.includes('/companies') ||
-        pathname?.includes('/salaryforge') ||
-        pathname?.includes('/networkforge') ||
-        pathname?.includes('/ats-live') ||
-        pathname?.includes('/builder') ||
-        pathname?.includes('/mock-test') ||
-        pathname?.includes('/privacy-policy') ||
-        pathname?.includes('/terms-of-service') ||
-        pathname?.includes('/cookie-policy') ||
-        pathname?.includes('/data-deletion') ||
-        pathname?.includes('/signup') ||
-        pathname?.includes('/pricing') ||
-        pathname?.includes('/login');
-
-    if (isInternalApp || isLandingPage) {
+    if (shouldHideHeader(pathname)) {
         return null;
     }
 

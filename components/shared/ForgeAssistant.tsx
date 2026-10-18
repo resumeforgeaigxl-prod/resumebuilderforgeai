@@ -37,7 +37,7 @@ const QUICK_ACTIONS = [
 
 export function ForgeAssistant({ locale }: { locale: string }) {
     const pathname = usePathname();
-    const isMentorForge = pathname?.includes('mentorforge');
+    const isMentorForge = pathname?.includes('mentorforge') || pathname?.includes('omni');
 
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([

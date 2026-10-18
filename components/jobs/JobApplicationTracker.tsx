@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const STATUSES = [
     { id: 'Applied', icon: CheckCircle, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-    { id: 'Interview', icon: Clock, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+    { id: 'Interview', icon: Clock, color: 'text-[#d7e4f0]', bg: 'bg-[#16171b]' },
     { id: 'Offer', icon: Star, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
     { id: 'Rejected', icon: XCircle, color: 'text-red-400', bg: 'bg-red-400/10' },
     { id: 'Saved', icon: Save, color: 'text-slate-400', bg: 'bg-slate-400/10' },
@@ -14,9 +14,10 @@ const STATUSES = [
 
 interface JobApplicationTrackerProps {
     jobId: string;
+    compact?: boolean;
 }
 
-export function JobApplicationTracker({ jobId }: JobApplicationTrackerProps) {
+export function JobApplicationTracker({ jobId, compact = false }: JobApplicationTrackerProps) {
     const [status, setStatus] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
@@ -69,13 +70,18 @@ export function JobApplicationTracker({ jobId }: JobApplicationTrackerProps) {
             <button
                 onClick={() => setShowMenu(!showMenu)}
                 disabled={updating}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 ${currentStatus.bg} transition-all hover:bg-white/10 group active:scale-95`}
+                aria-label={status || 'Save'}
+                className={compact
+                    ? 'flex h-9 w-9 items-center justify-center rounded-full border border-[#2a2c33] text-[#9bb4c9] hover:border-[#3a3d46]'
+                    : 'flex items-center gap-2 rounded-full border border-[#2a2c33] px-3.5 py-1.5 text-[#b4b8c2] hover:text-[#f4f5f7]'}
             >
-                {updating ? <Loader2 className="w-4 h-4 animate-spin" /> : <StatusIcon className={`w-4 h-4 ${currentStatus.color}`} />}
-                <span className={`text-xs font-bold uppercase tracking-wider ${currentStatus.id === 'Track Application' ? 'text-slate-400 group-hover:text-white' : 'text-white'}`}>
-                    {status || 'Track Application'}
-                </span>
-                <ChevronDown className="w-3 h-3 text-slate-600 group-hover:text-slate-400 transition-all" />
+                {updating ? <Loader2 className="h-3.5 w-3.5 animate-spin text-[#9bb4c9]" /> : <StatusIcon className={`h-3.5 w-3.5 ${compact ? 'text-[#9bb4c9]' : currentStatus.color}`} />}
+                {!compact && (
+                    <>
+                        <span className="text-xs">{status || 'Save'}</span>
+                        <ChevronDown className="h-3 w-3 text-[#8b909a]" />
+                    </>
+                )}
             </button>
 
             <AnimatePresence>
@@ -86,18 +92,18 @@ export function JobApplicationTracker({ jobId }: JobApplicationTrackerProps) {
                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                            className="absolute bottom-full mb-3 right-0 w-48 bg-[#0a0a0f] border border-white/10 rounded-2xl p-2 shadow-2xl z-50 backdrop-blur-xl"
+                            className="absolute bottom-full right-0 z-50 mb-3 w-48 rounded-xl border border-[#2a2c33] bg-[#0c0d10] p-2"
                         >
-                            <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-3 py-2 border-b border-white/5 mb-1">Set Status</p>
+                            <p className="mb-1 border-b border-[#2a2c33] px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] text-[#8b909a]">Status</p>
                             {STATUSES.map((s) => (
                                 <button
                                     key={s.id}
                                     onClick={() => handleUpdateStatus(s.id)}
-                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all hover:bg-white/5 ${status === s.id ? 'text-white bg-white/5' : 'text-slate-400 hover:text-white'}`}
+                                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:bg-[#202020] ${status === s.id ? 'text-[#F5F5F5] bg-[#202020]' : 'text-[#7E7E7E] hover:text-[#F5F5F5]'}`}
                                 >
-                                    <s.icon className={`w-4 h-4 ${s.color}`} />
+                                    <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
                                     {s.id}
-                                    {status === s.id && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500" />}
+                                    {status === s.id && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-[#d7e4f0]" />}
                                 </button>
                             ))}
                         </motion.div>

@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createSession } from '@/lib/auth/jwt';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { sendWelcomeEmail } from '@/lib/brevo';
@@ -52,7 +53,22 @@ export async function POST(request: Request) {
         // Send welcome email (Awaited for reliability)
         await sendWelcomeEmail(email).catch(e => console.error('[Signup] Welcome email error:', e));
 
-        return NextResponse.json({ success: true, message: 'Account created! Please log in.' });
+        // Issue session so the user is immediately authenticated
+        await createSession({
+            userId,
+            role: 'user',
+            isBlocked: false,
+            termsAccepted: tcAccepted,
+            profileCompleted: false,
+            provider: 'credentials',
+        });
+
+        return NextResponse.json({
+            success: true,
+            autoLogin: true,
+            profileCompleted: false,
+            message: 'Account created successfully!'
+        });
     } catch (err: unknown) {
         console.error('Signup error:', err);
         return NextResponse.json({ success: false, message: 'Signup failed' }, { status: 500 });

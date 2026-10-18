@@ -62,6 +62,37 @@ export async function buildCentralizedContext(userId: string, type: ContextType)
         console.warn('[ContextBuilder] Profile error:', e);
     }
 
+    // 1b. Candidate Application Profile Facts (Level 6 canonical truth)
+    try {
+        const { getCandidateApplicationProfile } = await import('@/lib/capabilities/profile');
+        const appProfile = await getCandidateApplicationProfile(userId);
+        if (appProfile) {
+            context += `Candidate Application Readiness: ${appProfile.readiness.status} (${appProfile.completeness.percentage}% complete)\n`;
+            if (appProfile.preferences.targetRoles?.length > 0) {
+                context += `Preferred Roles: ${appProfile.preferences.targetRoles.join(', ')}\n`;
+            }
+            if (appProfile.preferences.preferredLocations?.length > 0) {
+                context += `Preferred Locations: ${appProfile.preferences.preferredLocations.join(', ')}\n`;
+            }
+            if (appProfile.preferences.preferredSalaryMin || appProfile.preferences.minExpectedSalary) {
+                context += `Salary Expectation: ${appProfile.preferences.salaryCurrency} ${appProfile.preferences.preferredSalaryMin || appProfile.preferences.minExpectedSalary}\n`;
+            }
+            if (appProfile.answers['notice_period']?.value) {
+                context += `Notice Period: ${appProfile.answers['notice_period'].value}\n`;
+            }
+            if (appProfile.answers['work_authorization']?.status === 'VERIFIED') {
+                context += `Work Authorization: Verified (${appProfile.answers['work_authorization'].value})\n`;
+            } else {
+                context += `Work Authorization: Unconfirmed/Unknown (Must not assume or guess)\n`;
+            }
+            if (appProfile.readiness.blockers.length > 0) {
+                context += `Missing Profile Blockers: ${appProfile.readiness.blockers.join('; ')}\n`;
+            }
+        }
+    } catch (e) {
+        // Safe fallback if tables are loading
+    }
+
     // 2. Type-Specific Context
     switch (type) {
         case 'coding':
@@ -116,4 +147,29 @@ export async function buildCentralizedContext(userId: string, type: ContextType)
     }
 
     return context;
+}
+
+/**
+ * Builds the comprehensive Agent Operating System prompt for Omni or specialized roles,
+ * combining Constitution, Role, Skill, Policies, and Candidate context.
+ */
+export async function buildOmniAgentPrompt(
+    userId: string,
+    options: {
+        role?: import('@/lib/agent-os').AgentRoleType;
+        skillId?: import('@/lib/agent-os').SkillId;
+        contextType?: ContextType;
+        taskDescription?: string;
+    } = {}
+): Promise<string> {
+    const { ContextComposer } = await import('@/lib/agent-os');
+    const { role = 'omni', skillId, contextType = 'general', taskDescription } = options;
+    const userContext = await buildCentralizedContext(userId, contextType);
+
+    return ContextComposer.compose({
+        role,
+        skillId,
+        userContextSnippet: userContext,
+        taskDescription,
+    });
 }

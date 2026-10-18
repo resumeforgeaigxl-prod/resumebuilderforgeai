@@ -6,47 +6,52 @@ interface SidebarContextType {
   collapsed: boolean;
   toggle: () => void;
   setCollapsed: (value: boolean) => void;
+  mobileOpen: boolean;
+  setMobileOpen: (value: boolean) => void;
+  toggleMobile: () => void;
   isMounted: boolean;
 }
 
 const SidebarContext = createContext<SidebarContextType>({
-  collapsed: false,
+  collapsed: true,
   toggle: () => {},
   setCollapsed: () => {},
+  mobileOpen: false,
+  setMobileOpen: () => {},
+  toggleMobile: () => {},
   isMounted: false,
 });
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const [collapsed, setCollapsedState] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
-  // Persist preference and prevent transition flash
   useEffect(() => {
-    const saved = localStorage.getItem("sidebar-collapsed");
-    // Also auto-collapse on small screens by default if no saved preference
-    const isMobile = window.innerWidth < 768;
-    
-    if (saved === "true" || (saved === null && isMobile)) {
-        setCollapsedState(true);
-    }
-    
-    // Allow DOM to update before enabling transitions
     requestAnimationFrame(() => {
-        setIsMounted(true);
+      setIsMounted(true);
     });
   }, []);
 
-  const setCollapsed = useCallback((value: boolean) => {
-    setCollapsedState(value);
-    localStorage.setItem("sidebar-collapsed", String(value));
+  const toggle = useCallback(() => {
+    setMobileOpen((prev) => !prev);
   }, []);
 
-  const toggle = useCallback(() => {
-    setCollapsed(!collapsed);
-  }, [collapsed, setCollapsed]);
+  const toggleMobile = useCallback(() => {
+    setMobileOpen((prev) => !prev);
+  }, []);
 
   return (
-    <SidebarContext.Provider value={{ collapsed, toggle, setCollapsed, isMounted }}>
+    <SidebarContext.Provider
+      value={{
+        collapsed: true,
+        toggle,
+        setCollapsed: () => {},
+        mobileOpen,
+        setMobileOpen,
+        toggleMobile,
+        isMounted,
+      }}
+    >
       {children}
     </SidebarContext.Provider>
   );

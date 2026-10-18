@@ -1,41 +1,50 @@
-'use client'
+'use client';
+
 export const dynamic = 'force-dynamic';
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useRouter, useSearchParams, useParams } from 'next/navigation'
-import { LogIn, Loader2, AlertCircle } from '@/components/icons'
-import { OAuthButtons } from '@/components/auth/oauth-buttons'
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { authHeadingClass, authDescriptionClass, authLabelClass, authInputClass, authButtonClass } from '@/components/auth/styles';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
+import { Loader2, AlertCircle, CheckCircle2 } from '@/components/icons';
+import { OAuthButtons } from '@/components/auth/oauth-buttons';
+import { resolvePostAuthDestination } from '@/lib/auth/intent';
 
 export default function LoginPage() {
-    const params = useParams() as { locale: string };
-    const { locale } = params;
-    const router = useRouter()
-    const searchParams = useSearchParams()
-    const initialError = searchParams?.get('error') ?? null
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState<string | null>(initialError)
-    const [isCheckingSession, setIsCheckingSession] = useState(true)
+    const params = useParams() as { locale?: string };
+    const locale = params?.locale || 'en-in';
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
+    const initialError = searchParams?.get('error') ?? null;
+    const initialMessage = searchParams?.get('message') ?? null;
+
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(initialError);
+    const [message, setMessage] = useState<string | null>(initialMessage);
+    const [isCheckingSession, setIsCheckingSession] = useState(true);
+
+    const searchString = searchParams?.toString() ? `?${searchParams.toString()}` : '';
+
+    // Check existing session and preserve intent redirect
     useEffect(() => {
         async function checkSession() {
             try {
-                const res = await fetch('/api/user/profile')
+                const res = await fetch('/api/user/profile');
                 if (res.ok) {
-                    const data = await res.json()
+                    const data = await res.json();
                     if (data.success) {
-                        const redirectTo = searchParams?.get('redirect');
-                        if (redirectTo) {
-                            router.push(redirectTo);
-                        } else if (!data.user?.profileCompleted) {
-                            router.push(`/${locale}/complete-profile`);
-                        } else {
-                            router.push(`/${locale}/dashboard`);
-                        }
+                        const destination = resolvePostAuthDestination(
+                            searchParams,
+                            locale,
+                            data.user?.profileCompleted
+                        );
+                        router.push(destination);
                         return;
                     }
                 }
             } catch (err) {
-                console.warn('[Login session check failed]', err);
+                console.warn('[Login session check]', err);
             } finally {
                 setIsCheckingSession(false);
             }
@@ -44,13 +53,14 @@ export default function LoginPage() {
     }, [locale, router, searchParams]);
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault()
-        setIsLoading(true)
-        setError(null)
+        e.preventDefault();
+        setIsLoading(true);
+        setError(null);
+        setMessage(null);
 
-        const formData = new FormData(e.currentTarget)
-        const email = formData.get('email')
-        const password = formData.get('password')
+        const formData = new FormData(e.currentTarget);
+        const email = formData.get('email');
+        const password = formData.get('password');
 
         try {
             const res = await fetch('/api/login', {
@@ -59,116 +69,181 @@ export default function LoginPage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ email, password }),
-            })
+            });
 
-            const data = await res.json()
+            const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.error || 'Login failed')
+                throw new Error(data.error || 'Invalid email or password.');
             }
 
-            // Redirect based on profile completion or explicit redirect param
-            const redirectTo = searchParams?.get('redirect');
-            if (redirectTo) {
-                router.push(redirectTo);
-            } else if (!data.profileCompleted) {
-                router.push(`/${locale}/complete-profile`)
-            } else {
-                router.push(`/${locale}/dashboard`)
-            }
-            router.refresh()
+            // Resolve target destination preserving flow intent
+            const destination = resolvePostAuthDestination(
+                searchParams,
+                locale,
+                data.profileCompleted
+            );
+
+            router.push(destination);
+            router.refresh();
         } catch (err: unknown) {
-            setError((err as Error).message || 'Login failed')
-            setIsLoading(false)
+            setError((err as Error).message || 'Login failed. Please try again.');
+            setIsLoading(false);
         }
     }
 
     if (isCheckingSession) {
         return (
             <div className="flex min-h-[300px] items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+                <Loader2 className="w-5 h-5 animate-spin text-[#7E7E7E]" />
             </div>
         );
     }
 
     return (
-        <div className="w-full flex flex-col gap-5">
+        <div className="w-full space-y-4">
+            {/* Auth heading */}
             <div className="text-left">
-                <h1 className="text-4xl font-bold text-white mb-1">
-                    Welcome Back
+                <h1 className={authHeadingClass}>
+                    Sign in
                 </h1>
-                <p className="text-sm text-gray-400 mb-6">
-                    Sign in to your account to continue.
+                <p className={authDescriptionClass}>
+                    Continue where you left off.
                 </p>
             </div>
 
+            {/* Error Banner */}
             {error && (
-                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-md flex items-start gap-3 text-red-500">
-                    <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-                    <p className="text-sm font-medium">{error}</p>
+                <div
+                    role="alert"
+                    className="p-3.5 rounded-[10px] bg-red-950/20 border border-red-900/40 text-red-400 text-[13px] flex items-start gap-2.5"
+                >
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
+                    <p className="leading-relaxed">{error}</p>
                 </div>
             )}
 
-            <div className="flex flex-col gap-4">
-                <OAuthButtons />
+            {/* Success Message Banner */}
+            {message && (
+                <div
+                    role="status"
+                    className="p-3.5 rounded-[10px] bg-emerald-950/20 border border-emerald-900/40 text-emerald-400 text-[13px] flex items-start gap-2.5"
+                >
+                    <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
+                    <p className="leading-relaxed">{message}</p>
+                </div>
+            )}
 
-                <div className="text-xs text-gray-500 tracking-widest text-center my-3">
-                    OR CONTINUE WITH EMAIL
+            {/* Social Authentication */}
+            <OAuthButtons />
+
+            {/* Simple Divider */}
+            <div className="relative" aria-hidden="true">
+                <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-[#242424]" />
+                </div>
+                <div className="relative flex justify-center text-[12px]">
+                    <span className="bg-[#050505] px-3 text-[#7E7E7E]">
+                        or continue with email
+                    </span>
+                </div>
+            </div>
+
+            {/* Email / Password Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                    <label
+                        htmlFor="signin-email"
+                        className={authLabelClass + ' mb-2'}
+                    >
+                        Email
+                    </label>
+                    <input
+                        id="signin-email"
+                        type="email"
+                        name="email"
+                        placeholder="you@example.com"
+                        required
+                        disabled={isLoading}
+                        autoComplete="email"
+                        className={authInputClass}
+                    />
                 </div>
 
-                <form className="space-y-4" onSubmit={handleSubmit}>
-                    <div className="flex flex-col">
-                        <label className="text-[10px] tracking-widest text-gray-400 mb-1.5 uppercase font-medium">Email Address</label>
-                        <input
-                            type="email"
-                            name="email"
-                            placeholder="you@example.com"
-                            required
-                            disabled={isLoading}
-                            className="w-full h-11 px-4 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
-                        />
+                <div>
+                    <div className="mb-2 flex items-center justify-between gap-4">
+                        <label
+                            htmlFor="signin-password"
+                            className={authLabelClass}
+                        >
+                            Password
+                        </label>
+                        <Link
+                            href={`/${locale}/forgot-password`}
+                            className="text-[12px] text-[#BDBDBD] hover:text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#BDBDBD]"
+                        >
+                            Forgot password?
+                        </Link>
                     </div>
-                    <div className="flex flex-col">
-                        <div className="flex justify-between items-center mb-1.5">
-                            <label className="text-[10px] tracking-widest text-gray-400 uppercase font-medium">Password</label>
-                            <Link href={`/${locale}/forgot-password`} title='Forgot Password' className="text-xs text-purple-400 hover:text-purple-300 font-semibold transition-colors underline underline-offset-4 decoration-purple-500/30">
-                                Forgot password?
-                            </Link>
-                        </div>
-                        <input
-                            type="password"
-                            name="password"
-                            placeholder="••••••••"
-                            required
-                            disabled={isLoading}
-                            className="w-full h-11 px-4 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
-                        />
-                    </div>
-
-                    <button
-                        type="submit"
+                    <input
+                        id="signin-password"
+                        type="password"
+                        name="password"
+                        placeholder="•••••••••"
+                        required
                         disabled={isLoading}
-                        className="w-full h-11 mt-4 rounded-md bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                    >
-                        {isLoading ? (
-                            <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                                Signing In...
-                            </>
-                        ) : (
-                            'Sign In'
-                        )}
-                    </button>
-                </form>
+                        autoComplete="current-password"
+                        className={authInputClass}
+                    />
+                </div>
 
-                <p className="text-center text-sm text-gray-400 mt-2">
-                    Don&apos;t have an account?{' '}
-                    <Link href={`/${locale}/signup`} className="text-purple-400 hover:text-purple-300 font-semibold transition-colors underline underline-offset-4 decoration-purple-500/30 hover:decoration-purple-400">
-                        Sign up
-                    </Link>
-                </p>
-            </div>
+                {/* Primary Continue Button */}
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    className={authButtonClass}
+                >
+                    {isLoading ? (
+                        <>
+                            <Loader2 className="w-4 h-4 animate-spin text-[#0A0A0A]" />
+                            <span>Signing in...</span>
+                        </>
+                    ) : (
+                        'Continue'
+                    )}
+                </button>
+            </form>
+
+            {/* Terms and Privacy */}
+            <p className="text-center text-[12px] text-[#7E7E7E] leading-relaxed pt-1">
+                By continuing, you agree to{' '}
+                <Link
+                    href={`/${locale}/terms-of-service`}
+                    target="_blank"
+                    className="text-[#BDBDBD] hover:text-white underline underline-offset-4 decoration-[#242424] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#BDBDBD]"
+                >
+                    Terms
+                </Link>{' '}
+                and{' '}
+                <Link
+                    href={`/${locale}/privacy-policy`}
+                    target="_blank"
+                    className="text-[#BDBDBD] hover:text-white underline underline-offset-4 decoration-[#242424] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#BDBDBD]"
+                >
+                    Privacy
+                </Link>.
+            </p>
+
+            {/* Switch to Sign Up */}
+            <p className="text-center text-[13px] text-[#7E7E7E] pt-1">
+                Don&apos;t have an account?{' '}
+                <Link
+                    href={`/${locale}/signup${searchString}`}
+                    className="text-white hover:underline font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#BDBDBD]"
+                >
+                    Create account
+                </Link>
+            </p>
         </div>
     );
 }
-

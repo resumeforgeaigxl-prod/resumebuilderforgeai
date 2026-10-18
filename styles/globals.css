@@ -91,9 +91,9 @@
   color: var(--rf-ink);
 }
 
-.landing-light *,
-.landing-light *::before,
-.landing-light *::after {
+.landing-light :not(.rf-dark, .rf-dark *),
+.landing-light :not(.rf-dark, .rf-dark *)::before,
+.landing-light :not(.rf-dark, .rf-dark *)::after {
   border-color: var(--rf-hairline);
 }
 
@@ -108,6 +108,53 @@
 }
 .landing-light ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.14);
+}
+
+/* ═══ ResumeForge Product Dark Surface System ═══ */
+
+.product-dark {
+  /* Surfaces */
+  --bg: #050505;
+  --surface-1: #0A0A0A;
+  --surface-2: #101010;
+  --surface-3: #151515;
+
+  /* Borders */
+  --border: #242424;
+  --border-strong: #2D2D2D;
+
+  /* Typography */
+  --text-primary: #F5F5F5;
+  --text-secondary: #BDBDBD;
+  --text-muted: #7E7E7E;
+  --text-disabled: #565656;
+
+  /* Accents */
+  --accent-cyan: #22C7F2;
+  --accent-violet: #8B5CF6;
+  --accent-cyan-soft: #9BE7FA;
+  --accent-violet-soft: #C4B5FD;
+
+  background-color: var(--bg);
+  color: var(--text-primary);
+}
+
+.product-dark ::selection {
+  background-color: rgba(34, 199, 242, 0.25);
+  color: #FFFFFF;
+}
+
+.product-dark ::-webkit-scrollbar-track {
+  background: #050505;
+}
+
+.product-dark ::-webkit-scrollbar-thumb {
+  background: #242424;
+  border-radius: 9999px;
+}
+
+.product-dark ::-webkit-scrollbar-thumb:hover {
+  background: #2D2D2D;
 }
 
 @layer components {
@@ -342,6 +389,11 @@
 
   h1 { font-size: 1.85rem !important; line-height: 1.1 !important; }
   h2 { font-size: 1.5rem !important; }
+
+  .landing-light main,
+  main.omni-shell {
+    padding: 0 !important;
+  }
 }
 
 /* Custom Scrollbar Premium */
@@ -360,4 +412,60 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.1);
+}
+
+.resume-workspace h1,
+.resume-workspace h2,
+.resume-workspace h3,
+.resume-workspace h4 {
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif !important;
+}
+
+.resume-workspace nav button {
+  color: #BDBDBD;
+}
+
+/* A slow focus glow keeps the composer still while its halo breathes. */
+.omni-composer::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.18),
+    0 0 24px 2px rgba(139, 92, 246, 0.32);
+  transition: opacity 250ms ease;
+}
+
+.omni-composer:focus-within::before {
+  opacity: 1;
+  animation: omni-composer-breathe 3.2s ease-in-out infinite;
+}
+
+@keyframes omni-composer-breathe {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .omni-composer::before { transition: none; }
+  .omni-composer:focus-within::before {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+/* Auth Modern Minimalist Surface (OpenStatus aesthetic) */
+.auth-surface,
+.auth-surface h1,
+.auth-surface h2,
+.auth-surface h3,
+.auth-surface p,
+.auth-surface span,
+.auth-surface button,
+.auth-surface input,
+.auth-surface a,
+.auth-surface label {
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }

@@ -81,6 +81,12 @@ export async function GET(req: Request) {
         if (jobId) {
             query = query.eq('id', jobId);
         } else {
+            // Level 8: CLOSED vacancies must not appear in active discovery/recommendations
+            const includeClosed = searchParams.get('include_closed') === 'true';
+            if (!includeClosed) {
+                query = query.neq('status', 'CLOSED');
+            }
+
             if (search) {
                 query = query.or(`title.ilike.%${search}%,company.ilike.%${search}%`);
             }

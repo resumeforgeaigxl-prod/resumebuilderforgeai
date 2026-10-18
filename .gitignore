@@ -55,3 +55,12 @@ single-lint*.txt
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# Android & build artifacts
+.gradle/
+**/build/
+**/capacitor-cordova-android-plugins/.gradle/
+**/capacitor-cordova-android-plugins/build/
+
+# Scratch
+scratch/

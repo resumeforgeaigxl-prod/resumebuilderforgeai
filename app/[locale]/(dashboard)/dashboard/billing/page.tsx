@@ -534,9 +534,9 @@ function BillingContent({ params }: { params: { locale: string } }) {
     };
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] text-[#171717]">
+        <div className="min-h-screen bg-[#050505] text-[#F5F5F5]">
             <div className="relative max-w-5xl mx-auto px-4 py-10 animate-premium-in">
-                <Link href="/" className="inline-flex items-center gap-2 text-[#8F8F8F] hover:text-[#171717] transition-colors mb-8 text-xs font-semibold uppercase tracking-wider font-mono">
+                <Link href="/" className="inline-flex items-center gap-2 text-[#7E7E7E] hover:text-[#F5F5F5] transition-colors mb-8 text-xs font-semibold uppercase tracking-wider font-mono">
                     <ArrowLeft className="w-3.5 h-3.5" />
                     Back
                 </Link>
@@ -545,40 +545,40 @@ function BillingContent({ params }: { params: { locale: string } }) {
                     {/* ── Left: Plan Summary ── */}
                     <div className="space-y-6">
                         <div>
-                            <h1 className="text-3xl font-semibold tracking-tight text-[#171717]">
+                            <h1 className="text-3xl font-semibold tracking-tight text-[#F5F5F5]">
                                 Complete your purchase
                             </h1>
-                            <p className="text-[#4D4D4D] mt-2 text-sm">You&apos;re just one step away from unlocking your plan.</p>
+                            <p className="text-[#BDBDBD] mt-2 text-sm">You&apos;re just one step away from unlocking your plan.</p>
                         </div>
 
                         {/* Plan card */}
-                        <div className="p-6 rounded-xl bg-[#FFFFFF] border border-[#EBEBEB] shadow-sm">
+                        <div className="p-6 rounded-xl bg-[#101010] border border-[#242424] shadow-sm">
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center">
-                                    <div className="text-[#171717]">{planInfo.icon}</div>
+                                <div className="w-10 h-10 rounded-lg bg-[#151515] border border-[#242424] flex items-center justify-center">
+                                    <div className="text-[#22C7F2]">{planInfo.icon}</div>
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <h2 className="font-semibold text-base text-[#171717] leading-tight">{planInfo.label} Plan</h2>
-                                    <p className="text-[#8F8F8F] text-xs mt-0.5 truncate">{planInfo.description}</p>
+                                    <h2 className="font-semibold text-base text-[#F5F5F5] leading-tight">{planInfo.label} Plan</h2>
+                                    <p className="text-[#7E7E7E] text-xs mt-0.5 truncate">{planInfo.description}</p>
                                 </div>
                                 <div className="ml-auto text-right">
                                     {discountAmount > 0 ? (
                                         <div>
-                                            <div className="text-[#8F8F8F] line-through text-xs font-medium">{currentSymbol}{basePrice}</div>
-                                            <div className="text-2xl font-bold text-emerald-600 leading-none">
+                                            <div className="text-[#7E7E7E] line-through text-xs font-medium">{currentSymbol}{basePrice}</div>
+                                            <div className="text-2xl font-bold text-[#22C7F2] leading-none">
                                                 {finalPrice === 0 ? 'Free' : `${currentSymbol}${finalPrice}`}
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="text-2xl font-bold text-[#171717]">{currentSymbol}{currentPrice}</div>
+                                        <div className="text-2xl font-bold text-[#F5F5F5]">{currentSymbol}{currentPrice}</div>
                                     )}
                                 </div>
                             </div>
 
                             <ul className="space-y-3">
                                 {planInfo.features.map((f) => (
-                                    <li key={f} className="flex items-center gap-2.5 text-xs text-[#4D4D4D]">
-                                        <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                                    <li key={f} className="flex items-center gap-2.5 text-xs text-[#BDBDBD]">
+                                        <CheckCircle className="w-4 h-4 text-[#22C7F2] shrink-0" />
                                         {f}
                                     </li>
                                 ))}
@@ -587,20 +587,20 @@ function BillingContent({ params }: { params: { locale: string } }) {
 
                         {/* Price breakdown (when coupon applied) */}
                         {couponResult?.valid && (
-                            <div className="p-4 rounded-xl bg-emerald-50/50 border border-emerald-200 text-[#171717] space-y-2">
+                            <div className="p-4 rounded-xl bg-[#151515] border border-cyan-500/30 text-[#F5F5F5] space-y-2">
                                 <div className="flex justify-between text-xs">
-                                    <span className="text-[#4D4D4D]">Original price</span>
-                                    <span className="text-[#171717]">{currentSymbol}{basePrice}</span>
+                                    <span className="text-[#7E7E7E]">Original price</span>
+                                    <span className="text-[#F5F5F5]">{currentSymbol}{basePrice}</span>
                                 </div>
                                 <div className="flex justify-between text-xs">
-                                    <span className="text-emerald-700 flex items-center gap-1 font-semibold">
+                                    <span className="text-[#22C7F2] flex items-center gap-1 font-semibold">
                                         <Tag className="w-3 h-3" /> Coupon ({couponResult.code}) — {couponResult.discountLabel}
                                     </span>
-                                    <span className="text-emerald-700 font-semibold">−{currentSymbol}{discountAmount}</span>
+                                    <span className="text-[#22C7F2] font-semibold">−{currentSymbol}{discountAmount}</span>
                                 </div>
-                                <div className="flex justify-between font-bold border-t border-emerald-200 pt-2 text-base">
+                                <div className="flex justify-between font-bold border-t border-[#242424] pt-2 text-base">
                                     <span>Total</span>
-                                    <span className={finalPrice === 0 ? 'text-emerald-700' : 'text-[#171717]'}>
+                                    <span className={finalPrice === 0 ? 'text-[#22C7F2]' : 'text-[#F5F5F5]'}>
                                         {finalPrice === 0 ? 'Free' : `${currentSymbol}${finalPrice}`}
                                     </span>
                                 </div>
@@ -614,16 +614,16 @@ function BillingContent({ params }: { params: { locale: string } }) {
                                 { icon: <CreditCard className="w-4 h-4" />, text: 'Razorpay Powered' },
                                 { icon: <Clock className="w-4 h-4" />, text: 'Instant Activation' },
                             ].map(({ icon, text }) => (
-                                <div key={text} className="p-3 rounded-xl bg-[#FFFFFF] border border-[#EBEBEB] flex flex-col items-center gap-1.5 text-center shadow-sm">
-                                    <div className="text-[#171717]">{icon}</div>
-                                    <span className="text-[10px] text-[#4D4D4D] leading-tight font-medium">{text}</span>
+                                <div key={text} className="p-3 rounded-xl bg-[#101010] border border-[#242424] flex flex-col items-center gap-1.5 text-center shadow-sm">
+                                    <div className="text-[#22C7F2]">{icon}</div>
+                                    <span className="text-[10px] text-[#BDBDBD] leading-tight font-medium">{text}</span>
                                 </div>
                             ))}
                         </div>
 
                         {/* Plan switcher */}
-                        <div className="p-4 rounded-xl bg-[#FFFFFF] border border-[#EBEBEB] shadow-sm">
-                            <p className="text-xs font-semibold text-[#8F8F8F] uppercase tracking-wider font-mono mb-3">Switch plan</p>
+                        <div className="p-4 rounded-xl bg-[#101010] border border-[#242424] shadow-sm">
+                            <p className="text-xs font-semibold text-[#7E7E7E] uppercase tracking-wider font-mono mb-3">Switch plan</p>
                             <div className="flex gap-2 flex-wrap">
                                 {(() => {
                                     const isAllAccess = planVariant.endsWith('ALL_ACCESS');
@@ -636,8 +636,8 @@ function BillingContent({ params }: { params: { locale: string } }) {
                                             key={p}
                                             href={`/${locale}/dashboard/billing?plan=${p}`}
                                             className={`px-3 py-1.5 rounded-md text-xs font-semibold border transition-all ${p === planVariant 
-                                                ? 'bg-[#171717] border-[#171717] text-white shadow-sm' 
-                                                : 'bg-[#FAFAFA] border-[#EBEBEB] text-[#4D4D4D] hover:bg-[#FAFAFA]/80'
+                                                ? 'bg-[#22C7F2] border-[#22C7F2] text-black shadow-sm font-bold' 
+                                                : 'bg-[#151515] border-[#242424] text-[#BDBDBD] hover:text-[#F5F5F5] hover:bg-[#242424]'
                                                 }`}
                                         >
                                             {PLANS[p].label} — {currentSymbol}{priceConfig?.prices[p.toLowerCase()] || PLANS[p].price}
@@ -649,14 +649,14 @@ function BillingContent({ params }: { params: { locale: string } }) {
                     </div>
 
                     {/* ── Right: Billing Form ── */}
-                    <div className="p-6 rounded-xl bg-[#FFFFFF] border border-[#EBEBEB] shadow-sm self-start">
-                        <h2 className="text-base font-semibold mb-5 flex items-center gap-2 text-[#171717]">
-                            <CreditCard className="w-4.5 h-4.5 text-[#171717]" />
+                    <div className="p-6 rounded-xl bg-[#101010] border border-[#242424] shadow-sm self-start">
+                        <h2 className="text-base font-semibold mb-5 flex items-center gap-2 text-[#F5F5F5]">
+                            <CreditCard className="w-4.5 h-4.5 text-[#22C7F2]" />
                             Billing Details
                         </h2>
 
                         {error && (
-                            <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs">
+                            <div className="mb-4 p-3 rounded-lg bg-red-950/30 border border-red-500/30 text-red-400 text-xs">
                                 {error}
                             </div>
                         )}
@@ -665,63 +665,63 @@ function BillingContent({ params }: { params: { locale: string } }) {
                             {/* Full Name + Email */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-[#4D4D4D] uppercase tracking-wider mb-1.5 font-mono">Full Name *</label>
+                                    <label className="block text-[10px] font-bold text-[#BDBDBD] uppercase tracking-wider mb-1.5 font-mono">Full Name *</label>
                                     <input name="full_name" value={form.full_name} onChange={handleChange} required placeholder="Arjun Sharma"
-                                        className="w-full px-3 py-2 rounded-md bg-[#FFFFFF] border border-[#EBEBEB] text-[#171717] placeholder-[#8F8F8F] text-xs focus:outline-none focus:border-[#171717] transition-all" />
+                                        className="w-full px-3 py-2 rounded-md bg-[#151515] border border-[#242424] text-[#F5F5F5] placeholder-[#565656] text-xs focus:outline-none focus:border-[#22C7F2] transition-all" />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-[#4D4D4D] uppercase tracking-wider mb-1.5 font-mono">Email *</label>
+                                    <label className="block text-[10px] font-bold text-[#BDBDBD] uppercase tracking-wider mb-1.5 font-mono">Email *</label>
                                     <input name="email" type="email" value={form.email} onChange={handleChange} required placeholder="arjun@email.com"
-                                        className="w-full px-3 py-2 rounded-md bg-[#FFFFFF] border border-[#EBEBEB] text-[#171717] placeholder-[#8F8F8F] text-xs focus:outline-none focus:border-[#171717] transition-all" />
+                                        className="w-full px-3 py-2 rounded-md bg-[#151515] border border-[#242424] text-[#F5F5F5] placeholder-[#565656] text-xs focus:outline-none focus:border-[#22C7F2] transition-all" />
                                 </div>
                             </div>
 
                             {/* Phone + Company */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-[#4D4D4D] uppercase tracking-wider mb-1.5 font-mono">Phone</label>
+                                    <label className="block text-[10px] font-bold text-[#BDBDBD] uppercase tracking-wider mb-1.5 font-mono">Phone</label>
                                     <input name="phone" type="tel" value={form.phone} onChange={handleChange} placeholder="+91 98765 43210"
-                                        className="w-full px-3 py-2 rounded-md bg-[#FFFFFF] border border-[#EBEBEB] text-[#171717] placeholder-[#8F8F8F] text-xs focus:outline-none focus:border-[#171717] transition-all" />
+                                        className="w-full px-3 py-2 rounded-md bg-[#151515] border border-[#242424] text-[#F5F5F5] placeholder-[#565656] text-xs focus:outline-none focus:border-[#22C7F2] transition-all" />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-[#4D4D4D] uppercase tracking-wider mb-1.5 font-mono">Company <span className="text-[#8F8F8F]">(opt)</span></label>
+                                    <label className="block text-[10px] font-bold text-[#BDBDBD] uppercase tracking-wider mb-1.5 font-mono">Company <span className="text-[#7E7E7E]">(opt)</span></label>
                                     <input name="company_name" value={form.company_name} onChange={handleChange} placeholder="Acme Corp"
-                                        className="w-full px-3 py-2 rounded-md bg-[#FFFFFF] border border-[#EBEBEB] text-[#171717] placeholder-[#8F8F8F] text-xs focus:outline-none focus:border-[#171717] transition-all" />
+                                        className="w-full px-3 py-2 rounded-md bg-[#151515] border border-[#242424] text-[#F5F5F5] placeholder-[#565656] text-xs focus:outline-none focus:border-[#22C7F2] transition-all" />
                                 </div>
                             </div>
 
                             {/* Country + State */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-[#4D4D4D] uppercase tracking-wider mb-1.5 font-mono">Country</label>
+                                    <label className="block text-[10px] font-bold text-[#BDBDBD] uppercase tracking-wider mb-1.5 font-mono">Country</label>
                                     <input name="country" value={form.country} onChange={handleChange} placeholder="India"
-                                        className="w-full px-3 py-2 rounded-md bg-[#FFFFFF] border border-[#EBEBEB] text-[#171717] placeholder-[#8F8F8F] text-xs focus:outline-none focus:border-[#171717] transition-all" />
+                                        className="w-full px-3 py-2 rounded-md bg-[#151515] border border-[#242424] text-[#F5F5F5] placeholder-[#565656] text-xs focus:outline-none focus:border-[#22C7F2] transition-all" />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-[#4D4D4D] uppercase tracking-wider mb-1.5 font-mono">State</label>
+                                    <label className="block text-[10px] font-bold text-[#BDBDBD] uppercase tracking-wider mb-1.5 font-mono">State</label>
                                     <input name="state" value={form.state} onChange={handleChange} placeholder="Telangana"
-                                        className="w-full px-3 py-2 rounded-md bg-[#FFFFFF] border border-[#EBEBEB] text-[#171717] placeholder-[#8F8F8F] text-xs focus:outline-none focus:border-[#171717] transition-all" />
+                                        className="w-full px-3 py-2 rounded-md bg-[#151515] border border-[#242424] text-[#F5F5F5] placeholder-[#565656] text-xs focus:outline-none focus:border-[#22C7F2] transition-all" />
                                 </div>
                             </div>
 
                             {/* Billing Address */}
                             <div>
-                                <label className="block text-[10px] font-bold text-[#4D4D4D] uppercase tracking-wider mb-1.5 font-mono">Address</label>
+                                <label className="block text-[10px] font-bold text-[#BDBDBD] uppercase tracking-wider mb-1.5 font-mono">Address</label>
                                 <textarea name="address" value={form.address} onChange={handleChange}
                                     placeholder="Flat 101, Building Name, Street" rows={2}
-                                    className="w-full px-3 py-2 rounded-md bg-[#FFFFFF] border border-[#EBEBEB] text-[#171717] placeholder-[#8F8F8F] text-xs focus:outline-none focus:border-[#171717] transition-all resize-none" />
+                                    className="w-full px-3 py-2 rounded-md bg-[#151515] border border-[#242424] text-[#F5F5F5] placeholder-[#565656] text-xs focus:outline-none focus:border-[#22C7F2] transition-all resize-none" />
                             </div>
 
                             {/* Geolocation */}
-                            <div className="p-4 rounded-xl bg-[#FAFAFA] border border-[#EBEBEB]">
+                            <div className="p-4 rounded-xl bg-[#151515] border border-[#242424]">
                                 <div className="flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-[#FFFFFF] border border-[#EBEBEB] flex items-center justify-center shadow-sm">
-                                            <MapPin className="w-4 h-4 text-[#171717] shrink-0" />
+                                        <div className="w-8 h-8 rounded-lg bg-[#101010] border border-[#242424] flex items-center justify-center shadow-sm">
+                                            <MapPin className="w-4 h-4 text-[#22C7F2] shrink-0" />
                                         </div>
                                         <div>
-                                            <p className="text-xs font-semibold text-[#171717]">Location Access</p>
-                                            <p className="text-[10px] text-[#8F8F8F]">
+                                            <p className="text-xs font-semibold text-[#F5F5F5]">Location Access</p>
+                                            <p className="text-[10px] text-[#7E7E7E]">
                                                 {geoStatus === 'granted'
                                                     ? `✓ Detected (${geo.latitude?.toFixed(2)}, ${geo.longitude?.toFixed(2)})`
                                                     : geoStatus === 'denied'
@@ -732,7 +732,7 @@ function BillingContent({ params }: { params: { locale: string } }) {
                                     </div>
                                     {geoStatus !== 'granted' && (
                                         <button type="button" onClick={requestGeo} disabled={geoStatus === 'requesting'}
-                                            className="px-3 py-1.5 rounded-md bg-[#FFFFFF] border border-[#EBEBEB] text-[#171717] text-xs font-semibold hover:bg-[#FAFAFA] transition-all disabled:opacity-50 whitespace-nowrap">
+                                            className="px-3 py-1.5 rounded-md bg-[#101010] border border-[#242424] text-[#F5F5F5] text-xs font-semibold hover:bg-[#242424] transition-all disabled:opacity-50 whitespace-nowrap cursor-pointer">
                                             {geoStatus === 'requesting' ? 'Requesting…' : 'Detect'}
                                         </button>
                                     )}
@@ -740,22 +740,22 @@ function BillingContent({ params }: { params: { locale: string } }) {
                             </div>
 
                             {/* ── Coupon Code ── */}
-                            <div className="p-4 rounded-xl bg-[#FAFAFA] border border-[#EBEBEB] space-y-3">
-                                <label className="block text-[10px] font-bold text-[#4D4D4D] uppercase tracking-wider flex items-center gap-2 font-mono">
-                                    <Tag className="w-3.5 h-3.5 text-[#171717]" /> Coupon Discount
+                            <div className="p-4 rounded-xl bg-[#151515] border border-[#242424] space-y-3">
+                                <label className="block text-[10px] font-bold text-[#BDBDBD] uppercase tracking-wider flex items-center gap-2 font-mono">
+                                    <Tag className="w-3.5 h-3.5 text-[#22C7F2]" /> Coupon Discount
                                 </label>
 
                                 {couponResult?.valid ? (
                                     <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
-                                        <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800">
-                                            <Stars className="w-4 h-4 text-emerald-600 shrink-0" />
+                                        <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-md bg-emerald-950/30 border border-emerald-500/30 text-emerald-300">
+                                            <Stars className="w-4 h-4 text-[#22C7F2] shrink-0" />
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-bold uppercase tracking-wider leading-none">{couponResult.code}</p>
-                                                <p className="text-[10px] text-emerald-700/80 mt-1 truncate">{couponResult.message}</p>
+                                                <p className="text-xs font-bold uppercase tracking-wider leading-none text-[#F5F5F5]">{couponResult.code}</p>
+                                                <p className="text-[10px] text-emerald-400 mt-1 truncate">{couponResult.message}</p>
                                             </div>
                                         </div>
                                         <button type="button" onClick={handleRemoveCoupon}
-                                            className="p-2 rounded-md bg-[#FFFFFF] border border-[#EBEBEB] text-[#8F8F8F] hover:text-[#171717] transition-all shrink-0"
+                                            className="p-2 rounded-md bg-[#101010] border border-[#242424] text-[#7E7E7E] hover:text-[#F5F5F5] transition-all shrink-0 cursor-pointer"
                                             aria-label="Remove coupon">
                                             <X className="w-3.5 h-3.5" />
                                         </button>
@@ -771,22 +771,22 @@ function BillingContent({ params }: { params: { locale: string } }) {
                                                 }}
                                                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleApplyCoupon(); } }}
                                                 placeholder="Enter code"
-                                                className="flex-1 px-3 py-2 rounded-md bg-[#FFFFFF] border border-[#EBEBEB] text-[#171717] placeholder-[#8F8F8F] text-xs focus:outline-none focus:border-[#171717] transition-all uppercase tracking-[0.2em]"
+                                                className="flex-1 px-3 py-2 rounded-md bg-[#101010] border border-[#242424] text-[#F5F5F5] placeholder-[#565656] text-xs focus:outline-none focus:border-[#22C7F2] transition-all uppercase tracking-[0.2em]"
                                             />
                                             <button
                                                 type="button"
                                                 onClick={handleApplyCoupon}
                                                 disabled={couponLoading || !couponInput.trim()}
-                                                className="px-4 py-2 rounded-md bg-[#171717] hover:bg-[#333333] text-white text-xs font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                                                className="px-4 py-2 rounded-md bg-[#22C7F2] hover:bg-[#9BE7FA] text-black text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0 cursor-pointer"
                                             >
                                                 {couponLoading ? (
-                                                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                    <div className="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                                                 ) : 'APPLY'}
                                             </button>
                                         </div>
                                         {couponResult && !couponResult.valid && couponResult.error && (
-                                            <p className="text-xs text-red-600 flex items-center gap-1.5 px-1 font-semibold">
-                                                <X className="w-3 h-3 text-red-600" /> {couponResult.error}
+                                            <p className="text-xs text-red-400 flex items-center gap-1.5 px-1 font-semibold">
+                                                <X className="w-3 h-3 text-red-400" /> {couponResult.error}
                                             </p>
                                         )}
                                     </div>
@@ -797,19 +797,19 @@ function BillingContent({ params }: { params: { locale: string } }) {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className={`w-full py-3.5 rounded-md font-semibold text-xs tracking-wider uppercase transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.98] mt-2 shadow-sm ${isFree
-                                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                                    : 'bg-[#171717] hover:bg-[#333333] text-white'
+                                className={`w-full py-3.5 rounded-md font-bold text-xs tracking-wider uppercase transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.98] mt-2 shadow-sm cursor-pointer ${isFree
+                                    ? 'bg-[#22C7F2] hover:bg-[#9BE7FA] text-black'
+                                    : 'bg-[#22C7F2] hover:bg-[#9BE7FA] text-black'
                                     }`}
                             >
                                 {loading ? (
                                     <>
-                                        <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        <div className="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                                         Processing…
                                     </>
                                 ) : isFree ? (
                                     <>
-                                        <Stars className="w-4 h-4 text-white animate-pulse" />
+                                        <Stars className="w-4 h-4 text-black animate-pulse" />
                                         Activate Plan
                                     </>
                                 ) : (
@@ -820,7 +820,7 @@ function BillingContent({ params }: { params: { locale: string } }) {
                                 )}
                             </button>
 
-                            <p className="text-center text-[9px] text-[#8F8F8F] uppercase tracking-wider font-bold font-mono">
+                            <p className="text-center text-[9px] text-[#7E7E7E] uppercase tracking-wider font-bold font-mono">
                                 {isFree
                                     ? 'Instant activation · Full access unlocked'
                                     : 'Secured by Razorpay · PCI DSS Compliant'}
@@ -836,8 +836,8 @@ function BillingContent({ params }: { params: { locale: string } }) {
 export default function BillingPage({ params }: { params: { locale: string } }) {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-[#EBEBEB] border-t-[#171717] rounded-full animate-spin" />
+            <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+                <div className="w-8 h-8 border-4 border-[#242424] border-t-[#22C7F2] rounded-full animate-spin" />
             </div>
         }>
             <BillingContent params={params} />

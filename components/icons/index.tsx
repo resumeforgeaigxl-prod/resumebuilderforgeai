@@ -2,6 +2,12 @@
 import { createIcon } from './IconBase';
 export * from './IconBase';
 
+export const Bookmark = createIcon('Bookmark', [['path', { d: 'M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z' }]]);
+export const FilePen = createIcon('FilePen', [
+    ['path', { d: 'M12 22H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8l6 6v4M14 2v6h6' }],
+    ['path', { d: 'm16 16 3 3m-6 3 1-4 5-5a2.12 2.12 0 0 1 3 3l-5 5z' }],
+]);
+
 export const Activity = createIcon('Activity', [["path",{"d":"M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"}]]);
 export const AlertCircle = createIcon('AlertCircle', [["circle",{"cx":"12","cy":"12","r":"10"}],["line",{"x1":"12","x2":"12","y1":"8","y2":"12"}],["line",{"x1":"12","x2":"12.01","y1":"16","y2":"16"}]]);
 export const AlertTriangle = createIcon('AlertTriangle', [["path",{"d":"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"}],["path",{"d":"M12 9v4"}],["path",{"d":"M12 17h.01"}]]);

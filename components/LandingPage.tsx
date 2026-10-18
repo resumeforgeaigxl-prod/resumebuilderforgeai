@@ -8,15 +8,9 @@ import { useEffect, useState } from "react";
 import GrowXLabsTopBar from "@/components/ads/GrowXLabsTopBar";
 import Navbar from "@/components/landing-v2/Navbar";
 import HeroSection from "@/components/landing-v2/HeroSection";
+import FinalCTA from "@/components/landing-v2/FinalCTA";
 
 /* ── Lazily loaded (below the fold) ── */
-const TrustBar = dynamic(() => import("@/components/landing-v2/TrustBar"), { ssr: true });
-const FeaturesGrid = dynamic(() => import("@/components/landing-v2/FeaturesGrid"), { ssr: true });
-const WorkflowTimeline = dynamic(() => import("@/components/landing-v2/WorkflowTimeline"), { ssr: true });
-const PlatformEcosystem = dynamic(() => import("@/components/landing-v2/PlatformEcosystem"), { ssr: true });
-const ATSDashboard = dynamic(() => import("@/components/landing-v2/ATSDashboard"), { ssr: false });
-const MentorForgeSection = dynamic(() => import("@/components/landing-v2/MentorForgeSection"), { ssr: false });
-const FinalCTA = dynamic(() => import("@/components/landing-v2/FinalCTA"), { ssr: false });
 const FooterSection = dynamic(() => import("@/components/landing-v2/FooterSection"), { ssr: false });
 const CookieBanner = dynamic(() => import("@/components/ui/CookieBanner"), { ssr: false });
 const InstallBanner = dynamic(() => import("@/components/pwa/InstallBanner"), { ssr: false });
@@ -40,21 +34,17 @@ export default function LandingPage({
 
   return (
     <div className="landing-light">
-      <GrowXLabsTopBar />
-      <Navbar locale={locale} />
+      <div className="rf-dark">
+        <GrowXLabsTopBar />
+        <Navbar locale={locale} />
+      </div>
 
       <main>
         <HeroSection locale={locale} />
-        <TrustBar />
-        <FeaturesGrid />
-        <WorkflowTimeline />
-        <PlatformEcosystem locale={locale} />
-        <ATSDashboard />
-        <MentorForgeSection />
         <FinalCTA locale={locale} />
       </main>
 
-      <FooterSection locale={locale} />
+      <FooterSection locale={locale} promo={false} />
 
       {showBanners && (
         <>

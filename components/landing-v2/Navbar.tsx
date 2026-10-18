@@ -45,8 +45,8 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
 
   const mobileLinks = [
     { label: "Resume Builder", href: `/${locale}/resumes` },
-    { label: "Resume Templates", href: `/${locale}#templates` },
-    { label: "ATS Scanner", href: `/${locale}#ats-score` },
+    { label: "Resume Templates", href: `/${locale}/resumes` },
+    { label: "ATS Scanner", href: `/${locale}/ats-live` },
     { label: "Project Services", href: `/${locale}/project-services` },
     { label: "Blog", href: `/${locale}/blogs` },
     { label: "Pricing", href: `/${locale}/pricing` },
@@ -65,7 +65,7 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
       id: 1,
       label: "Resume Templates",
       desc: "Browse curated design systems",
-      href: `/${locale}#templates`,
+      href: `/${locale}/resumes`,
       icon: Layout,
       color: "text-blue-600 bg-blue-50 border-blue-100",
     },
@@ -73,7 +73,7 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
       id: 2,
       label: "ATS Scanner",
       desc: "Calibrate and check score instantly",
-      href: `/${locale}#ats-score`,
+      href: `/${locale}/ats-live`,
       icon: Zap,
       color: "text-pink-600 bg-pink-50 border-pink-100",
     }
@@ -84,13 +84,13 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      className="sticky top-0 z-50 w-full bg-[#fafaf9]"
+      className="sticky top-0 z-50 w-full bg-[#0c0d10]"
     >
       <nav
-        className={`mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6 border-x border-[#e7e5e4] transition-all duration-300 ${
+        className={`mx-auto flex h-14 max-w-[1120px] items-center justify-between px-8 transition-all duration-300 ${
           scrolled
-            ? "bg-[#FAFAFA]/80 backdrop-blur-md border-b border-[#e7e5e4]"
-            : "bg-[#FAFAFA] border-b border-transparent"
+            ? "bg-[#0c0d10]/90 backdrop-blur-md border-b border-[#2a2c33]"
+            : "bg-[#0c0d10] border-b border-transparent"
         }`}
       >
         {/* ── Logo ── */}
@@ -98,9 +98,9 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
           href={`/${locale}`}
           className="flex items-center gap-2.5 select-none"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#171717]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[#2e3138]">
             <span
-              className="text-white"
+              className="text-[#f4f5f7]"
               style={{
                 fontFamily: "var(--font-geist-sans)",
                 fontSize: "12px",
@@ -113,7 +113,7 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
             </span>
           </div>
           <span
-            className="text-[#171717]"
+            className="text-[#f4f5f7]"
             style={{
               fontFamily: "var(--font-geist-sans)",
               fontSize: "14px",
@@ -127,16 +127,16 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
         </Link>
 
         {/* ── Center links (desktop dropdown + static links) ── */}
-        <ul className="hidden lg:flex items-center gap-8 text-[#171717]">
+        <ul className="hidden lg:flex items-center gap-8 text-[#f4f5f7]">
           <li 
             className="relative"
             onMouseEnter={() => setDropdownOpen(true)}
             onMouseLeave={() => setDropdownOpen(false)}
           >
             <button
-              className="flex items-center gap-1 text-[#4D4D4D] transition-colors duration-200 hover:text-[#171717] font-mono text-[13px] uppercase font-semibold tracking-[0.04em] h-16 focus:outline-none"
+              className="flex items-center gap-1 text-[#8b909a] transition-colors duration-200 hover:text-[#f4f5f7] font-mono text-[13px] uppercase font-semibold tracking-[0.04em] h-14 focus:outline-none"
             >
-              Resume <ChevronDown className="w-3.5 h-3.5 text-stone-400 group-hover:text-[#171717] transition-transform duration-200" />
+              Resume <ChevronDown className="w-3.5 h-3.5 text-[#8b909a]" />
             </button>
             
             <AnimatePresence>
@@ -314,7 +314,7 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
             <li key={label}>
               <Link
                 href={href}
-                className="text-[#4D4D4D] transition-colors duration-200 hover:text-[#171717] font-mono text-[13px] uppercase font-semibold tracking-[0.04em]"
+                className="text-[#8b909a] transition-colors duration-200 hover:text-[#f4f5f7] font-mono text-[13px] uppercase font-semibold tracking-[0.04em]"
               >
                 {label}
               </Link>
@@ -325,26 +325,16 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
         {/* ── Right actions (desktop) ── */}
         <div className="hidden lg:flex items-center gap-3">
           <Link
-            href={`/${locale}/signup`}
-            className="inline-flex items-center justify-center rounded-xl border border-[#EBEBEB] bg-white px-3 h-9 text-[#171717] transition-all duration-75 hover:bg-[#F2F2F2] active:scale-95 font-mono text-[13px] uppercase font-semibold"
-            style={{
-              fontFamily: "monospace",
-              letterSpacing: "0.04em",
-              lineHeight: "20px",
-            }}
+            href={`/${locale}/login`}
+            className="text-[13px] font-medium text-[#b4b8c2] transition-colors hover:text-[#f4f5f7]"
           >
-            Sign In
+            Sign in
           </Link>
           <Link
             href={`/${locale}/resumes`}
-            className="inline-flex items-center justify-center rounded-xl bg-[#7c3aed] border border-[#6d28d9] px-5 h-10 text-white transition-all duration-75 hover:bg-[#6d28d9] active:scale-95 font-mono text-[13px] uppercase font-semibold"
-            style={{
-              fontFamily: "monospace",
-              letterSpacing: "0.04em",
-              lineHeight: "20px",
-            }}
+            className="inline-flex h-9 items-center justify-center rounded-lg border border-[#2e3138] px-3.5 text-[13px] font-medium text-[#f4f5f7] transition-colors hover:bg-[#16171b]"
           >
-            Generate Resume
+            Generate resume
           </Link>
         </div>
 
@@ -352,7 +342,7 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
         <button
           type="button"
           onClick={() => setMobileOpen((prev) => !prev)}
-          className="lg:hidden inline-flex items-center justify-center rounded-[6px] border border-[#EBEBEB] bg-white h-9 w-9 text-[#171717] transition-colors duration-200 hover:bg-[#F2F2F2]"
+          className="lg:hidden inline-flex items-center justify-center rounded-[6px] border border-[#2e3138] bg-transparent h-9 w-9 text-[#f4f5f7] transition-colors duration-200 hover:bg-[#16171b]"
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
         >
           {mobileOpen ? (
@@ -371,7 +361,7 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:hidden overflow-hidden border-b border-[#EBEBEB] bg-[#FAFAFA]"
+            className="lg:hidden overflow-hidden border-b border-[#2a2c33] bg-[#0c0d10]"
           >
             <div className="mx-auto max-w-[1200px] px-6 py-6 flex flex-col gap-4">
               {mobileLinks.map(({ label, href }) => (
@@ -379,36 +369,26 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
                   key={label}
                   href={href}
                   onClick={() => setMobileOpen(false)}
-                  className="text-[#4D4D4D] transition-colors duration-200 hover:text-[#171717] font-mono py-1 text-[13px] uppercase font-semibold tracking-[0.04em]"
+                  className="text-[#b4b8c2] transition-colors duration-200 hover:text-[#f4f5f7] font-mono py-1 text-[13px] uppercase font-semibold tracking-[0.04em]"
                 >
                   {label}
                 </Link>
               ))}
 
-              <div className="flex flex-col gap-3 pt-4 border-t border-[#EBEBEB]">
+              <div className="flex flex-col gap-3 pt-4 border-t border-[#2a2c33]">
                 <Link
-                  href={`/${locale}/signup`}
+                  href={`/${locale}/login`}
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex items-center justify-center rounded-xl border border-[#EBEBEB] bg-white px-3 h-9 text-[#171717] transition-all duration-75 hover:bg-[#F2F2F2] active:scale-95 font-mono text-[13px] uppercase font-semibold"
-                  style={{
-                    fontFamily: "monospace",
-                    letterSpacing: "0.04em",
-                    lineHeight: "20px",
-                  }}
+                  className="inline-flex h-10 items-center justify-center text-[14px] font-medium text-[#b4b8c2]"
                 >
-                  Sign In
+                  Sign in
                 </Link>
                 <Link
                   href={`/${locale}/resumes`}
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex items-center justify-center rounded-xl bg-[#7c3aed] border border-[#6d28d9] px-5 h-10 text-white transition-all duration-75 hover:bg-[#6d28d9] active:scale-95 font-mono text-[13px] uppercase font-semibold"
-                  style={{
-                    fontFamily: "monospace",
-                    letterSpacing: "0.04em",
-                    lineHeight: "20px",
-                  }}
+                  className="inline-flex h-10 items-center justify-center rounded-lg border border-[#2e3138] px-4 text-[14px] font-medium text-[#f4f5f7]"
                 >
-                  Generate Resume
+                  Generate resume
                 </Link>
               </div>
             </div>

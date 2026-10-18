@@ -269,7 +269,7 @@ export default function MentorForgeSection() {
         {/* Header Block (Full-width inside section, matching FeaturesGrid and ATSDashboard) */}
         <div className="px-6 md:px-10 py-16 text-left">
           <span className="font-mono text-[14px] text-rose-500 font-semibold uppercase leading-4 block mb-3 select-none">
-            #05 — MentorForge AI
+            #05 — Omni AI Agent
           </span>
           <h2
             className="text-[#1c1917] font-bold leading-[1.15] text-2xl md:text-[clamp(28px,3vw,40px)] tracking-tight max-w-[640px]"

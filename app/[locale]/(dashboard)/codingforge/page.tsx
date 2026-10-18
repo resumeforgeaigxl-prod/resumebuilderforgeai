@@ -86,8 +86,8 @@ export default function CodingForgeDashboard() {
                     <div className="flex items-center gap-2 text-[#8F8F8F] font-medium tracking-normal text-xs uppercase mb-3 font-mono">
                         <Code2 className="w-3.5 h-3.5" /> Intelligence Core
                     </div>
-                    <h1 className="text-3xl md:text-4xl font-semibold tracking-tighter text-[#171717]">CodingForge</h1>
-                    <p className="text-[#4D4D4D] mt-2 text-base">Master algorithms and system patterns through our multi-language IDE ecosystem.</p>
+                    <h1 className="text-3xl md:text-4xl font-semibold tracking-tighter text-[#171717]">Coding Practice</h1>
+                    <p className="text-[#4D4D4D] mt-2 text-base">Master algorithms and technical problem-solving with industrial test runners.</p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-4">

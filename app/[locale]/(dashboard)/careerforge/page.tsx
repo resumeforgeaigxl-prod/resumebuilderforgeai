@@ -1,13 +1,6 @@
 export const dynamic = 'force-dynamic';
-import RoadmapGenerator from '@/components/dashboard/RoadmapGenerator';
-import { FeatureGate } from '@/components/pricing/FeatureGate';
+import { redirect } from 'next/navigation';
 
-export default function CareerForgePage() {
-    return (
-        <FeatureGate task="roadmap">
-            <div className="py-8">
-                <RoadmapGenerator />
-            </div>
-        </FeatureGate>
-    );
+export default function CareerForgePage({ params }: { params: { locale: string } }) {
+    redirect(`/${params.locale}/omni`);
 }

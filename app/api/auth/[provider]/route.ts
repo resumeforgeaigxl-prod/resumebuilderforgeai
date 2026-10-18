@@ -1,8 +1,9 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import { PROVIDERS, getRedirectUri, setOAuthStateCookie } from '@/lib/auth/oauth';
+import { PROVIDERS, getRedirectUri, setOAuthStateCookie, setOAuthRedirectCookie } from '@/lib/auth/oauth';
 import crypto from 'crypto';
 import { BASE_URL } from '@/lib/constants';
+import { resolvePostAuthDestination } from '@/lib/auth/intent';
 
 export async function GET(request: Request, { params }: { params: { provider: string } }) {
     const provider = params.provider.toLowerCase();
@@ -13,6 +14,18 @@ export async function GET(request: Request, { params }: { params: { provider: st
     }
 
     const config = PROVIDERS[provider];
+    const url = new URL(request.url);
+
+    // Save intent or redirect if supplied
+    const destination = resolvePostAuthDestination(url.searchParams, 'en-in', true);
+    if (destination && destination !== '/en-in/dashboard') {
+        setOAuthRedirectCookie(destination);
+    } else {
+        const rawRedirect = url.searchParams.get('redirect');
+        if (rawRedirect && rawRedirect.startsWith('/')) {
+            setOAuthRedirectCookie(rawRedirect);
+        }
+    }
 
     // Generate secure state parameter
     const state = crypto.randomBytes(32).toString('hex');

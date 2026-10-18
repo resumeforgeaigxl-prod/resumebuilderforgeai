@@ -52,11 +52,21 @@ export async function callAI(options: AIRouterOptions): Promise<AIResponse> {
                 keyPool.markSuccess(key.id);
                 aiCache.set(options.prompt, options.task, response);
 
-                // Track Usage (Deduct Credits)
+                // Track Usage (Deduct Credits & Record COGS)
                 if (options.userId) {
                     await PricingService.trackUsage(options.userId, options.task).catch(e => 
                         console.error('[AIRouter] Usage tracking failed but AI call succeeded:', e)
                     );
+
+                    const { CogsService } = await import('@/lib/billing');
+                    await CogsService.recordUsageCost({
+                        userId: options.userId,
+                        action: options.task,
+                        provider: providerName,
+                        model: response.model || 'default',
+                        inputTokens: response.usage?.prompt_tokens || 0,
+                        outputTokens: response.usage?.completion_tokens || 0,
+                    }).catch(e => console.warn('[AIRouter] COGS recording notice:', e));
                 }
 
                 return response;

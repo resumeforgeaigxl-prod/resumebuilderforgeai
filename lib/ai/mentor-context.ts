@@ -80,7 +80,7 @@ async function analyzeUserProfile(_userId: string, context: UserContext) {
         strengths,
         weaknesses,
         recommendations: [
-            readinessScore < 60 ? "Improve coding speed in CodingForge" : "Practice interviews",
+            readinessScore < 60 ? "Improve coding speed with practice coding" : "Practice mock interviews",
             (context.ResumeForge as ForgeData)?.count === 0 ? "Generate your first resume" : null
         ].filter((item): item is string => item !== null)
     };

@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import { PROVIDERS, getOAuthStateCookie, clearOAuthStateCookie, getRedirectUri } from '@/lib/auth/oauth';
+import { PROVIDERS, getOAuthStateCookie, clearOAuthStateCookie, getRedirectUri, getOAuthRedirectCookie, clearOAuthRedirectCookie } from '@/lib/auth/oauth';
 import { createSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
 import { sendLoginEmail, sendWelcomeEmail } from '@/lib/brevo';
@@ -199,7 +199,15 @@ export async function GET(request: Request, { params }: { params: { provider: st
             provider,
         });
 
-        // 6. Redirect based on profile completion
+        // 6. Check saved post-auth redirect
+        const savedRedirect = getOAuthRedirectCookie();
+        clearOAuthRedirectCookie();
+
+        if (savedRedirect && (savedRedirect.startsWith('/') || savedRedirect.startsWith(url.origin))) {
+            return NextResponse.redirect(new URL(savedRedirect, url.origin));
+        }
+
+        // 7. Redirect based on profile completion
         if (!userRecord.profile_completed) {
             return NextResponse.redirect(`${url.origin}/complete-profile`);
         }

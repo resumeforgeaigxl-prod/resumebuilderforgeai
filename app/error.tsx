@@ -1,53 +1,97 @@
 'use client';
+
 import { useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { ArrowRight } from '@/components/icons';
 
-import { ShieldAlert } from '@/components/icons';
+function localeFromPath(pathname: string) {
+  const segment = pathname.split('/').filter(Boolean)[0];
+  return segment && segment.includes('-') ? segment : 'en-in';
+}
 
-export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
-    useEffect(() => {
-        if (process.env.NODE_ENV !== 'production') {
-            console.error('[App Error Boundary]', error);
+export default function ErrorPage({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  const pathname = usePathname() || '/en-in';
+  const locale = localeFromPath(pathname);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('[App Error Boundary]', error);
+    }
+  }, [error]);
+
+  return (
+    <div className="rf-error min-h-screen bg-[#0c0d10] text-[#f4f5f7]">
+      <style>{`
+        .rf-error h1 {
+          font-size: clamp(40px, 5vw, 64px) !important;
+          line-height: 1.02 !important;
         }
-    }, [error]);
+      `}</style>
 
-
-    return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-[#070710] text-slate-100 p-4 selection:bg-rose-500/30">
-            <div className="absolute top-0 left-1/4 w-[500px] h-[300px] bg-rose-600/10 blur-[150px] -z-10" />
-
-            <div className="text-center max-w-md relative z-10 border border-white/5 bg-white/[0.02] p-10 rounded-3xl backdrop-blur-xl">
-                <div className="flex justify-center mb-6">
-                    <div className="w-16 h-16 bg-rose-600/10 border border-rose-500/30 rounded-2xl flex items-center justify-center shadow-lg shadow-rose-500/20">
-                        <ShieldAlert className="w-8 h-8 text-rose-500" />
-                    </div>
-                </div>
-                <h1 className="text-4xl font-black mb-4">Something Went Wrong</h1>
-                <p className="text-slate-400 mb-4 font-medium">
-                    Our servers encountered an error while processing your request.
-                </p>
-                {/* Debug info */}
-                <div className="bg-black/40 border border-white/5 p-4 rounded-xl mb-8 text-left overflow-auto max-h-40">
-                    <p className="text-rose-400 text-xs font-mono font-bold uppercase tracking-widest mb-2">Error Detail</p>
-                    <p className="text-slate-500 text-[11px] font-mono whitespace-pre-wrap leading-relaxed">
-                        {error.message || 'Unknown runtime exception'}
-                        {error.digest && `\n\nDigest: ${error.digest}`}
-                    </p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <button
-                        onClick={() => window.location.href = '/en-in/dashboard'}
-                        className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-all shadow-lg active:scale-95 text-center"
-                    >
-                        Go to Dashboard
-                    </button>
-                    <button
-                        onClick={() => reset()}
-                        className="px-6 py-3 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl font-bold transition-all active:scale-95 text-center"
-                    >
-                        Try Again
-                    </button>
-                </div>
-            </div>
+      <header className="border-b border-[#2a2c33]">
+        <div className="mx-auto flex h-14 max-w-[1120px] items-center px-6 sm:px-8">
+          <Link href={`/${locale}`} className="inline-flex items-center gap-2.5 text-[#f4f5f7]">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#3a3d46] text-[11px] font-semibold tracking-tight">
+              RF
+            </span>
+            <span className="text-sm font-medium tracking-tight">ResumeForge AI</span>
+          </Link>
         </div>
-    );
+      </header>
+
+      <div className="mx-auto flex w-full max-w-[1120px] flex-col px-6 py-16 sm:px-8 sm:py-24">
+        <p className="font-mono text-[11px] font-medium uppercase tracking-[0.16em] text-[#8b909a]">
+          Error
+        </p>
+        <h1 className="mt-4 max-w-[14ch] font-normal tracking-[-0.035em] text-[#f4f5f7]">
+          Something went wrong.
+        </h1>
+        <p className="mt-5 max-w-xl text-base leading-7 text-[#b4b8c2]">
+          This page didn’t finish loading. Try it once more, or go back home and continue from there.
+        </p>
+
+        <div className="mt-8 max-w-xl rounded-[4px] border border-[#2a2c33] bg-[#16171b] px-4 py-3.5">
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[#8b909a]">
+            Detail
+          </p>
+          <p className="mt-2 whitespace-pre-wrap font-mono text-[13px] leading-6 text-[#f4f5f7]">
+            {error.message || 'Unknown error'}
+          </p>
+          {error.digest ? (
+            <p className="mt-2 font-mono text-[12px] text-[#8b909a]">Reference {error.digest}</p>
+          ) : null}
+        </div>
+
+        <div className="mt-8 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => reset()}
+            className="inline-flex items-center gap-2 rounded-full bg-[#f4f5f7] px-5 py-2.5 text-sm font-medium text-[#0c0d10]"
+          >
+            Try again
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+          <Link
+            href={`/${locale}`}
+            className="inline-flex items-center rounded-full border border-[#3a3d46] px-5 py-2.5 text-sm font-medium text-[#f4f5f7]"
+          >
+            Back home
+          </Link>
+          <Link
+            href={`/${locale}/dashboard`}
+            className="inline-flex items-center px-2 py-2.5 text-sm text-[#8b909a] hover:text-[#f4f5f7]"
+          >
+            Dashboard
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
 }

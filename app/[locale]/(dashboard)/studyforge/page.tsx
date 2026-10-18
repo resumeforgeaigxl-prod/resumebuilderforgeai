@@ -184,7 +184,7 @@ export default function StudyForgePage() {
                             <BookOpen className="w-3.5 h-3.5 text-[#171717]" /> Intelligence Core
                         </div>
                         <h1 className="text-3xl font-semibold tracking-tight text-[#171717]">
-                            StudyForge
+                            Study Workspace
                         </h1>
                         <p className="text-[#4D4D4D] mt-1.5 text-base">AI-powered document synthesis and study assistance.</p>
                     </div>

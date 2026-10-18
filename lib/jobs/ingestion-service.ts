@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { createHash } from 'crypto';
 import { isValidLocation } from './utils';
+import { normalizeTitle } from './normalize';
 
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -152,12 +153,16 @@ export async function ingestJobs(jobs: Partial<NormalisedJob>[]) {
     // Map all readyToIngest jobs directly to the DB schema structure without pre-skipping duplicates
     const finalDbJobs = readyToIngest.map(j => ({
         title: j.title,
+        normalized_title: normalizeTitle(j.title),
         company: j.company,
         location: j.location,
+        location_text: j.location,
         description: j.description,
         apply_url: j.apply_url,
+        canonical_url: j.apply_url,
         employment_type: j.job_type,
         posted_at: j.posted_date,
+        last_seen_at: new Date().toISOString(),
         source: j.source,
         external_id: j.external_id,
         dedup_key: j.dedup_key,
@@ -203,6 +208,23 @@ export async function ingestJobs(jobs: Partial<NormalisedJob>[]) {
                 failed++;
             }
         } else if (data && data.length > 0) {
+            const rowId = data[0].id;
+            // Record source occurrence for multi-source provenance
+            if (rowId) {
+                try {
+                    await supabaseAdmin
+                        .from('job_sources')
+                        .insert({
+                            job_id: rowId,
+                            source: job.source,
+                            apply_url: job.apply_url,
+                            last_seen_at: new Date().toISOString(),
+                        });
+                } catch {
+                    // Ignore occurrence recording error
+                }
+            }
+
             if (isExisting) {
                 updated++;
                 updatedDetails.push({ title: job.title, company: job.company });

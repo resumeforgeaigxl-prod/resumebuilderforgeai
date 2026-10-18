@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { Download, X } from '@/components/icons';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -56,7 +57,17 @@ export default function InstallBanner() {
         dismiss();
     };
 
+    const pathname = usePathname();
+
     if (!isVisible) return null;
+    if (
+        pathname?.includes('/login') ||
+        pathname?.includes('/signup') ||
+        pathname?.includes('/forgot-password') ||
+        pathname?.includes('/reset-password')
+    ) {
+        return null;
+    }
 
     return (
         <div className="fixed bottom-6 left-6 right-6 md:left-auto md:right-8 md:w-96 z-[100] animate-in slide-in-from-bottom-8 duration-500">

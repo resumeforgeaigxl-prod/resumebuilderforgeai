@@ -1,4 +1,6 @@
 export const dynamic = 'force-dynamic';
-import ResumesPage from '../resumes/page';
+import { redirect } from 'next/navigation';
 
-export default ResumesPage;
+export default function ResumeForgePage({ params }: { params: { locale: string } }) {
+    redirect(`/${params.locale}/resumes`);
+}

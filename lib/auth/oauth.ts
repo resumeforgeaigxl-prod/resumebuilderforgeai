@@ -37,6 +37,7 @@ export const PROVIDERS: Record<string, OAuthConfig> = {
 };
 
 const OAUTH_STATE_COOKIE = 'oauth_state';
+const OAUTH_REDIRECT_COOKIE = 'oauth_redirect';
 
 export function getRedirectUri(provider: string, baseUrl: string) {
     return `${baseUrl}/api/auth/${provider}/callback`;
@@ -67,3 +68,28 @@ export function clearOAuthStateCookie() {
         domain: process.env.NODE_ENV === 'production' ? `.${MAIN_DOMAIN}` : undefined,
     });
 }
+
+export function setOAuthRedirectCookie(redirect: string) {
+    cookies().set(OAUTH_REDIRECT_COOKIE, redirect, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 60 * 10, // 10 minutes
+        sameSite: 'lax',
+        domain: process.env.NODE_ENV === 'production' ? `.${MAIN_DOMAIN}` : undefined,
+    });
+}
+
+export function getOAuthRedirectCookie(): string | undefined {
+    return cookies().get(OAUTH_REDIRECT_COOKIE)?.value;
+}
+
+export function clearOAuthRedirectCookie() {
+    cookies().delete(OAUTH_REDIRECT_COOKIE);
+    cookies().set(OAUTH_REDIRECT_COOKIE, '', {
+        maxAge: 0,
+        path: '/',
+        domain: process.env.NODE_ENV === 'production' ? `.${MAIN_DOMAIN}` : undefined,
+    });
+}
+

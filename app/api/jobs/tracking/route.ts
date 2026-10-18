@@ -28,7 +28,7 @@ export async function GET(req: Request) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data } = await (supabase as any)
             .from('job_applications')
-            .select('*, jobs(company_name, role_title, logo_url)')
+            .select('*, jobs(id, company, company_name, title, role_title, location, apply_url, status, closure_reason)')
             .eq('user_id', session.userId)
             .order('updated_at', { ascending: false });
 

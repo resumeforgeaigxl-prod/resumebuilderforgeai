@@ -19,10 +19,10 @@ interface Invoice {
 
 function planColor(plan: string) {
     switch (plan.toLowerCase()) {
-        case 'career': return 'text-amber-700';
-        case 'premium': return 'text-purple-700';
-        case 'pro': return 'text-blue-700';
-        default: return 'text-[#4D4D4D]';
+        case 'career': return 'text-amber-400';
+        case 'premium': return 'text-[#C4B5FD]';
+        case 'pro': return 'text-[#22C7F2]';
+        default: return 'text-[#BDBDBD]';
     }
 }
 
@@ -52,35 +52,35 @@ export default function InvoicesPage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8 pb-24 text-[#171717] animate-premium-in">
+        <div className="max-w-4xl mx-auto space-y-8 pb-24 text-[#F5F5F5] animate-premium-in">
             {/* Header */}
-            <header className="flex items-center gap-3 border-b border-[#EBEBEB] pb-6 mb-10">
-                <div className="w-10 h-10 rounded-lg bg-[#FFFFFF] border border-[#EBEBEB] flex items-center justify-center shadow-sm">
-                    <Receipt className="w-5 h-5 text-[#171717]" />
+            <header className="flex items-center gap-3 border-b border-[#242424] pb-6 mb-10">
+                <div className="w-10 h-10 rounded-lg bg-[#101010] border border-[#242424] flex items-center justify-center shadow-sm">
+                    <Receipt className="w-5 h-5 text-[#22C7F2]" />
                 </div>
                 <div>
-                    <h1 className="text-3xl font-semibold tracking-tight text-[#171717]">My Invoices</h1>
-                    <p className="text-[#4D4D4D] text-xs mt-0.5">Download receipts for your purchases</p>
+                    <h1 className="text-3xl font-semibold tracking-tight text-[#F5F5F5]">My Invoices</h1>
+                    <p className="text-[#7E7E7E] text-xs mt-0.5">Download receipts for your purchases</p>
                 </div>
             </header>
 
             {loading ? (
                 <div className="flex items-center justify-center h-48">
-                    <Loader2 className="w-6 h-6 animate-spin text-[#171717]" />
+                    <Loader2 className="w-6 h-6 animate-spin text-[#22C7F2]" />
                 </div>
             ) : error ? (
-                <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs">{error}</div>
+                <div className="p-3 rounded-lg bg-red-950/30 border border-red-500/30 text-red-400 text-xs">{error}</div>
             ) : invoices.length === 0 ? (
-                <div className="p-12 rounded-xl bg-[#FFFFFF] border border-[#EBEBEB] text-center space-y-3 shadow-sm">
-                    <FileText className="w-10 h-10 text-[#8F8F8F] mx-auto" />
-                    <p className="text-[#171717] font-semibold text-sm">No invoices yet</p>
-                    <p className="text-[#8F8F8F] text-xs font-medium">Invoices appear here after each purchase.</p>
+                <div className="p-12 rounded-xl bg-[#101010] border border-[#242424] text-center space-y-3 shadow-sm">
+                    <FileText className="w-10 h-10 text-[#565656] mx-auto" />
+                    <p className="text-[#F5F5F5] font-semibold text-sm">No invoices yet</p>
+                    <p className="text-[#7E7E7E] text-xs font-medium">Invoices appear here after each purchase.</p>
                 </div>
             ) : (
-                <div className="bg-[#FFFFFF] border border-[#EBEBEB] rounded-xl overflow-hidden shadow-sm">
+                <div className="bg-[#101010] border border-[#242424] rounded-xl overflow-hidden shadow-sm">
                     <table className="w-full text-sm">
-                        <thead className="border-b border-[#EBEBEB] bg-[#FAFAFA]">
-                            <tr className="text-left text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider font-mono">
+                        <thead className="border-b border-[#242424] bg-[#0A0A0A]">
+                            <tr className="text-left text-[10px] font-bold text-[#7E7E7E] uppercase tracking-wider font-mono">
                                 <th className="px-5 py-3">Invoice ID</th>
                                 <th className="px-5 py-3">Plan</th>
                                 <th className="px-5 py-3">Amount</th>
@@ -89,12 +89,12 @@ export default function InvoicesPage() {
                                 <th className="px-5 py-3 text-right">Download</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#EBEBEB]">
+                        <tbody className="divide-y divide-[#242424]">
                             {invoices.map(inv => (
-                                <tr key={inv.id} className="hover:bg-[#FAFAFA]/50 transition-colors">
+                                <tr key={inv.id} className="hover:bg-[#151515]/50 transition-colors">
                                     {/* Invoice ID */}
                                     <td className="px-5 py-4">
-                                        <div className="font-mono font-semibold text-[#171717] text-xs">{inv.invoice_number}</div>
+                                        <div className="font-mono font-semibold text-[#F5F5F5] text-xs">{inv.invoice_number}</div>
                                     </td>
 
                                     {/* Plan */}
@@ -107,12 +107,12 @@ export default function InvoicesPage() {
                                     {/* Amount */}
                                     <td className="px-5 py-4">
                                         {inv.amount === 0 ? (
-                                            <span className="flex items-center gap-0.5 text-emerald-700 font-bold text-xs">
+                                            <span className="flex items-center gap-0.5 text-[#22C7F2] font-bold text-xs">
                                                 <IndianRupee className="w-3 h-3" />Free
                                             </span>
                                         ) : (
-                                            <span className="flex items-center gap-0.5 text-[#171717] font-semibold text-xs">
-                                                <IndianRupee className="w-3 h-3 text-[#8F8F8F]" />
+                                            <span className="flex items-center gap-0.5 text-[#F5F5F5] font-semibold text-xs">
+                                                <IndianRupee className="w-3 h-3 text-[#7E7E7E]" />
                                                 {(inv.amount / 100).toFixed(0)}
                                             </span>
                                         )}
@@ -121,22 +121,22 @@ export default function InvoicesPage() {
                                     {/* Method */}
                                     <td className="px-5 py-4">
                                         {inv.payment_method === 'coupon' ? (
-                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#FAFAFA] border border-[#EBEBEB] text-[10px] font-bold text-[#4D4D4D] font-mono uppercase">
-                                                <Ticket className="w-3 h-3 text-[#8F8F8F]" />
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#151515] border border-[#242424] text-[10px] font-bold text-[#BDBDBD] font-mono uppercase">
+                                                <Ticket className="w-3 h-3 text-[#7E7E7E]" />
                                                 {inv.coupon_code ?? 'Coupon'}
                                             </span>
                                         ) : (
-                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700 font-mono uppercase">
-                                                <CreditCard className="w-3 h-3 text-emerald-600" />
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#151515] border border-[#242424] text-[10px] font-bold text-[#22C7F2] font-mono uppercase">
+                                                <CreditCard className="w-3 h-3 text-[#22C7F2]" />
                                                 Razorpay
                                             </span>
                                         )}
                                     </td>
 
                                     {/* Date */}
-                                    <td className="px-5 py-4 text-[#4D4D4D] text-xs">
+                                    <td className="px-5 py-4 text-[#BDBDBD] text-xs">
                                         <div className="flex items-center gap-1.5">
-                                            <Calendar className="w-3 h-3 text-[#8F8F8F]" />
+                                            <Calendar className="w-3 h-3 text-[#7E7E7E]" />
                                             {format(new Date(inv.created_at), 'MMM dd, yyyy')}
                                         </div>
                                     </td>
@@ -145,9 +145,9 @@ export default function InvoicesPage() {
                                     <td className="px-5 py-4 text-right">
                                         <button
                                             onClick={() => handleDownload(inv)}
-                                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#FFFFFF] border border-[#EBEBEB] text-[#171717] text-xs font-semibold hover:bg-[#FAFAFA] transition-all shadow-sm"
+                                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#151515] border border-[#242424] text-[#F5F5F5] text-xs font-semibold hover:bg-[#242424] transition-all shadow-sm cursor-pointer"
                                         >
-                                            <Download className="w-3 h-3 text-[#8F8F8F]" />
+                                            <Download className="w-3 h-3 text-[#7E7E7E]" />
                                             PDF
                                         </button>
                                     </td>

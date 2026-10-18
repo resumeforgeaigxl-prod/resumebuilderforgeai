@@ -11,15 +11,14 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Calendar, User, ArrowLeft, Share2 } from '@/components/icons';
 import { format } from 'date-fns';
-import { Playfair_Display, Lora } from 'next/font/google';
 import FooterSection from '@/components/landing-v2/FooterSection';
 import BlogShareButton from '@/components/blog/BlogShareButton';
 import BlogNewsletterSignup from '@/components/blog/BlogNewsletterSignup';
 import GrowXLabsInArticleAd from '@/components/ads/GrowXLabsInArticleAd';
 import GrowXLabsSidebarAd from '@/components/ads/GrowXLabsSidebarAd';
 
-const playfair = Playfair_Display({ subsets: ['latin'], weight: ['400', '600', '700'] });
-const lora = Lora({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
+const playfair = { className: 'font-serif' };
+const lora = { className: 'font-serif' };
 
 interface BlogPost {
   title: string;

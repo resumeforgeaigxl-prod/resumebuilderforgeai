@@ -84,7 +84,7 @@ function TypingDots() {
             {[1, 2, 3].map((dot) => (
                 <motion.div
                     key={dot}
-                    className="w-1.5 h-1.5 bg-[#171717] rounded-full mx-0.5"
+                    className="w-1.5 h-1.5 bg-[#F5F5F5] rounded-full mx-0.5"
                     initial={{ opacity: 0.3 }}
                     animate={{
                         opacity: [0.3, 0.9, 0.3],
@@ -122,8 +122,8 @@ interface MentorForgeChatProps {
     onChange: (val: string) => void;
     onSend: (mode?: string) => void;
     isLoading: boolean;
-    activeMode: string;
-    onModeChange: (mode: string) => void;
+    activeMode?: string;
+    onModeChange?: (mode: string) => void;
     placeholder?: string;
 }
 
@@ -143,17 +143,13 @@ export function MentorForgeChatInput({
     const [activeSuggestion, setActiveSuggestion] = useState<number>(-1);
     const commandPaletteRef = useRef<HTMLDivElement>(null);
     const { textareaRef, adjustHeight } = useAutoResizeTextarea({
-        minHeight: 56,
-        maxHeight: 180,
+        minHeight: 32,
+        maxHeight: 160,
     });
 
-    const MODES: ForgeMode[] = [
-        { id: "General", icon: Bot, color: "text-[#171717]" },
-        { id: "Career", icon: Rocket, color: "text-[#171717]" },
-        { id: "Coding", icon: Code2, color: "text-[#171717]" },
-        { id: "Interview", icon: MessageSquare, color: "text-[#171717]" },
-        { id: "Learning", icon: GraduationCap, color: "text-[#171717]" },
-    ];
+    useEffect(() => {
+        adjustHeight();
+    }, [value, adjustHeight]);
 
     const commandSuggestions: CommandSuggestion[] = [
         {
@@ -254,41 +250,17 @@ export function MentorForgeChatInput({
     };
 
     return (
-        <div className="w-full space-y-5">
-            {/* Mode selector pills */}
-            <div className="flex items-center justify-center flex-wrap gap-1.5">
-                {MODES.map((mode) => (
-                    <button
-                        key={mode.id}
-                        onClick={() => onModeChange(mode.id)}
-                        className={cn(
-                            "flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-semibold uppercase tracking-[0.15em] transition-all duration-200 border",
-                            activeMode === mode.id
-                                ? "bg-[#171717] border-[#171717] text-white shadow-sm"
-                                : "bg-white border-[#EBEBEB] text-[#4D4D4D] hover:bg-[#FAFAFA] hover:text-[#171717]"
-                        )}
-                    >
-                        <mode.icon
-                            className={cn("w-3.5 h-3.5", mode.color)}
-                        />
-                        {mode.id}
-                    </button>
-                ))}
-            </div>
-
+        <div className="w-full">
             {/* Chat input container */}
             <motion.div
-                className="relative bg-white rounded-xl border border-[#EBEBEB] shadow-sm"
-                initial={{ scale: 0.98 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.1 }}
+                className="omni-composer relative flex items-end gap-2 rounded-2xl border border-[#2a2c33] bg-[#121214] px-3 py-2 transition-colors focus-within:border-[#3a3d46]"
             >
                 {/* Command palette */}
                 <AnimatePresence>
                     {showCommandPalette && (
                         <motion.div
                             ref={commandPaletteRef}
-                            className="absolute left-4 right-4 bottom-full mb-2 bg-white rounded-lg z-50 shadow-lg border border-[#EBEBEB] overflow-hidden text-[#171717]"
+                            className="absolute left-4 right-4 bottom-full mb-2 bg-[#151515] rounded-lg z-50 shadow-2xl border border-[#242424] overflow-hidden text-[#F5F5F5]"
                             initial={{ opacity: 0, y: 5 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 5 }}
@@ -301,8 +273,8 @@ export function MentorForgeChatInput({
                                         className={cn(
                                             "flex items-center gap-3 px-4 py-2 text-xs cursor-pointer transition-colors",
                                             activeSuggestion === i
-                                                ? "bg-[#FAFAFA] text-[#171717]"
-                                                : "text-[#4D4D4D] hover:bg-[#FAFAFA]"
+                                                ? "bg-[#1F1F1F] text-[#F5F5F5]"
+                                                : "text-[#BDBDBD] hover:bg-[#1A1A1A]"
                                         )}
                                         onClick={() => selectCommand(i)}
                                         initial={{ opacity: 0 }}
@@ -313,8 +285,8 @@ export function MentorForgeChatInput({
                                             className={cn(
                                                 "w-5 h-5 flex items-center justify-center",
                                                 activeSuggestion === i
-                                                    ? "text-[#171717]"
-                                                    : "text-[#8F8F8F]"
+                                                    ? "text-[#8B5CF6]"
+                                                    : "text-[#7E7E7E]"
                                             )}
                                         >
                                             {s.icon}
@@ -322,7 +294,7 @@ export function MentorForgeChatInput({
                                         <div className="font-medium">
                                             {s.label}
                                         </div>
-                                        <div className="text-[#8F8F8F] text-[10px] ml-auto font-mono">
+                                        <div className="text-[#7E7E7E] text-[10px] ml-auto font-mono">
                                             {s.prefix}
                                         </div>
                                     </motion.div>
@@ -332,127 +304,46 @@ export function MentorForgeChatInput({
                     )}
                 </AnimatePresence>
 
-                {/* Textarea */}
-                <div className="p-4 pb-0">
-                    <textarea
-                        ref={textareaRef}
-                        value={value}
-                        onChange={(e) => {
-                            onChange(e.target.value);
-                            adjustHeight();
-                        }}
-                        onKeyDown={handleKeyDown}
-                        placeholder={
-                            placeholder ||
-                            `Message ${activeMode} AI Assistant...`
-                        }
-                        className={cn(
-                            "w-full px-2 py-2",
-                            "resize-none",
-                            "bg-transparent",
-                            "border-none outline-none",
-                            "text-[#171717] text-sm leading-relaxed",
-                            "placeholder:text-[#8F8F8F]",
-                            "min-h-[56px]",
-                            "focus:ring-0 focus:outline-none"
-                        )}
-                        style={{ overflow: "hidden" }}
-                    />
-                </div>
-
-                {/* Attachments */}
-                <AnimatePresence>
-                    {attachments.length > 0 && (
-                        <motion.div
-                            className="px-4 pb-2 flex gap-2 flex-wrap"
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                        >
-                            {attachments.map((file, i) => (
-                                <motion.div
-                                    key={i}
-                                    className="flex items-center gap-2 text-xs bg-[#FAFAFA] py-1.5 px-3 rounded-md text-[#4D4D4D] border border-[#EBEBEB]"
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.9 }}
-                                >
-                                    <span>{file}</span>
-                                    <button
-                                        onClick={() => removeAttachment(i)}
-                                        className="text-[#8F8F8F] hover:text-[#EE0000] transition-colors"
-                                    >
-                                        <XIcon className="w-3 h-3" />
-                                    </button>
-                                </motion.div>
-                            ))}
-                        </motion.div>
+                <textarea
+                    ref={textareaRef}
+                    value={value}
+                    rows={1}
+                    aria-label="Message Omni"
+                    onChange={(e) => {
+                        onChange(e.target.value);
+                        adjustHeight();
+                    }}
+                    onKeyDown={handleKeyDown}
+                    placeholder={placeholder || "Ask Omni..."}
+                    className={cn(
+                        "block min-w-0 flex-1 resize-none bg-transparent",
+                        "border-none px-1 py-1.5 outline-none",
+                        "text-sm leading-6 text-[#F5F5F5]",
+                        "placeholder:text-[#8b909a]",
+                        "min-h-[36px] max-h-[160px]",
+                        "focus:ring-0 focus:outline-none"
                     )}
-                </AnimatePresence>
+                />
 
-                {/* Bottom toolbar */}
-                <div className="px-4 pb-4 pt-2 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-1">
-                        <motion.button
-                            type="button"
-                            onClick={handleAttachFile}
-                            whileTap={{ scale: 0.94 }}
-                            className="p-2 text-[#8F8F8F] hover:text-[#171717] rounded-md transition-colors hover:bg-[#FAFAFA]"
-                        >
-                            <Paperclip className="w-4 h-4" />
-                        </motion.button>
-                        <motion.button
-                            type="button"
-                            data-command-button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setShowCommandPalette((p) => !p);
-                            }}
-                            whileTap={{ scale: 0.94 }}
-                            className={cn(
-                                "p-2 rounded-md transition-colors hover:bg-[#FAFAFA]",
-                                showCommandPalette
-                                    ? "bg-[#FAFAFA] text-[#171717]"
-                                    : "text-[#8F8F8F] hover:text-[#171717]"
-                            )}
-                        >
-                            <Command className="w-4 h-4" />
-                        </motion.button>
-                    </div>
-
-                    <motion.button
-                        type="button"
-                        onClick={() => onSend()}
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.99 }}
-                        disabled={isLoading || !value.trim()}
-                        className={cn(
-                            "px-4 py-2 rounded-md text-xs font-medium transition-all duration-200",
-                            "flex items-center gap-2",
-                            value.trim()
-                                ? "bg-[#171717] text-white shadow-sm hover:bg-[#171717]/90"
-                                : "bg-[#FAFAFA] text-[#8F8F8F] border border-[#EBEBEB]"
-                        )}
-                    >
-                        {isLoading ? (
-                            <LoaderIcon className="w-4 h-4 animate-spin text-[#8F8F8F]" />
-                        ) : (
-                            <SendIcon className="w-4 h-4" />
-                        )}
-                        <span>Send</span>
-                    </motion.button>
-                </div>
+                <button
+                    type="button"
+                    onClick={() => onSend()}
+                    disabled={isLoading || !value.trim()}
+                    aria-label="Send"
+                    className={cn(
+                        "mb-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors",
+                        value.trim()
+                            ? "bg-[#f4f5f7] text-[#0c0d10]"
+                            : "text-[#5c616b]"
+                    )}
+                >
+                    {isLoading ? (
+                        <LoaderIcon className="h-4 w-4 animate-spin" />
+                    ) : (
+                        <SendIcon className="h-4 w-4" />
+                    )}
+                </button>
             </motion.div>
-
-            {/* Version tag */}
-            <div className="flex items-center justify-center gap-4 pt-1">
-                <div className="h-px bg-[#EBEBEB] flex-1" />
-                <p className="text-[8px] text-[#8F8F8F] font-bold uppercase tracking-[0.4em] flex items-center gap-2">
-                    <Bot className="w-2.5 h-2.5 text-[#171717]" />
-                    MentorForge Pro v3.1
-                </p>
-                <div className="h-px bg-[#EBEBEB] flex-1" />
-            </div>
         </div>
     );
 }
@@ -464,16 +355,16 @@ export function MentorForgeTypingIndicator({ isTyping }: { isTyping: boolean }) 
         <AnimatePresence>
             {isTyping && (
                 <motion.div
-                    className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white rounded-full px-5 py-2.5 shadow-lg border border-[#EBEBEB] z-50 text-[#171717]"
+                    className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#151515] rounded-full px-5 py-2.5 shadow-2xl border border-[#242424] z-50 text-[#F5F5F5]"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 20 }}
                 >
                     <div className="flex items-center gap-3">
-                        <div className="w-7 h-7 rounded-full bg-[#FAFAFA] flex items-center justify-center border border-[#EBEBEB]">
-                            <BrainCircuit className="w-3.5 h-3.5 text-[#171717]" />
+                        <div className="w-7 h-7 rounded-full bg-[#101010] flex items-center justify-center border border-[#242424]">
+                            <BrainCircuit className="w-3.5 h-3.5 text-[#8B5CF6]" />
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-[#4D4D4D] font-medium">
+                        <div className="flex items-center gap-2 text-xs text-[#BDBDBD] font-medium">
                             <span>Thinking</span>
                             <TypingDots />
                         </div>

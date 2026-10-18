@@ -1,227 +1,162 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  FileText,
-  Code,
-  Projector,
-  MessageSquare,
-  BookOpen,
-  Briefcase,
-  Search,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
-  Building2,
-  Zap,
-  Lightbulb,
-  PlayCircle,
-  Bot,
-  GraduationCap,
-  Brain,
-  Terminal,
-  PanelLeftClose,
-  PanelLeft,
-  Wallet,
-  Network
-} from "@/components/icons";
+import { Menu } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/hooks/use-sidebar";
+import { WalletModal } from "@/components/billing/WalletModal";
 
 interface SidebarProps {
   locale: string;
 }
 
+const RAIL = [
+  { name: "Overview", icon: "/rail/rail-overview.png?v=ice", href: "dashboard" },
+  { name: "Omni", icon: "/rail/rail-omni.png?v=ice", href: "omni" },
+  { name: "Resume", icon: "/rail/rail-resume.png?v=ice", href: "resumes" },
+  { name: "Jobs", icon: "/rail/rail-jobs.png?v=ice", href: "jobs" },
+  { name: "Apps", icon: "/rail/rail-apps.png?v=ice", href: "applications" },
+] as const;
+
 export function Sidebar({ locale }: SidebarProps) {
-  const { collapsed, toggle, setCollapsed, isMounted } = useSidebar();
+  const { mobileOpen, setMobileOpen, toggle } = useSidebar();
   const pathname = usePathname();
+  const [credits, setCredits] = useState<number | null>(null);
+  const [walletOpen, setWalletOpen] = useState(false);
+
+  const loadCredits = useCallback(() => {
+    fetch("/api/credits/balance")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        const available = data?.balance?.available;
+        if (data?.success && typeof available === "number") {
+          setCredits(available);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    loadCredits();
+  }, [loadCredits]);
 
   const safeLocale = locale.toLowerCase();
-  const navItems = [
-    { name: "Overview", icon: LayoutDashboard, href: `/${safeLocale}/dashboard` },
-    { name: "ResumeForge", icon: FileText, href: `/${safeLocale}/resumes` },
-    { name: "CodingForge", icon: Code, href: `/${safeLocale}/codingforge` },
-    { name: "PrepForge", icon: Brain, href: `/${safeLocale}/prepforge` },
-    { name: "ProjectForge", icon: Projector, href: `/${safeLocale}/projectforge` },
-    { name: "InterviewForge", icon: MessageSquare, href: `/${safeLocale}/mock-interview` },
-    { name: "LearnForge", icon: PlayCircle, href: `/${safeLocale}/learnforge` },
-    { name: "KnowledgeForge", icon: GraduationCap, href: `/${safeLocale}/knowledgeforge` },
-    { name: "ExplainForge", icon: Lightbulb, href: `/${safeLocale}/explainforge` },
-    { name: "StudyForge", icon: BookOpen, href: `/${safeLocale}/studyforge` },
-    { name: "CareerForge", icon: Briefcase, href: `/${safeLocale}/careerforge` },
-    { name: "MentorForge", icon: Bot, href: `/${safeLocale}/mentorforge` },
-    { name: "JobForge", icon: Search, href: `/${safeLocale}/jobs` },
-    { name: "Company Prep", icon: Building2, href: `/${safeLocale}/company-prep-interview` },
-    { name: "API Platform", icon: Terminal, href: `/${safeLocale}/api-keys` },
-    { name: "SalaryForge", icon: Wallet, href: `/${safeLocale}/salaryforge` },
-    { name: "NetworkForge", icon: Network, href: `/${safeLocale}/networkforge` },
-    { name: "AtsLive", icon: Zap, href: `/${safeLocale}/ats-live` },
-    { name: "AI Tools", icon: Zap, href: `/${safeLocale}/tools` },
-  ];
+  const accountActive = pathname?.includes("/account");
+
+  const isActive = (href: string, name: string) => {
+    if (name === "Apps") return pathname?.includes("/applications");
+    if (name === "Omni") return pathname?.includes("/omni") || pathname?.includes("/mentorforge");
+    const path = `/${safeLocale}/${href}`;
+    return pathname === path || pathname?.startsWith(path + "/");
+  };
 
   return (
     <>
-      {/* Mobile Overlay */}
-      {!collapsed && (
-        <div 
-          className="fixed inset-0 z-30 bg-black/20 backdrop-blur-[1px] md:hidden animate-in fade-in duration-300"
-          onClick={() => setCollapsed(true)}
+      {!mobileOpen && (
+        <button
+          type="button"
+          onClick={toggle}
+          className="fixed left-3 top-3 z-30 inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#8b909a] md:hidden"
+          aria-label="Open menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+      )}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] transition-opacity md:hidden"
+          onClick={() => setMobileOpen(false)}
         />
       )}
 
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen border-r border-[#EBEBEB] bg-[#FAFAFA] flex flex-col",
-          "ease-[cubic-bezier(0.4,0,0.2,1)]",
-          isMounted ? "transition-all duration-300" : "",
-          collapsed 
-            ? "-translate-x-full md:translate-x-0 md:w-[72px]" 
-            : "translate-x-0 w-64 md:w-64"
+          "fixed left-0 top-0 z-50 flex h-screen w-[80px] shrink-0 flex-col border-r border-[#161616] bg-[#050505]",
+          "transition-transform duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] md:translate-x-0",
+          mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full md:translate-x-0"
         )}
       >
-        <div className="flex h-full flex-col p-3">
-          {/* Logo + Collapse Toggle */}
-          <div className="mb-6 flex items-center justify-between min-h-[48px] px-1 select-none">
-            {/* Expanded Brand Mark */}
-            <div className={cn(
-              "flex items-center gap-2 overflow-hidden ease-[cubic-bezier(0.4,0,0.2,1)]",
-              isMounted ? "transition-all duration-300" : "",
-              collapsed ? "w-0 opacity-0" : "opacity-100"
-            )}>
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#171717] shrink-0 shadow-sm">
-                <span className="text-white text-[10px] font-bold tracking-tight">RF</span>
-              </div>
-              <span className="text-[#171717] font-semibold text-sm tracking-tight shrink-0 font-sans">
-                ResumeForge AI
-              </span>
-            </div>
-
-            {/* Collapsed Brand Mark */}
-            {collapsed && (
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#171717] mx-auto shrink-0 shadow-sm animate-in fade-in duration-200">
-                <span className="text-white text-[10px] font-bold tracking-tight">RF</span>
-              </div>
-            )}
-
-            <button
-              onClick={toggle}
-              className={cn(
-                "p-1.5 rounded-lg transition-all duration-200 text-[#4D4D4D] hover:text-[#171717] hover:bg-[#171717]/5",
-                collapsed && "absolute right-2 top-4"
-              )}
-              title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            >
-              {collapsed ? (
-                <PanelLeft className="w-4 h-4" />
-              ) : (
-                <PanelLeftClose className="w-4 h-4" />
-              )}
-            </button>
-          </div>
-
-          {/* Nav Items */}
-          <nav className="flex-1 space-y-0.5 overflow-y-auto overflow-x-hidden scrollbar-none">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  title={collapsed ? item.name : undefined}
-                  className={cn(
-                    "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 group font-sans",
-                    collapsed && "justify-center px-0",
-                    isActive
-                      ? "bg-[#171717]/5 text-[#171717] font-semibold"
-                      : "text-[#4D4D4D] hover:bg-[#171717]/5 hover:text-[#171717]"
-                  )}
-                >
-                  {/* Active indicator bar */}
-                  {isActive && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-[#171717] transition-all duration-300" />
-                  )}
-
-                  <item.icon className={cn(
-                    "h-[18px] w-[18px] shrink-0 transition-all duration-200",
-                    isActive ? "text-[#171717]" : "text-[#4D4D4D] group-hover:text-[#171717]",
-                    collapsed && "h-5 w-5"
-                  )} />
-
-                  {/* Label with smooth slide */}
-                  <span className={cn(
-                    "whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
-                    collapsed ? "w-0 opacity-0 overflow-hidden" : "w-auto opacity-100"
-                  )}>
-                    {item.name}
-                  </span>
-
-                  {/* Active dot */}
-                  {isActive && !collapsed && (
-                    <div className="ml-auto h-1.5 w-1.5 rounded-full bg-[#171717]" />
-                  )}
-
-                  {/* Tooltip for collapsed state */}
-                  {collapsed && (
-                    <div className="absolute left-full ml-2 px-3 py-1.5 rounded-lg bg-white border border-[#EBEBEB] text-[#171717] text-xs font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 shadow-[0_8px_16px_rgba(0,0,0,0.06)] z-50">
-                      {item.name}
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 rotate-45 bg-white border-l border-b border-[#EBEBEB]" />
-                    </div>
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Bottom Actions */}
-          <div className="mt-auto space-y-0.5 pt-3 border-t border-[#EBEBEB]">
+        <div className="flex h-full flex-col items-center justify-between px-2 py-4">
+          <div className="flex w-full flex-col items-center">
             <Link
-              href={`/${locale}/account`}
-              title={collapsed ? "Settings" : undefined}
-              className={cn(
-                "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 group font-sans",
-                collapsed && "justify-center px-0",
-                pathname?.includes("account")
-                  ? "bg-[#171717]/5 text-[#171717] font-semibold"
-                  : "text-[#4D4D4D] hover:bg-[#171717]/5 hover:text-[#171717]"
-              )}
+              href={`/${safeLocale}/dashboard`}
+              title="ResumeForge"
+              className="mb-5 flex h-9 w-9 items-center justify-center text-[13px] font-medium tracking-tight text-[#f4f5f7]"
             >
-              <Settings className={cn("h-[18px] w-[18px] shrink-0", collapsed && "h-5 w-5")} />
-              <span className={cn(
-                "whitespace-nowrap transition-all duration-300",
-                collapsed ? "w-0 opacity-0 overflow-hidden" : "w-auto opacity-100"
-              )}>
-                Settings
-              </span>
-
-              {collapsed && (
-                <div className="absolute left-full ml-2 px-3 py-1.5 rounded-lg bg-white border border-[#EBEBEB] text-[#171717] text-xs font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 shadow-[0_8px_16px_rgba(0,0,0,0.06)] z-50">
-                  Settings
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 rotate-45 bg-white border-l border-b border-[#EBEBEB]" />
-                </div>
-              )}
+              RF
             </Link>
 
-            <button
-              onClick={toggle}
+            <nav className="flex w-full flex-col gap-1" aria-label="Global navigation rail">
+              {RAIL.map((item) => {
+                const active = isActive(item.href, item.name);
+                return (
+                  <Link
+                    key={item.name}
+                    href={`/${safeLocale}/${item.href}`}
+                    onClick={() => setMobileOpen(false)}
+                    title={item.name}
+                    className={cn(
+                      "flex flex-col items-center gap-1 rounded-2xl px-1 py-2 transition-colors",
+                      active ? "bg-[#141414] text-[#f4f5f7]" : "text-[#8b909a] hover:bg-[#101010] hover:text-[#f4f5f7]"
+                    )}
+                  >
+                    <img
+                      src={item.icon}
+                      alt=""
+                      width={32}
+                      height={32}
+                      draggable={false}
+                      className={cn("h-8 w-8 object-contain", active ? "opacity-100" : "opacity-80")}
+                    />
+                    <span className="text-[10px] leading-none tracking-tight">{item.name}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+
+          <div className="flex w-full flex-col items-center gap-1 border-t border-[#161616] pt-3">
+            <Link
+              href={`/${safeLocale}/account`}
+              onClick={() => setMobileOpen(false)}
+              title="Account"
               className={cn(
-                "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[#4D4D4D] transition-all duration-200 hover:bg-[#171717]/5 hover:text-[#171717]",
-                collapsed && "justify-center px-0"
+                "flex w-full flex-col items-center gap-1 rounded-2xl px-1 py-2 transition-colors",
+                accountActive ? "bg-[#141414] text-[#f4f5f7]" : "text-[#8b909a] hover:bg-[#101010] hover:text-[#f4f5f7]"
               )}
             >
-              {collapsed ? (
-                <ChevronRight className="h-5 w-5 text-[#171717]" />
-              ) : (
-                <>
-                  <ChevronLeft className="h-[18px] w-[18px]" />
-                  <span>Collapse</span>
-                </>
-              )}
+              <img
+                src="/rail/rail-account.png?v=ice"
+                alt=""
+                width={32}
+                height={32}
+                draggable={false}
+                className={cn("h-8 w-8 object-contain", accountActive ? "opacity-100" : "opacity-80")}
+              />
+              <span className="text-[10px] leading-none tracking-tight">Account</span>
+            </Link>
+            <button
+              type="button"
+              onClick={() => setWalletOpen(true)}
+              className="flex w-full flex-col items-center rounded-2xl px-1 py-2 text-[#8b909a] transition-colors hover:bg-[#101010] hover:text-[#f4f5f7]"
+            >
+              <span className="text-[13px] font-medium tabular-nums leading-none text-[#f4f5f7]">
+                {credits !== null ? credits : "–"}
+              </span>
+              <span className="mt-1 text-[10px] leading-none tracking-tight">credits</span>
             </button>
           </div>
         </div>
       </aside>
+      <WalletModal
+        isOpen={walletOpen}
+        onClose={() => {
+          setWalletOpen(false);
+          loadCredits();
+        }}
+      />
     </>
   );
 }

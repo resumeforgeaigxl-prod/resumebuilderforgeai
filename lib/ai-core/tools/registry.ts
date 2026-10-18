@@ -1,8 +1,33 @@
-import { createClient } from '@/lib/supabase/server';
-import { consumeCodeExecutionCredit, refundCodeExecutionCredit } from '@/lib/code-execution-credits';
-import { generateGroundedJobSearch } from '@/lib/gemini-service';
-import { callAI } from '@/lib/ai/router';
 import { SchemaType } from '@google/generative-ai';
+import {
+  listResumes,
+  getResumeDetails,
+  auditResumeATS,
+  tailorResumeForJob,
+  generateResume,
+} from '@/lib/capabilities/resume';
+import { updateCareerProfileInsights } from '@/lib/capabilities/career';
+import { negotiateSalaryOffer } from '@/lib/capabilities/salary';
+import { createLearningPlan, addStudyTopic, getLearningProgress } from '@/lib/capabilities/learning';
+import { generateProjectBlueprint } from '@/lib/capabilities/projects';
+import { listMockInterviews, triggerMockInterview, evaluateInterviewAnswer } from '@/lib/capabilities/interview';
+import { listCodingSubmissions, listCodingProblems, runCodeSandbox, triggerCodingChallenge } from '@/lib/capabilities/coding';
+import {
+  searchJobMarket,
+  getJobApplications,
+  getCanonicalJobById,
+  verifyJobFreshness,
+  findReplacementOpportunities,
+  checkJobApplicationEligibility,
+  matchCandidateToJob,
+  rankJobsForCandidate,
+} from '@/lib/capabilities/jobs';
+import {
+  getCandidateApplicationProfile,
+  upsertApplicationAnswer,
+  SENSITIVE_PROTECTED_FIELDS,
+} from '@/lib/capabilities/profile';
+import { ApplicationPreparationEngine } from '@/lib/application-engine';
 
 export interface ToolDefinition {
   name: string;
@@ -22,118 +47,8 @@ export interface ToolDefinition {
   execute: (args: any, userId: string) => Promise<any>;
 }
 
-const JUDGE0_URL = process.env.JUDGE0_URL || 'http://34.170.78.245:2358';
-const LANGUAGE_MAP: Record<string, number> = {
-  'python': 71,
-  'javascript': 63,
-  'java': 62,
-  'cpp': 54,
-  'c': 50
-};
-
-const DEFAULT_RESUME_JSON: {
-  name: string;
-  email: string;
-  phone: string;
-  linkedin: string;
-  github: string;
-  summary: string;
-  skills: { languages: string[]; frameworks: string[]; tools: string[]; other: string[] };
-  experience: { id: string; company: string; role: string; duration: string; points: string[] }[];
-  projects: { id: string; name: string; tech: string[]; description: string[] }[];
-  education: { id: string; institution: string; degree: string; year: string; score: string }[];
-  certifications: { id: string; title: string; issuer: string; year: string }[];
-} = {
-  name: "",
-  email: "",
-  phone: "",
-  linkedin: "",
-  github: "",
-  summary: "",
-  skills: { languages: [], frameworks: [], tools: [], other: [] },
-  experience: [],
-  projects: [],
-  education: [],
-  certifications: []
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function buildResumeFromProfile(profile: any): typeof DEFAULT_RESUME_JSON {
-  if (!profile) return { ...DEFAULT_RESUME_JSON };
-
-  const profileSkills = Array.isArray(profile.skills) ? profile.skills : [];
-  const skills = {
-    languages: [] as string[],
-    frameworks: [] as string[],
-    tools: [] as string[],
-    other: profileSkills.length > 0 ? [...profileSkills] : []
-  };
-
-  const education: { id: string; institution: string; degree: string; year: string; score: string }[] = [];
-  
-  if (profile.education_10th_school) {
-    education.push({
-      id: `edu-10th-${Date.now()}`,
-      institution: profile.education_10th_school || '',
-      degree: '10th / SSC',
-      year: profile.education_10th_year || '',
-      score: profile.education_10th_percentage || ''
-    });
-  }
-  if (profile.education_12th_school) {
-    education.push({
-      id: `edu-12th-${Date.now()}`,
-      institution: profile.education_12th_school || '',
-      degree: '12th / HSC',
-      year: profile.education_12th_year || '',
-      score: profile.education_12th_percentage || ''
-    });
-  }
-  if (profile.education_diploma_college) {
-    education.push({
-      id: `edu-diploma-${Date.now()}`,
-      institution: profile.education_diploma_college || '',
-      degree: `Diploma in ${profile.education_diploma_branch || 'Engineering'}`,
-      year: profile.education_diploma_year || '',
-      score: profile.education_diploma_percentage || ''
-    });
-  }
-  if (profile.education_btech_college) {
-    education.push({
-      id: `edu-btech-${Date.now()}`,
-      institution: profile.education_btech_college || '',
-      degree: `B.Tech in ${profile.education_btech_branch || 'Computer Science'}`,
-      year: profile.education_btech_year || '',
-      score: profile.education_btech_cgpa || ''
-    });
-  }
-  if (profile.education_masters_college) {
-    education.push({
-      id: `edu-masters-${Date.now()}`,
-      institution: profile.education_masters_college || '',
-      degree: `${profile.education_masters_degree || 'M.Tech'} in ${profile.education_masters_branch || ''}`.trim(),
-      year: profile.education_masters_year || '',
-      score: profile.education_masters_cgpa || ''
-    });
-  }
-
-  return {
-    name: profile.full_name || '',
-    email: profile.email || '',
-    phone: profile.phone || '',
-    linkedin: profile.linkedin_url || '',
-    github: profile.github_url || '',
-    summary: profile.professional_summary || '',
-    skills,
-    experience: [],
-    projects: [],
-    education: education.length > 0 ? education : [],
-    certifications: []
-  };
-}
-
 export const toolsRegistry: Record<string, ToolDefinition> = {
-  // ─── RESUMEFORGE TOOLS ───────────────────────────────────────────────────
+  // ─── RESUME CAPABILITIES ──────────────────────────────────────────────────
   list_resumes: {
     name: 'list_resumes',
     description: 'Lists all professional resumes created by the user, including details like scores and last updated timestamps.',
@@ -142,16 +57,9 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
       properties: {}
     },
     execute: async (_, userId) => {
-      const supabase = createClient();
       try {
-        const { data, error } = await supabase
-          .from('resumes')
-          .select('id, title, created_at, updated_at')
-          .eq('user_id', userId)
-          .order('updated_at', { ascending: false });
-
-        if (error) throw error;
-        return { resumes: data || [] };
+        const resumes = await listResumes(userId);
+        return { resumes };
       } catch (err: any) {
         console.error('[list_resumes] Error:', err.message);
         return { error: `Failed to fetch resumes: ${err.message}` };
@@ -174,18 +82,10 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
     },
     execute: async ({ resumeId }, userId) => {
       if (!resumeId) return { error: 'resumeId is required' };
-      const supabase = createClient();
       try {
-        const { data, error } = await supabase
-          .from('resumes')
-          .select('*')
-          .eq('id', resumeId)
-          .eq('user_id', userId)
-          .maybeSingle();
-
-        if (error) throw error;
-        if (!data) return { error: 'Resume not found' };
-        return { resume: data };
+        const resume = await getResumeDetails(resumeId, userId);
+        if (!resume) return { error: 'Resume not found' };
+        return { resume };
       } catch (err: any) {
         console.error('[get_resume_details] Error:', err.message);
         return { error: `Failed to fetch resume details: ${err.message}` };
@@ -193,7 +93,104 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
     }
   },
 
-  // ─── CODINGFORGE TOOLS ───────────────────────────────────────────────────
+  audit_resume_ats: {
+    name: 'audit_resume_ats',
+    description: 'Performs a deep ATS compatibility analysis on the candidate resume. Computes ATS score (0-100), extracts matched keywords, identifies missing requirements, and flags critical improvements.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        resumeId: {
+          type: SchemaType.STRING,
+          description: 'The UUID of the resume to audit (optional, defaults to latest resume)'
+        },
+        targetRole: {
+          type: SchemaType.STRING,
+          description: 'The target role or title to benchmark against (e.g. "Senior Full-Stack Engineer")'
+        },
+        jobDescription: {
+          type: SchemaType.STRING,
+          description: 'The job posting description text to match against (optional)'
+        }
+      }
+    },
+    execute: async ({ resumeId, targetRole, jobDescription }, userId) => {
+      try {
+        return await auditResumeATS({ resumeId, targetRole, jobDescription }, userId);
+      } catch (err: any) {
+        console.error('[audit_resume_ats] Error:', err.message);
+        return { error: `Failed to audit resume: ${err.message}` };
+      }
+    }
+  },
+
+  tailor_resume_for_job: {
+    name: 'tailor_resume_for_job',
+    description: 'Autonomously tailors the candidate resume specifically for a target role or job description. Rewrites bullet points to maximize ATS keyword match and persists a new tailored resume version.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        resumeId: {
+          type: SchemaType.STRING,
+          description: 'The UUID of the base resume to tailor (optional, defaults to most recent)'
+        },
+        targetRole: {
+          type: SchemaType.STRING,
+          description: 'The target role (e.g. "Senior Backend Engineer", "AI Product Engineer")'
+        },
+        jobDescription: {
+          type: SchemaType.STRING,
+          description: 'The job posting description or key requirements to optimize for'
+        }
+      },
+      required: ['targetRole']
+    },
+    execute: async ({ resumeId, targetRole, jobDescription }, userId) => {
+      try {
+        return await tailorResumeForJob({ resumeId, targetRole, jobDescription }, userId);
+      } catch (err: any) {
+        console.error('[tailor_resume_for_job] Error:', err.message);
+        return { error: `Failed to tailor resume: ${err.message}` };
+      }
+    }
+  },
+
+  trigger_resume_generation: {
+    name: 'trigger_resume_generation',
+    description: 'Generates a complete new professional resume tailored for a specific target role or title, optimizes it for ATS systems, and stores it in the database.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        targetRole: {
+          type: SchemaType.STRING,
+          description: 'Target job title (e.g. "Senior React Developer", "AI Engineer", "Product Manager")'
+        },
+        title: {
+          type: SchemaType.STRING,
+          description: 'A custom title for this resume (optional)'
+        },
+        experienceSummary: {
+          type: SchemaType.STRING,
+          description: 'Candidate background or key career summary (optional)'
+        },
+        skills: {
+          type: SchemaType.ARRAY,
+          items: { type: SchemaType.STRING },
+          description: 'Specific technical skills or tools to emphasize'
+        }
+      },
+      required: ['targetRole']
+    },
+    execute: async ({ targetRole, title, experienceSummary, skills: inputSkills }, userId) => {
+      try {
+        return await generateResume({ targetRole, title, experienceSummary, skills: inputSkills }, userId);
+      } catch (err: any) {
+        console.error('[trigger_resume_generation] Error:', err.message);
+        return { error: `Failed to generate resume: ${err.message}` };
+      }
+    }
+  },
+
+  // ─── CODING CAPABILITIES ─────────────────────────────────────────────────
   list_coding_submissions: {
     name: 'list_coding_submissions',
     description: 'Lists the user\'s recent coding challenge submissions, showing programming languages, pass/fail status, and scores.',
@@ -202,17 +199,9 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
       properties: {}
     },
     execute: async (_, userId) => {
-      const supabase = createClient();
       try {
-        const { data, error } = await supabase
-          .from('coding_submissions')
-          .select('id, language, status, score, problem_id, created_at')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false })
-          .limit(10);
-
-        if (error) throw error;
-        return { submissions: data || [] };
+        const submissions = await listCodingSubmissions(userId);
+        return { submissions };
       } catch (err: any) {
         console.error('[list_coding_submissions] Error:', err.message);
         return { error: `Failed to fetch submissions: ${err.message}` };
@@ -222,21 +211,15 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
 
   list_coding_problems: {
     name: 'list_coding_problems',
-    description: 'Lists the available coding challenges on CodingForge, including their titles, difficulty levels, and slugs.',
+    description: 'Lists the available coding challenges, including their titles, difficulty levels, and slugs.',
     parameters: {
       type: SchemaType.OBJECT,
       properties: {}
     },
     execute: async () => {
-      const supabase = createClient();
       try {
-        const { data, error } = await supabase
-          .from('coding_questions')
-          .select('id, title, difficulty, slug, tags')
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        return { problems: data || [] };
+        const problems = await listCodingProblems();
+        return { problems };
       } catch (err: any) {
         console.error('[list_coding_problems] Error:', err.message);
         return { error: `Failed to fetch coding problems: ${err.message}` };
@@ -265,102 +248,22 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
         },
         problemId: {
           type: SchemaType.STRING,
-          description: 'The UUID of the CodingForge challenge to run test cases against (optional)'
+          description: 'The UUID of the coding challenge to run test cases against (optional)'
         }
       },
       required: ['language', 'code']
     },
     execute: async ({ language, code, stdin, problemId }, userId) => {
-      if (!language || !code) return { error: 'Language and code are required.' };
-      
-      const languageId = LANGUAGE_MAP[language.toLowerCase()];
-      if (!languageId) return { error: `Unsupported language: ${language}` };
-
-      // 1. Deduct execution credit
-      const creditResult = await consumeCodeExecutionCredit(userId);
-      if (!creditResult.success) {
-        return { error: creditResult.error || 'Out of code execution credits.' };
-      }
-
       try {
-        const supabase = createClient();
-        let testCases = [];
-
-        // If it's a specific problem, fetch its test cases
-        if (problemId) {
-          const { data } = await supabase
-            .from('coding_test_cases')
-            .select('*')
-            .eq('question_id', problemId)
-            .order('order_index', { ascending: true });
-          if (data && data.length > 0) {
-            testCases = data;
-          }
-        }
-
-        // Default test case if none found
-        if (testCases.length === 0) {
-          testCases = [{ input: stdin || '', expected_output: null, is_hidden: false }];
-        }
-
-        // 2. Run all test cases in parallel
-        const runPromises = testCases.map(async (tc) => {
-          const response = await fetch(`${JUDGE0_URL}/submissions?wait=true`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              source_code: code,
-              language_id: languageId,
-              stdin: tc.input || '',
-            }),
-          });
-
-          if (!response.ok) throw new Error('Judge0 connection error');
-          const data = await response.json();
-
-          const actualOutput = (data.stdout || '').trim();
-          const expectedOutput = (tc.expected_output || '').trim();
-          
-          let passed = true;
-          if (tc.expected_output !== null) {
-            passed = actualOutput === expectedOutput;
-          }
-
-          return {
-            input: tc.is_hidden ? '[Hidden]' : tc.input,
-            expected: tc.is_hidden ? '[Hidden]' : tc.expected_output,
-            actual: actualOutput,
-            status: data.status?.description || 'Unknown',
-            status_id: data.status?.id,
-            time: data.time || 0,
-            passed,
-            stderr: data.stderr || data.compile_output || '',
-          };
-        });
-
-        const results = await Promise.all(runPromises);
-        const anyFailed = results.some(r => !r.passed || r.status_id !== 3);
-
-        return {
-          success: !anyFailed,
-          results,
-          summary: {
-            total: results.length,
-            passed: results.filter(r => r.passed && r.status_id === 3).length,
-            failed: results.filter(r => !r.passed || r.status_id !== 3).length
-          }
-        };
-
+        return await runCodeSandbox({ language, code, stdin, problemId }, userId);
       } catch (err: any) {
         console.error('[run_code_sandbox] Execution failed:', err.message);
-        // Refund credit on exception
-        await refundCodeExecutionCredit(userId).catch(() => {});
         return { error: `Execution sandbox error: ${err.message}` };
       }
     }
   },
 
-  // ─── INTERVIEWFORGE TOOLS ────────────────────────────────────────────────
+  // ─── INTERVIEW CAPABILITIES ─────────────────────────────────────────────
   list_mock_interviews: {
     name: 'list_mock_interviews',
     description: 'Lists all mock interviews taken by the user, including overall scores, performance feedback, and interview types.',
@@ -369,17 +272,9 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
       properties: {}
     },
     execute: async (_, userId) => {
-      const supabase = createClient();
       try {
-        const { data, error } = await supabase
-          .from('mock_interviews')
-          .select('id, role, score, feedback, interview_type, created_at')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false })
-          .limit(10);
-
-        if (error) throw error;
-        return { interviews: data || [] };
+        const interviews = await listMockInterviews(userId);
+        return { interviews };
       } catch (err: any) {
         console.error('[list_mock_interviews] Error:', err.message);
         return { error: `Failed to fetch interviews: ${err.message}` };
@@ -387,35 +282,18 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
     }
   },
 
-  // ─── STUDYFORGE / LEARNFORGE TOOLS ───────────────────────────────────────
+  // ─── LEARNING CAPABILITIES ──────────────────────────────────────────────
   list_learning_progress: {
     name: 'list_learning_progress',
-    description: 'Retrieves the user\'s active learning roadmap modules and progress from LearnForge.',
+    description: 'Retrieves the user\'s active learning roadmap modules and progress.',
     parameters: {
       type: SchemaType.OBJECT,
       properties: {}
     },
     execute: async (_, userId) => {
-      const supabase = createClient();
       try {
-        // Try user_learning_progress first, fallback to roadmaps
-        let { data, error } = await supabase
-          .from('user_learning_progress')
-          .select('*')
-          .eq('user_id', userId);
-
-        if (error || !data || data.length === 0) {
-          const { data: roadmaps, error: roadmapsErr } = await supabase
-            .from('roadmaps')
-            .select('*')
-            .eq('user_id', userId);
-
-          if (!roadmapsErr && roadmaps) {
-            data = roadmaps;
-          }
-        }
-
-        return { progress: data || [] };
+        const progress = await getLearningProgress(userId);
+        return { progress };
       } catch (err: any) {
         console.error('[list_learning_progress] Error:', err.message);
         return { error: `Failed to fetch learning progress: ${err.message}` };
@@ -438,40 +316,8 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
     },
     execute: async ({ topicName }, userId) => {
       if (!topicName) return { error: 'topicName is required' };
-      const supabase = createClient();
       try {
-        // 1. Try to insert into user_learning_progress or roadmaps
-        // We will insert into roadmaps table which exists in public.roadmaps
-        const { data, error } = await supabase
-          .from('roadmaps')
-          .insert({
-            user_id: userId,
-            title: topicName,
-            status: 'active',
-            progress: 0,
-            syllabus: [`Introduction to ${topicName}`, `Core Concepts of ${topicName}`, `Hands-on Practice with ${topicName}`]
-          })
-          .select()
-          .maybeSingle();
-
-        if (error) {
-          // Try user_learning_progress table
-          const { data: lpData, error: lpError } = await supabase
-            .from('user_learning_progress')
-            .insert({
-              user_id: userId,
-              topic: topicName,
-              status: 'active',
-              progress: 0
-            })
-            .select()
-            .maybeSingle();
-
-          if (lpError) throw lpError;
-          return { success: true, topic: lpData };
-        }
-
-        return { success: true, topic: data };
+        return await addStudyTopic(topicName, userId);
       } catch (err: any) {
         console.error('[add_study_topic] Error:', err.message);
         return { error: `Failed to add study topic: ${err.message}` };
@@ -494,10 +340,8 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
       required: ['query']
     },
     execute: async ({ query }) => {
-      if (!query) return { error: 'query is required' };
       try {
-        const jobs = await generateGroundedJobSearch(query);
-        return { jobs: jobs || [] };
+        return await searchJobMarket(query);
       } catch (err: any) {
         console.error('[search_job_market] Error:', err.message);
         return { error: `Failed to search job market: ${err.message}` };
@@ -513,29 +357,246 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
       properties: {}
     },
     execute: async (_, userId) => {
-      const supabase = createClient();
       try {
-        const { data, error } = await supabase
-          .from('job_applications')
-          .select(`
-            id,
-            status,
-            notes,
-            created_at,
-            jobs (
-              title,
-              company,
-              location
-            )
-          `)
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        return { applications: data || [] };
+        const applications = await getJobApplications(userId);
+        return { applications };
       } catch (err: any) {
         console.error('[get_job_applications] Error:', err.message);
         return { error: `Failed to fetch job applications: ${err.message}` };
+      }
+    }
+  },
+
+  get_canonical_job: {
+    name: 'get_canonical_job',
+    description: 'Retrieves complete canonical job details, requirements, compensation, live status, and source provenance by canonical job UUID. If the vacancy has closed, automatically includes top similar active replacements.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        jobId: {
+          type: SchemaType.STRING,
+          description: 'The canonical UUID of the job opening to inspect'
+        }
+      },
+      required: ['jobId']
+    },
+    execute: async ({ jobId }, userId) => {
+      if (!jobId) return { error: 'jobId is required' };
+      try {
+        const job = await getCanonicalJobById(jobId, userId);
+        return {
+          job,
+          isClosed: job.status === 'CLOSED',
+          replacements: job.replacements || [],
+        };
+      } catch (err: any) {
+        console.error('[get_canonical_job] Error:', err.message);
+        return { error: `Failed to fetch canonical job: ${err.message}` };
+      }
+    }
+  },
+
+  verify_job_freshness: {
+    name: 'verify_job_freshness',
+    description: 'Verifies the live availability and application status of a vacancy. Detects HTTP 404/410, explicit closure phrasing, or active form state. Returns current status (ACTIVE, UNKNOWN, CLOSED) and closure reason.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        jobId: {
+          type: SchemaType.STRING,
+          description: 'The canonical UUID of the job to reverify'
+        }
+      },
+      required: ['jobId']
+    },
+    execute: async ({ jobId }) => {
+      if (!jobId) return { error: 'jobId is required' };
+      try {
+        const verification = await verifyJobFreshness(jobId, { force: true });
+        return { verification };
+      } catch (err: any) {
+        console.error('[verify_job_freshness] Error:', err.message);
+        return { error: `Failed to verify job: ${err.message}` };
+      }
+    }
+  },
+
+  find_job_replacements: {
+    name: 'find_job_replacements',
+    description: 'Discovers 3 to 5 similar ACTIVE replacement opportunities when a job vacancy is closed or expired. Ranks results by title similarity, skills overlap, location, experience fit, and candidate profile match.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        jobId: {
+          type: SchemaType.STRING,
+          description: 'The UUID of the closed vacancy to replace'
+        }
+      },
+      required: ['jobId']
+    },
+    execute: async ({ jobId }, userId) => {
+      if (!jobId) return { error: 'jobId is required' };
+      try {
+        const result = await findReplacementOpportunities(jobId, userId, 3);
+        return {
+          originalJob: {
+            id: result.originalJobId,
+            title: result.originalJobTitle,
+            company: result.originalCompany,
+            status: result.originalStatus,
+          },
+          replacements: result.replacements,
+          count: result.count,
+        };
+      } catch (err: any) {
+        console.error('[find_job_replacements] Error:', err.message);
+        return { error: `Failed to find replacements: ${err.message}` };
+      }
+    }
+  },
+
+  get_job_match: {
+    name: 'get_job_match',
+    description: 'Calculates or retrieves the explainable match score between the candidate application profile and a canonical active job. Evaluates skills fit, experience fit, role family, location, compensation, hard blockers, and data confidence.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        jobId: {
+          type: SchemaType.STRING,
+          description: 'The canonical UUID of the job opening to evaluate against'
+        },
+        forceRecalculate: {
+          type: SchemaType.BOOLEAN,
+          description: 'Set to true to bypass cache and recompute from latest profile and resume'
+        }
+      },
+      required: ['jobId']
+    },
+    execute: async ({ jobId, forceRecalculate }, userId) => {
+      if (!jobId) return { error: 'jobId is required' };
+      try {
+        const match = await matchCandidateToJob({
+          userId,
+          jobId,
+          forceRecalculate: Boolean(forceRecalculate),
+        });
+        return {
+          success: true,
+          tool: 'get_job_match',
+          jobId,
+          jobTitle: match.job?.title,
+          company: match.job?.company,
+          score: match.score,
+          category: match.category,
+          recommendation: match.recommendation,
+          confidence: match.confidence,
+          isBlocked: match.isBlocked,
+          summary: match.explanation?.summary,
+          strongMatches: match.explanation?.strongMatches,
+          missingRequirements: match.explanation?.missingRequirements,
+          underrepresentedSkills: match.explanation?.underrepresentedSkills,
+          blockers: match.explanation?.blockers,
+          evidence: match.evidence,
+        };
+      } catch (err: any) {
+        console.error('[get_job_match] Error:', err.message);
+        return { error: `Failed to evaluate candidate job match: ${err.message}` };
+      }
+    }
+  },
+
+  explain_job_match: {
+    name: 'explain_job_match',
+    description: 'Provides deep, evidence-based explainability for why a candidate received a specific match score and recommendation. Outlines strong matches, partial matches, underrepresented skills (resume tailoring opportunities), strictly missing requirements, blockers, and unknown data points.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        jobId: {
+          type: SchemaType.STRING,
+          description: 'The canonical UUID of the job opening to explain'
+        }
+      },
+      required: ['jobId']
+    },
+    execute: async ({ jobId }, userId) => {
+      if (!jobId) return { error: 'jobId is required' };
+      try {
+        const match = await matchCandidateToJob({ userId, jobId });
+        return {
+          success: true,
+          tool: 'explain_job_match',
+          jobId,
+          jobTitle: match.job?.title,
+          company: match.job?.company,
+          score: match.score,
+          category: match.category,
+          recommendation: match.recommendation,
+          confidence: match.confidence,
+          isBlocked: match.isBlocked,
+          summary: match.explanation?.summary,
+          strongMatches: match.explanation?.strongMatches,
+          missingRequirements: match.explanation?.missingRequirements,
+          underrepresentedSkills: match.explanation?.underrepresentedSkills,
+          blockers: match.explanation?.blockers,
+          evidence: match.evidence,
+        };
+      } catch (err: any) {
+        console.error('[explain_job_match] Error:', err.message);
+        return { error: `Failed to explain job match: ${err.message}` };
+      }
+    }
+  },
+
+  rank_candidate_jobs: {
+    name: 'rank_candidate_jobs',
+    description: 'Ranks canonical active job vacancies against the candidate\'s profile using a high-performance 2-stage matching pipeline. Returns top opportunities sorted by fit score, unblocked status, and confidence.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        limit: {
+          type: SchemaType.NUMBER,
+          description: 'Maximum number of ranked job matches to return (default 10)'
+        },
+        minScore: {
+          type: SchemaType.NUMBER,
+          description: 'Minimum match score filter from 0 to 100 (default 60)'
+        },
+        excludeBlocked: {
+          type: SchemaType.BOOLEAN,
+          description: 'Whether to exclude blocked or incompatible jobs (default true)'
+        }
+      }
+    },
+    execute: async ({ limit = 10, minScore = 60, excludeBlocked = true }, userId) => {
+      try {
+        const matches = await rankJobsForCandidate({
+          userId,
+          limit,
+          minScore,
+          excludeBlocked,
+        });
+        return {
+          success: true,
+          tool: 'rank_candidate_jobs',
+          count: matches.length,
+          matches: matches.map(m => ({
+            jobId: m.jobId,
+            jobTitle: m.job?.title,
+            company: m.job?.company,
+            score: m.score,
+            category: m.category,
+            recommendation: m.recommendation,
+            confidence: m.confidence,
+            summary: m.explanation.summary,
+            strongMatches: m.explanation.strongMatches,
+            missingRequirements: m.explanation.missingRequirements,
+            underrepresentedSkills: m.explanation.underrepresentedSkills,
+            isBlocked: m.isBlocked,
+          })),
+        };
+      } catch (err: any) {
+        console.error('[rank_candidate_jobs] Error:', err.message);
+        return { error: `Failed to rank candidate jobs: ${err.message}` };
       }
     }
   },
@@ -571,204 +632,11 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
       }
     },
     execute: async ({ goals, weaknesses, improvements }, userId) => {
-      const supabase = createClient();
       try {
-        const { data: existing } = await supabase
-          .from('mentor_memory')
-          .select('*')
-          .eq('user_id', userId)
-          .maybeSingle();
-
-        const newGoals = Array.from(new Set([...(existing?.goals || []), ...(goals || [])]));
-        const newWeaknesses = Array.from(new Set([...(existing?.weaknesses || []), ...(weaknesses || [])]));
-        const newImprovements = Array.from(new Set([...(existing?.improvements || []), ...(improvements || [])]));
-
-        if (!existing) {
-          const { error } = await supabase
-            .from('mentor_memory')
-            .insert({
-              user_id: userId,
-              goals: newGoals,
-              weaknesses: newWeaknesses,
-              improvements: newImprovements
-            });
-          if (error) throw error;
-        } else {
-          const { error } = await supabase
-            .from('mentor_memory')
-            .update({
-              goals: newGoals,
-              weaknesses: newWeaknesses,
-              improvements: newImprovements,
-              updated_at: new Date().toISOString()
-            })
-            .eq('user_id', userId);
-          if (error) throw error;
-        }
-
-        return { success: true, message: 'Long-term insights updated successfully.' };
+        return await updateCareerProfileInsights({ goals, weaknesses, improvements }, userId);
       } catch (err: any) {
         console.error('[update_profile_insights] Error:', err.message);
         return { error: `Failed to update memory insights: ${err.message}` };
-      }
-    }
-  },
-
-  trigger_resume_generation: {
-    name: 'trigger_resume_generation',
-    description: 'Spawns a specialized subagent to autonomously compile, enrich, and generate a new ATS-optimized resume for the user using their practice records (coding tests, interviews) and profile data. Returns the generated resume ID.',
-    parameters: {
-      type: SchemaType.OBJECT,
-      properties: {
-        theme: {
-          type: SchemaType.STRING,
-          description: 'The template theme to select (modern, minimal, executive)',
-          enum: ['modern', 'minimal', 'executive']
-        },
-        title: {
-          type: SchemaType.STRING,
-          description: 'A customized, professional title for the resume based on the career path (e.g. "Software Engineer Resume", "Frontend Developer Resume")'
-        }
-      }
-    },
-    execute: async ({ theme, title: customTitle }, userId) => {
-      const supabase = createClient();
-      try {
-        // 1. Fetch user profile
-        const { data: profile } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', userId)
-          .single();
-          
-        if (!profile) return { error: 'User profile not found.' };
-
-        // 2. Fetch coding & interview achievements
-        const { data: coding } = await supabase
-          .from('coding_submissions')
-          .select('language, status, score, problem_id')
-          .eq('user_id', userId)
-          .eq('status', 'success')
-          .limit(5);
-
-        const { data: interviews } = await supabase
-          .from('mock_interviews')
-          .select('role, score, feedback')
-          .eq('user_id', userId)
-          .order('score', { ascending: false })
-          .limit(3);
-
-        // 3. Fetch user's latest existing resume (to keep experience, projects, etc. intact)
-        const { data: existingResume } = await supabase
-          .from('resumes')
-          .select('id, title, resume_json')
-          .eq('user_id', userId)
-          .order('updated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        let baseResume: any;
-        if (existingResume && existingResume.resume_json) {
-          try {
-            baseResume = typeof existingResume.resume_json === 'string'
-              ? JSON.parse(existingResume.resume_json)
-              : existingResume.resume_json;
-            
-            // Merge profile updates (name, email, phone, social, summary)
-            if (profile.full_name) baseResume.name = profile.full_name;
-            if (profile.email) baseResume.email = profile.email;
-            if (profile.phone) baseResume.phone = profile.phone;
-            if (profile.linkedin_url) baseResume.linkedin = profile.linkedin_url;
-            if (profile.github_url) baseResume.github = profile.github_url;
-            if (profile.professional_summary) baseResume.summary = profile.professional_summary;
-
-            // Merge skills
-            const profileSkills = Array.isArray(profile.skills) ? profile.skills : [];
-            if (profileSkills.length > 0) {
-              if (!baseResume.skills) {
-                baseResume.skills = { languages: [], frameworks: [], tools: [], other: [] };
-              }
-              baseResume.skills.other = Array.from(new Set([...(baseResume.skills.other || []), ...profileSkills]));
-            }
-          } catch (jsonErr) {
-            console.warn('[trigger_resume_generation] Error parsing existing resume_json, using profile fallback:', jsonErr);
-            baseResume = buildResumeFromProfile(profile);
-          }
-        } else {
-          baseResume = buildResumeFromProfile(profile);
-        }
-
-        // 4. Enrich resume with achievements using AI subagent
-        let enrichedResume = { ...baseResume };
-        
-        try {
-          const enrichPrompt = `
-You are a Resume Writer Subagent.
-Your goal is to enrich the candidate's Base Resume JSON with realistic, high-impact bullet points and project descriptions based on their verified practice achievements.
-
-Candidate Base Resume:
-${JSON.stringify(baseResume)}
-
-Verified Achievements:
-- Solved Coding Tasks: ${JSON.stringify(coding || [])}
-- Mock Interviews: ${JSON.stringify(interviews || [])}
-
-Instructions:
-1. Translate coding achievements into quantified experience bullet points (e.g. "Optimized data structure logic in JavaScript...") and place them in the experience or projects section.
-2. Translate mock interview strengths/feedback into bullet points and place them in experience or skills.
-3. Keep name, contact info, and education intact.
-4. Output ONLY the complete, enriched Resume JSON matching the input schema.
-`;
-          const aiResponse = await callAI({
-            task: 'resume',
-            prompt: enrichPrompt,
-            systemPrompt: "You are a professional resume writer.",
-            userId,
-            responseFormat: 'json'
-          });
-          const aiResult = JSON.parse(aiResponse.text);
-          if (aiResult && typeof aiResult === 'object') {
-            enrichedResume = { ...enrichedResume, ...aiResult };
-          }
-        } catch (aiErr) {
-          console.warn('[trigger_resume_generation] AI enrichment failed, saving base resume:', aiErr);
-        }
-
-        // 5. Update existing resume or insert new one
-        const resumeTitle = customTitle || profile.target_role ? (customTitle || `${profile.target_role} Resume`) : (existingResume?.title || 'Untitled Resume');
-        
-        if (existingResume) {
-          const { error } = await supabase
-            .from('resumes')
-            .update({
-              resume_json: enrichedResume,
-              title: resumeTitle,
-              template_selected: theme || 'modern',
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', existingResume.id);
-
-          if (error) throw error;
-          return { success: true, id: existingResume.id, title: resumeTitle };
-        } else {
-          const { data: inserted, error } = await supabase
-            .from('resumes')
-            .insert({
-              user_id: userId,
-              title: resumeTitle,
-              resume_json: enrichedResume,
-              template_selected: theme || 'modern',
-              email_sent: false
-            })
-            .select('id')
-            .single();
-
-          if (error) throw error;
-          return { success: true, id: inserted.id, title: resumeTitle };
-        }
-      } catch (err: any) {
-        console.error('[trigger_resume_generation] Error:', err.message);
-        return { error: `Failed to generate resume: ${err.message}` };
       }
     }
   },
@@ -792,94 +660,8 @@ Instructions:
       required: ['topic', 'difficulty']
     },
     execute: async ({ topic, difficulty }, userId) => {
-      const supabase = createClient();
       try {
-        // First try to find an existing question on the topic/difficulty
-        const { data: existing } = await supabase
-          .from('coding_questions')
-          .select('id, title, slug')
-          .eq('difficulty', difficulty)
-          .ilike('topic', `%${topic}%`)
-          .limit(1)
-          .maybeSingle();
-
-        if (existing) {
-          return { success: true, id: existing.id, slug: existing.slug, title: existing.title, is_new: false };
-        }
-
-        // If none exists, generate one dynamically
-        const prompt = `Generate a coding interview question. Topic: ${topic}, Difficulty: ${difficulty}.
-Return ONLY a valid JSON object matching this schema:
-{
-  "title": "A concise title",
-  "description": "Clear problem statement with examples",
-  "topic": "${topic}",
-  "difficulty": "${difficulty}",
-  "approach": "A brief explanation of how to solve it",
-  "interview_tips": ["tip1", "tip2"],
-  "time_complexity": "O(N)",
-  "space_complexity": "O(1)",
-  "test_cases": [
-    { "input": "sample input text", "output": "expected output text", "is_hidden": false }
-  ],
-  "solutions": {
-    "javascript": "function solution() { ... }"
-  }
-}`;
-
-        const response = await callAI({
-          task: 'code',
-          prompt,
-          systemPrompt: "You are an expert technical interviewer and competitive programmer.",
-          userId,
-          responseFormat: 'json'
-        });
-
-        const q = JSON.parse(response.text);
-        const slug = q.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-
-        const { data: inserted, error: qError } = await supabase
-          .from('coding_questions')
-          .insert({
-            title: q.title,
-            slug,
-            description: q.description,
-            difficulty: q.difficulty,
-            topic: q.topic,
-            type: 'Programming',
-            approach: q.approach,
-            interview_tips: q.interview_tips,
-            time_complexity: q.time_complexity,
-            space_complexity: q.space_complexity
-          })
-          .select()
-          .single();
-
-        if (qError) throw qError;
-
-        // Insert test cases
-        if (q.test_cases && q.test_cases.length > 0) {
-          const testCases = q.test_cases.map((tc: any, idx: number) => ({
-            question_id: inserted.id,
-            input: tc.input,
-            expected_output: tc.output,
-            is_hidden: tc.is_hidden || false,
-            order_index: idx
-          }));
-          await supabase.from('coding_test_cases').insert(testCases);
-        }
-
-        // Insert solutions
-        if (q.solutions) {
-          const solutions = Object.entries(q.solutions).map(([lang, code]) => ({
-            question_id: inserted.id,
-            language: lang,
-            code
-          }));
-          await supabase.from('coding_solutions').insert(solutions);
-        }
-
-        return { success: true, id: inserted.id, slug, title: q.title, is_new: true };
+        return await triggerCodingChallenge({ topic, difficulty }, userId);
       } catch (err: any) {
         console.error('[trigger_coding_challenge] Error:', err.message);
         return { error: `Failed to spawn coding challenge: ${err.message}` };
@@ -906,44 +688,42 @@ Return ONLY a valid JSON object matching this schema:
       required: ['role', 'difficulty']
     },
     execute: async ({ role, difficulty }, userId) => {
-      const supabase = createClient();
       try {
-        const prompt = `Generate 5 technical interview questions for a ${difficulty} level ${role} position.
-Return a JSON array of strings containing only the questions: ["Question 1", "Question 2", ...]`;
-
-        const response = await callAI({
-          task: 'interview',
-          prompt,
-          systemPrompt: "You are an elite technical interviewer. Return valid JSON only.",
-          userId,
-          responseFormat: 'json'
-        });
-
-        const questions = JSON.parse(response.text);
-        if (!Array.isArray(questions)) {
-          throw new Error('LLM did not return an array of questions');
-        }
-
-        const { data: session, error } = await supabase
-          .from('mock_interviews')
-          .insert({
-            user_id: userId,
-            role: role,
-            interview_type: 'Technical',
-            num_questions: questions.length,
-            questions: questions,
-            interview_mode: 'chat',
-            score: 0,
-            feedback: 'Awaiting completion'
-          })
-          .select('id')
-          .single();
-
-        if (error) throw error;
-        return { success: true, id: session.id, role, num_questions: questions.length };
+        return await triggerMockInterview({ role, difficulty }, userId);
       } catch (err: any) {
         console.error('[trigger_mock_interview] Error:', err.message);
         return { error: `Failed to spawn mock interview: ${err.message}` };
+      }
+    }
+  },
+
+  evaluate_interview_answer: {
+    name: 'evaluate_interview_answer',
+    description: 'Evaluates candidate response to an interview question using the STAR framework, computes score (0-100), assesses communication depth, and provides a polished model answer.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        role: {
+          type: SchemaType.STRING,
+          description: 'The job title/role (e.g. "Senior Backend Engineer", "Product Manager")'
+        },
+        question: {
+          type: SchemaType.STRING,
+          description: 'The interview question that was asked'
+        },
+        userAnswer: {
+          type: SchemaType.STRING,
+          description: 'The candidate answer text or transcript'
+        }
+      },
+      required: ['question', 'userAnswer']
+    },
+    execute: async ({ role, question, userAnswer }, userId) => {
+      try {
+        return await evaluateInterviewAnswer({ role, question, userAnswer }, userId);
+      } catch (err: any) {
+        console.error('[evaluate_interview_answer] Error:', err.message);
+        return { error: `Evaluation failed: ${err.message}` };
       }
     }
   },
@@ -966,44 +746,478 @@ Return a JSON array of strings containing only the questions: ["Question 1", "Qu
       required: ['topic']
     },
     execute: async ({ topic, durationWeeks }, userId) => {
-      const supabase = createClient();
       try {
-        const weeks = durationWeeks || 4;
-        const prompt = `Create a ${weeks}-week structured study syllabus outline for learning "${topic}".
-Return ONLY a JSON array of strings representing the weekly milestone titles: ["Week 1: ...", "Week 2: ...", ...]`;
-
-        const response = await callAI({
-          task: 'learn',
-          prompt,
-          systemPrompt: "You are an expert technical curriculum designer. Return valid JSON only.",
-          userId,
-          responseFormat: 'json'
-        });
-
-        const syllabus = JSON.parse(response.text);
-        if (!Array.isArray(syllabus)) {
-          throw new Error('Syllabus is not a valid array');
-        }
-
-        const { data: roadmap, error } = await supabase
-          .from('roadmaps')
-          .insert({
-            user_id: userId,
-            title: topic,
-            status: 'active',
-            progress: 0,
-            syllabus: syllabus
-          })
-          .select('id, title')
-          .single();
-
-        if (error) throw error;
-        return { success: true, id: roadmap.id, title: roadmap.title, syllabus_steps: syllabus.length };
+        return await createLearningPlan({ topic, durationWeeks }, userId);
       } catch (err: any) {
         console.error('[trigger_study_plan] Error:', err.message);
         return { error: `Failed to create study plan: ${err.message}` };
       }
     }
-  }
+  },
+
+  // ─── PROJECTFORGE TOOLS ──────────────────────────────────────────────────
+  generate_project_blueprint: {
+    name: 'generate_project_blueprint',
+    description: 'Generates a full-stack portfolio project architecture, folder structure, starter code files, and key milestones to showcase on a resume or GitHub.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        idea: {
+          type: SchemaType.STRING,
+          description: 'The project concept or domain (e.g., "AI Resume Scanner with Next.js", "Distributed Cache in Go")'
+        }
+      },
+      required: ['idea']
+    },
+    execute: async ({ idea }, userId) => {
+      if (!idea) return { error: 'idea is required' };
+      try {
+        return await generateProjectBlueprint({ idea }, userId);
+      } catch (err: any) {
+        console.error('[generate_project_blueprint] Error:', err.message);
+        return { error: `Failed to generate project blueprint: ${err.message}` };
+      }
+    }
+  },
+
+  // ─── SALARYFORGE TOOLS ───────────────────────────────────────────────────
+  negotiate_salary_offer: {
+    name: 'negotiate_salary_offer',
+    description: 'Generates an executive salary negotiation strategy, market benchmarks, and customized scripts to negotiate higher compensation.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        role: {
+          type: SchemaType.STRING,
+          description: 'The job title (e.g. "Senior Frontend Engineer", "Staff Backend Lead")'
+        },
+        currentOffer: {
+          type: SchemaType.STRING,
+          description: 'The offered compensation or baseline (e.g. "$120,000", "₹18 LPA")'
+        },
+        targetSalary: {
+          type: SchemaType.STRING,
+          description: 'The candidate target compensation (e.g. "$145,000", "₹24 LPA")'
+        }
+      },
+      required: ['role', 'currentOffer', 'targetSalary']
+    },
+    execute: async ({ role, currentOffer, targetSalary }, userId) => {
+      try {
+        return await negotiateSalaryOffer({ role, currentOffer, targetSalary }, userId);
+      } catch (err: any) {
+        console.error('[negotiate_salary_offer] Error:', err.message);
+        return { error: `Failed to negotiate salary: ${err.message}` };
+      }
+    }
+  },
+
+  // ─── CANDIDATE APPLICATION PROFILE TOOLS ──────────────────────────────────
+  get_candidate_profile: {
+    name: 'get_candidate_profile',
+    description: 'Retrieves the candidate canonical application profile including verified application answers, career facts, target preferences, readiness state, and any application blockers. Call this to check facts before answering questions or preparing job applications.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {}
+    },
+    execute: async (_, userId) => {
+      try {
+        const profile = await getCandidateApplicationProfile(userId);
+        return {
+          success: true,
+          tool: 'get_candidate_profile',
+          fullName: profile.identity.fullName,
+          email: profile.identity.email,
+          phone: profile.identity.phoneNumber,
+          location: profile.identity.currentCity,
+          skills: profile.career.skills,
+          targetRoles: profile.preferences.targetRoles,
+          preferredLocations: profile.preferences.preferredLocations,
+          remotePreference: profile.preferences.remotePreference,
+          salaryRange: {
+            min: profile.preferences.preferredSalaryMin,
+            max: profile.preferences.preferredSalaryMax,
+            currency: profile.preferences.salaryCurrency,
+          },
+          readinessStatus: profile.readiness.status,
+          readinessSummary: profile.readiness.summary,
+          completenessPercentage: profile.completeness.percentage,
+          blockers: profile.readiness.blockers,
+          verifiedAnswers: Object.fromEntries(
+            Object.entries(profile.answers).map(([k, v]) => [
+              k,
+              { value: v.value, status: v.status, verified: v.verified, source: v.source }
+            ])
+          ),
+        };
+      } catch (err: any) {
+        console.error('[get_candidate_profile] Error:', err.message);
+        return { error: `Failed to retrieve candidate profile: ${err.message}` };
+      }
+    }
+  },
+
+  update_candidate_application_answer: {
+    name: 'update_candidate_application_answer',
+    description: 'Updates or records a verified reusable application answer (e.g. notice_period, expected_salary, willing_to_relocate, or explicit work authorization confirmation). NEVER guess or infer sensitive answers (visa, citizenship, work authorization) unless explicitly confirmed by the user in this conversation.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        field: {
+          type: SchemaType.STRING,
+          description: 'The answer field name (e.g. "notice_period", "expected_salary", "work_authorization", "willing_to_relocate", "available_start_date")'
+        },
+        value: {
+          type: SchemaType.STRING,
+          description: 'The answer value provided or confirmed by the candidate'
+        },
+        userConfirmed: {
+          type: SchemaType.BOOLEAN,
+          description: 'Whether the candidate explicitly confirmed this answer in conversation (must be true for sensitive items)'
+        }
+      },
+      required: ['field', 'value', 'userConfirmed']
+    },
+    execute: async ({ field, value, userConfirmed }, userId) => {
+      try {
+        if (!userConfirmed) {
+          return {
+            error: 'User confirmation is required to update candidate application answers.',
+            needsConfirmation: true,
+          };
+        }
+
+        const isSensitive = SENSITIVE_PROTECTED_FIELDS.includes(field as any);
+        const answer = await upsertApplicationAnswer(userId, field, value, {
+          status: 'VERIFIED',
+          verified: true,
+          source: 'user',
+          valueType: typeof value === 'number' ? 'number' : 'string',
+        });
+
+        return {
+          success: true,
+          tool: 'update_candidate_application_answer',
+          message: `Recorded ${field} as verified answer: "${value}".`,
+          answer,
+          isSensitive,
+        };
+      } catch (err: any) {
+        console.error('[update_candidate_application_answer] Error:', err.message);
+        return { error: `Failed to update application answer: ${err.message}` };
+      }
+    }
+  },
+
+  check_application_readiness: {
+    name: 'check_application_readiness',
+    description: 'Evaluates whether the candidate profile has verified all essential application facts (work authorization, expected salary, notice period, contact info, core skills). Returns readiness status (NOT_READY, READY_WITH_CONFIRMATION, READY), missing blockers, and a link to complete the profile.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {}
+    },
+    execute: async (_, userId) => {
+      try {
+        const profile = await getCandidateApplicationProfile(userId);
+        return {
+          success: true,
+          tool: 'check_application_readiness',
+          status: profile.readiness.status,
+          summary: profile.readiness.summary,
+          completeness: `${profile.completeness.percentage}%`,
+          blockers: profile.readiness.blockers,
+          missingCritical: profile.completeness.missingCritical,
+          missingRecommended: profile.completeness.missingRecommended,
+          actionLink: '/account?tab=application-profile',
+          shortcutPrompt: profile.readiness.blockers.length > 0
+            ? `${profile.readiness.blockers.length} details are missing before applications can be prepared automatically. Please visit your Application Profile to complete them.`
+            : 'Your Application Profile is ready for agent applications!',
+        };
+      } catch (err: any) {
+        console.error('[check_application_readiness] Error:', err.message);
+        return { error: `Failed to check application readiness: ${err.message}` };
+      }
+    }
+  },
+
+  // ─── APPLICATION PREPARATION ENGINE (LEVEL 12) ──────────────────────────
+  prepare_job_application_package: {
+    name: 'prepare_job_application_package',
+    description: 'Prepares a complete, structured, truthful application package for a target canonical job before browser automation. Validates job freshness, checks Level 10 match blockers, selects/tailors truthful resume, derives safe facts, and compiles missing unknown questions into READY, NEEDS_USER, or BLOCKED status.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        jobId: {
+          type: SchemaType.STRING,
+          description: 'The UUID of the canonical job to prepare an application package for.',
+        },
+        userOverride: {
+          type: SchemaType.BOOLEAN,
+          description: 'Set to true if user explicitly requests preparing for a low priority/skip job without hard blockers.',
+        },
+      },
+      required: ['jobId'],
+    },
+    execute: async ({ jobId, userOverride = false }, userId) => {
+      try {
+        const pkg = await ApplicationPreparationEngine.preparePackage({
+          userId,
+          jobId,
+          userOverride,
+        });
+
+        if (pkg.status === 'BLOCKED') {
+          return {
+            success: true,
+            tool: 'prepare_job_application_package',
+            status: 'BLOCKED',
+            packageId: pkg.id,
+            jobId,
+            jobTitle: pkg.jobSnapshot?.title,
+            company: pkg.jobSnapshot?.company,
+            readinessScore: '0%',
+            reason: pkg.blockedReason,
+            evidence: pkg.blockedEvidence,
+            message: `Cannot prepare application for ${pkg.jobSnapshot?.company || 'Company'} - ${pkg.jobSnapshot?.title || 'Role'}: ${pkg.blockedEvidence || pkg.blockedReason}`,
+          };
+        }
+
+        if (pkg.status === 'NEEDS_USER') {
+          const missingFormatted = pkg.unknownQuestions
+            .filter((q) => q.required)
+            .map((q, idx) => `${idx + 1}. ${q.question} (${q.reason})`)
+            .join('\n');
+
+          return {
+            success: true,
+            tool: 'prepare_job_application_package',
+            status: 'NEEDS_USER',
+            packageId: pkg.id,
+            readinessScore: `${pkg.readinessScore}%`,
+            jobTitle: pkg.jobSnapshot.title,
+            company: pkg.jobSnapshot.company,
+            resumeUsed: pkg.documents.find((d) => d.type === 'RESUME')?.title,
+            tailoringStatus: pkg.tailoringStatus,
+            missingQuestionsCount: pkg.unknownQuestions.filter((q) => q.required).length,
+            missingQuestions: pkg.unknownQuestions,
+            message: `Application for ${pkg.jobSnapshot.company} is ${pkg.readinessScore}% ready, but requires your input on ${pkg.unknownQuestions.filter((q) => q.required).length} question(s):\n\n${missingFormatted}\n\nPlease reply with your answers so I can finalize your package.`,
+          };
+        }
+
+        return {
+          success: true,
+          tool: 'prepare_job_application_package',
+          status: 'READY',
+          packageId: pkg.id,
+          readinessScore: '100%',
+          jobTitle: pkg.jobSnapshot.title,
+          company: pkg.jobSnapshot.company,
+          resumeUsed: pkg.documents.find((d) => d.type === 'RESUME')?.title,
+          tailoringStatus: pkg.tailoringStatus,
+          message: `Application package for ${pkg.jobSnapshot.company} — ${pkg.jobSnapshot.title} is verified and 100% READY!\n\n✓ Job active & verified\n✓ Resume tailored & verified\n✓ Contact & career answers resolved\n✓ Documents attached\n\nYour package is ready for future submission review.`,
+        };
+      } catch (err: any) {
+        console.error('[prepare_job_application_package] Error:', err.message);
+        return { error: `Failed to prepare application package: ${err.message}` };
+      }
+    },
+  },
+
+  answer_application_questions: {
+    name: 'answer_application_questions',
+    description: 'Submits user answers to unresolved questions in an application package. Reusable answers (salary, notice period, work authorization) update the candidate profile, while job-specific answers update the package, transitioning it to READY.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        packageId: {
+          type: SchemaType.STRING,
+          description: 'The UUID of the application package to update.',
+        },
+        answersJson: {
+          type: SchemaType.STRING,
+          description: 'JSON object containing key-value pairs of answers (e.g., {"expected_salary": "15 LPA", "work_authorization": true}).',
+        },
+      },
+      required: ['packageId', 'answersJson'],
+    },
+    execute: async ({ packageId, answersJson }, userId) => {
+      try {
+        let answersObj: Record<string, any> = {};
+        try {
+          answersObj = typeof answersJson === 'string' ? JSON.parse(answersJson) : answersJson;
+        } catch (pErr) {
+          return { error: 'Invalid answers format. Please provide valid JSON.' };
+        }
+
+        const updatedPkg = await ApplicationPreparationEngine.answerMissingQuestions({
+          packageId,
+          userId,
+          answers: answersObj,
+        });
+
+        return {
+          success: true,
+          tool: 'answer_application_questions',
+          status: updatedPkg.status,
+          readinessScore: `${updatedPkg.readinessScore}%`,
+          remainingQuestionsCount: updatedPkg.unknownQuestions.filter((q) => q.required).length,
+          message: updatedPkg.status === 'READY'
+            ? `All questions resolved! Application package for ${updatedPkg.jobSnapshot.company} is now 100% READY.`
+            : `Answers recorded. ${updatedPkg.unknownQuestions.filter((q) => q.required).length} required question(s) remaining.`,
+        };
+      } catch (err: any) {
+        console.error('[answer_application_questions] Error:', err.message);
+        return { error: `Failed to answer application questions: ${err.message}` };
+      }
+    },
+  },
+
+  // ─── BROWSER APPLICATION AGENT (LEVEL 13: APPROVAL MODE) ─────────────────
+  start_browser_application: {
+    name: 'start_browser_application',
+    description: 'Launches the Browser Application Agent in APPROVAL MODE for a READY application package. Opens the employer career portal, maps verified candidate details, uploads the approved resume, validates the form, and halts at the submission boundary (AWAITING_APPROVAL) for candidate review. NEVER submits automatically.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        packageId: {
+          type: SchemaType.STRING,
+          description: 'The UUID of the READY application package to execute.',
+        },
+      },
+      required: ['packageId'],
+    },
+    execute: async ({ packageId }, userId) => {
+      try {
+        const { BrowserApplicationAgentService } = await import('@/lib/browser-agent');
+        const run = await BrowserApplicationAgentService.startRun({
+          userId,
+          packageId,
+        });
+
+        if (run.status === 'AWAITING_APPROVAL') {
+          return {
+            success: true,
+            tool: 'start_browser_application',
+            status: 'AWAITING_APPROVAL',
+            runId: run.id,
+            packageId,
+            company: run.handoffPayload?.company || 'Employer',
+            jobTitle: run.handoffPayload?.jobTitle || 'Role',
+            provider: run.provider,
+            filledFieldsCount: run.handoffPayload?.filledFieldsCount || 0,
+            resumeUploaded: run.handoffPayload?.resumeUploaded || false,
+            resumeFileName: run.handoffPayload?.resumeFileName,
+            readyToSubmit: true,
+            message: `Application for ${run.handoffPayload?.company || 'Employer'} — ${run.handoffPayload?.jobTitle || 'Role'} is filled and validated!\n\n✓ ${run.handoffPayload?.filledFieldsCount || 0} fields verified\n✓ Resume uploaded (${run.handoffPayload?.resumeFileName || 'approved resume'})\n✓ 0 unresolved required questions\n\nReady for your approval. Please review and approve to submit.`,
+          };
+        }
+
+        if (run.status === 'NEEDS_USER') {
+          return {
+            success: true,
+            tool: 'start_browser_application',
+            status: 'NEEDS_USER',
+            runId: run.id,
+            packageId,
+            provider: run.provider,
+            handoffReason: run.handoffReason,
+            handoffPayload: run.handoffPayload,
+            message: run.handoffPayload?.message || `Your input is required to continue applying to ${run.provider}: ${run.handoffReason}`,
+          };
+        }
+
+        if (run.status === 'UNSUPPORTED') {
+          return {
+            success: true,
+            tool: 'start_browser_application',
+            status: 'UNSUPPORTED',
+            runId: run.id,
+            packageId,
+            applyUrl: run.handoffPayload?.applyUrl,
+            message: run.handoffPayload?.message || 'This application portal uses a format not automated yet. Your application package is ready for manual application.',
+          };
+        }
+
+        return {
+          success: run.status === 'SUBMITTED',
+          tool: 'start_browser_application',
+          status: run.status,
+          runId: run.id,
+          message: run.errorMessage || `Browser application status: ${run.status}`,
+        };
+      } catch (err: any) {
+        console.error('[start_browser_application] Error:', err.message);
+        return { error: `Failed to launch browser application agent: ${err.message}` };
+      }
+    },
+  },
+
+  approve_and_submit_job_application: {
+    name: 'approve_and_submit_job_application',
+    description: 'Explicitly approves and finalizes submission of a verified employer application previously paused in AWAITING_APPROVAL status. Submits the application once, checks confirmation, settles 8 credits, and records application tracking evidence.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        runId: {
+          type: SchemaType.STRING,
+          description: 'The UUID of the browser application run to approve and submit.',
+        },
+        packageId: {
+          type: SchemaType.STRING,
+          description: 'The UUID of the associated application package.',
+        },
+        userApprovalConfirmed: {
+          type: SchemaType.BOOLEAN,
+          description: 'Explicit candidate confirmation to submit the application.',
+        },
+      },
+      required: ['runId', 'packageId', 'userApprovalConfirmed'],
+    },
+    execute: async ({ runId, packageId, userApprovalConfirmed }, userId) => {
+      try {
+        if (!userApprovalConfirmed) {
+          return {
+            error: 'Explicit user approval is required before submitting.',
+            status: 'POLICY_BLOCKED',
+          };
+        }
+
+        const { BrowserApplicationAgentService } = await import('@/lib/browser-agent');
+        const run = await BrowserApplicationAgentService.approveAndSubmit({
+          userId,
+          runId,
+          packageId,
+          explicitUserConsent: true,
+        });
+
+        if (run.status === 'SUBMITTED') {
+          return {
+            success: true,
+            tool: 'approve_and_submit_job_application',
+            status: 'SUBMITTED',
+            runId: run.id,
+            submittedAt: run.submittedAt,
+            confirmationUrl: run.confirmationUrl,
+            confirmationText: run.confirmationText,
+            message: `Application submitted successfully!\n\n✓ Confirmation received\n✓ Timestamp: ${run.submittedAt}\n✓ Tracked in your Applications dashboard.`,
+          };
+        }
+
+        return {
+          success: false,
+          tool: 'approve_and_submit_job_application',
+          status: run.status,
+          runId: run.id,
+          error: run.errorMessage || 'Submission could not be confirmed.',
+          message: run.status === 'SUBMISSION_UNKNOWN'
+            ? 'Submission was triggered, but confirmation text could not be verified automatically. Halting retry to avoid duplicate application.'
+            : run.errorMessage,
+        };
+      } catch (err: any) {
+        console.error('[approve_and_submit_job_application] Error:', err.message);
+        return { error: `Failed to submit application: ${err.message}` };
+      }
+    },
+  },
 };
 

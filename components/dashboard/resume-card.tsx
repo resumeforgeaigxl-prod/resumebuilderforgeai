@@ -1,35 +1,121 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import { FileText, MoreVertical, Edit2, Download, Trash2, Copy } from '@/components/icons'
-import { formatDistanceToNow } from 'date-fns'
-import { Card } from '@/components/ui/Card'
-import { Badge } from '@/components/ui/Badge'
-import { 
-    DropdownMenu, 
-    DropdownMenuContent, 
-    DropdownMenuItem, 
-    DropdownMenuSeparator, 
-    DropdownMenuTrigger 
-} from '@/components/ui/DropdownMenu'
-import { Button } from '@/components/ui/Button'
-import { useParams } from 'next/navigation'
+import React from 'react';
+import Link from 'next/link';
+import {
+    MoreVertical,
+    Edit2,
+    Download,
+    Trash2,
+    Copy,
+    ArrowRight,
+    Target
+} from '@/components/icons';
+import { formatDistanceToNow } from 'date-fns';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from '@/components/ui/DropdownMenu';
+import { Button } from '@/components/ui/Button';
+import { useParams } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
+export type ResumeType = 'PRIMARY' | 'TAILORED' | 'DRAFT' | 'MASTER';
 
-interface ResumeCardProps {
-    id: string
-    title: string
-    updatedAt: string
-    versionName?: string
-    onDelete?: (id: string) => void
+export interface ResumeCardProps {
+    id: string;
+    title: string;
+    updatedAt: string;
+    createdAt?: string;
+    versionName?: string;
+    atsScore?: number | null;
+    isPrimary?: boolean;
+    targetRole?: string;
+    onDelete?: (id: string) => void;
+    onTailor?: (id: string) => void;
 }
 
-export function ResumeCard({ id, title, updatedAt, versionName, onDelete }: ResumeCardProps) {
+export function determineResumeType(opts: {
+    isPrimary?: boolean;
+    title?: string;
+    versionName?: string;
+}): ResumeType {
+    if (opts.isPrimary) return 'PRIMARY';
+    if (opts.versionName || (opts.title && opts.title.toLowerCase().includes('tailor'))) {
+        return 'TAILORED';
+    }
+    if (!opts.title || opts.title.toLowerCase().includes('untitled')) {
+        return 'DRAFT';
+    }
+    return 'MASTER';
+}
+
+export function determineAtsStatus(score?: number | null): {
+    label: string;
+    dotColor: string;
+    badgeStyle: string;
+} {
+    if (typeof score === 'number' && score >= 75) {
+        return {
+            label: 'ATS Ready',
+            dotColor: 'bg-emerald-400',
+            badgeStyle: 'bg-emerald-950/40 text-emerald-400 border-emerald-800/40',
+        };
+    }
+    if (typeof score === 'number' && Number.isFinite(score) && score >= 0) {
+        return {
+            label: 'ATS Needs Review',
+            dotColor: 'bg-[#9bb4c9]',
+            badgeStyle: 'bg-transparent text-[#d7e4f0] border-[#2a2c33]',
+        };
+    }
+    return {
+        label: 'ATS Not Scanned',
+        dotColor: 'bg-[#565656]',
+        badgeStyle: 'bg-[#151515] text-[#A3A3A3] border-[#242424]',
+    };
+}
+
+export function determineSupportingContext(opts: {
+    isPrimary?: boolean;
+    versionName?: string;
+    targetRole?: string;
+    type: ResumeType;
+}): string {
+    if (opts.isPrimary) return 'Master Resume';
+    if (opts.versionName) return `Tailored for ${opts.versionName}`;
+    if (opts.targetRole) return `Target: ${opts.targetRole}`;
+    if (opts.type === 'DRAFT') return 'Draft · Incomplete';
+    return 'General Application Profile';
+}
+
+export function ResumeCard({
+    id,
+    title,
+    updatedAt,
+    versionName,
+    atsScore,
+    isPrimary = false,
+    targetRole,
+    onDelete,
+    onTailor,
+}: ResumeCardProps) {
     const params = useParams();
     const locale = params?.locale || 'en';
 
-    const handleClone = async (e: React.MouseEvent) => {
+    const resumeType = determineResumeType({ isPrimary, title, versionName });
+    const atsStatus = determineAtsStatus(atsScore);
+    const supportingContext = determineSupportingContext({
+        isPrimary,
+        versionName,
+        targetRole,
+        type: resumeType,
+    });
 
+    const handleClone = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
 
@@ -54,69 +140,148 @@ export function ResumeCard({ id, title, updatedAt, versionName, onDelete }: Resu
     };
 
     return (
-        <div className="bg-white border border-[#EBEBEB] rounded-xl p-6 group hover:shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.06)] hover:border-[#171717]/25 transition-all flex flex-col h-full relative cursor-default">
-            <div className="flex justify-between items-start mb-6">
-                <div className="w-12 h-12 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center text-[#171717] group-hover:border-[#171717] transition-all">
-                    <FileText className="w-6 h-6" />
+        <div
+            className={cn(
+                "rounded-xl p-5 transition-all duration-200 flex flex-col justify-between h-full min-h-[250px] relative group cursor-default",
+                isPrimary
+                    ? "bg-[#0c0d10] border border-[#3a3d46] hover:border-[#9bb4c9]/40"
+                    : "bg-[#0c0d10] border border-[#2a2c33] hover:border-[#3a3d46]"
+            )}
+        >
+            {/* Top Section */}
+            <div>
+                {/* Header Row: Refined Icon + More Menu */}
+                <div className="flex items-center justify-between">
+                    <img src="/rail/rail-resume.png?v=ice" alt="" width={36} height={36} className="h-9 w-9 object-contain" />
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-[#A3A3A3] hover:text-[#F5F5F5] hover:bg-[#151515] rounded-lg shrink-0 cursor-pointer"
+                                aria-label="More options"
+                            >
+                                <MoreVertical className="w-4 h-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48 bg-[#151515] border border-[#242424] text-[#F5F5F5] shadow-2xl">
+                            <DropdownMenuItem asChild className="cursor-pointer hover:bg-[#1F1F1F] focus:bg-[#1F1F1F] text-[#F5F5F5]">
+                                <Link href={`/${locale}/builder/${id}`} className="flex items-center gap-2">
+                                    <Edit2 className="w-4 h-4 text-[#BDBDBD]" /> Edit in Studio
+                                </Link>
+                            </DropdownMenuItem>
+                            {onTailor && (
+                                <DropdownMenuItem
+                                    onClick={() => onTailor(id)}
+                                    className="flex items-center gap-2 cursor-pointer hover:bg-[#1F1F1F] focus:bg-[#1F1F1F] text-[#F5F5F5]"
+                                >
+                                    <Target className="w-4 h-4 text-[#9bb4c9]" /> Tailor for Job
+                                </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem
+                                onClick={handleClone}
+                                className="flex items-center gap-2 cursor-pointer hover:bg-[#1F1F1F] focus:bg-[#1F1F1F] text-[#F5F5F5]"
+                            >
+                                <Copy className="w-4 h-4 text-[#BDBDBD]" /> Clone as Version
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="flex items-center gap-2 cursor-pointer hover:bg-[#1F1F1F] focus:bg-[#1F1F1F] text-[#F5F5F5]">
+                                <Download className="w-4 h-4 text-[#BDBDBD]" /> Export PDF
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="bg-[#242424] my-1" />
+                            <DropdownMenuItem
+                                className="flex items-center gap-2 text-rose-400 focus:text-rose-300 focus:bg-rose-950/40 hover:bg-rose-950/40 cursor-pointer"
+                                onClick={() => onDelete?.(id)}
+                            >
+                                <Trash2 className="w-4 h-4" /> Decommission
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
 
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-[#8F8F8F] hover:text-[#171717] hover:bg-[#171717]/5 rounded-md">
-                            <MoreVertical className="w-5 h-5" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48 bg-white border border-[#EBEBEB] text-[#171717] shadow-xl">
-                        <DropdownMenuItem asChild className="cursor-pointer hover:bg-[#FAFAFA] focus:bg-[#FAFAFA] text-[#171717]">
-                            <Link href={`/${locale}/builder/${id}`} className="flex items-center gap-2">
-                                <Edit2 className="w-4 h-4 text-[#4D4D4D]" /> Edit Profile
-                            </Link>
-                        </DropdownMenuItem>
-
-                        <DropdownMenuItem onClick={handleClone} className="flex items-center gap-2 cursor-pointer hover:bg-[#FAFAFA] focus:bg-[#FAFAFA] text-[#171717]">
-                            <Copy className="w-4 h-4 text-[#4D4D4D]" /> Clone as Version
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="flex items-center gap-2 cursor-pointer hover:bg-[#FAFAFA] focus:bg-[#FAFAFA] text-[#171717]">
-                            <Download className="w-4 h-4 text-[#4D4D4D]" /> Export PDF
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-[#EBEBEB] my-1" />
-                        <DropdownMenuItem 
-                            className="flex items-center gap-2 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer hover:bg-rose-50"
-                            onClick={() => onDelete?.(id)}
-                        >
-                            <Trash2 className="w-4 h-4" /> Decommission
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
-
-            <div className="space-y-3 flex-1">
-                <h3 className="text-lg font-semibold text-[#171717] leading-tight line-clamp-2 group-hover:text-[#0070F3] transition-colors">
-                    {title}
+                {/* Title */}
+                <h3
+                    className={cn(
+                        "font-sans !text-base font-semibold tracking-tight leading-snug line-clamp-1 mt-3.5 mb-2 transition-colors",
+                        isPrimary ? "text-[#F5F5F5]" : "text-[#F5F5F5] group-hover:text-white"
+                    )}
+                    title={title || 'Untitled Resume'}
+                >
+                    {title || 'Untitled Resume'}
                 </h3>
-                
-                <div className="flex flex-wrap gap-2 items-center">
-                    {versionName && (
-                        <span className="text-[10px] font-semibold border border-[#EBEBEB] bg-[#FAFAFA] text-[#4D4D4D] py-0.5 px-2 rounded-full">
-                            {versionName}
+
+                {/* Status Badges Row */}
+                <div className="flex flex-wrap items-center gap-1.5 mb-2.5">
+                    {/* Resume Type Badge */}
+                    {resumeType === 'PRIMARY' && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wider font-mono bg-[#151515] text-[#F5F5F5] border border-[#2D2D2D] shadow-2xs">
+                            PRIMARY
                         </span>
                     )}
-                    <span className="text-[10px] font-semibold border border-emerald-100 bg-emerald-50 text-emerald-600 py-0.5 px-2 rounded-full">
-                        ATS READY
+                    {resumeType === 'TAILORED' && (
+                        <span className="rounded-full border border-[#2a2c33] px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wider text-[#d7e4f0]">
+                            TAILORED
+                        </span>
+                    )}
+                    {resumeType === 'DRAFT' && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wider font-mono bg-[#151515] text-[#A3A3A3] border border-[#242424]">
+                            DRAFT
+                        </span>
+                    )}
+                    {resumeType === 'MASTER' && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wider font-mono bg-[#151515] text-[#BDBDBD] border border-[#242424]">
+                            MASTER
+                        </span>
+                    )}
+
+                    {/* ATS Status Badge */}
+                    <span
+                        className={cn(
+                            "px-2 py-0.5 rounded-full text-[10px] font-medium border flex items-center gap-1",
+                            atsStatus.badgeStyle
+                        )}
+                    >
+                        <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", atsStatus.dotColor)} />
+                        <span>{atsStatus.label}</span>
                     </span>
+                </div>
+
+                {/* Supporting Context (role / master / draft info) */}
+                <p className="text-xs text-[#BDBDBD] font-medium truncate mb-1">
+                    {supportingContext}
+                </p>
+
+                {/* Metadata Row */}
+                <div className="text-[11px] text-[#A3A3A3] flex items-center gap-1.5 font-normal">
+                    <span>Updated {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}</span>
+                    {typeof atsScore === 'number' && atsScore > 0 && (
+                        <>
+                            <span className="text-[#565656]">·</span>
+                            <span className="font-mono text-[#BDBDBD]">Score {atsScore}</span>
+                        </>
+                    )}
                 </div>
             </div>
 
-            <div className="mt-8 pt-4 border-t border-[#EBEBEB] flex items-center justify-between">
-                <div className="text-[11px] text-[#8F8F8F] font-mono">
-                    Last sync: {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}
-                </div>
-                <Link href={`/${locale}/builder/${id}`}>
-                    <Button variant="ghost" size="sm" className="h-7 px-0 text-xs font-semibold text-[#8F8F8F] hover:text-[#0070F3] hover:bg-transparent transition-colors">
-                        Enter <Edit2 className="ml-1.5 w-3 h-3" />
+            {/* Action Row / Footer */}
+            <div className="mt-4 pt-3 border-t border-[#242424] flex items-center gap-2">
+                <Link href={`/${locale}/builder/${id}`} className="flex-1">
+                    <Button
+                        className="w-full h-8 px-3 text-xs font-semibold bg-[#151515] hover:bg-[#1D1D1D] text-[#F5F5F5] border border-[#242424] rounded-lg shadow-2xs transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                        <span>Open</span>
+                        <ArrowRight className="w-3 h-3 opacity-70" />
                     </Button>
                 </Link>
-
+                <Link href={`/${locale}/builder/${id}`}>
+                    <Button
+                        variant="outline"
+                        className="h-8 px-3 text-xs font-medium border-[#242424] hover:bg-[#151515] text-[#BDBDBD] hover:text-[#F5F5F5] rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
+                    >
+                        <Edit2 className="w-3 h-3 text-[#A3A3A3]" />
+                        <span>Edit</span>
+                    </Button>
+                </Link>
             </div>
         </div>
     );

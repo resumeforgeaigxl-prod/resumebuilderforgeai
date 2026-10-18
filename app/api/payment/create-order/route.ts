@@ -3,36 +3,37 @@ import { NextRequest, NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 import { getSession } from '@/lib/auth/jwt';
 import { createClient } from '@/lib/supabase/server';
+import { BILLING_CONFIG, PlanId } from '@/lib/billing';
 
 type PlanName =
+    | 'STARTER' | 'SEARCH' | 'PRO' | 'AGENT' | 'AUTOPILOT'
+    | 'TOPUP_75' | 'TOPUP_175' | 'TOPUP_350' | 'TOPUP_550'
     | 'DAILY' | 'DAILY_STANDARD' | 'DAILY_ALL_ACCESS'
     | 'WEEKLY' | 'WEEKLY_STANDARD' | 'WEEKLY_ALL_ACCESS'
     | 'MONTHLY' | 'MONTHLY_STANDARD' | 'MONTHLY_ALL_ACCESS'
-    | 'PROFESSIONAL' | 'PRO_STANDARD' | 'PRO_ALL_ACCESS'
-    | 'PRO';
+    | 'PROFESSIONAL' | 'PRO_STANDARD' | 'PRO_ALL_ACCESS';
 
-const PLAN_PRICES: Record<PlanName, number> = {
+const PLAN_PRICES: Record<string, number> = {
+    // Canonical Level 11 Plans
+    STARTER: BILLING_CONFIG.plans.STARTER.priceInr,
+    SEARCH: BILLING_CONFIG.plans.SEARCH.priceInr,
+    PRO: BILLING_CONFIG.plans.PRO.priceInr,
+    AGENT: BILLING_CONFIG.plans.AGENT.priceInr,
+    AUTOPILOT: BILLING_CONFIG.plans.AUTOPILOT.priceInr,
+    // Canonical Level 11 Top-ups
+    TOPUP_75: BILLING_CONFIG.topUpPacks.TOPUP_75.priceInr,
+    TOPUP_175: BILLING_CONFIG.topUpPacks.TOPUP_175.priceInr,
+    TOPUP_350: BILLING_CONFIG.topUpPacks.TOPUP_350.priceInr,
+    TOPUP_550: BILLING_CONFIG.topUpPacks.TOPUP_550.priceInr,
+    // Legacy support
     DAILY: 29, DAILY_STANDARD: 29, DAILY_ALL_ACCESS: 49,
     WEEKLY: 79, WEEKLY_STANDARD: 79, WEEKLY_ALL_ACCESS: 129,
     MONTHLY: 199, MONTHLY_STANDARD: 199, MONTHLY_ALL_ACCESS: 399,
     PROFESSIONAL: 499, PRO_STANDARD: 499, PRO_ALL_ACCESS: 899,
-    PRO: 499, // Legacy support
 };
-
 
 /**
  * POST /api/payment/create-order
- *
- * Body:
- *   plan         — 'PRO' | 'PREMIUM' | 'CAREER'
- *   coupon_code? — optional validated coupon code to apply discount
- *
- * Flow:
- *   1. Look up plan base price
- *   2. If coupon_code provided → re-validate it server-side and compute discount
- *   3. finalAmount = max(0, basePrice - discountAmount)
- *   4. Create Razorpay order for finalAmount
- *   5. Store order row with original_price, coupon_code, discount_amount, final_amount
  */
 export async function POST(req: NextRequest) {
     try {
@@ -42,39 +43,23 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        const planName = (body.plan as string)?.toUpperCase() as PlanName;
+        const planName = (body.plan as string)?.toUpperCase();
         const couponCode: string = (body.coupon_code ?? '').trim().toUpperCase();
 
         if (!planName || !PLAN_PRICES[planName]) {
-            return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
+            return NextResponse.json({ error: 'Invalid plan or top-up pack' }, { status: 400 });
         }
 
         // ── 1. Detect Country and Set Currency ──────────────────────────────
-        // Priority: Vercel header > Cloudflare header > Browser query > Fallback
         const countryCode = req.headers.get('x-vercel-ip-country') || req.headers.get('cf-ipcountry') || 'IN';
         const isIndia = countryCode === 'IN';
         const currency = isIndia ? 'INR' : 'USD';
 
         // ── 2. Determine Pricing ──────────────────────────────────────────
-        const CURRENCY_PRICES: Record<string, Record<PlanName, number>> = {
-            INR: {
-                DAILY: 29, DAILY_STANDARD: 29, DAILY_ALL_ACCESS: 49,
-                WEEKLY: 79, WEEKLY_STANDARD: 79, WEEKLY_ALL_ACCESS: 129,
-                MONTHLY: 199, MONTHLY_STANDARD: 199, MONTHLY_ALL_ACCESS: 399,
-                PROFESSIONAL: 499, PRO_STANDARD: 499, PRO_ALL_ACCESS: 899,
-                PRO: 499
-            },
-            USD: {
-                DAILY: 1.5, DAILY_STANDARD: 1.5, DAILY_ALL_ACCESS: 2.5,
-                WEEKLY: 3, WEEKLY_STANDARD: 3, WEEKLY_ALL_ACCESS: 5,
-                MONTHLY: 7, MONTHLY_STANDARD: 7, MONTHLY_ALL_ACCESS: 14,
-                PROFESSIONAL: 15, PRO_STANDARD: 15, PRO_ALL_ACCESS: 28,
-                PRO: 15
-            }
-        };
-
-
-        const basePrice = CURRENCY_PRICES[currency][planName] || CURRENCY_PRICES['INR'][planName];
+        let basePrice = PLAN_PRICES[planName];
+        if (currency === 'USD') {
+            basePrice = Math.max(2, Math.round(basePrice / 80));
+        }
         let discountAmount = 0;
         let validatedCouponCode: string | null = null;
 

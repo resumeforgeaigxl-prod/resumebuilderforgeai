@@ -1,4 +1,6 @@
 export const dynamic = 'force-dynamic';
-import MockInterviewPage from '../mock-interview/page';
+import { redirect } from 'next/navigation';
 
-export default MockInterviewPage;
+export default function InterviewForgePage({ params }: { params: { locale: string } }) {
+    redirect(`/${params.locale}/mock-interview`);
+}

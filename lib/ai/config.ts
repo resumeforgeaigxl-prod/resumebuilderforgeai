@@ -5,7 +5,7 @@ export const TASK_ROUTING_CHAINS: Record<AITask, AIProviderName[]> = {
     'code': ['deepseek', 'together', 'groq'],
     'interview': ['groq', 'gemini', 'openrouter'],
     'explain': ['gemini', 'deepseek', 'huggingface'],
-    'mentor': ['gemini', 'groq', 'openrouter'],
+    'mentor': ['openrouter', 'groq', 'gemini'],
     'project': ['deepseek', 'together', 'gemini'],
     'career': ['gemini', 'mistral', 'openrouter'],
     'learn': ['gemini', 'groq', 'together'],
@@ -33,7 +33,7 @@ export const PROVIDER_CONFIGS: Record<AIProviderName, {
     },
     'groq': {
         baseUrl: 'https://api.groq.com/openai/v1/chat/completions',
-        defaultModel: 'llama-3.1-70b-versatile',
+        defaultModel: 'openai/gpt-oss-120b',
         concurrencyLimit: 5,
     },
     'together': {

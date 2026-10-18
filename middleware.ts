@@ -343,7 +343,10 @@ export async function middleware(request: NextRequest) {
     const isCompleteProfile = normalizedPath === '/complete-profile';
 
     if (!session && !isAuthRoute && !isPublicRoute && !isCompleteProfile) {
-        return NextResponse.redirect(new URL(`/${currentLocale}-${currentRegion}/login`, request.url));
+        const fullRequestedUrl = pathname + (request.nextUrl.search || '');
+        const redirectUrl = new URL(`/${currentLocale}-${currentRegion}/login`, request.url);
+        redirectUrl.searchParams.set('redirect', fullRequestedUrl);
+        return NextResponse.redirect(redirectUrl);
     }
 
     if (session) {
@@ -406,6 +409,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
-        '/((?!api|_next/static|_next/image|favicon.ico|manifest.json|sw.js|locales|pdfjs-worker|.*\\.(?:svg|png|jpg|jpeg|gif|webp|xml|ico|js|mjs|css|map|txt|woff|woff2|ttf|otf|json)$).*)',
+        '/((?!api|_next/static|_next/image|favicon.ico|manifest.json|sw.js|locales|pdfjs-worker|.*\\.(?:svg|png|jpg|jpeg|gif|webp|xml|ico|js|mjs|css|map|txt|woff|woff2|ttf|otf|json|glb|gltf)$).*)',
     ],
 };

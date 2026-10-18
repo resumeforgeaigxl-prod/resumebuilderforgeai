@@ -1,9 +1,9 @@
 "use client";
 
 import { Sidebar } from "@/components/ui/Sidebar";
-import { TopNav } from "@/components/ui/TopNav";
 import { usePathname } from "next/navigation";
 import { SidebarProvider, useSidebar } from "@/hooks/use-sidebar";
+import { OmniHeaderProvider } from "@/hooks/use-omni-header";
 import { cn } from "@/lib/utils";
 
 function DashboardContent({
@@ -14,29 +14,21 @@ function DashboardContent({
     locale: string;
 }) {
     const pathname = usePathname();
-    const { collapsed, isMounted } = useSidebar();
+    const { isMounted } = useSidebar();
 
-    const isMentorForge = (pathname ?? '').includes('/mentorforge');
-
-    // Extract page title from pathname
-    const pageTitle = (pathname ?? '').split('/').pop()?.replace(/-/g, ' ') || 'Overview';
-    const formattedTitle = pageTitle.charAt(0).toUpperCase() + pageTitle.slice(1);
+    const isOmni = (pathname ?? '').includes('/omni') || (pathname ?? '').includes('/mentorforge');
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] flex overflow-hidden relative landing-light">
+        <div className="min-h-screen bg-[#050505] text-[#F5F5F5] flex overflow-hidden relative product-dark">
             <Sidebar locale={locale} />
 
-            <div className={cn(
-                "flex-1 flex flex-col min-w-0 ease-[cubic-bezier(0.4,0,0.2,1)]",
-                isMounted ? "transition-all duration-300" : "",
-                collapsed ? "ml-0 md:ml-[72px]" : "ml-0 md:ml-64"
-            )}>
-                <TopNav pageTitle={formattedTitle} locale={locale} />
-
+            <div className="flex-1 flex flex-col min-w-0 ml-0 md:ml-[80px] relative">
                 <main className={cn(
                     "flex-1 w-full",
                     isMounted ? "transition-all duration-300" : "",
-                    isMentorForge ? "h-[calc(100vh-64px)] mt-16 overflow-hidden" : "pt-20 md:pt-24 pb-12 px-4 md:px-8 overflow-y-auto overflow-x-hidden custom-scrollbar"
+                    isOmni
+                        ? "omni-shell h-screen bg-[#050505] overflow-hidden flex flex-col"
+                        : "h-screen bg-[#050505] overflow-y-auto overflow-x-hidden custom-scrollbar p-4 md:p-8"
                 )}>
                     {children}
                 </main>
@@ -56,9 +48,11 @@ export default function DashboardLayout({
 
     return (
         <SidebarProvider>
-            <DashboardContent locale={locale}>
-                {children}
-            </DashboardContent>
+            <OmniHeaderProvider>
+                <DashboardContent locale={locale}>
+                    {children}
+                </DashboardContent>
+            </OmniHeaderProvider>
         </SidebarProvider>
     );
 }

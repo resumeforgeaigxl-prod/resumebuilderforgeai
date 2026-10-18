@@ -37,10 +37,20 @@ const INTERNAL_APP_ROOTS = new Set([
     'setup-username',
     'u',
     'knowledgeforge',
+    'applications',
     'salaryforge',
     'networkforge',
     'ats-live',
     'jobs',
+    'pricing',
+    'login',
+    'signup',
+    'forgot-password',
+    'reset-password',
+    'privacy-policy',
+    'terms-of-service',
+    'cookie-policy',
+    'data-deletion',
 ]);
 
 function getRouteRoot(pathname: string | null): string {
@@ -49,12 +59,12 @@ function getRouteRoot(pathname: string | null): string {
     const segments = pathname.split('/').filter(Boolean);
     if (segments.length === 0) return '';
 
-    // Locale path format: /{region}/{lang}/{root}
-    if (segments.length >= 3) {
-        return segments[2];
+    // If first segment is locale like 'en-in', return the second segment
+    if (/^[a-z]{2}(-[a-z]{2})?$/i.test(segments[0])) {
+        return (segments[1] || '').toLowerCase();
     }
 
-    return segments[0] || '';
+    return (segments[0] || '').toLowerCase();
 }
 
 export default function Footer() {
@@ -62,7 +72,9 @@ export default function Footer() {
     const pathname = usePathname();
 
     const root = getRouteRoot(pathname);
+    const isLanding = !root;
     const shouldHideFooter =
+        isLanding ||
         pathname?.startsWith('/admin') ||
         pathname?.startsWith('/api') ||
         INTERNAL_APP_ROOTS.has(root);
@@ -105,7 +117,7 @@ export default function Footer() {
                             <li><Link href={`/${locale}-${region}/salaryforge`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-[#00D4A0]/50 group-hover:bg-[#00D4A0]" /> SalaryForge</Link></li>
                             <li><Link href={`/${locale}-${region}/ats-live`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-[#00D4A0]/50 group-hover:bg-[#00D4A0]" /> AtsLive</Link></li>
                             <li><Link href={`/${locale}-${region}/jobs`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-[#00D4A0]/50 group-hover:bg-[#00D4A0]" /> JobForge</Link></li>
-                            <li><Link href={`/${locale}-${region}/mentorforge`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> MentorForge</Link></li>
+                            <li><Link href={`/${locale}-${region}/omni`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> Omni</Link></li>
                             <li><Link href={`/${locale}-${region}/company-prep`} className="text-sm font-medium text-slate-500 hover:text-white transition-all flex items-center gap-2 group"><div className="w-1 h-1 rounded-full bg-indigo-500/50 group-hover:bg-indigo-500" /> CompanyForge</Link></li>
                         </ul>
                     </div>

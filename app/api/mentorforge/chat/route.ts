@@ -1,15 +1,10 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { runAgenticLoop, type AgentProgressEvent } from '@/lib/ai-core/agent-loop';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 import { buildUserContext, type UserContext } from '@/lib/ai/mentor-context';
 import { getSession } from '@/lib/auth/jwt';
 import { trackAIUsage, logAIChat, updateMentorMemory } from '@/lib/ai/governance-service';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,10 +13,62 @@ export async function POST(req: NextRequest) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
     const userId = session.userId;
+    const supabase = createClient();
 
-    const { message, history, mode = 'General' } = await req.json();
+    const body = await req.json();
+    const { message, history, mode = 'General', conversationId: incomingConversationId } = body;
+
+    if (!message || typeof message !== 'string') {
+      return new Response(JSON.stringify({ error: 'Message is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
 
     console.log(`[MentorForge] Running Agent Loop (SSE) | Mode: ${mode} | User: ${userId}`);
+
+    // 1. Resolve or Create Conversation
+    let conversationId = incomingConversationId;
+    if (conversationId) {
+      const { data: existingConv } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('id', conversationId)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (!existingConv) {
+        conversationId = null;
+      }
+    }
+
+    if (!conversationId) {
+      const { data: newConv, error: newConvErr } = await supabase
+        .from('conversations')
+        .insert({ user_id: userId, updated_at: new Date().toISOString() })
+        .select('id')
+        .single();
+
+      if (newConvErr || !newConv) {
+        console.error('[MentorForge] Failed to create conversation record:', newConvErr);
+        return new Response(JSON.stringify({ error: 'Failed to create conversation' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+      }
+      conversationId = newConv.id;
+    }
+
+    // 2. Pre-persist the user message immediately so history survives disconnection
+    try {
+      await supabase.from('ai_messages').insert({
+        conversation_id: conversationId,
+        user_id: userId,
+        role: 'user',
+        content: message,
+        created_at: new Date().toISOString(),
+      });
+      await supabase
+        .from('conversations')
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', conversationId);
+    } catch (saveUserErr) {
+      console.warn('[MentorForge] Warning: pre-saving user message failed:', saveUserErr);
+    }
 
     // Clean history to prevent token bloat
     const cleanedHistory = (history || []).slice(-10).map((h: { role: string; content?: string }) => ({
@@ -43,6 +90,9 @@ export async function POST(req: NextRequest) {
           }
         };
 
+        // Notify client of active conversationId immediately
+        sendEvent('conversation', { conversationId });
+
         // Send initial thinking event
         sendEvent('progress', { type: 'thinking', name: 'agent_reasoning', status: 'running' });
 
@@ -58,35 +108,57 @@ export async function POST(req: NextRequest) {
             }
           );
 
-          // Track AI usage telemetry
-          await trackAIUsage(userId, 'MentorForge', { input: 1500, output: 800 }, 'gemini-2.0-flash');
-          await logAIChat(userId, 'MentorForge', message, result.reply, 2000);
-
-          // Log chat interaction into DB for message history
-          await supabase.from('mentor_chats').insert([
-            { user_id: userId, role: 'user', content: message },
-            { user_id: userId, role: 'assistant', content: result.reply, metadata: { suggestedAction: result.suggestedAction } }
-          ]);
-
-          // Update long-term memory if the agent extracted insights
-          if (result.memoryExtraction) {
-            await updateMentorMemory(userId, result.memoryExtraction);
-          }
-
           // Retrieve updated context to return user readiness stats
           const userContext = await buildUserContext(userId).catch(() => ({} as UserContext));
 
-          // Send final result event
+          // Send final result event immediately to client
           sendEvent('result', {
+            conversationId,
             reply: result.reply,
             suggestedAction: result.suggestedAction,
-            analysis: userContext.analysis
+            analysis: userContext.analysis,
+            artifacts: result.artifacts,
+            blocks: (result as any).blocks,
           });
+
+          // Chat persistence & telemetry
+          try {
+            await trackAIUsage(userId, 'MentorForge', { input: 1500, output: 800 }, 'gemini-2.0-flash');
+            await logAIChat(userId, 'MentorForge', message, result.reply, 2000);
+
+            // Serialize assistant payload with blocks and artifacts for full UI restoration
+            const assistantContent = JSON.stringify({
+              reply: result.reply || '',
+              blocks: (result as any).blocks || [],
+              artifacts: result.artifacts || [],
+              suggestedAction: result.suggestedAction,
+              analysis: userContext.analysis,
+            });
+
+            await supabase.from('ai_messages').insert({
+              conversation_id: conversationId,
+              user_id: userId,
+              role: 'assistant',
+              content: assistantContent,
+              created_at: new Date().toISOString(),
+            });
+
+            await supabase
+              .from('conversations')
+              .update({ updated_at: new Date().toISOString() })
+              .eq('id', conversationId);
+
+            if (result.memoryExtraction) {
+              await updateMentorMemory(userId, result.memoryExtraction);
+            }
+          } catch (persistErr) {
+            console.warn('[MentorForge] Assistant message persistence warning:', persistErr);
+          }
 
         } catch (error: unknown) {
           const msg = error instanceof Error ? error.message : 'Unknown error';
           console.error('MentorForge Agent Loop Error:', msg);
-          sendEvent('error', { error: msg });
+          sendEvent('error', { error: msg, conversationId });
         } finally {
           if (!isCancelled) {
             try {

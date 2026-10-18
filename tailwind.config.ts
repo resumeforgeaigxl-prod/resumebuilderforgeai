@@ -9,6 +9,10 @@ const config: Config = {
   darkMode: "class",
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-geist-sans)", "ui-sans-serif", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "ui-monospace", "SFMono-Regular", "monospace"],
+      },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
@@ -42,6 +46,28 @@ const config: Config = {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        surface: {
+          1: "#0A0A0A",
+          2: "#101010",
+          3: "#151515",
+          canvas: "#050505",
+        },
+        "rf-border": {
+          DEFAULT: "#242424",
+          strong: "#2D2D2D",
+        },
+        "rf-text": {
+          primary: "#F5F5F5",
+          secondary: "#BDBDBD",
+          muted: "#7E7E7E",
+          disabled: "#565656",
+        },
+        "rf-accent": {
+          cyan: "#22C7F2",
+          violet: "#8B5CF6",
+          "cyan-soft": "#9BE7FA",
+          "violet-soft": "#C4B5FD",
         },
       },
       borderRadius: {

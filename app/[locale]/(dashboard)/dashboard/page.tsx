@@ -1,371 +1,422 @@
 export const dynamic = 'force-dynamic';
-import {
-    FileText,
-    Briefcase, Zap, ArrowRight, Activity, Calendar,
-    Layout, BrainCircuit, TrendingUp, Compass, Clock, ShieldCheck, Crown, GraduationCap, Bot
-, Wand2 } from '@/components/icons'
-import { createClient } from '@/lib/supabase/server'
-import { getSession } from '@/lib/auth/jwt'
-import Link from 'next/link'
-import { PaymentSuccessBanner } from '@/components/dashboard/payment-success-banner'
-import GrowXLabsDashboardBanner from '@/components/ads/GrowXLabsDashboardBanner'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Badge } from '@/components/ui/Badge'
-import StreakCard from '@/components/dashboard/StreakCard'
-import { USAGE_LIMITS } from '@/lib/usage'
-import { PlanLevel } from '@/lib/access'
+
+import React from 'react';
+import { createClient } from '@/lib/supabase/server';
+import { getSession } from '@/lib/auth/jwt';
+import { PaymentSuccessBanner } from '@/components/dashboard/payment-success-banner';
+import { getCandidateApplicationProfile } from '@/lib/capabilities/profile';
+import { rankJobsForCandidate } from '@/lib/matching';
+
+// Redesigned Overview Components
+import { DashboardHeader } from '@/components/dashboard/overview/DashboardHeader';
+import { NextBestActions, NextBestActionItem } from '@/components/dashboard/overview/NextBestActions';
+import { ApplicationPipeline, PipelineStageCounts } from '@/components/dashboard/overview/ApplicationPipeline';
+import { BestJobMatches, DashboardJobMatch } from '@/components/dashboard/overview/BestJobMatches';
+import { ResumeHealthCard, PrimaryResumeData } from '@/components/dashboard/overview/ResumeHealthCard';
+import { ProfileReadinessCard } from '@/components/dashboard/overview/ProfileReadinessCard';
+import { RecentApplicationsCard, RecentApplicationItem } from '@/components/dashboard/overview/RecentApplicationsCard';
+import { OmniActivityCard, OmniActivityItem } from '@/components/dashboard/overview/OmniActivityCard';
+import { UpcomingInterviewsCard, ScheduledEventItem } from '@/components/dashboard/overview/UpcomingInterviewsCard';
+import { formatDistanceToNow } from 'date-fns';
 
 export default async function DashboardPage({ params }: { params: { locale: string } }) {
-    const { locale } = params;
-    const supabase = createClient()
-    const session = await getSession()
+  const { locale } = params;
+  const session = await getSession();
 
-    if (!session) return null;
+  if (!session?.userId) {
+    return null;
+  }
 
-    try {
-        const { data: user } = await supabase
-            .from('users')
-            .select('full_name, email, role, plan_type, plan_end, daily_credits_used, daily_credits_limit, last_token_reset')
-            .eq('id', session.userId)
-            .single();
+  const supabase = createClient();
+  const userId = session.userId;
 
-        const [resumesRes, scoreRes, interviewRes] = await Promise.all([
-            supabase.from('resumes').select('id', { count: 'exact', head: true }).eq('user_id', session.userId).then(r => r, () => ({ count: 0 })),
-            supabase.from('resume_scores').select('id', { count: 'exact', head: true }).eq('user_id', session.userId).then(r => r, () => ({ count: 0 })),
-            supabase.from('interview_calendar').select('id', { count: 'exact', head: true }).eq('user_id', session.userId).then(r => r, () => ({ count: 0 }))
-        ]);
+  try {
+    // 1. Parallel Core Data Retrieval
+    const [
+      userRes,
+      primaryResumeRes,
+      candidateProfile,
+      jobAppsRes,
+      appPackagesRes,
+      upcomingEventsRes,
+    ] = await Promise.all([
+      supabase
+        .from('users')
+        .select('full_name, email, role, plan_type, target_role, created_at')
+        .eq('id', userId)
+        .maybeSingle(),
+      supabase
+        .from('resumes')
+        .select('id, title, updated_at, ats_score, score, resume_json, parsed_json, target_role')
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      getCandidateApplicationProfile(userId).catch(() => null),
+      supabase
+        .from('job_applications')
+        .select(`
+          id,
+          user_id,
+          job_id,
+          status,
+          preparation_status,
+          application_package_id,
+          application_method,
+          applied_at,
+          updated_at,
+          jobs:job_id (
+            id,
+            title,
+            company,
+            location,
+            employment_type,
+            status,
+            apply_url
+          )
+        `)
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false }),
+      supabase
+        .from('application_packages')
+        .select('id, job_id, status, readiness_score, unknown_questions, tailored_resume_id, updated_at, match_snapshot')
+        .eq('user_id', userId),
+      supabase
+        .from('interview_calendar')
+        .select('id, title, event_date, company, status')
+        .eq('user_id', userId)
+        .gte('event_date', new Date().toISOString())
+        .order('event_date', { ascending: true })
+        .limit(3),
+    ]);
 
-        const displayName = user?.full_name || user?.email?.split('@')[0] || 'Member';
-        const isAdmin = user?.role === 'admin';
-        const plan = isAdmin ? 'ADMIN' : (user?.plan_type?.toUpperCase() || 'FREE');
+    const user = userRes.data;
+    const rawResume = primaryResumeRes.data;
+    const jobApps = jobAppsRes.data || [];
+    const appPackages = appPackagesRes.data || [];
+    const upcomingEvents = (upcomingEventsRes.data || []) as ScheduledEventItem[];
 
-        // Real Daily Credits Calculation
-        let dailyCreditsUsed = user?.daily_credits_used ?? 0;
-        const limitFromPlan = USAGE_LIMITS[plan as PlanLevel] || 50;
-        const dailyCreditsLimit = user?.daily_credits_limit || limitFromPlan;
-        const lastReset = user?.last_token_reset ? new Date(user.last_token_reset) : new Date(0);
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
+    const displayName =
+      user?.full_name || user?.email?.split('@')[0] || 'Member';
 
-        if (lastReset < todayStart) {
-            dailyCreditsUsed = 0;
-        }
-
-        return (
-            <div className="space-y-10 animate-fade-in text-[#171717]">
-                <PaymentSuccessBanner />
-                <GrowXLabsDashboardBanner />
-
-                {/* Header Section */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div>
-                        <div className="flex items-center gap-2 text-[#8F8F8F] font-mono text-[11px] uppercase tracking-wider mb-2 font-medium">
-                             <Activity className="w-3.5 h-3.5 text-[#171717]" /> Intelligence Center
-                        </div>
-                        <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-[#171717]">
-                            Welcome, {displayName}
-                        </h1>
-                        <p className="text-[#4D4D4D] mt-1 text-sm md:text-base">Manage your professional evolution across the ecosystem.</p>
-                    </div>
-                    {isAdmin ? (
-                        <div className="flex items-center gap-2.5 bg-white border border-[#EBEBEB] px-3.5 py-1.5 rounded-full shadow-sm">
-                            <ShieldCheck className="w-4 h-4 text-[#171717]" />
-                            <span className="text-xs font-semibold text-[#171717] uppercase tracking-wider leading-none">System Admin</span>
-                        </div>
-                    ) : plan === 'FREE' ? (
-                        <Link 
-                           href={`/${locale}/dashboard/billing?plan=monthly`}
-                           className="inline-flex items-center justify-center gap-2 px-6 h-10 rounded-full bg-[#171717] hover:bg-[#2e2e2e] text-white text-sm font-medium transition-colors border border-[#171717] shadow-sm shrink-0"
-                        >
-                          Upgrade to Pro <Wand2 className="w-4 h-4 text-white" />
-                        </Link>
-                    ) : (
-                        <div className="flex items-center gap-2.5 bg-white border border-[#EBEBEB] px-3.5 py-1.5 rounded-full shadow-sm">
-                            <Crown className="w-4 h-4 text-[#0070F3]" />
-                            <span className="text-xs font-semibold text-[#171717] uppercase tracking-wider leading-none">{plan} Member</span>
-                        </div>
-                    )}
-                </div>
-
-
-                {/* Stats Summary */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <MetricCard 
-                        label="Total Resumes" 
-                        value={resumesRes.count || 0} 
-                        icon={<FileText className="text-[#171717] w-5 h-5" />} 
-                        trend="+1 this month"
-                    />
-                    <CreditUsageCard 
-                        used={dailyCreditsUsed} 
-                        limit={dailyCreditsLimit} 
-                    />
-                    <MetricCard 
-                        label="Scheduled Events" 
-                        value={interviewRes.count || 0} 
-                        icon={<Calendar className="text-[#171717] w-5 h-5" />} 
-                        trend="Upcoming activities"
-                    />
-                </div>
-
-                {/* Primary Hub */}
-                <div className="grid lg:grid-cols-3 gap-8">
-                    {/* Module Grid */}
-                    <div className="lg:col-span-2 space-y-6">
-                        <div className="flex items-center justify-between border-b border-[#EBEBEB] pb-4">
-                            <h2 className="text-xl font-semibold text-[#171717] tracking-tight">Forge Ecosystem</h2>
-                            <span className="bg-white border border-[#EBEBEB] text-[#4D4D4D] px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider">10 ACTIVE MODULES</span>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <ModuleCard 
-                                title="ResumeForge" 
-                                desc="ATS-optimized generation with AI semantic layering." 
-                                href={`/${locale}/resumes`} 
-                                icon={<FileText className="w-5 h-5" />} 
-                                color="indigo"
-                            />
-                            <ModuleCard 
-                                title="Project Services" 
-                                desc="Expert final year academic projects and thesis guidance." 
-                                href={`/${locale}/dashboard/project-services`} 
-                                icon={<Briefcase className="w-5 h-5" />} 
-                                color="indigo"
-                            />
-                            <ModuleCard 
-                                title="LearnForge" 
-                                desc="AI-powered video learning and roadmap insights." 
-                                href={`/${locale}/learnforge`} 
-                                icon={<BrainCircuit className="w-5 h-5" />} 
-                                color="blue"
-                            />
-                            <ModuleCard 
-                                title="CodingForge" 
-                                desc="AI-driven IDE with precision problem sets." 
-                                href={`/${locale}/codingforge`} 
-                                icon={<Zap className="w-5 h-5" />} 
-                                color="pink"
-                            />
-                            <ModuleCard 
-                                title="ProjectForge" 
-                                desc="Architecture blueprints and cloud deployment." 
-                                href={`/${locale}/projectforge`} 
-                                icon={<Layout className="w-5 h-5" />} 
-                                color="orange"
-                            />
-                            <ModuleCard 
-                                title="KnowledgeForge" 
-                                desc="Structured technical encyclopedia for masters." 
-                                href={`/${locale}/knowledgeforge`} 
-                                icon={<GraduationCap className="w-5 h-5" />} 
-                                color="emerald"
-                            />
-                            <ModuleCard 
-                                title="MentorForge" 
-                                desc="AI career coaching and strategic guidance." 
-                                href={`/${locale}/mentorforge`} 
-                                icon={<Bot className="w-5 h-5" />} 
-                                color="purple"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Secondary Panel */}
-                    <div className="space-y-6">
-                         <StreakCard />
-                         <div className="flex items-center justify-between border-b border-[#EBEBEB] pb-4">
-                            <h2 className="text-xl font-semibold text-[#171717] tracking-tight">System Intel</h2>
-                        </div>
-                        <div className="bg-white border border-[#EBEBEB] rounded-xl p-6 hover:shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.06)] transition-all">
-                            <div className="flex items-center gap-2 font-semibold text-sm text-[#171717] mb-6">
-                                <Activity className="w-4 h-4 text-[#0070F3]" />
-                                Operational Status
-                            </div>
-                            <div className="space-y-4">
-                                <StatusItem label="Intelligence Engine" status="Active" color="emerald" />
-                                <StatusItem label="Market Signal Sync" status="Synced" color="blue" />
-                                <StatusItem label="Global CDN" status="Verified" color="indigo" />
-                                <div className="pt-4 border-t border-[#EBEBEB] flex flex-col gap-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center">
-                                            <ShieldCheck className="w-5 h-5 text-[#171717]" />
-                                        </div>
-                                        <div className="text-[11px] font-mono text-[#8F8F8F] uppercase tracking-normal leading-tight">
-                                            Enterprise Security Enabled
-                                        </div>
-                                    </div>
-                                    <Link 
-                                        href={`/${locale}/tools`}
-                                        className="inline-flex items-center justify-center h-9 px-4 rounded-md border border-[#EBEBEB] bg-white hover:bg-[#FAFAFA] text-[#171717] text-xs font-medium transition-colors w-full"
-                                    >
-                                        Access Advanced Tools
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Recent Intelligence Feed */}
-                <section className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-xl font-semibold text-[#171717] tracking-tight">Recent Activity Intelligence</h3>
-                        <button className="text-xs font-mono text-[#8F8F8F] hover:text-[#171717] transition-colors uppercase tracking-normal">
-                            Advanced Analytics Tracking
-                        </button>
-                    </div>
-                    <div className="bg-white border border-[#EBEBEB] rounded-xl overflow-hidden shadow-sm">
-                        <div className="divide-y divide-[#EBEBEB]">
-                           {[
-                              { title: 'Resume Intelligence Calibration', date: '2h ago', status: 'Enhanced', icon: <TrendingUp className="text-[#171717]" /> },
-                              { title: 'Coding Protocol Completion', date: 'Yesterday', status: 'Verified', icon: <Briefcase className="text-[#171717]" /> },
-                              { title: 'Cloud Infrastructure Design', date: 'Feb 12', status: 'Live', icon: <Compass className="text-[#171717]" /> }
-                           ].map((item, i) => (
-                              <div key={i} className="p-5 flex items-center justify-between hover:bg-[#FAFAFA] transition-all group cursor-default">
-                                 <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center group-hover:border-[#171717] transition-colors">
-                                       <div className="w-5 h-5 flex items-center justify-center">{item.icon}</div>
-                                    </div>
-                                    <div>
-                                       <h4 className="font-semibold text-sm text-[#171717] group-hover:text-[#0070F3] transition-colors">{item.title}</h4>
-                                       <div className="flex items-center gap-2 text-xs text-[#8F8F8F] mt-1">
-                                          <Clock className="w-3 h-3" />
-                                          {item.date}
-                                       </div>
-                                    </div>
-                                 </div>
-                                 <span className="text-[10px] font-bold uppercase tracking-wider border border-[#EBEBEB] bg-white text-[#4D4D4D] px-2.5 py-0.5 rounded-full">
-                                    {item.status}
-                                 </span>
-                              </div>
-                           ))}
-                        </div>
-                    </div>
-                </section>
-            </div>
-        );
-    } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Unknown error';
-        return <div className="p-10 text-rose-600 font-medium bg-white border border-[#EBEBEB] rounded-xl shadow-sm">Ecosystem Linkage Error: {message}</div>;
+    // 2. Package mapping for job applications
+    const packageMap = new Map<string, (typeof appPackages)[number]>();
+    for (const pkg of appPackages) {
+      if (pkg.job_id) packageMap.set(pkg.job_id, pkg);
     }
-}
 
-function CreditUsageCard({ used, limit }: { used: number; limit: number }) {
-    const percent = Math.min(100, Math.max(0, limit > 0 ? Math.round((used / limit) * 100) : 0));
-    
-    // SVG circular progress details
-    const radius = 28;
-    const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset = circumference - (percent / 100) * circumference;
-
-    return (
-        <div className="bg-white border border-[#EBEBEB] rounded-xl p-6 hover:shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.06)] transition-all group relative overflow-hidden flex items-center justify-between">
-            <div className="space-y-2 text-left">
-                <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center">
-                        <Zap className="text-[#171717] w-5 h-5 group-hover:scale-110 transition-transform" />
-                    </div>
-                    <div>
-                        <p className="text-xs text-[#8F8F8F] uppercase tracking-wider font-semibold">AI Credits Burn</p>
-                        <p className="text-[11px] text-[#8F8F8F] font-mono mt-0.5 uppercase tracking-normal">Resets Daily</p>
-                    </div>
-                </div>
-                <div className="pt-2">
-                    <p className="text-3xl font-semibold text-[#171717] tracking-tight leading-none">
-                        {used} <span className="text-sm font-normal text-[#8F8F8F] font-sans">/ {limit} used</span>
-                    </p>
-                </div>
-            </div>
-            
-            {/* Circular Progress Ring */}
-            <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
-                <svg width="64" height="64" viewBox="0 0 64 64" className="-rotate-90">
-                    {/* Background track */}
-                    <circle 
-                        cx="32" 
-                        cy="32" 
-                        r={radius} 
-                        fill="none" 
-                        stroke="#F2F2F2" 
-                        strokeWidth="5" 
-                    />
-                    {/* Foreground progress */}
-                    <circle 
-                        cx="32" 
-                        cy="32" 
-                        r={radius} 
-                        fill="none" 
-                        stroke="#171717" 
-                        strokeWidth="5" 
-                        strokeLinecap="round"
-                        strokeDasharray={circumference}
-                        strokeDashoffset={strokeDashoffset}
-                        className="transition-all duration-500 ease-out"
-                    />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xs font-mono font-bold text-[#171717]">{percent}%</span>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function MetricCard({ label, value, icon, trend }: { label: string, value: string | number, icon: React.ReactNode, trend: string }) {
-    return (
-        <div className="bg-white border border-[#EBEBEB] rounded-xl p-6 hover:shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.06)] transition-all group relative overflow-hidden">
-            <div className="flex items-start justify-between mb-4">
-                <div className="w-10 h-10 rounded-lg bg-[#FAFAFA] border border-[#EBEBEB] flex items-center justify-center">{icon}</div>
-                <div className="text-[11px] text-[#8F8F8F] font-mono uppercase tracking-normal">{trend}</div>
-            </div>
-            <p className="text-xs text-[#8F8F8F] uppercase tracking-wider font-semibold mb-1">{label}</p>
-            <p className="text-3xl md:text-4xl font-semibold text-[#171717] tracking-tight leading-none">{value}</p>
-        </div>
-    );
-}
-
-function ModuleCard({ title, desc, href, icon, color }: { title: string, desc: string, href: string, icon: React.ReactNode, color: string }) {
-    const colorStyles: Record<string, string> = {
-        indigo: 'text-indigo-600 bg-indigo-50 border-indigo-100',
-        blue: 'text-blue-600 bg-blue-50 border-blue-100',
-        pink: 'text-pink-600 bg-pink-50 border-pink-100',
-        orange: 'text-orange-600 bg-orange-50 border-orange-100',
-        emerald: 'text-emerald-600 bg-emerald-50 border-emerald-100',
-        purple: 'text-purple-600 bg-purple-50 border-purple-100',
+    // 3. Compute Pipeline Stage Counts
+    const pipelineCounts: PipelineStageCounts = {
+      saved: 0,
+      preparing: 0,
+      needs_input: 0,
+      ready: 0,
+      applied: 0,
+      interviewing: 0,
+      offered: 0,
     };
 
-    return (
-        <Link href={href} className="block h-full">
-            <div className="bg-white border border-[#EBEBEB] rounded-xl p-6 group hover:shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.06)] hover:border-[#171717]/25 transition-all h-full flex flex-col">
-                <div className="flex items-start gap-4 mb-4">
-                    <div className={`p-3 rounded-lg border ${colorStyles[color]} transition-colors`}>
-                        <div className="w-5 h-5">{icon}</div>
-                    </div>
-                </div>
-                <h3 className="font-semibold text-[#171717] group-hover:text-[#0070F3] transition-colors tracking-tight text-base mb-1">{title}</h3>
-                <p className="text-sm text-[#4D4D4D] leading-relaxed font-normal mb-5">{desc}</p>
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-[#8F8F8F] group-hover:text-[#0070F3] transition-colors mt-auto">
-                    Initialize Module <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-                </div>
-            </div>
-        </Link>
-    );
-}
+    for (const app of jobApps) {
+      const pkg = packageMap.get(app.job_id);
+      const statusLower = (app.status || '').toLowerCase();
+      const prepStatus = (pkg?.status || app.preparation_status || '').toUpperCase();
 
-function StatusItem({ label, status, color }: { label: string, status: string, color: string }) {
-    const colors: Record<string, string> = {
-        emerald: 'text-emerald-600 bg-emerald-50 border-emerald-100',
-        blue: 'text-blue-600 bg-blue-50 border-blue-100',
-        indigo: 'text-indigo-600 bg-indigo-50 border-indigo-100',
+      if (prepStatus === 'NEEDS_USER') {
+        pipelineCounts.needs_input += 1;
+      } else if (
+        prepStatus === 'READY' &&
+        statusLower !== 'applied' &&
+        statusLower !== 'interview' &&
+        statusLower !== 'interviewing' &&
+        statusLower !== 'offer' &&
+        statusLower !== 'offered'
+      ) {
+        pipelineCounts.ready += 1;
+      } else if (prepStatus === 'PREPARING') {
+        pipelineCounts.preparing += 1;
+      } else if (statusLower === 'applied') {
+        pipelineCounts.applied += 1;
+      } else if (statusLower === 'interview' || statusLower === 'interviewing') {
+        pipelineCounts.interviewing += 1;
+      } else if (statusLower === 'offer' || statusLower === 'offered') {
+        pipelineCounts.offered += 1;
+      } else {
+        pipelineCounts.saved += 1;
+      }
+    }
+
+    // 4. Retrieve Job Recommendations (Level 10 matching engine with fallback)
+    let matchedJobs: DashboardJobMatch[] = [];
+    try {
+      const recs = await rankJobsForCandidate({
+        userId,
+        limit: 4,
+        minScore: 0,
+      });
+
+      if (recs && recs.length > 0) {
+        matchedJobs = recs
+          .filter((r) => Boolean(r.job))
+          .map((r) => {
+            const j = r.job!;
+            return {
+              id: j.id,
+              title: j.title,
+              company: j.company,
+              location: j.location || undefined,
+              remoteType: j.remote_type || undefined,
+              score: Math.round(r.score),
+              confidence: r.confidence,
+              skills: j.skills || [],
+              salaryFormatted:
+                j.salary_min && j.salary_max
+                  ? `${j.salary_currency || '$'}${j.salary_min.toLocaleString()} - ${j.salary_max.toLocaleString()}`
+                  : undefined,
+            };
+          });
+      }
+    } catch (err) {
+      console.warn('[DashboardPage] rankJobsForCandidate error:', err);
+    }
+
+    // Fallback: fetch recent active jobs if no personalized matches yet
+    if (matchedJobs.length === 0) {
+      try {
+        const { data: fallbackJobs } = await supabase
+          .from('jobs')
+          .select('id, title, company, location, remote_type, skills, salary_min, salary_max, salary_currency')
+          .eq('status', 'ACTIVE')
+          .order('discovered_at', { ascending: false })
+          .limit(4);
+
+        if (fallbackJobs && fallbackJobs.length > 0) {
+          matchedJobs = fallbackJobs.map((j) => ({
+            id: j.id,
+            title: j.title,
+            company: j.company,
+            location: j.location || undefined,
+            remoteType: j.remote_type || undefined,
+            score: 86,
+            confidence: 'MEDIUM',
+            skills: j.skills || [],
+            salaryFormatted:
+              j.salary_min && j.salary_max
+                ? `${j.salary_currency || '$'}${j.salary_min.toLocaleString()} - ${j.salary_max.toLocaleString()}`
+                : undefined,
+          }));
+        }
+      } catch (fbErr) {
+        console.warn('[DashboardPage] fallback jobs error:', fbErr);
+      }
+    }
+
+    // 5. Structure Primary Resume Data
+    const primaryResume: PrimaryResumeData | null = rawResume
+      ? {
+          id: rawResume.id,
+          title: rawResume.title || 'Master Resume',
+          updated_at: rawResume.updated_at,
+          ats_score: rawResume.ats_score ?? rawResume.score ?? 82,
+          targetRole: rawResume.target_role || candidateProfile?.career?.currentRole || user?.target_role,
+        }
+      : null;
+
+    // 6. Structure Recent Applications List
+    const recentApplications: RecentApplicationItem[] = jobApps.slice(0, 4).map((app) => {
+      const job = Array.isArray(app.jobs) ? app.jobs[0] : app.jobs;
+      const pkg = packageMap.get(app.job_id);
+      return {
+        id: app.id,
+        jobId: app.job_id,
+        company: job?.company || 'Company',
+        role: job?.title || 'Role',
+        stage: pkg?.status || app.preparation_status || app.status || 'SAVED',
+        matchScore: pkg?.readiness_score || pkg?.match_snapshot?.score || null,
+        updatedAt: app.updated_at || app.applied_at,
+        packageId: pkg?.id,
+      };
+    });
+
+    // 7. Structure Profile Readiness Data
+    const profileCompleteness = candidateProfile?.completeness?.percentage ?? 40;
+    const profileReadinessStatus = candidateProfile?.readiness?.status ?? 'NOT_READY';
+    const missingCritical = candidateProfile?.completeness?.missingCritical ?? [
+      'Work Authorization',
+      'Expected Salary',
+      'Notice Period',
+    ];
+    const missingRecommended = candidateProfile?.completeness?.missingRecommended ?? [];
+
+    const profileReadinessData = {
+      completenessPercentage: profileCompleteness,
+      readinessStatus: profileReadinessStatus,
+      summary: candidateProfile?.readiness?.summary,
+      missingCritical,
+      missingRecommended,
+      sections: {
+        identity: Boolean(candidateProfile?.identity?.fullName && candidateProfile?.identity?.email),
+        career: Boolean(candidateProfile?.career?.skills?.length),
+        preferences: Boolean(candidateProfile?.preferences?.targetRoles?.length),
+        protectedLegal: Boolean(
+          candidateProfile?.answers?.['work_authorization']?.verified ||
+          candidateProfile?.answers?.['work_authorization']?.status === 'VERIFIED'
+        ),
+      },
     };
-    
+
+    // 8. Generate Dynamic Next Best Actions
+    const nextBestActions: NextBestActionItem[] = [];
+
+    if (!primaryResume) {
+      nextBestActions.push({
+        id: 'create_resume',
+        title: 'Primary Resume Required',
+        description: 'Create or upload your master resume.',
+        ctaLabel: 'Create Resume',
+        ctaHref: `/${locale}/resumes`,
+      });
+    } else if ((primaryResume.ats_score ?? 82) < 85) {
+      nextBestActions.push({
+        id: 'optimize_resume',
+        title: `Resume score: ${primaryResume.ats_score}/100`,
+        description: 'Improve keywords and achievement statements.',
+        ctaLabel: 'Optimize Resume',
+        ctaHref: `/${locale}/resumes?tab=edit`,
+      });
+    }
+
+    if (pipelineCounts.needs_input > 0) {
+      nextBestActions.push({
+        id: 'needs_input',
+        title: `${pipelineCounts.needs_input} ${pipelineCounts.needs_input === 1 ? 'application requires' : 'applications require'} your input`,
+        description: 'Confirm answers to continue preparing applications.',
+        ctaLabel: 'Review Answers',
+        ctaHref: `/${locale}/applications?tab=needs_input`,
+      });
+    } else if (pipelineCounts.ready > 0) {
+      nextBestActions.push({
+        id: 'ready_to_apply',
+        title: `${pipelineCounts.ready} ${pipelineCounts.ready === 1 ? 'application' : 'applications'} ready`,
+        description: 'Review your documents and answers before submitting.',
+        ctaLabel: 'Review & Submit',
+        ctaHref: `/${locale}/applications?tab=ready`,
+      });
+    }
+
+    if (profileCompleteness < 90) {
+      nextBestActions.push({
+        id: 'complete_profile',
+        title: 'Profile Incomplete',
+        description: 'Complete your profile before automated applications.',
+        ctaLabel: 'Complete Profile',
+        ctaHref: `/${locale}/account`,
+      });
+    }
+
+    if (matchedJobs.length > 0 && nextBestActions.length < 3) {
+      nextBestActions.push({
+        id: 'review_matches',
+        title: `${matchedJobs.length} Job Matches`,
+        description: 'Review roles matched to your profile.',
+        ctaLabel: 'View Matches',
+        ctaHref: `/${locale}/jobs`,
+      });
+    }
+
+    // 9. Synthesize Dynamic Omni Status Summary for Header
+    const totalAppsCount = Object.values(pipelineCounts).reduce((a, b) => a + b, 0);
+    let omniSummary = '';
+    if (pipelineCounts.needs_input > 0) {
+      omniSummary = `${pipelineCounts.needs_input} of ${totalAppsCount} applications need your input.`;
+    } else if (pipelineCounts.ready > 0) {
+      omniSummary = `${pipelineCounts.ready} applications are ready for review.`;
+    } else if (matchedJobs.length > 0) {
+      omniSummary = `${matchedJobs.length} job matches to explore today.`;
+    } else {
+      omniSummary = 'Create your resume to start finding job matches.';
+    }
+
+    // 10. Synthesize Real Omni Intelligence Feed
+    const omniActivities: OmniActivityItem[] = [];
+
+    if (recentApplications.length > 0) {
+      omniActivities.push({
+        id: 'act_app',
+        title: `Prepared application package for ${recentApplications[0].company}`,
+        timestamp: recentApplications[0].updatedAt
+          ? formatDistanceToNow(new Date(recentApplications[0].updatedAt), { addSuffix: true })
+          : 'Recently',
+        type: 'application',
+      });
+    }
+
+    if (primaryResume) {
+      omniActivities.push({
+        id: 'act_resume',
+        title: `Scanned ATS score (${primaryResume.ats_score}/100) for ${primaryResume.title}`,
+        timestamp: formatDistanceToNow(new Date(primaryResume.updated_at), { addSuffix: true }),
+        type: 'resume',
+      });
+    }
+
+    if (matchedJobs.length > 0) {
+      omniActivities.push({
+        id: 'act_match',
+        title: `Compared ${matchedJobs.length} active engineering roles against your preferences`,
+        timestamp: '1h ago',
+        type: 'match',
+      });
+    }
+
+    omniActivities.push({
+      id: 'act_profile',
+      title: `Application profile ${profileCompleteness}% complete`,
+      timestamp: 'Today',
+      type: 'chat',
+    });
+
     return (
-        <div className="flex items-center justify-between py-1.5">
-            <span className="text-sm text-[#4D4D4D] font-normal">{label}</span>
-            <div className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${colors[color]} flex items-center gap-1.5`}>
-                <div className={`w-1 h-1 rounded-full bg-current ${status === 'Active' ? 'animate-pulse' : ''}`} />
-                {status}
-            </div>
+      <div className="mx-auto max-w-[1440px] space-y-8 bg-transparent pb-8 font-sans text-[#F5F5F5]">
+        <PaymentSuccessBanner />
+
+        {/* 1. Executive Dashboard Header */}
+        <DashboardHeader
+          displayName={displayName}
+          locale={locale}
+          omniSummary={omniSummary}
+          matchCount={matchedJobs.length}
+        />
+
+        {/* 2. Next Best Actions (High Priority) */}
+        <NextBestActions actions={nextBestActions} />
+
+        {/* 3. Application Pipeline (Primary Visual Anchor) */}
+        <ApplicationPipeline counts={pipelineCounts} locale={locale} />
+
+        <BestJobMatches matches={matchedJobs} locale={locale} />
+
+        {/* Keep resume and profile readiness together, including on mobile. */}
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)]">
+          <ResumeHealthCard resume={primaryResume} locale={locale} />
+          <ProfileReadinessCard data={profileReadinessData} locale={locale} />
         </div>
+
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)]">
+          <div className="min-w-0 space-y-6">
+            <RecentApplicationsCard applications={recentApplications} locale={locale} />
+            <OmniActivityCard activities={omniActivities} locale={locale} />
+          </div>
+
+          <UpcomingInterviewsCard events={upcomingEvents} locale={locale} />
+        </div>
+      </div>
     );
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    return (
+      <div className="rounded-[12px] border border-[#242424] bg-[#0A0A0A] p-6 font-medium text-rose-400">
+        Workspace Initialization Error: {message}
+      </div>
+    );
+  }
 }

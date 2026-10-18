@@ -1,34 +1,39 @@
-export default function AuthLayout({
-    children,
-}: {
-    children: React.ReactNode
-}) {
-    return (
-        <div className="min-h-screen flex flex-col-reverse md:flex-row overflow-hidden md:h-screen w-screen bg-[#0d0d0d] font-sans">
-            
-            {/* Left Panel: Form Container (50% on Desktop) */}
-            <div 
-                className="w-full md:w-1/2 flex flex-col justify-center px-6 md:px-16 py-12 overflow-y-auto relative z-10 border-r border-white/5"
-                style={{ background: 'radial-gradient(ellipse at top left, #1e1040 0%, #0d0d0d 60%)' }}
-            >
-                {/* Subtle purple glow in top-left */}
-                <div className="absolute w-64 h-64 bg-purple-600/10 blur-3xl rounded-full top-0 left-0 pointer-events-none" />
+import Link from 'next/link';
 
-                <div className="w-full max-w-[400px] mx-auto flex flex-col justify-center relative z-10">
+export default function AuthLayout({ children, params }: {
+    children: React.ReactNode;
+    params?: { locale?: string };
+}) {
+    const locale = params?.locale || 'en-in';
+
+    return (
+        <div className="auth-surface grid min-h-screen min-h-dvh w-full bg-[#050505] font-sans text-[#F5F5F5] antialiased selection:bg-[#242424] lg:grid-cols-2">
+            <div className="flex min-w-0 items-center justify-center px-6 py-8 sm:px-10">
+                <div className="w-full max-w-[460px]">
+                    <Link
+                        href={`/${locale}`}
+                        className="mb-8 inline-flex items-center gap-2 rounded-[10px] text-base font-semibold tracking-tight focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#BDBDBD]"
+                        aria-label="ResumeForge home"
+                    >
+                        <span aria-hidden="true" className="flex h-8 w-8 items-center justify-center rounded-[8px] border border-[#242424] bg-[#101010] text-xs font-bold">RF</span>
+                        ResumeForge
+                    </Link>
                     {children}
                 </div>
             </div>
-
-            {/* Right Panel: Illustration (50% on Desktop, bg-[#6B3FE7]) */}
-            <div className="w-full md:w-1/2 h-[200px] md:h-screen flex items-center justify-center bg-[#6B3FE7] overflow-hidden">
-                <img
-                    src="/images/auth-side.png?v=welcome-pixelart"
-                    alt="ResumeForgeAI Cinematic Auth Visual"
-                    className="h-[160px] md:h-auto md:max-h-[85vh] w-auto object-contain"
-                />
-            </div>
-            
+            <aside
+                aria-label="About ResumeForge"
+                className="hidden min-w-0 items-center justify-center border-l border-[#242424] bg-[#151515] px-12 py-16 lg:flex xl:px-16"
+            >
+                <div className="w-full max-w-[540px] space-y-4">
+                    <h2 className="!font-sans !text-[32px] font-semibold leading-tight tracking-tight text-[#F5F5F5] xl:!text-[36px]">
+                        Your AI job agent.
+                    </h2>
+                    <p className="text-base leading-7 text-[#BDBDBD]">
+                        Find the right jobs, tailor your resume, prepare applications, and move faster with Omni.
+                    </p>
+                </div>
+            </aside>
         </div>
     );
 }
-

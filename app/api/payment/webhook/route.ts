@@ -81,8 +81,54 @@ export async function POST(req: NextRequest) {
                 });
             }
 
-            // Activate plan
-            const subscriptionId = await activateUserPlan(order.user_id, order.plan_name as PlanName, razorpayPaymentId, order.coupon_code);
+            // ── Grant Credits & Set Plan via Canonical Credit Service ─────────────
+            const cleanPlan = (order.plan_name || '').toUpperCase();
+            const { CreditService, BILLING_CONFIG } = await import('@/lib/billing');
+            type PlanKey = keyof typeof BILLING_CONFIG.plans;
+
+            if (cleanPlan in BILLING_CONFIG.plans) {
+                const planDef = BILLING_CONFIG.plans[cleanPlan as PlanKey];
+                await CreditService.grantCredits({
+                    userId: order.user_id,
+                    amount: planDef.credits,
+                    reason: 'PLAN_PURCHASE',
+                    referenceType: 'razorpay_order',
+                    referenceId: razorpayOrderId,
+                    idempotencyKey: `order_${razorpayOrderId}`,
+                    planId: planDef.id,
+                    planDurationDays: planDef.durationDays,
+                });
+            } else if (BILLING_CONFIG.topUpPacks[cleanPlan]) {
+                const packDef = BILLING_CONFIG.topUpPacks[cleanPlan];
+                await CreditService.grantCredits({
+                    userId: order.user_id,
+                    amount: packDef.credits,
+                    reason: 'TOPUP_PURCHASE',
+                    referenceType: 'razorpay_order',
+                    referenceId: razorpayOrderId,
+                    idempotencyKey: `order_${razorpayOrderId}`,
+                });
+            } else {
+                const fallbackCredits = cleanPlan.includes('PRO') ? 500 : cleanPlan.includes('MONTH') ? 250 : 100;
+                await CreditService.grantCredits({
+                    userId: order.user_id,
+                    amount: fallbackCredits,
+                    reason: 'PLAN_PURCHASE',
+                    referenceType: 'razorpay_order',
+                    referenceId: razorpayOrderId,
+                    idempotencyKey: `order_${razorpayOrderId}`,
+                    planId: 'PRO',
+                    planDurationDays: 30,
+                });
+            }
+
+            // Activate legacy plan for backward compatibility
+            let subscriptionId: string | undefined;
+            try {
+                subscriptionId = await activateUserPlan(order.user_id, cleanPlan as PlanName, razorpayPaymentId, order.coupon_code);
+            } catch (e) {
+                console.warn('[webhook] Legacy activateUserPlan notice:', e);
+            }
 
             // ── GENERATE INVOICE & SEND EMAIL (Fallback for missing verify flow) ──
             try {

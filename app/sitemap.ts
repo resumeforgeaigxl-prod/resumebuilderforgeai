@@ -59,6 +59,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.6,
       });
     });
+
+    // Add eligible active canonical jobs
+    try {
+      const { createClient } = await import('@/lib/supabase/server');
+      const { isJobIndexable } = await import('@/lib/jobs/indexability');
+      const { getCanonicalJobUrl } = await import('@/lib/jobs/slug');
+      const supabase = await createClient();
+
+      const { data: activeJobs } = await supabase
+        .from('jobs')
+        .select('id, title, company, location, city, description, apply_url, status, slug, last_seen_at')
+        .eq('status', 'ACTIVE')
+        .order('last_seen_at', { ascending: false })
+        .limit(200);
+
+      (activeJobs || []).forEach((job) => {
+        if (isJobIndexable(job).eligible) {
+          sitemapData.push({
+            url: getCanonicalJobUrl(job, primaryLocale),
+            lastModified: job.last_seen_at ? new Date(job.last_seen_at) : new Date(),
+            changeFrequency: 'daily',
+            priority: 0.8,
+          });
+        }
+      });
+    } catch (jobErr) {
+      console.warn('Jobs sitemap fetch error:', jobErr);
+    }
   } catch (err) {
     console.error('Sitemap dynamic generation failed:', err);
   }

@@ -102,8 +102,55 @@ export async function POST(req: NextRequest) {
             await (supabase as any).rpc('increment_coupon_used', { p_code: couponCode });
         }
 
-        // ── Activate user plan ────────────────────────────────────────────────
-        const subscriptionId = await activateUserPlan(session.userId, plan_name.toUpperCase() as PlanName, razorpay_payment_id, couponCode ?? undefined);
+        // ── Grant Credits & Set Plan via Canonical Credit Service ─────────────
+        const cleanPlan = plan_name.toUpperCase();
+        const { CreditService, BILLING_CONFIG } = await import('@/lib/billing');
+        type PlanKey = keyof typeof BILLING_CONFIG.plans;
+
+        if (cleanPlan in BILLING_CONFIG.plans) {
+            const planDef = BILLING_CONFIG.plans[cleanPlan as PlanKey];
+            await CreditService.grantCredits({
+                userId: session.userId,
+                amount: planDef.credits,
+                reason: 'PLAN_PURCHASE',
+                referenceType: 'razorpay_order',
+                referenceId: razorpay_order_id,
+                idempotencyKey: `order_${razorpay_order_id}`,
+                planId: planDef.id,
+                planDurationDays: planDef.durationDays,
+            });
+        } else if (BILLING_CONFIG.topUpPacks[cleanPlan]) {
+            const packDef = BILLING_CONFIG.topUpPacks[cleanPlan];
+            await CreditService.grantCredits({
+                userId: session.userId,
+                amount: packDef.credits,
+                reason: 'TOPUP_PURCHASE',
+                referenceType: 'razorpay_order',
+                referenceId: razorpay_order_id,
+                idempotencyKey: `order_${razorpay_order_id}`,
+            });
+        } else {
+            // Legacy plan fallback grant
+            const fallbackCredits = cleanPlan.includes('PRO') ? 500 : cleanPlan.includes('MONTH') ? 250 : 100;
+            await CreditService.grantCredits({
+                userId: session.userId,
+                amount: fallbackCredits,
+                reason: 'PLAN_PURCHASE',
+                referenceType: 'razorpay_order',
+                referenceId: razorpay_order_id,
+                idempotencyKey: `order_${razorpay_order_id}`,
+                planId: 'PRO',
+                planDurationDays: 30,
+            });
+        }
+
+        // ── Activate legacy user plan for backward compatibility ──────────────
+        let subscriptionId: string | undefined;
+        try {
+            subscriptionId = await activateUserPlan(session.userId, cleanPlan as PlanName, razorpay_payment_id, couponCode ?? undefined);
+        } catch (e) {
+            console.warn('[verify] Legacy activateUserPlan notice:', e);
+        }
 
         // ── Generate invoice ──────────────────────────────────────────────────
         const invoice = await createInvoice({

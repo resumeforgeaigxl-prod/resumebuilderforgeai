@@ -1,23 +1,32 @@
 "use client";
 
 import Link from "next/link";
+import styles from "./FooterSection.module.css";
 
 interface FooterSectionProps {
   locale?: string;
+  promo?: boolean;
 }
 
-const columns = (locale: string) => [
+type FooterLink = {
+  label: string;
+  href: string;
+};
+
+const columns = (locale: string): { title: string; links: FooterLink[]; wide?: boolean }[] => [
   {
     title: "Product",
     links: [
-      { label: "Features", href: `/${locale}#features` },
-      { label: "Templates", href: `/${locale}#templates` },
-      { label: "ATS Score", href: `/${locale}#ats-score` },
+      { label: "Resume Builder", href: `/${locale}/ai-resume-builder` },
+      { label: "Templates", href: `/${locale}/resumes` },
+      { label: "ATS Score", href: `/${locale}/ats-live` },
       { label: "Pricing", href: `/${locale}/pricing` },
+      { label: "Omni", href: `/${locale}/omni` },
     ],
   },
   {
     title: "Forges",
+    wide: true,
     links: [
       { label: "ResumeForge", href: `/${locale}/ai-resume-builder` },
       { label: "CodingForge", href: `/${locale}/codingforge` },
@@ -32,100 +41,101 @@ const columns = (locale: string) => [
   {
     title: "Resources",
     links: [
-      { label: "Documentation", href: "#" },
+      { label: "Documentation", href: `/${locale}/docs` },
       { label: "Blog", href: `/${locale}/blogs` },
-      { label: "Changelog", href: "#" },
-      { label: "Support", href: "#" },
+      { label: "Project Services", href: `/${locale}/project-services` },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "About", href: "#" },
       { label: "Careers", href: "https://careers.growxlabs.tech/" },
-      { label: "Contact", href: "#" },
-      { label: "Press", href: "#" },
-    ],
-  },
-  {
-    title: "Legal",
-    links: [
-      { label: "Privacy Policy", href: `/${locale}/privacy-policy` },
-      { label: "Terms of Service", href: `/${locale}/terms-of-service` },
-      { label: "Cookie Policy", href: "#" },
+      { label: "Support", href: "mailto:support@resumeforgeai.in" },
+      { label: "GrowXLabs", href: "https://growxlabs.tech" },
     ],
   },
 ];
 
-export default function FooterSection({ locale = "en-in" }: FooterSectionProps) {
+const legal = (locale: string): FooterLink[] => [
+  { label: "Privacy", href: `/${locale}/privacy-policy` },
+  { label: "Terms", href: `/${locale}/terms-of-service` },
+  { label: "Cookies", href: `/${locale}/cookie-policy` },
+];
+
+function FooterAnchor({ link, className }: { link: FooterLink; className: string }) {
+  const newTab = link.href.startsWith("http");
+  return (
+    <Link
+      href={link.href}
+      className={className}
+      target={newTab ? "_blank" : undefined}
+      rel={newTab ? "noopener noreferrer" : undefined}
+    >
+      {link.label}
+    </Link>
+  );
+}
+
+export default function FooterSection({ locale = "en-in", promo = true }: FooterSectionProps) {
   const footerColumns = columns(locale);
 
   return (
-    <footer className="w-full bg-[#fafaf9] relative overflow-hidden select-none">
-      <div className="max-w-[1200px] mx-auto border-x border-t border-[#e7e5e4] bg-white text-[#1c1917] pt-10 md:pt-16 pb-6 md:pb-8 px-6 md:px-20">
-        {/* Top Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start pb-12 border-b border-[#e7e5e4] mb-12 gap-8 md:gap-0">
-          {/* Left: Logo Block */}
-          <div>
-            <div className="flex items-center">
-              <div className="w-8 h-8 rounded-full bg-[#171717] flex items-center justify-center font-bold text-sm text-white select-none shrink-0">
-                RF
-              </div>
-              <span className="text-[18px] font-bold text-[#1c1917] ml-2.5">
-                ResumeForge AI
-              </span>
-            </div>
-            <p className="text-[13px] text-[#78716c] mt-1.5 leading-normal">
-              Build resumes that get interviews.
+    <footer className={`${styles.footer} rf-dark`}>
+      <div className={styles.frame}>
+        {promo && (
+          <div className={styles.promo}>
+            <p className={styles.promoText}>Ready to forge your career?</p>
+            <Link href={`/${locale}/resumes`} className={styles.promoAction}>
+              Generate resume
+            </Link>
+          </div>
+        )}
+
+        <div className={styles.main}>
+          <div className={styles.brand}>
+            <Link href={`/${locale}`} className={styles.logo}>
+              <span className={styles.mark} aria-hidden="true">RF</span>
+              <span className={styles.wordmark}>ResumeForge AI</span>
+            </Link>
+            <p className={styles.tagline}>Build resumes that get interviews.</p>
+            <p className={styles.blurb}>
+              Resumes, job matches, and interview prep in one place.
             </p>
           </div>
 
-          {/* Right: CTA Block */}
-          <div className="flex flex-col items-start md:items-end">
-            <span className="text-xl font-bold text-[#1c1917] italic" style={{ fontFamily: "var(--font-display)" }}>
-              Ready to forge your career?
-            </span>
-            <Link href={`/${locale}/ai-resume-builder`} className="mt-3.5 block">
-              <button className="bg-[#7c3aed] hover:bg-[#6d28d9] text-white rounded-xl px-6 py-2.5 text-[13px] font-mono font-semibold uppercase tracking-wider transition-all duration-75 cursor-pointer active:scale-95">
-                Generate Resume →
-              </button>
-            </Link>
-          </div>
+          <nav className={styles.columns} aria-label="Footer">
+            {footerColumns.map((column) => (
+              <div key={column.title}>
+                <h2 className={styles.heading}>{column.title}</h2>
+                <ul className={column.wide ? styles.wideList : styles.list}>
+                  {column.links.map((link) => (
+                    <li key={link.label}>
+                      <FooterAnchor link={link} className={styles.link} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </nav>
         </div>
-
-        {/* Columns Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8">
-          {footerColumns.map((column) => (
-            <div key={column.title}>
-              <h4 className="font-mono text-[11px] tracking-[0.15em] text-[#78716c] mb-4 uppercase font-semibold select-none">
-                {column.title}
-              </h4>
-              <ul className="space-y-1">
-                {column.links.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      target={link.href.startsWith("http") ? "_blank" : undefined}
-                      rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                      className="block text-[13px] text-[#57534e] hover:text-[#1c1917] py-1 transition-colors duration-150"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="border-t border-[#e7e5e4] mt-12 pt-6 flex flex-col md:flex-row justify-between items-center gap-2 md:gap-0 text-center md:text-left">
-          <span className="text-[12px] text-[#a8a29e]">
-            © 2026 ResumeForge AI
-          </span>
-          <span className="text-[12px] text-[#a8a29e]">
-            Made for developers, designers & job seekers. Built By GrowXlabsTech
-          </span>
+      </div>
+      <p className={styles.giant}>RESUMEFORGEAI</p>
+      <div className={styles.base}>
+        <div className={styles.bottom}>
+          <p className={styles.copy}>© 2026 ResumeForge AI</p>
+          <ul className={styles.legal}>
+            {legal(locale).map((link) => (
+              <li key={link.label}>
+                <FooterAnchor link={link} className={styles.legalLink} />
+              </li>
+            ))}
+          </ul>
+          <p className={styles.credit}>
+            Built by{" "}
+            <a href="https://growxlabs.tech" target="_blank" rel="noopener noreferrer">
+              GrowXLabs
+            </a>
+          </p>
         </div>
       </div>
     </footer>

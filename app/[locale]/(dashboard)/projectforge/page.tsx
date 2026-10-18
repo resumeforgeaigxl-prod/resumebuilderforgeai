@@ -92,8 +92,8 @@ export default function ProjectForgeLanding() {
                     <div className="flex items-center gap-2 text-[#8F8F8F] font-medium tracking-normal text-xs uppercase mb-3 font-mono">
                         <Cpu className="w-3.5 h-3.5" /> Intelligence Core
                     </div>
-                    <h1 className="text-3xl md:text-4xl font-semibold tracking-tighter text-[#171717]">ProjectForge</h1>
-                    <p className="text-[#4D4D4D] mt-2 text-base">Transmit your vision and let the Forge materialize a high-performance system architecture.</p>
+                    <h1 className="text-3xl md:text-4xl font-semibold tracking-tighter text-[#171717]">Project Studio</h1>
+                    <p className="text-[#4D4D4D] mt-2 text-base">Transform your vision into high-performance portfolio projects and system architecture.</p>
                 </div>
 
                 <div className="flex items-center gap-3 p-4 rounded-xl bg-[#FFFFFF] border border-[#EBEBEB] shadow-sm">

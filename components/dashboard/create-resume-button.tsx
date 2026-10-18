@@ -65,12 +65,12 @@ export function CreateResumeButton({ variant = 'primary' }: { variant?: 'primary
                     onClick={handleCreate}
                     disabled={isCreating}
                     variant="outline"
-                    className="gap-2 px-6 h-10 rounded-md border-[#EBEBEB] bg-white text-[#171717] hover:bg-[#FAFAFA] transition-colors"
+                    className="gap-2 px-6 h-10 rounded-md border-[#242424] bg-[#101010] text-[#F5F5F5] hover:bg-[#151515] transition-colors cursor-pointer"
                 >
-                    {isCreating ? <Loader2 className="w-4 h-4 animate-spin text-[#171717]" /> : <PlusCircle className="w-4 h-4 text-[#171717]" />}
-                    Initialize New Profile
+                    {isCreating ? <Loader2 className="w-4 h-4 animate-spin text-[#F5F5F5]" /> : <PlusCircle className="w-4 h-4 text-[#F5F5F5]" />}
+                    Create Resume
                 </Button>
-                {error && <p className="text-rose-600 text-xs font-medium mt-2">{error}</p>}
+                {error && <p className="text-rose-400 text-xs font-medium mt-2">{error}</p>}
             </div>
         )
     }
@@ -80,12 +80,12 @@ export function CreateResumeButton({ variant = 'primary' }: { variant?: 'primary
             <Button
                 onClick={handleCreate}
                 disabled={isCreating}
-                className="gap-2 px-6 h-10 rounded-full bg-[#171717] hover:bg-[#2e2e2e] text-white border border-[#171717] font-medium text-sm transition-colors shadow-sm"
+                className="gap-2 px-5 h-9 rounded-lg bg-[#F5F5F5] hover:bg-white text-[#050505] font-semibold text-xs transition-colors shadow-xs cursor-pointer"
             >
-                {isCreating ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <PlusCircle className="w-4 h-4 text-white" />}
-                Forge New Resume
+                {isCreating ? <Loader2 className="w-4 h-4 animate-spin text-[#050505]" /> : <PlusCircle className="w-4 h-4 text-[#050505]" />}
+                Create Resume
             </Button>
-            {error && <p className="text-rose-600 text-xs font-medium mt-2">{error}</p>}
+            {error && <p className="text-rose-400 text-xs font-medium mt-2">{error}</p>}
         </div>
     )
 }
