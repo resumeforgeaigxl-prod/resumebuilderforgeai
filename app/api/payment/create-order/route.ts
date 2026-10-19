@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
         // ── 5. Store order in DB ──────────────────────────────────────────
         const supabase = createClient();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (supabase as any).from('orders').insert({
+        const { error: orderInsertErr } = await (supabase as any).from('orders').insert({
             user_id: session.userId,
             plan_name: planName,
             original_price: Math.round(basePrice * 100),
@@ -138,11 +138,13 @@ export async function POST(req: NextRequest) {
             discount_amount: Math.round(discountAmount * 100),
             amount: amountPaise,
             currency,
-            country_code: countryCode,
-            payment_gateway: 'razorpay',
             razorpay_order_id: order.id,
             status: 'pending',
         });
+
+        if (orderInsertErr) {
+            console.error('[create-order] Error saving order to DB:', orderInsertErr);
+        }
 
         return NextResponse.json({
             orderId: order.id,

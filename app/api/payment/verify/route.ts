@@ -26,11 +26,43 @@ export async function POST(req: NextRequest) {
 
         // ── 1. Fetch server-recorded order row ─────────────────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: orderRow, error: orderFetchErr } = await (supabase as any)
+        let { data: orderRow, error: orderFetchErr } = await (supabase as any)
             .from('orders')
-            .select('id, user_id, plan_name, amount, original_price, coupon_code, discount_amount, currency, country_code, status')
+            .select('id, user_id, plan_name, amount, original_price, coupon_code, discount_amount, currency, status')
             .eq('razorpay_order_id', razorpay_order_id)
             .maybeSingle();
+
+        // ── 1b. Self-Healing Fallback: Fetch Authoritative Order from Razorpay ─
+        if (!orderRow && process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+            try {
+                const Razorpay = (await import('razorpay')).default;
+                const razorpay = new Razorpay({
+                    key_id: process.env.RAZORPAY_KEY_ID,
+                    key_secret: process.env.RAZORPAY_KEY_SECRET,
+                });
+                const rzpOrder = await razorpay.orders.fetch(razorpay_order_id);
+                if (rzpOrder && (rzpOrder.notes?.userId === session.userId || rzpOrder.notes?.user_id === session.userId)) {
+                    const fallbackPlan = (rzpOrder.notes?.planName || body.plan_name || 'DAILY_STANDARD').toUpperCase();
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const { data: recoveredOrder } = await (supabase as any).from('orders').upsert({
+                        user_id: session.userId,
+                        plan_name: fallbackPlan,
+                        original_price: rzpOrder.amount,
+                        amount: rzpOrder.amount,
+                        currency: rzpOrder.currency || 'INR',
+                        razorpay_order_id: rzpOrder.id,
+                        status: 'pending',
+                    }, { onConflict: 'razorpay_order_id' }).select('id, user_id, plan_name, amount, original_price, coupon_code, discount_amount, currency, status').single();
+                    if (recoveredOrder) {
+                        orderRow = recoveredOrder;
+                        orderFetchErr = null;
+                        console.log(`[verify] Recovered missing order ${razorpay_order_id} directly from Razorpay for user ${session.userId}`);
+                    }
+                }
+            } catch (rzpOrderErr) {
+                console.error('[verify] Razorpay order recovery error:', rzpOrderErr);
+            }
+        }
 
         if (orderFetchErr || !orderRow) {
             console.error('[verify] Order record not found:', { razorpay_order_id, orderFetchErr });
@@ -177,8 +209,6 @@ export async function POST(req: NextRequest) {
             discount_amount: discountAmount,
             amount: amountPaise,
             currency,
-            country_code: countryCode,
-            payment_gateway: 'razorpay',
             razorpay_payment_id,
             razorpay_order_id,
             status: 'success',

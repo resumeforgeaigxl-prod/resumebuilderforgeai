@@ -123,8 +123,7 @@ export async function activateUserPlan(userId: string, planName: PlanName, payme
             plan: 'pro', // legacy field — so existing checkUserAccess still works
             access_expires_at: planEnd.toISOString(), // legacy field
             daily_credits_limit: config.dailyTokens,
-            tokens_used: 0, // Reset usage on upgrade
-            daily_job_views: 0,   // Reset job views
+            daily_credits_used: 0, // Reset usage on upgrade
         })
         .eq('id', userId);
 
@@ -135,21 +134,48 @@ export async function activateUserPlan(userId: string, planName: PlanName, payme
 
     // Upsert subscription for backward compat with checkUserAccess
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: subData, error: subError } = await (supabase as any)
+    const { data: existingSub } = await (supabase as any)
         .from('subscriptions')
-        .upsert(
-            {
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let subData: any = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let subError: any = null;
+
+    if (existingSub?.id) {
+        const res = await (supabase as any)
+            .from('subscriptions')
+            .update({
+                plan: config.subscriptionPlan,
+                status: 'active',
+                expires_at: planEnd.toISOString(),
+                payment_id: paymentId ?? null,
+                coupon_code: couponCode ?? null,
+            })
+            .eq('id', existingSub.id)
+            .select()
+            .maybeSingle();
+        subData = res.data;
+        subError = res.error;
+    } else {
+        const res = await (supabase as any)
+            .from('subscriptions')
+            .insert({
                 user_id: userId,
                 plan: config.subscriptionPlan,
                 status: 'active',
                 expires_at: planEnd.toISOString(),
                 payment_id: paymentId ?? null,
                 coupon_code: couponCode ?? null,
-            },
-            { onConflict: 'user_id' }
-        )
-        .select()
-        .single();
+            })
+            .select()
+            .maybeSingle();
+        subData = res.data;
+        subError = res.error;
+    }
 
     if (subError) {
         // Non-fatal — log but don't throw; user record is already updated

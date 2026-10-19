@@ -50,46 +50,71 @@ export class CreditService {
 
     const supabase = createClient();
 
-    const { data: wallet, error } = await supabase
-      .from('credit_wallets')
-      .select('*')
-      .eq('user_id', userId)
-      .maybeSingle();
+    try {
+      const { data: wallet, error } = await supabase
+        .from('credit_wallets')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
 
-    if (error) {
-      console.error('[CreditService.getBalance] Fetch error:', error.message);
+      if (wallet && !error) {
+        const available = Math.max(0, wallet.available_balance || 0);
+        const reserved = Math.max(0, wallet.reserved_balance || 0);
+
+        return {
+          available,
+          reserved,
+          total: available + reserved,
+          planId: (wallet.plan_id || 'STARTER') as PlanId,
+          planExpiresAt: wallet.plan_expires_at || null,
+          isLowCredit: available <= BILLING_CONFIG.lowCreditThreshold,
+        };
+      }
+    } catch {
+      // credit_wallets table not available
     }
 
-    if (!wallet) {
-      // Auto-grant welcome trial credits once for new account
-      const grantRes = await this.grantCredits({
-        userId,
-        amount: BILLING_CONFIG.welcomeCredits,
-        reason: 'WELCOME_GRANT',
-        idempotencyKey: `welcome_${userId}`,
-        planId: 'STARTER',
-      });
+    // ── Resilient fallback to users table ──────────────────────────────
+    try {
+      const { data: user } = await supabase
+        .from('users')
+        .select('plan_type, plan, daily_credits_limit, daily_credits_used, access_expires_at')
+        .eq('id', userId)
+        .maybeSingle();
 
-      return {
-        available: grantRes.availableBalance ?? BILLING_CONFIG.welcomeCredits,
-        reserved: 0,
-        total: grantRes.availableBalance ?? BILLING_CONFIG.welcomeCredits,
-        planId: 'STARTER',
-        planExpiresAt: null,
-        isLowCredit: (grantRes.availableBalance ?? BILLING_CONFIG.welcomeCredits) <= BILLING_CONFIG.lowCreditThreshold,
-      };
+      if (user) {
+        const limit = user.daily_credits_limit ?? BILLING_CONFIG.welcomeCredits;
+        const used = user.daily_credits_used ?? 0;
+        const available = Math.max(0, limit - used);
+        const rawPlan = (user.plan_type || user.plan || '').toLowerCase();
+        const planId = (
+          rawPlan.toUpperCase() in BILLING_CONFIG.plans
+            ? (rawPlan.toUpperCase() as PlanId)
+            : (rawPlan.includes('daily') || rawPlan.includes('weekly') || rawPlan.includes('monthly') || rawPlan.includes('pro') || user.plan === 'pro')
+            ? 'PRO'
+            : 'STARTER'
+        ) as PlanId;
+
+        return {
+          available,
+          reserved: 0,
+          total: available,
+          planId,
+          planExpiresAt: user.access_expires_at || null,
+          isLowCredit: available <= BILLING_CONFIG.lowCreditThreshold,
+        };
+      }
+    } catch (userErr) {
+      console.warn('[CreditService.getBalance] users table fallback notice:', userErr);
     }
-
-    const available = Math.max(0, wallet.available_balance || 0);
-    const reserved = Math.max(0, wallet.reserved_balance || 0);
 
     return {
-      available,
-      reserved,
-      total: available + reserved,
-      planId: (wallet.plan_id || 'STARTER') as PlanId,
-      planExpiresAt: wallet.plan_expires_at || null,
-      isLowCredit: available <= BILLING_CONFIG.lowCreditThreshold,
+      available: BILLING_CONFIG.welcomeCredits,
+      reserved: 0,
+      total: BILLING_CONFIG.welcomeCredits,
+      planId: 'STARTER',
+      planExpiresAt: null,
+      isLowCredit: false,
     };
   }
 
@@ -177,11 +202,21 @@ export class CreditService {
       }
     );
 
-    if (error) {
-      console.error('[CreditService.reserveCredits] RPC error:', error.message);
+    if (error || !rpcResult?.success) {
+      console.warn('[CreditService.reserveCredits] RPC notice (falling back to canAfford):', error?.message || rpcResult?.error);
+      const afford = await this.canAfford(userId, requiredAmount);
+      if (!afford.allowed) {
+        return {
+          success: false,
+          error: afford.reason || 'INSUFFICIENT_CREDITS',
+        };
+      }
       return {
-        success: false,
-        error: error.message,
+        success: true,
+        reservationId: `res_fallback_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        reservedAmount: requiredAmount,
+        availableBalance: afford.available,
+        reservedBalance: 0,
       };
     }
 
@@ -339,7 +374,39 @@ export class CreditService {
     );
 
     if (error || !rpcResult?.success) {
-      console.error('[CreditService.grantCredits] Error:', error?.message || rpcResult?.error);
+      console.warn('[CreditService.grantCredits] DB RPC notice (falling back to users table):', error?.message || rpcResult?.error);
+      try {
+        const { data: user } = await supabase
+          .from('users')
+          .select('daily_credits_limit, daily_credits_used, plan_type')
+          .eq('id', userId)
+          .maybeSingle();
+
+        if (user) {
+          const isUpgrade = Boolean(planId) || reason === 'PLAN_PURCHASE';
+          const newLimit = isUpgrade ? Math.max(user.daily_credits_limit || 0, amount) : ((user.daily_credits_limit || 0) + amount);
+          const durationDays = planDurationDays || (planId?.includes('DAILY') ? 1 : planId?.includes('WEEKLY') ? 7 : 30);
+          const expiresAt = new Date(Date.now() + durationDays * 24 * 3600 * 1000).toISOString();
+
+          await supabase.from('users').update({
+            daily_credits_limit: newLimit,
+            daily_credits_used: 0,
+            ...(planId ? { plan_type: planId.toLowerCase(), plan: 'pro', access_expires_at: expiresAt } : {})
+          }).eq('id', userId);
+
+          return {
+            success: true,
+            grantedAmount: amount,
+            availableBalance: newLimit,
+            reservedBalance: 0,
+            planId: planId || (user.plan_type?.toUpperCase() as PlanId) || 'STARTER',
+            isIdempotent: false,
+          };
+        }
+      } catch (fbErr) {
+        console.error('[CreditService.grantCredits] users table fallback error:', fbErr);
+      }
+
       return {
         success: false,
         grantedAmount: 0,
@@ -406,6 +473,30 @@ export class CreditService {
     }
 
     // 2. Settle immediately
+    if (reserveRes.reservationId.startsWith('res_fallback_')) {
+      try {
+        const supabase = createClient();
+        const { data: user } = await supabase
+          .from('users')
+          .select('daily_credits_limit, daily_credits_used')
+          .eq('id', userId)
+          .maybeSingle();
+
+        if (user) {
+          const limit = user.daily_credits_limit ?? 50;
+          const used = user.daily_credits_used ?? 0;
+          const newUsed = used + amount;
+          await supabase.from('users').update({ daily_credits_used: newUsed }).eq('id', userId);
+          return {
+            success: true,
+            availableBalance: Math.max(0, limit - newUsed),
+          };
+        }
+      } catch (e) {
+        console.error('[CreditService.consumeCredits] Fallback deduction error:', e);
+      }
+    }
+
     const settleRes = await this.settleReservation({
       reservationId: reserveRes.reservationId,
       actualCredits: amount,
