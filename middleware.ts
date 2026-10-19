@@ -320,7 +320,7 @@ export async function middleware(request: NextRequest) {
     const isAuthRoute = normalizedPath.startsWith('/login') || normalizedPath.startsWith('/signup');
     const isPublicRoute =
         normalizedPath === '/' ||
-        isRegionalPath ||
+        normalizedPath.startsWith('/pricing') ||
         normalizedPath.startsWith('/privacy') ||
         normalizedPath.startsWith('/terms') ||
         normalizedPath.startsWith('/cookie-policy') ||

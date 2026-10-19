@@ -16,21 +16,85 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan_name } = body;
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = body;
 
-        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !plan_name) {
-            return NextResponse.json({ error: 'Missing payment fields' }, { status: 400 });
+        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+            return NextResponse.json({ error: 'Missing required payment verification fields' }, { status: 400 });
         }
 
-        // ── Verify HMAC-SHA256 signature ──────────────────────────────────────
-        const secret = process.env.RAZORPAY_KEY_SECRET!;
+        const supabase = createClient();
+
+        // ── 1. Fetch server-recorded order row ─────────────────────────────────
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: orderRow, error: orderFetchErr } = await (supabase as any)
+            .from('orders')
+            .select('id, user_id, plan_name, amount, original_price, coupon_code, discount_amount, currency, country_code, status')
+            .eq('razorpay_order_id', razorpay_order_id)
+            .maybeSingle();
+
+        if (orderFetchErr || !orderRow) {
+            console.error('[verify] Order record not found:', { razorpay_order_id, orderFetchErr });
+            return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+        }
+
+        // ── 2. Enforce User Ownership ──────────────────────────────────────────
+        if (orderRow.user_id !== session.userId) {
+            console.error('[verify] Security Alert: Authenticated user does not own order', {
+                orderUserId: orderRow.user_id,
+                sessionUserId: session.userId,
+                razorpay_order_id,
+            });
+            return NextResponse.json({ error: 'Forbidden: Order belongs to a different account' }, { status: 403 });
+        }
+
+        // ── 3. Idempotency Check (prevent double activation / duplicate credits) ─
+        if (orderRow.status === 'success' || orderRow.status === 'paid') {
+            console.log(`[verify] Idempotent hit: Order ${razorpay_order_id} already marked successful`);
+            // Check for existing invoice
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { data: existingInv } = await (supabase as any)
+                .from('invoices')
+                .select('invoice_url')
+                .eq('razorpay_order_id', razorpay_order_id)
+                .maybeSingle();
+
+            return NextResponse.json({
+                success: true,
+                message: 'Payment already verified and processed',
+                invoice_url: existingInv?.invoice_url || null,
+            });
+        }
+
+        // Also check if payment ID already exists
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: existingPayment } = await (supabase as any)
+            .from('payments')
+            .select('id, invoice_url')
+            .eq('razorpay_payment_id', razorpay_payment_id)
+            .maybeSingle();
+
+        if (existingPayment) {
+            console.log(`[verify] Payment ${razorpay_payment_id} already processed`);
+            return NextResponse.json({
+                success: true,
+                message: 'Payment already recorded',
+                invoice_url: existingPayment.invoice_url || null,
+            });
+        }
+
+        // ── 4. Verify Cryptographic HMAC-SHA256 signature ─────────────────────
+        const secret = process.env.RAZORPAY_KEY_SECRET;
+        if (!secret) {
+            console.error('[verify] Server configuration error: Missing RAZORPAY_KEY_SECRET');
+            return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+        }
+
         const expected = createHmac('sha256', secret)
             .update(`${razorpay_order_id}|${razorpay_payment_id}`)
             .digest('hex');
 
-        const supabase = createClient();
-
         if (expected !== razorpay_signature) {
+            console.error('[verify] Invalid payment signature for order:', razorpay_order_id);
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await (supabase as any)
                 .from('orders')
@@ -39,32 +103,56 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Invalid payment signature' }, { status: 400 });
         }
 
-        // ── Fetch the order row ───────────────────────────────────────────────
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: orderRow } = await (supabase as any)
-            .from('orders')
-            .select('amount, original_price, coupon_code, discount_amount, currency, country_code')
-            .eq('razorpay_order_id', razorpay_order_id)
-            .single();
+        // ── 5. Strict Server-Side Razorpay Payment API Verification ───────────
+        if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+            try {
+                const Razorpay = (await import('razorpay')).default;
+                const razorpay = new Razorpay({
+                    key_id: process.env.RAZORPAY_KEY_ID,
+                    key_secret: process.env.RAZORPAY_KEY_SECRET,
+                });
+                const payment = await razorpay.payments.fetch(razorpay_payment_id);
+                if (payment) {
+                    if (payment.order_id && payment.order_id !== razorpay_order_id) {
+                        console.error('[verify] Payment order mismatch:', { paymentOrderId: payment.order_id, razorpay_order_id });
+                        return NextResponse.json({ error: 'Payment does not match order' }, { status: 400 });
+                    }
+                    if (payment.status === 'failed') {
+                        return NextResponse.json({ error: 'Payment status is failed' }, { status: 400 });
+                    }
+                    if (payment.amount && Number(payment.amount) !== Number(orderRow.amount)) {
+                        console.error('[verify] Payment amount mismatch:', { paymentAmount: payment.amount, orderAmount: orderRow.amount });
+                        return NextResponse.json({ error: 'Payment amount mismatch' }, { status: 400 });
+                    }
+                }
+            } catch (apiErr) {
+                // If live API verification throws (e.g. rate limit or mock key), log warning
+                // Cryptographic HMAC-SHA256 signature check passed above
+                console.warn('[verify] Razorpay API fetch warning (continuing with verified signature):', apiErr);
+            }
+        }
 
-        const currency = orderRow?.currency || 'INR';
-        const countryCode = orderRow?.country_code || 'IN';
-        const amountPaise = orderRow?.amount ?? 0;
-        const originalPrice = orderRow?.original_price ?? amountPaise;
-        const couponCode = orderRow?.coupon_code ?? null;
-        const discountAmount = orderRow?.discount_amount ?? 0;
+        // ── 6. Extract Verified Plan & Pricing from Server-Side Order ─────────
+        // NOTE: Strictly ignore any client-supplied body.plan_name to prevent privilege escalation!
+        const verifiedPlanName = (orderRow.plan_name || 'PRO_STANDARD').toUpperCase();
+        const currency = orderRow.currency || 'INR';
+        const countryCode = orderRow.country_code || 'IN';
+        const amountPaise = Number(orderRow.amount ?? 0);
+        const originalPrice = Number(orderRow.original_price ?? amountPaise);
+        const couponCode = orderRow.coupon_code ?? null;
+        const discountAmount = Number(orderRow.discount_amount ?? 0);
 
         const currencySymbol = currency === 'INR' ? '₹' : '$';
         const formattedAmount = `${currencySymbol}${(amountPaise / 100).toFixed(currency === 'INR' ? 0 : 2)}`;
 
-        // ── Mark order success ────────────────────────────────────────────────
+        // ── 7. Mark order as success ──────────────────────────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (supabase as any)
             .from('orders')
             .update({ status: 'success' })
             .eq('razorpay_order_id', razorpay_order_id);
 
-        // ── Fetch billing details ─────────────────────────────────────────────
+        // ── 8. Fetch billing details ──────────────────────────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: billing } = await (supabase as any)
             .from('billing_details')
@@ -72,18 +160,18 @@ export async function POST(req: NextRequest) {
             .eq('user_id', session.userId)
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
 
         const billingAddress = billing
             ? [billing.address, billing.city, billing.state, billing.zip_code, billing.country]
                 .filter(Boolean).join(', ')
             : null;
 
-        // ── Insert payment record ─────────────────────────────────────────────
+        // ── 9. Insert verified payment record ─────────────────────────────────
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (supabase as any).from('payments').insert({
             user_id: session.userId,
-            plan_name: plan_name.toUpperCase(),
+            plan_name: verifiedPlanName,
             original_price: originalPrice,
             coupon_code: couponCode,
             discount_amount: discountAmount,
@@ -97,18 +185,22 @@ export async function POST(req: NextRequest) {
             billing_address: billingAddress,
         });
 
+        // ── 10. Increment coupon usage if coupon applied ───────────────────────
         if (couponCode) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await (supabase as any).rpc('increment_coupon_used', { p_code: couponCode });
+            try {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                await (supabase as any).rpc('increment_coupon_used', { p_code: couponCode });
+            } catch (couponRpcErr) {
+                console.warn('[verify] increment_coupon_used rpc notice:', couponRpcErr);
+            }
         }
 
-        // ── Grant Credits & Set Plan via Canonical Credit Service ─────────────
-        const cleanPlan = plan_name.toUpperCase();
+        // ── 11. Grant Verified Credits via Canonical Credit Service ───────────
         const { CreditService, BILLING_CONFIG } = await import('@/lib/billing');
         type PlanKey = keyof typeof BILLING_CONFIG.plans;
 
-        if (cleanPlan in BILLING_CONFIG.plans) {
-            const planDef = BILLING_CONFIG.plans[cleanPlan as PlanKey];
+        if (verifiedPlanName in BILLING_CONFIG.plans) {
+            const planDef = BILLING_CONFIG.plans[verifiedPlanName as PlanKey];
             await CreditService.grantCredits({
                 userId: session.userId,
                 amount: planDef.credits,
@@ -119,8 +211,8 @@ export async function POST(req: NextRequest) {
                 planId: planDef.id,
                 planDurationDays: planDef.durationDays,
             });
-        } else if (BILLING_CONFIG.topUpPacks[cleanPlan]) {
-            const packDef = BILLING_CONFIG.topUpPacks[cleanPlan];
+        } else if (BILLING_CONFIG.topUpPacks[verifiedPlanName]) {
+            const packDef = BILLING_CONFIG.topUpPacks[verifiedPlanName];
             await CreditService.grantCredits({
                 userId: session.userId,
                 amount: packDef.credits,
@@ -130,8 +222,8 @@ export async function POST(req: NextRequest) {
                 idempotencyKey: `order_${razorpay_order_id}`,
             });
         } else {
-            // Legacy plan fallback grant
-            const fallbackCredits = cleanPlan.includes('PRO') ? 500 : cleanPlan.includes('MONTH') ? 250 : 100;
+            // Legacy plan fallback grant based on verified plan name
+            const fallbackCredits = verifiedPlanName.includes('PRO') ? 500 : verifiedPlanName.includes('MONTH') ? 250 : 100;
             await CreditService.grantCredits({
                 userId: session.userId,
                 amount: fallbackCredits,
@@ -144,19 +236,19 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        // ── Activate legacy user plan for backward compatibility ──────────────
+        // ── 12. Activate legacy user plan for backward compatibility ───────────
         let subscriptionId: string | undefined;
         try {
-            subscriptionId = await activateUserPlan(session.userId, cleanPlan as PlanName, razorpay_payment_id, couponCode ?? undefined);
+            subscriptionId = await activateUserPlan(session.userId, verifiedPlanName as PlanName, razorpay_payment_id, couponCode ?? undefined);
         } catch (e) {
             console.warn('[verify] Legacy activateUserPlan notice:', e);
         }
 
-        // ── Generate invoice ──────────────────────────────────────────────────
+        // ── 13. Generate Invoice ──────────────────────────────────────────────
         const invoice = await createInvoice({
             userId: session.userId,
             subscriptionId,
-            plan: plan_name.toUpperCase(),
+            plan: verifiedPlanName,
             amount: amountPaise,
             currency,
             paymentMethod: 'razorpay',
@@ -176,7 +268,7 @@ export async function POST(req: NextRequest) {
             } : null,
         });
 
-        // ── Generate PDF and Upload to Storage ───────────────────────────────
+        // ── 14. Generate PDF and Upload to Storage ────────────────────────────
         let invoicePdfBase64: string | undefined;
         let invoiceUrl: string | null = null;
 
@@ -223,14 +315,14 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        // ── Send payment success email ────────────────────────────────────────
+        // ── 15. Send payment success email ────────────────────────────────────
         const userEmail = billing?.email ?? null;
         if (userEmail && invoice) {
             console.log(`[verify] Sending success email to: ${userEmail}`);
             sendPaymentSuccessEmail({
                 userEmail,
                 userName: billing?.full_name,
-                plan: plan_name.toUpperCase(),
+                plan: verifiedPlanName,
                 amountINR: formattedAmount,
                 paymentMethod: 'Razorpay',
                 couponCode: couponCode ?? undefined,
@@ -241,13 +333,10 @@ export async function POST(req: NextRequest) {
             }).catch(e => console.error('[verify] Email error:', e));
         }
 
-        console.log(`[verify] Payment pipeline complete for user: ${session.userId}`);
+        console.log(`[verify] Payment pipeline completed securely for user: ${session.userId}, plan: ${verifiedPlanName}`);
         return NextResponse.json({ success: true, invoice_url: invoiceUrl });
     } catch (err) {
         console.error('[verify] Error:', err);
         return NextResponse.json({ error: 'Payment verification failed' }, { status: 500 });
     }
 }
-
-
-

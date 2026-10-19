@@ -14,7 +14,8 @@ type PlanName =
     | 'DAILY' | 'DAILY_STANDARD' | 'DAILY_ALL_ACCESS'
     | 'WEEKLY' | 'WEEKLY_STANDARD' | 'WEEKLY_ALL_ACCESS'
     | 'MONTHLY' | 'MONTHLY_STANDARD' | 'MONTHLY_ALL_ACCESS'
-    | 'PROFESSIONAL' | 'PRO_STANDARD' | 'PRO_ALL_ACCESS';
+    | 'PROFESSIONAL' | 'PRO_STANDARD' | 'PRO_ALL_ACCESS'
+    | 'PRO' | 'STARTER' | 'SEARCH' | 'AGENT' | 'AUTOPILOT';
 
 const PLANS: Record<PlanName, {
     basePlan: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'PROFESSIONAL';
@@ -231,6 +232,91 @@ const PLANS: Record<PlanName, {
         gradient: 'from-amber-500/20 to-orange-500/20',
         border: 'border-amber-500/40',
     },
+    PRO: {
+        basePlan: 'PROFESSIONAL',
+        label: 'Professional (Standard)',
+        price: 499,
+        priceLabel: '₹499/mo',
+        description: 'Pro Resume Builder access',
+        features: [
+            '5,000 Daily AI credits',
+            'Full ResumeForge access',
+            'Advanced ATS optimization',
+            'Priority Support',
+            'No watermarks',
+        ],
+        icon: <Crown className="w-5 h-5 text-yellow-400" />,
+        gradient: 'from-amber-500/20 to-orange-500/20',
+        border: 'border-amber-500/40',
+    },
+    STARTER: {
+        basePlan: 'DAILY',
+        label: 'Starter (Standard)',
+        price: 29,
+        priceLabel: '₹29',
+        description: '24-hour Resume Builder access',
+        features: [
+            '300 Daily AI credits',
+            'Full ResumeForge access',
+            'Advanced ATS optimization',
+            'Priority Support',
+            'No watermarks',
+        ],
+        icon: <Zap className="w-5 h-5" />,
+        gradient: 'from-blue-500/20 to-cyan-500/20',
+        border: 'border-blue-500/40',
+    },
+    SEARCH: {
+        basePlan: 'WEEKLY',
+        label: 'Search (Standard)',
+        price: 79,
+        priceLabel: '₹79',
+        description: '7-day Resume Builder access',
+        features: [
+            '800 Daily AI credits',
+            'Full ResumeForge access',
+            'Advanced ATS optimization',
+            'Priority Support',
+            'No watermarks',
+        ],
+        icon: <Zap className="w-5 h-5" />,
+        gradient: 'from-emerald-500/20 to-teal-500/20',
+        border: 'border-emerald-500/40',
+    },
+    AGENT: {
+        basePlan: 'PROFESSIONAL',
+        label: 'Agent (All-Access)',
+        price: 899,
+        priceLabel: '₹899/mo',
+        description: 'Agent full access to all Forges',
+        features: [
+            '5,000 Daily AI credits',
+            'Everything in Standard',
+            'CodingForge & InterviewForge access',
+            'PrepForge & ProjectForge access',
+            'LearnForge roadmaps',
+        ],
+        icon: <Crown className="w-5 h-5 text-purple-500" />,
+        gradient: 'from-purple-500/20 to-indigo-500/20',
+        border: 'border-purple-500/40',
+    },
+    AUTOPILOT: {
+        basePlan: 'PROFESSIONAL',
+        label: 'Autopilot (All-Access)',
+        price: 899,
+        priceLabel: '₹899/mo',
+        description: 'Autopilot full access to all Forges',
+        features: [
+            '5,000 Daily AI credits',
+            'Everything in Standard',
+            'CodingForge & InterviewForge access',
+            'PrepForge & ProjectForge access',
+            'LearnForge roadmaps',
+        ],
+        icon: <Crown className="w-5 h-5 text-purple-500" />,
+        gradient: 'from-purple-500/20 to-indigo-500/20',
+        border: 'border-purple-500/40',
+    },
 };
 
 
@@ -255,14 +341,18 @@ interface CouponResult {
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
-function BillingContent({ params }: { params: { locale: string } }) {
-    const { locale } = params;
+function BillingContent({ params }: { params?: { locale?: string } }) {
+    const locale = params?.locale || 'en-in';
     const router = useRouter();
     const searchParams = useSearchParams();
-    const rawPlan = ((searchParams?.get('plan') ?? 'MONTHLY_STANDARD').toUpperCase() as PlanName);
-    const planVariant = PLANS[rawPlan] ? rawPlan : 'MONTHLY_STANDARD';
-    const planInfo = PLANS[planVariant];
+    const paramPlan = searchParams?.get('plan')?.trim().toUpperCase();
+    const isKnownPlan = Boolean(paramPlan && paramPlan in PLANS);
+    const planVariant: PlanName = isKnownPlan ? (paramPlan as PlanName) : 'PRO_STANDARD';
+    const planInfo = PLANS[planVariant] || PLANS.PRO_STANDARD;
     const plan = planInfo.basePlan;
+    const planNotice = paramPlan && !isKnownPlan
+        ? `Plan "${searchParams?.get('plan')}" was not recognized. We have selected ${planInfo.label} for you.`
+        : null;
 
     const [form, setForm] = useState({
         full_name: '',
@@ -536,10 +626,20 @@ function BillingContent({ params }: { params: { locale: string } }) {
     return (
         <div className="min-h-screen bg-[#050505] text-[#F5F5F5]">
             <div className="relative max-w-5xl mx-auto px-4 py-10 animate-premium-in">
-                <Link href="/" className="inline-flex items-center gap-2 text-[#7E7E7E] hover:text-[#F5F5F5] transition-colors mb-8 text-xs font-semibold uppercase tracking-wider font-mono">
+                <Link href={`/${locale}/pricing`} className="inline-flex items-center gap-2 text-[#7E7E7E] hover:text-[#F5F5F5] transition-colors mb-8 text-xs font-semibold uppercase tracking-wider font-mono">
                     <ArrowLeft className="w-3.5 h-3.5" />
-                    Back
+                    Back to Plans
                 </Link>
+
+                {planNotice && (
+                    <div className="mb-6 p-4 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-200 text-xs flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-2">
+                            <span className="inline-block w-2 h-2 rounded-full bg-amber-400" />
+                            <span>{planNotice}</span>
+                        </div>
+                        <span className="text-[10px] text-amber-300 font-mono uppercase tracking-wider shrink-0">Defaulted to {planInfo.label}</span>
+                    </div>
+                )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                     {/* ── Left: Plan Summary ── */}

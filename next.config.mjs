@@ -70,7 +70,7 @@ const nextConfig = {
                 headers: [
                     {
                         key: 'Content-Security-Policy',
-                        value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; block-all-mixed-content; upgrade-insecure-requests;",
+                        value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: https://checkout.razorpay.com; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' data: https:; object-src 'none'; base-uri 'self'; form-action 'self' https://api.razorpay.com https://*.razorpay.com; frame-ancestors 'none'; frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com https:; connect-src 'self' https: wss:; block-all-mixed-content; upgrade-insecure-requests;",
                     },
                     {
                         key: 'X-Frame-Options',
@@ -86,7 +86,7 @@ const nextConfig = {
                     },
                     {
                         key: 'Permissions-Policy',
-                        value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+                        value: 'camera=(), microphone=(), geolocation=(self), interest-cohort=()',
                     },
                     {
                         key: 'Strict-Transport-Security',
