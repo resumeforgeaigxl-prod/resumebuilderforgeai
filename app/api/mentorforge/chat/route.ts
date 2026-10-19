@@ -1,3 +1,4 @@
+import { classifyProviderError, OMNI_FAILURE_MESSAGE } from '@/lib/ai/provider-errors';
 export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { runAgenticLoop, type AgentProgressEvent } from '@/lib/ai-core/agent-loop';
@@ -173,7 +174,7 @@ export async function POST(req: NextRequest) {
 
           // Chat persistence & telemetry
           try {
-            await trackAIUsage(userId, 'MentorForge', { input: 1500, output: 800 }, 'gemini-2.0-flash');
+            // Provider usage is recorded by the router; do not invent token/model telemetry.
             await logAIChat(userId, 'MentorForge', message, result.reply, 2000);
 
             // Serialize assistant payload with blocks and artifacts for full UI restoration
@@ -207,8 +208,8 @@ export async function POST(req: NextRequest) {
 
         } catch (error: unknown) {
           const msg = error instanceof Error ? error.message : 'Unknown error';
-          console.error('MentorForge Agent Loop Error:', msg);
-          sendEvent('error', { error: msg, conversationId });
+          console.error('Omni request failed', { conversationId, ...classifyProviderError(error) });
+          sendEvent('error', { error: OMNI_FAILURE_MESSAGE, conversationId, retryable: classifyProviderError(error).retryable });
         } finally {
           if (!isCancelled) {
             try {
@@ -236,7 +237,7 @@ export async function POST(req: NextRequest) {
 
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Unknown error';
-    console.error('MentorForge SSE Setup Error:', msg);
-    return new Response(JSON.stringify({ error: msg }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    console.error('Omni setup failed', classifyProviderError(error));
+    return new Response(JSON.stringify({ error: OMNI_FAILURE_MESSAGE }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }

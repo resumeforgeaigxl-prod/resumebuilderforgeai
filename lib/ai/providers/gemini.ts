@@ -10,7 +10,7 @@ export class GeminiProvider implements ProviderClient {
         const genAI = new GoogleGenerativeAI(key);
         const config = PROVIDER_CONFIGS.gemini;
         const model = genAI.getGenerativeModel({ 
-            model: options.task === 'code' ? 'gemini-1.5-pro' : config.defaultModel,
+            model: config.defaultModel,
             generationConfig: {
                 temperature: options.temperature ?? 0.2,
                 maxOutputTokens: options.maxTokens ?? 4000,

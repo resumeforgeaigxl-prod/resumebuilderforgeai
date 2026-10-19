@@ -1,3 +1,4 @@
+import { classifyProviderError, OMNI_FAILURE_MESSAGE } from '@/lib/ai/provider-errors';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { toolsRegistry } from './tools/registry';
 import { extractJson } from '@/lib/ai-provider';
@@ -38,6 +39,20 @@ export interface AgentResult {
  * are NEVER rendered as raw markdown prose.
  */
 function sanitizeAgentReply(reply: string, artifacts?: any[]): string {
+  const counts = artifacts?.find(a => a.tool === 'get_job_database_counts' && a.success);
+  if (counts) return `The database stores ${counts.totalStored} jobs; ${counts.activeJobs} are marked active. Candidate matches and displayed results are separate counts.`;
+  const ranked = artifacts?.find(a => a.tool === 'rank_candidate_jobs' && a.success);
+  if (ranked) return `Found ${ranked.matches?.length || 0} matching jobs.`;
+  const search = artifacts?.find(a => a.tool === 'search_job_market' && a.success);
+  if (search) return `Found ${search.jobs?.length || 0} matching jobs.`;
+  const study = artifacts?.find(a => a.tool === 'trigger_study_plan' && a.success);
+  if (study) return `I've prepared a ${study.durationWeeks || 4}-week study roadmap for you below.`;
+
+  // Truthfulness guard: never claim a roadmap was structured if the tool was not executed
+  if (!study && (reply.toLowerCase().includes("i've structured a study roadmap") || reply.toLowerCase().includes("i've created a study roadmap") || reply.toLowerCase().includes("i have created a study plan"))) {
+    return "I can create a tailored study roadmap for you. Would you like me to build it?";
+  }
+
   if (!reply) return '';
 
   // If reply contains raw JSON dumps (e.g. from tool return values), strip out the JSON payload
@@ -146,6 +161,9 @@ Omni is an agent interface. Agent outputs are classified into:
 2. STRUCTURED_ARTIFACT: Rich UI cards for learning plans, resume audits, job matches, interview prep, coding drills, projects, salary analysis, applications.
 3. ACTION_RESULT: Structured execution receipts.
 4. NEEDS_USER: Explicit prompts for user input.
+For job searches, state ONLY the returned count in one short sentence (e.g. "Found 10 matching jobs.") and show the artifact immediately. NEVER output long repetitive conversational text like "I've found several job openings that match your profile. You can explore the details in the job cards below."
+Never use a displayed result count as a database total. When asked about database size or total job counts, ALWAYS invoke get_job_database_counts. Always distinguish: Total stored records, currently active jobs, candidate matches, and displayed results. Report source metadata accurately.
+TOOL TRUTHFULNESS: Never claim an artifact was created (e.g. "I've structured a study roadmap") unless a tool actually succeeded. If a learning plan has not been generated, offer to create one instead.
 5. ERROR / HANDOFF: Structured error cards with actionable CTAs.
 
 Large structured results must NEVER be rendered as raw markdown in "reply" when a tool creates an artifact.
@@ -247,7 +265,7 @@ You MUST output your final response as a JSON object matching this schema:
 
           const client = new GoogleGenerativeAI(key.key);
           const model = client.getGenerativeModel({
-            model: 'gemini-2.0-flash',
+            model: PROVIDER_CONFIGS.gemini.defaultModel,
             tools: [{ functionDeclarations }],
             systemInstruction: systemPrompt,
             generationConfig: {
@@ -404,7 +422,7 @@ You MUST output your final response as a JSON object matching this schema:
                         tool: 'error_card',
                         errorType: isCredit ? 'CREDIT_EXHAUSTED' : 'TOOL_FAILED',
                         title: isCredit ? 'AI Credit Limit Reached' : 'Generation Unavailable',
-                        message: isCredit ? 'You have reached your allocated AI generation quota for this action. Please top up your credits to continue.' : toolResult.error,
+                        message: isCredit ? 'You have reached your allocated AI generation quota for this action. Please top up your credits to continue.' : OMNI_FAILURE_MESSAGE,
                         actionLabel: isCredit ? 'Top Up Credits' : 'Try Again',
                         actionUrl: isCredit ? '/pricing' : undefined,
                       });
@@ -448,7 +466,7 @@ You MUST output your final response as a JSON object matching this schema:
                       tool: 'error_card',
                       errorType: isCredit ? 'CREDIT_EXHAUSTED' : 'TOOL_FAILED',
                       title: isCredit ? 'AI Credit Limit Reached' : 'Generation Unavailable',
-                      message: isCredit ? 'You have reached your allocated AI generation quota for this action. Please top up your credits to continue.' : err.message,
+                      message: isCredit ? 'You have reached your allocated AI generation quota for this action. Please top up your credits to continue.' : OMNI_FAILURE_MESSAGE,
                       actionLabel: isCredit ? 'Top Up Credits' : 'Try Again',
                       actionUrl: isCredit ? '/pricing' : undefined,
                     });
@@ -667,7 +685,7 @@ You MUST output your final response as a JSON object matching this schema:
                           tool: 'error_card',
                           errorType: isCredit ? 'CREDIT_EXHAUSTED' : 'TOOL_FAILED',
                           title: isCredit ? 'AI Credit Limit Reached' : 'Generation Unavailable',
-                          message: isCredit ? 'You have reached your allocated AI generation quota for this action. Please top up your credits to continue.' : toolResult.error,
+                          message: isCredit ? 'You have reached your allocated AI generation quota for this action. Please top up your credits to continue.' : OMNI_FAILURE_MESSAGE,
                           actionLabel: isCredit ? 'Top Up Credits' : 'Try Again',
                           actionUrl: isCredit ? '/pricing' : undefined,
                         });
@@ -711,7 +729,7 @@ You MUST output your final response as a JSON object matching this schema:
                         tool: 'error_card',
                         errorType: isCredit ? 'CREDIT_EXHAUSTED' : 'TOOL_FAILED',
                         title: isCredit ? 'AI Credit Limit Reached' : 'Generation Unavailable',
-                        message: isCredit ? 'You have reached your allocated AI generation quota for this action. Please top up your credits to continue.' : err.message,
+                        message: isCredit ? 'You have reached your allocated AI generation quota for this action. Please top up your credits to continue.' : OMNI_FAILURE_MESSAGE,
                         actionLabel: isCredit ? 'Top Up Credits' : 'Try Again',
                         actionUrl: isCredit ? '/pricing' : undefined,
                       });
@@ -758,8 +776,8 @@ You MUST output your final response as a JSON object matching this schema:
         }
       } catch (error: any) {
         lastError = error;
-        console.error(`[AgentLoop] Provider ${provider} with key ${key.id} failed:`, error.message);
-        const isQuotaError = 
+        const failure = classifyProviderError(error);
+        const isQuotaOrKeyError = 
           error.message?.includes('429') || 
           error.message?.toLowerCase().includes('quota') || 
           error.message?.includes('Rate limit') ||
@@ -767,8 +785,18 @@ You MUST output your final response as a JSON object matching this schema:
           error.message?.toLowerCase().includes('credit') ||
           error.message?.includes('403') ||
           error.message?.toLowerCase().includes('permission_denied') ||
-          error.message?.toLowerCase().includes('leaked');
-        keyPool.markFailure(key.id, isQuotaError);
+          error.message?.toLowerCase().includes('denied access') ||
+          error.message?.toLowerCase().includes('leaked') ||
+          error.message?.includes('401');
+        keyPool.markFailure(key.id, isQuotaOrKeyError);
+        // If the model itself is not available on this provider (404), break to next provider in chain
+        if (failure.category === 'model_unavailable') {
+          break;
+        }
+        // If this key failed with auth/permissions but other keys exist, try next key; otherwise break
+        if ((failure.category === 'authentication' || failure.status === 403) && !keyPool.hasActiveKeys(provider)) {
+          break;
+        }
       }
     }
   }

@@ -27,19 +27,10 @@ export function LearningPlanRenderer({
   // Derive weeks structure from either block.weeks or block.syllabus
   const weeks = block.weeks && block.weeks.length > 0
     ? block.weeks
-    : (block.syllabus || [
-        'Containers & Docker Foundations',
-        'Kubernetes Architecture & Pods',
-        'Deployments, Services & Networking',
-        'ConfigMaps, Secrets & Helm Charts',
-      ]).map((item, idx) => ({
+    : (block.syllabus || []).map((item, idx) => ({
         week: idx + 1,
         title: item.replace(/^Week \d+:\s*/i, ''),
-        topics: [
-          `${item} Architecture & Basics`,
-          'Hands-on manifest creation',
-          'Debugging & Production Best Practices',
-        ],
+        topics: [item],
       }));
 
   const totalMilestones = weeks.reduce((sum, w) => sum + w.topics.length, 0);
@@ -55,7 +46,7 @@ export function LearningPlanRenderer({
   return (
     <div className="my-3 w-full rounded-xl border border-[#242424] bg-[#0A0A0A] p-5 shadow-xs space-y-4 text-[#F5F5F5]">
       {/* Header */}
-      <div className="flex items-start justify-between gap-3 border-b border-[#242424] pb-3.5">
+      <div className="flex flex-col sm:flex-row items-start justify-between gap-3 border-b border-[#242424] pb-3.5">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-[#151515] border border-[#242424] flex items-center justify-center shrink-0 shadow-xs">
             <GraduationCap className="w-5 h-5 text-[#8B5CF6]" />
@@ -64,7 +55,7 @@ export function LearningPlanRenderer({
             <h4 className="text-sm font-bold text-[#F5F5F5] tracking-tight">
               {title}
             </h4>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex flex-wrap items-center gap-2 mt-1">
               <span className="text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md border text-[#C4B5FD] bg-[#8B5CF6]/15 border-[#8B5CF6]/30">
                 {duration} {duration === 1 ? 'Week' : 'Weeks'}
               </span>
@@ -128,10 +119,10 @@ export function LearningPlanRenderer({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center gap-2 pt-2 border-t border-[#242424]">
-        <Button
+      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#242424]">
+        {block.id && onStartPlan && <Button
           size="sm"
-          className="h-8 text-xs bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg gap-1.5 font-medium cursor-pointer"
+          className="min-h-11 text-xs bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg gap-1.5 font-medium cursor-pointer"
           onClick={() => {
             if (onStartPlan) {
               onStartPlan(block.id);
@@ -140,12 +131,12 @@ export function LearningPlanRenderer({
         >
           <Play className="w-3 h-3 text-white fill-white" />
           <span>Start Plan</span>
-        </Button>
+        </Button>}
 
         <Button
           size="sm"
           variant="outline"
-          className="h-8 text-xs rounded-lg gap-1.5 font-medium border-[#2E2E2E] bg-[#1A1A1A] text-[#F5F5F5] hover:bg-[#222222] cursor-pointer"
+          className="min-h-11 text-xs rounded-lg gap-1.5 font-medium border-[#2E2E2E] bg-[#1A1A1A] text-[#F5F5F5] hover:bg-[#222222] cursor-pointer"
           onClick={() => {
             if (onPracticeTopic) {
               onPracticeTopic(block.topic);

@@ -257,7 +257,7 @@ export function ApplicationArtifactCard({
         {isReady && (
           <Button
             size="sm"
-            className="h-8 text-xs bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg gap-2 font-medium shadow-xs"
+            className="min-h-[44px] h-auto py-2.5 text-xs bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg gap-2 font-medium shadow-xs"
             onClick={() => {
               if (artifact.jobId) {
                 router.push(`/${activeLocale}/jobs/${artifact.jobId}`);
@@ -274,7 +274,7 @@ export function ApplicationArtifactCard({
         {isNeedsUser && (
           <Button
             size="sm"
-            className="h-8 text-xs bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg gap-2 font-medium shadow-xs"
+            className="min-h-[44px] h-auto py-2.5 text-xs bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg gap-2 font-medium shadow-xs"
             onClick={() => router.push(`/${activeLocale}/account?tab=application-profile`)}
           >
             <span>Complete in Profile</span>
@@ -285,7 +285,7 @@ export function ApplicationArtifactCard({
         {isBlocked && (
           <Button
             size="sm"
-            className="h-8 text-xs bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg gap-2 font-medium shadow-xs"
+            className="min-h-[44px] h-auto py-2.5 text-xs bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg gap-2 font-medium shadow-xs"
             onClick={() => {
               if (onFindReplacements) {
                 onFindReplacements(title);
@@ -302,7 +302,7 @@ export function ApplicationArtifactCard({
         <Button
           size="sm"
           variant="outline"
-          className="h-8 text-xs bg-[#1A1A1A] hover:bg-[#222222] border border-[#2E2E2E] hover:border-[#3E3E3E] text-[#F5F5F5] rounded-lg gap-1.5 font-medium ml-auto"
+          className="min-h-[44px] h-auto py-2.5 text-xs bg-[#1A1A1A] hover:bg-[#222222] border border-[#2E2E2E] hover:border-[#3E3E3E] text-[#F5F5F5] rounded-lg gap-1.5 font-medium ml-auto"
           onClick={() => router.push(`/${activeLocale}/account?tab=application-profile`)}
         >
           <FileText className="w-3.5 h-3.5 text-[#7E7E7E]" />

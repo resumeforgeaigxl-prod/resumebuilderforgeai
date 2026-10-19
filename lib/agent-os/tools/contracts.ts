@@ -64,6 +64,14 @@ export const TOOL_CONTRACTS: Record<string, ToolContract> = {
   },
 
   // ── JOB TOOLS ──
+  get_job_database_counts: {
+    name: 'get_job_database_counts',
+    purpose: 'Read exact stored and active job counts.',
+    category: 'READ',
+    sideEffects: false,
+    idempotency: 'READ_ONLY',
+    requiredPermissions: ['jobs:read'],
+  },
   search_job_market: {
     name: 'search_job_market',
     purpose: 'Search canonical active job vacancies across all ingested sources.',

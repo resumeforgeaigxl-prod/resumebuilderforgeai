@@ -19,7 +19,7 @@ function DashboardContent({
     const isOmni = (pathname ?? '').includes('/omni') || (pathname ?? '').includes('/mentorforge');
 
     return (
-        <div className="min-h-screen bg-[#050505] text-[#F5F5F5] flex overflow-hidden relative product-dark">
+        <div className={cn("bg-[#050505] text-[#F5F5F5] flex overflow-hidden relative product-dark", isOmni ? "h-[100dvh] min-h-0" : "min-h-screen")}>
             <Sidebar locale={locale} />
 
             <div className="flex-1 flex flex-col min-w-0 ml-0 md:ml-[80px] relative">
@@ -27,7 +27,7 @@ function DashboardContent({
                     "flex-1 w-full",
                     isMounted ? "transition-all duration-300" : "",
                     isOmni
-                        ? "omni-shell h-screen bg-[#050505] overflow-hidden flex flex-col"
+                        ? "omni-shell h-full min-h-0 bg-[#050505] overflow-hidden flex flex-col"
                         : "h-screen bg-[#050505] overflow-y-auto overflow-x-hidden custom-scrollbar p-4 md:p-8"
                 )}>
                     {children}

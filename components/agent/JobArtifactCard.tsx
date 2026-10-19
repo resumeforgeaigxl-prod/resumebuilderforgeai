@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
-import { useRouter, useParams, usePathname } from 'next/navigation';
+import { useState } from 'react';
+import Link from 'next/link';
+import { generateJobSlug } from '@/lib/jobs/slug';
 import { cn } from '@/lib/utils';
 
 export interface JobItem {
@@ -20,13 +21,18 @@ export interface JobItem {
   salary_currency?: string;
   remote_type?: string;
   employment_type?: string;
+  matchScore?: number;
+  score?: number;
+  verifiedActive?: boolean;
+  isBlocked?: boolean;
 }
 
 export interface JobArtifact {
   success?: boolean;
-  tool?: 'search_job_market' | string;
+  tool?: string;
   query?: string;
   jobs?: JobItem[];
+  matches?: any[];
   count?: number;
 }
 
@@ -34,109 +40,140 @@ interface JobArtifactCardProps {
   artifact: JobArtifact;
   locale: string;
   onTailorResume?: (jobTitle: string, jobDesc?: string) => void;
+  onPrepareApplication?: (jobId: string) => void;
 }
 
-export function JobArtifactCard({ artifact, locale, onTailorResume }: JobArtifactCardProps) {
-  const router = useRouter();
-  const params = useParams();
-  const pathname = usePathname();
+export function JobArtifactCard({
+  artifact,
+  locale,
+  onTailorResume,
+  onPrepareApplication,
+}: JobArtifactCardProps) {
+  const [expanded, setExpanded] = useState(false);
 
-  const activeLocale =
-    (params?.locale as string | undefined) ||
-    locale ||
-    pathname?.split('/').filter(Boolean)[0] ||
-    'en-in';
+  const jobs: JobItem[] =
+    artifact.jobs && artifact.jobs.length > 0
+      ? artifact.jobs
+      : ((artifact as any).matches || []).map((m: any) => ({
+          id: m.jobId || m.id,
+          title: m.jobTitle || m.title,
+          company: m.company,
+          location: m.location,
+          snippet: m.summary || m.snippet,
+          matchScore: m.score ?? m.matchScore,
+          verifiedActive: true,
+          isBlocked: m.isBlocked,
+        }));
 
-  const jobs = artifact.jobs || [];
-
-  if (jobs.length === 0) {
-    return (
-      <div className="my-2 p-4 rounded-xl border border-[#242424] bg-[#0A0A0A] text-xs text-[#7E7E7E]">
-        No active job openings found for this search.
-      </div>
-    );
-  }
+  const visibleJobs = expanded ? jobs : jobs.slice(0, 3);
 
   return (
-    <div className="my-2.5 w-full rounded-xl border border-[#242424] bg-[#0A0A0A] p-4 space-y-3 text-[#F5F5F5] shadow-xs">
-      {/* Header */}
-      <div className="flex items-center justify-between pb-2.5 border-b border-[#242424]">
-        <span className="text-xs font-semibold text-[#F5F5F5] tracking-tight">
-          {artifact.query ? `Jobs for "${artifact.query}"` : 'Job Openings'}
-        </span>
-        <span className="text-[11px] text-[#7E7E7E]">
-          {jobs.length} found
-        </span>
+    <section
+      className="w-full min-w-0 rounded-xl border border-[#242424] bg-[#0A0A0A] text-[#F5F5F5] overflow-hidden shadow-xs"
+      aria-label="Job search results"
+    >
+      <div className="px-4 py-3 text-[13px] text-[#BDBDBD] border-b border-[#242424] flex items-center justify-between font-mono">
+        <span>{jobs.length ? `${jobs.length} jobs in this result set` : 'No active openings found for this search.'}</span>
+        {jobs.length > 3 && (
+          <span className="text-xs text-[#7E7E7E]">
+            {expanded ? `Showing ${jobs.length} of ${jobs.length}` : `Showing 3 of ${jobs.length}`}
+          </span>
+        )}
       </div>
 
-      {/* Clean, Scannable Jobs List */}
-      <div className="space-y-2">
-        {jobs.slice(0, 5).map((job, idx) => {
-          const applyUrl = job.url || job.apply_url || job.canonical_url;
-          const metaParts: string[] = [];
-          if (job.company) metaParts.push(job.company);
-          if (job.location) metaParts.push(job.location);
-          if (job.remote_type && job.remote_type !== 'UNKNOWN') {
-            metaParts.push(job.remote_type.toLowerCase());
-          }
+      <ol className="divide-y divide-[#242424]">
+        {visibleJobs.map((job, index) => {
+          const external = job.url || job.apply_url || job.canonical_url;
+          const href = job.id
+            ? `/${locale}/jobs/${generateJobSlug({ ...job, id: job.id })}`
+            : external && /^https?:\/\//i.test(external)
+            ? external
+            : undefined;
+
+          const matchScore = job.matchScore ?? (job as any).score;
+          const isBlocked = (job as any).isBlocked;
 
           return (
-            <div
-              key={job.id || idx}
-              className="p-3 rounded-lg border border-[#242424] bg-[#121212] hover:bg-[#161616] hover:border-[#303030] transition-colors flex items-center justify-between gap-3"
-            >
-              <div className="min-w-0 flex-1">
-                <h5 className="text-sm font-medium text-[#F5F5F5] truncate">
-                  {job.title || 'Software Engineer'}
-                </h5>
-                {metaParts.length > 0 && (
-                  <p className="text-xs text-[#7E7E7E] mt-0.5 truncate">
-                    {metaParts.join(' · ')}
-                  </p>
-                )}
-              </div>
+            <li key={job.id || index} className="min-w-0 p-3.5 sm:p-4 space-y-2">
+              {/* 1. Job title */}
+              <h5 className="!font-sans text-[15px] sm:text-[16px] font-semibold leading-snug text-[#F5F5F5] [overflow-wrap:anywhere] break-words">
+                {job.title || 'Untitled role'}
+              </h5>
 
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (onTailorResume && job.title) {
-                      onTailorResume(job.title, job.snippet || job.description);
-                    }
-                  }}
-                  className="text-xs font-medium text-[#F5F5F5] bg-[#1A1A1A] hover:bg-[#222222] border border-[#2E2E2E] hover:border-[#3E3E3E] px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
-                >
-                  Tailor Resume
-                </button>
+              {/* 2. Employer and location */}
+              <p className="text-[12px] sm:text-[13px] leading-relaxed text-[#BDBDBD] [overflow-wrap:anywhere]">
+                {[job.company, job.location].filter(Boolean).join(' · ') || 'Company details in listing'}
+              </p>
 
-                {applyUrl && (
-                  <a
-                    href={applyUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-[#BDBDBD] hover:text-[#FFFFFF] px-2 py-1.5 transition-colors inline-flex items-center gap-1"
+              {/* 3. Verified freshness / match information */}
+              <div className="flex items-center gap-2 text-[12px] sm:text-[13px] font-mono">
+                {isBlocked ? (
+                  <span className="text-rose-400 font-semibold">Blocked by policy</span>
+                ) : matchScore != null ? (
+                  <span
+                    className={cn(
+                      'font-semibold',
+                      matchScore >= 80
+                        ? 'text-emerald-400'
+                        : matchScore >= 65
+                        ? 'text-[#C4B5FD]'
+                        : 'text-amber-400'
+                    )}
                   >
-                    Apply ↗
-                  </a>
-                )}
+                    Match: {matchScore}%
+                  </span>
+                ) : null}
+                {matchScore != null && <span className="text-[#565656]">·</span>}
+                <span className="text-emerald-400/90 text-xs flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 inline-block" />
+                  Verified active
+                </span>
               </div>
-            </div>
+
+              {/* 4. Actions beneath the information */}
+              <div className="flex flex-wrap items-center gap-2 pt-1.5">
+                {href && (
+                  <Link
+                    href={href}
+                    className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-[#242424] bg-[#101010] hover:bg-[#151515] px-3.5 text-[13px] font-medium text-[#F5F5F5] transition-colors"
+                  >
+                    View Job
+                  </Link>
+                )}
+                {job.id && onPrepareApplication ? (
+                  <button
+                    type="button"
+                    onClick={() => onPrepareApplication(job.id!)}
+                    className="min-h-[44px] inline-flex items-center justify-center rounded-lg bg-[#8B5CF6] hover:bg-[#7C3AED] px-4 text-[13px] font-medium text-white transition-colors cursor-pointer"
+                  >
+                    Prepare →
+                  </button>
+                ) : onTailorResume && job.title ? (
+                  <button
+                    type="button"
+                    onClick={() => onTailorResume(job.title!, job.description || job.snippet)}
+                    className="min-h-[44px] inline-flex items-center justify-center rounded-lg bg-[#151515] border border-[#242424] hover:bg-[#1E1E1E] px-3.5 text-[13px] font-medium text-[#F5F5F5] transition-colors cursor-pointer"
+                  >
+                    Tailor Resume
+                  </button>
+                ) : null}
+              </div>
+            </li>
           );
         })}
-      </div>
+      </ol>
 
-      {/* Quiet Footer */}
-      {jobs.length > 5 && (
-        <div className="pt-1 flex items-center justify-between text-xs text-[#7E7E7E]">
-          <button
-            type="button"
-            onClick={() => router.push(`/${activeLocale}/jobs?tab=recommended`)}
-            className="text-xs font-medium text-[#8B5CF6] hover:text-[#A78BFA] transition-colors cursor-pointer"
-          >
-            View all {jobs.length} jobs →
-          </button>
-        </div>
+      {jobs.length > 3 && (
+        <button
+          type="button"
+          aria-expanded={expanded}
+          onClick={() => setExpanded(v => !v)}
+          className="min-h-[44px] w-full border-t border-[#242424] px-4 py-2.5 text-left text-[13px] font-medium text-[#C4B5FD] hover:text-white hover:bg-[#101010] transition-colors cursor-pointer flex items-center justify-between"
+        >
+          <span>{expanded ? 'Show fewer' : `Show all ${jobs.length}`}</span>
+          <span className="text-xs text-[#7E7E7E] font-mono">{expanded ? '↑' : '↓'}</span>
+        </button>
       )}
-    </div>
+    </section>
   );
 }

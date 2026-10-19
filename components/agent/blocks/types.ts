@@ -214,7 +214,7 @@ export interface JobMatchBlock {
   jobTitle: string;
   company: string;
   location?: string;
-  score: number;
+  score?: number;
   category?: string;
   recommendation?: string;
   confidence?: string;

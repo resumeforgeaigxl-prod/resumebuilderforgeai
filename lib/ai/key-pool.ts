@@ -104,6 +104,13 @@ export class AIKeyPool {
             key.cooldownUntil = null;
         }
     }
+
+    public hasActiveKeys(provider: AIProviderName): boolean {
+        return this.keys.some(k =>
+            k.provider === provider &&
+            (k.status === 'active' || (k.status === 'cooldown' && k.cooldownUntil && k.cooldownUntil < Date.now()))
+        );
+    }
 }
 
 // Singleton instance

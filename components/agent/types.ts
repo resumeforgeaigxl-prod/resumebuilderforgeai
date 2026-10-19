@@ -60,6 +60,7 @@ export interface JobMatchArtifact {
     isBlocked: boolean;
     jobTitle?: string;
     company?: string;
+    location?: string;
   }>;
   message?: string;
 }

@@ -1,3 +1,4 @@
+import { PROVIDER_CONFIGS } from '@/lib/ai/config';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { generateAIResponse, extractJson } from "@/lib/ai-provider";
 
@@ -54,7 +55,7 @@ async function fallbackViaOpenRouter(
 ): Promise<string> {
     const result = await generateAIResponse(
         prompt,
-        "google/gemini-2.0-flash-001",
+        PROVIDER_CONFIGS.openrouter.defaultModel,
         systemInstruction,
         0.3,
         8000
@@ -78,7 +79,7 @@ export async function generateContentGemini(prompt: string, systemInstruction?: 
         try {
             const client = new GoogleGenerativeAI(apiKey);
             const model = client.getGenerativeModel({
-                model: "gemini-2.0-flash",
+                model: PROVIDER_CONFIGS.gemini.defaultModel,
                 systemInstruction: systemInstruction,
             });
 
@@ -129,7 +130,7 @@ export async function* generateContentStreamGemini(prompt: string, systemInstruc
         try {
             const client = new GoogleGenerativeAI(apiKey);
             const model = client.getGenerativeModel({
-                model: "gemini-2.0-flash",
+                model: PROVIDER_CONFIGS.gemini.defaultModel,
                 systemInstruction: systemInstruction,
             });
 
@@ -175,7 +176,7 @@ export async function generateJsonGemini(prompt: string, systemInstruction?: str
         try {
             const client = new GoogleGenerativeAI(apiKey);
             const model = client.getGenerativeModel({
-                model: "gemini-2.0-flash",
+                model: PROVIDER_CONFIGS.gemini.defaultModel,
                 systemInstruction: systemInstruction,
                 generationConfig: {
                     responseMimeType: "application/json",
@@ -234,7 +235,7 @@ export async function generateGroundedJobSearch(query: string) {
     try {
         const client = new GoogleGenerativeAI(apiKey);
         const model = client.getGenerativeModel({
-            model: "gemini-2.0-flash",
+            model: PROVIDER_CONFIGS.gemini.defaultModel,
             tools: [{ googleSearchRetrieval: {} }]
         });
 

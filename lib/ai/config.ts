@@ -23,7 +23,7 @@ export const PROVIDER_CONFIGS: Record<AIProviderName, {
     concurrencyLimit: number;
 }> = {
     'gemini': {
-        defaultModel: 'gemini-1.5-flash',
+        defaultModel: process.env.GEMINI_MODEL || 'gemini-3.8-flash',
         concurrencyLimit: 5,
     },
     'openrouter': {

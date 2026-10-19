@@ -153,7 +153,7 @@ export function LearningArtifactCard({
           {onPracticeTopic && (
             <button
               onClick={() => onPracticeTopic(topicTitle)}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#C4B5FD] bg-[#8B5CF6]/10 hover:bg-[#8B5CF6]/20 border border-[#8B5CF6]/30 px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+              className="min-h-[44px] h-auto inline-flex items-center gap-1.5 text-xs font-semibold text-[#C4B5FD] bg-[#8B5CF6]/10 hover:bg-[#8B5CF6]/20 border border-[#8B5CF6]/30 px-3.5 py-2.5 rounded-lg transition-all cursor-pointer"
             >
               <Code className="w-3.5 h-3.5" />
               Practice Coding on this Topic
@@ -163,7 +163,7 @@ export function LearningArtifactCard({
           <Button
             onClick={() => router.push(`/${locale}/studyforge`)}
             size="sm"
-            className="h-8 rounded-lg bg-[#1A1A1A] hover:bg-[#222222] text-[#F5F5F5] border border-[#2E2E2E] text-xs font-medium px-3 transition-all flex items-center gap-1 cursor-pointer"
+            className="min-h-[44px] h-auto py-2.5 rounded-lg bg-[#1A1A1A] hover:bg-[#222222] text-[#F5F5F5] border border-[#2E2E2E] text-xs font-medium px-3.5 transition-all flex items-center gap-1 cursor-pointer"
           >
             <BookOpen className="w-3.5 h-3.5 text-[#7E7E7E]" />
             Start Learning Plan

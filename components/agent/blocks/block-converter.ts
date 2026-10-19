@@ -182,7 +182,7 @@ export function validateBlock(block: any): OmniBlock {
         jobTitle: String(block.jobTitle || 'Target Role'),
         company: String(block.company || 'Company'),
         location: block.location,
-        score: Number(block.score || 0),
+        score: block.score != null && Number.isFinite(Number(block.score)) ? Number(block.score) : undefined,
         category: block.category,
         recommendation: block.recommendation,
         confidence: block.confidence,
@@ -195,31 +195,51 @@ export function validateBlock(block: any): OmniBlock {
         blockers: Array.isArray(block.blockers) ? block.blockers : [],
       };
 
-    case 'job':
+    case 'job': {
+      const rawList = Array.isArray(block.jobs) && block.jobs.length > 0
+        ? block.jobs
+        : Array.isArray(block.matches)
+        ? block.matches.map((m: any) => ({
+            id: m.jobId || m.id,
+            title: m.jobTitle || m.title || 'Software Engineer',
+            company: m.company || 'Company',
+            location: m.location,
+            snippet: m.summary || m.snippet,
+            description: m.description || m.summary,
+            matchScore: m.score ?? m.matchScore,
+            verifiedActive: true,
+            isBlocked: m.isBlocked,
+            url: m.url || m.apply_url,
+            apply_url: m.apply_url || m.url,
+          }))
+        : [];
+
       return {
         type: 'job',
         query: block.query,
-        count: block.count || (Array.isArray(block.jobs) ? block.jobs.length : 0),
-        jobs: Array.isArray(block.jobs)
-          ? block.jobs.map((j: any) => ({
-              id: j.id,
-              title: j.title || 'Software Engineer',
-              company: j.company || 'Company',
-              location: j.location,
-              snippet: j.snippet || j.description,
-              description: j.description || j.snippet,
-              url: j.apply_url || j.url || j.canonical_url,
-              apply_url: j.apply_url || j.url,
-              source: j.source,
-              salary_min: j.salary_min,
-              salary_max: j.salary_max,
-              salary_currency: j.salary_currency,
-              remote_type: j.remote_type,
-            }))
-          : [],
+        count: block.count || rawList.length,
+        jobs: rawList.map((j: any) => ({
+          id: j.id,
+          title: j.title || 'Software Engineer',
+          company: j.company || 'Company',
+          location: j.location,
+          snippet: j.snippet || j.description,
+          description: j.description || j.snippet,
+          matchScore: j.matchScore ?? j.score,
+          verifiedActive: j.verifiedActive ?? true,
+          isBlocked: j.isBlocked,
+          url: j.apply_url || j.url || j.canonical_url,
+          apply_url: j.apply_url || j.url,
+          source: j.source,
+          salary_min: j.salary_min,
+          salary_max: j.salary_max,
+          salary_currency: j.salary_currency,
+          remote_type: j.remote_type,
+        })),
         tool: block.tool || 'search_job_market',
         success: block.success ?? true,
       } as any;
+    }
 
     case 'application':
       return {
@@ -464,7 +484,7 @@ export function convertMessageToBlocks(msg: Partial<OmniMessage> & { content?: s
         blocks.push(validateBlock({ type: 'coding', ...art }));
       } else if (art.tool === 'trigger_mock_interview' || art.tool === 'evaluate_interview_answer') {
         blocks.push(validateBlock({ type: 'interview', ...art }));
-      } else if (art.tool === 'search_job_market' || art.jobs) {
+      } else if (art.tool === 'search_job_market' || art.tool === 'rank_candidate_jobs' || art.jobs || art.matches) {
         blocks.push(validateBlock({ type: 'job', ...art }));
       } else if (art.tool === 'negotiate_salary_offer') {
         blocks.push(validateBlock({ type: 'salary', ...art }));
@@ -578,7 +598,7 @@ export function convertMessageToBlocks(msg: Partial<OmniMessage> & { content?: s
         actionLabel = 'Prepare for Interview';
         actionTarget = 'prep_interview';
       } else if (actionClean.includes('study') || actionClean.includes('learn')) {
-        actionLabel = 'Start Learning Plan';
+        actionLabel = 'Create Learning Plan';
         actionTarget = 'start_plan';
       } else if (actionClean.includes('resume')) {
         actionLabel = 'Open Resume Editor';

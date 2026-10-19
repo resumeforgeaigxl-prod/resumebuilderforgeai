@@ -7,6 +7,7 @@
  */
 
 import type { ModelTier } from '../policies/model-routing-policy';
+import { PROVIDER_CONFIGS } from '@/lib/ai/config';
 
 export interface RouteDecision {
   tier: ModelTier;
@@ -122,7 +123,7 @@ export class ModelRouter {
         return {
           tier: 1,
           targetProvider: 'gemini',
-          targetModel: 'gemini-1.5-flash',
+          targetModel: PROVIDER_CONFIGS.gemini.defaultModel,
           isDeterministic: false,
           requiresHumanHandoff: false,
           escalationReason: reason,
@@ -132,7 +133,7 @@ export class ModelRouter {
         return {
           tier: 2,
           targetProvider: 'gemini',
-          targetModel: 'gemini-2.0-flash',
+          targetModel: PROVIDER_CONFIGS.gemini.defaultModel,
           isDeterministic: false,
           requiresHumanHandoff: false,
           escalationReason: reason,
@@ -142,7 +143,7 @@ export class ModelRouter {
         return {
           tier: 3,
           targetProvider: 'gemini',
-          targetModel: 'gemini-1.5-pro',
+          targetModel: process.env.GEMINI_REASONING_MODEL || 'gemini-3.1-pro-preview',
           isDeterministic: false,
           requiresHumanHandoff: false,
           escalationReason: reason,

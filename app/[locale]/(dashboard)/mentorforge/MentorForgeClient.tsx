@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   User,
+  Menu,
   History,
   Plus,
   Trash2,
@@ -22,6 +23,8 @@ import {
 import { cn } from '@/lib/utils';
 import { useRouter, useSearchParams, useParams, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import styles from '@/components/agent/OmniWorkspace.module.css';
+import { useSidebar } from '@/hooks/use-sidebar';
 import { useOmniHeader } from '@/hooks/use-omni-header';
 
 function resolveOmniPresence(
@@ -182,6 +185,11 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
   const [agentActivities, setAgentActivities] = useState<AgentActivity[]>([]);
   const [, setActivityExpanded] = useState(true);
 
+  const { toggleMobile } = useSidebar();
+  const initialized = useRef(false);
+  const followBottom = useRef(true);
+  const [showBottom, setShowBottom] = useState(false);
+  const [visibleMessages, setVisibleMessages] = useState(60);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const router = useRouter();
@@ -226,6 +234,8 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
       const res = await fetch(`/api/omni/conversations/${convId}`);
       if (res.ok) {
         const data = await res.json();
+        followBottom.current = true;
+        setVisibleMessages(60);
         setMessages(data.messages || []);
         setActiveConversationId(convId);
         updateUrlWithConversation(convId);
@@ -245,6 +255,7 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
   // 2. If no ?c, load most recent active conversation.
   // 3. If user has no conversations, render empty state (do NOT create DB record on mount).
   useEffect(() => {
+    if (initialized.current) return;
     let isMounted = true;
 
     const initialize = async () => {
@@ -254,6 +265,7 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
         const convs: ConversationSummary[] = data.conversations || [];
         if (!isMounted) return;
 
+        initialized.current = true;
         setConversationsList(convs);
 
         if (urlConvId) {
@@ -292,20 +304,22 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
 
   // Scroll to bottom on updates
   useEffect(() => {
-    if (scrollRef.current) {
+    if (scrollRef.current && followBottom.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, isLoading, agentActivities]);
 
   // Start fresh chat: resets active conversation view and URL without creating DB row
-  const startNewChat = () => {
+  const startNewChat = useCallback(() => {
     setActiveConversationId(null);
     setMessages([]);
     setInput('');
     setAgentActivities([]);
     setIsHistoryOpen(false);
     updateUrlWithConversation(null);
-  };
+    followBottom.current = true;
+    setVisibleMessages(60);
+  }, [updateUrlWithConversation]);
 
   // Switch to selected conversation thread
   const selectConversation = async (convId: string) => {
@@ -338,9 +352,10 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
 
   const sendMessage = async (customMsg?: string) => {
     const text = customMsg || input;
-    if (!text.trim() || isLoading) return;
+    if (!text.trim() || isLoading || isLoadingThread) return;
 
     // Immediately pre-append user message to local state
+    followBottom.current = true;
     const userMsg: Message = { role: 'user', content: text };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
@@ -369,6 +384,7 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
         const decoder = new TextDecoder();
         let buffer = '';
         let receivedResult = false;
+        let eventType = '';
 
         while (true) {
           const { done, value } = await reader.read();
@@ -378,7 +394,7 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
           const lines = buffer.split('\n');
           buffer = lines.pop() || '';
 
-          let eventType = '';
+          // Keep SSE event names across network chunk boundaries.
           for (const line of lines) {
             if (line.startsWith('event: ')) {
               eventType = line.slice(7).trim();
@@ -431,7 +447,8 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
                     setActiveConversationId(data.conversationId);
                     updateUrlWithConversation(data.conversationId);
                   }
-                  const errorMsg = data.error || "Agent failed to generate response.";
+                  const errorMsg = "Omni couldn’t complete that request. Please try again.";
+                  setInput(current => current || text);
                   toast({ variant: "destructive", title: "AI Error", description: errorMsg });
                   setMessages(prev => [...prev, {
                     role: 'assistant',
@@ -441,8 +458,8 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
                       errorType: 'GENERAL',
                       title: 'Response Interrupted',
                       message: errorMsg,
-                      actionLabel: 'Try Again',
-                      retryable: true,
+                      actionLabel: data.retryable === false ? undefined : 'Try Again',
+                      retryable: data.retryable !== false,
                     }]
                   }]);
                   refreshConversationsList();
@@ -456,6 +473,7 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
         }
 
         if (!receivedResult) {
+          setInput(current => current || text);
           setMessages(prev => [...prev, {
             role: 'assistant',
             content: "I couldn't finish preparing that response. Please try asking again.",
@@ -477,6 +495,8 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
           updateUrlWithConversation(data.conversationId);
         }
         if (data.error) {
+          data.error = 'Omni couldn’t complete that request. Please try again.';
+          setInput(current => current || text);
           toast({ variant: "destructive", title: "AI Error", description: data.error });
           setMessages(prev => [...prev, {
             role: 'assistant',
@@ -503,7 +523,8 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
         refreshConversationsList();
       }
     } catch (err: any) {
-      const errorMsg = err?.message || "Failed to connect to Omni.";
+      const errorMsg = 'Omni couldn’t complete that request. Please try again.';
+      setInput(current => current || text);
       toast({ variant: "destructive", title: "AI Error", description: errorMsg });
       setMessages(prev => [...prev, {
         role: 'assistant',
@@ -561,6 +582,7 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
         }
         break;
       case 'start_plan':
+        if (payload?.id) { router.push(`/${activeLocale}/studyforge`); break; }
         sendMessage(`Start learning roadmap for ${payload?.topic || 'this syllabus'}`);
         break;
       case 'find_jobs':
@@ -658,7 +680,13 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
   }, [conversationsList.length, activeTitle, startNewChat, setOmniHeader, clearOmniHeader]);
 
   return (
-    <div className="flex flex-col h-full bg-[#050505] text-[#F5F5F5] overflow-hidden relative">
+    <div className={styles.root}>
+      <header className={styles.header}>
+        <button type="button" className="md:!hidden" onClick={toggleMobile} aria-label="Open navigation"><Menu className="h-5 w-5" /></button>
+        <strong>Omni</strong>
+        <button type="button" disabled={isLoading} onClick={() => setIsHistoryOpen(true)} aria-label="Conversation history"><History className="h-5 w-5" /></button>
+        <button type="button" disabled={isLoading} onClick={startNewChat} aria-label="New conversation"><Plus className="h-5 w-5" /></button>
+      </header>
       {/* 2. Conversation History Drawer (Slide-out panel) */}
       <AnimatePresence>
         {isHistoryOpen && (
@@ -769,12 +797,12 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
         </div>
       ) : !hasMessages ? (
         /* Empty State */
-        <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col justify-center px-6 sm:px-8 py-10">
-          <div className="max-w-3xl mx-auto w-full space-y-6">
+        <div className={styles.empty}>
+          <div className={styles.emptyInner}>
             {/* Omni 3D entity introduction */}
             <div className="space-y-3">
               <div className="flex items-center gap-3.5 mb-1">
-                <OmniEntity3D state={omniPresence.state} size={84} />
+                <OmniEntity3D state={omniPresence.state} size={56} />
                 <div className="flex flex-col">
                   <span className="text-base font-semibold text-[#F5F5F5] tracking-tight">Omni</span>
                   <span className="text-xs text-[#7E7E7E] font-normal transition-opacity duration-200">
@@ -790,8 +818,8 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
               </p>
             </div>
 
-            <div className="w-full">
-              <div className="mb-1.5 flex justify-end">
+            <div className={styles.emptyComposer}>
+              <div className="hidden">
                 <button
                   type="button"
                   onClick={() => setIsHistoryOpen(true)}
@@ -833,41 +861,47 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
         /* Active Conversation State */
         <>
           {/* Messages area */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar relative" ref={scrollRef}>
+          <div className={styles.scroll} ref={scrollRef} onScroll={() => { const el = scrollRef.current; if (el) { followBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 100; setShowBottom(!followBottom.current); } }}>
             {/* Smooth top fade gradient as messages scroll under the curved header */}
-            <div className="pointer-events-none sticky top-0 left-0 right-0 h-6 bg-gradient-to-b from-[#050505] to-transparent z-10 shrink-0 -mb-6" />
 
-            <div className="max-w-4xl mx-auto px-6 sm:px-8 pt-6 pb-12 space-y-8">
-              {messages.map((msg, i) => (
-                <motion.div
-                  key={msg.id || i}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.35, delay: 0.04 }}
-                  className={cn(
-                    "flex gap-4 w-full",
-                    msg.role === 'user' ? "flex-row-reverse" : "flex-row"
-                  )}
-                >
-                  {/* Avatar */}
-                  {msg.role === 'user' ? (
-                    <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center border bg-[#101010] border-[#242424] shadow-xs">
-                      <User className="w-4 h-4 text-[#F5F5F5]" />
-                    </div>
-                  ) : (
-                    <div className="w-11 h-11 shrink-0 flex items-center justify-center">
-                      <OmniEntity3D state="IDLE" size={44} />
-                    </div>
-                  )}
+            <div className={styles.messages}>
+              {messages.length > visibleMessages && (
+                <button type="button" className={styles.jump} onClick={() => setVisibleMessages(value => value + 60)}>
+                  Load earlier messages
+                </button>
+              )}
+              {messages.slice(-visibleMessages).map((msg, i, arr) => {
+                const isAssistant = msg.role === 'assistant';
+                const isFirstInAssistantTurn =
+                  isAssistant && (i === 0 || arr[i - 1]?.role !== 'assistant');
+
+                return (
+                  <motion.div
+                    key={msg.id || i}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25, delay: 0.02 }}
+                    className={cn(
+                      styles.row,
+                      msg.role === 'user' && styles.user,
+                      isAssistant && !isFirstInAssistantTurn && 'pl-8 sm:pl-9'
+                    )}
+                  >
+                    {/* Avatar: 24-28px, shown once per grouped assistant turn */}
+                    {isAssistant && isFirstInAssistantTurn && (
+                      <div className={styles.avatar}>
+                        <OmniEntity3D state="IDLE" size={24} />
+                      </div>
+                    )}
 
                   {/* Message Content Container */}
-                  <div className={cn("flex flex-col gap-2.5 max-w-[85%]", msg.role === 'user' && "items-end")}>
+                  <div className={msg.role === 'user' ? styles.userContent : styles.assistant}>
                     {msg.role === 'user' ? (
-                      <div className="px-5 py-3.5 rounded-xl text-sm leading-relaxed border bg-[#151515] text-[#F5F5F5] border-[#242424]">
+                      <div className={styles.bubble}>
                         <p className="whitespace-pre-wrap">{msg.content}</p>
                       </div>
                     ) : (
-                      <div className="w-full space-y-3">
+                      <div className="min-w-0 w-full space-y-2">
                         {(() => {
                           const blocks = convertMessageToBlocks(msg);
                           return blocks.map((block, bIdx) => (
@@ -877,8 +911,8 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
                               locale={locale}
                               onAction={handleBlockAction}
                               onFormSubmit={handleFormSubmit}
-                              onTailorResume={(jobTitle) =>
-                                sendMessage(`Tailor my resume for the role of ${jobTitle}.`)
+                              onTailorResume={(jobTitle, jobId) =>
+                                sendMessage(`Tailor my resume for the role of ${jobTitle}.${jobId ? ` Job ID: ${jobId}` : ""}`)
                               }
                               onPrepareApplication={(jobId) =>
                                 sendMessage(`Prepare my application package for job ID ${jobId}`)
@@ -906,7 +940,8 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
                     )}
                   </div>
                 </motion.div>
-              ))}
+              );
+            })}
 
               {/* Persistent 3D Omni Presence while Agent is Working */}
               {isLoading && (
@@ -915,7 +950,7 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex items-center gap-3 py-2 px-1"
                 >
-                  <OmniEntity3D state={omniPresence.state} size={44} />
+                  <OmniEntity3D state={omniPresence.state} size={28} />
                   <div className="flex flex-col">
                     <span className="text-xs font-semibold text-[#F5F5F5] tracking-tight">Omni</span>
                     <div className="flex items-center gap-1.5 text-xs text-[#7E7E7E] mt-0.5">
@@ -931,9 +966,10 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
           </div>
 
           {/* Bottom composer bar */}
-          <div className="w-full shrink-0 bg-[#050505] pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 px-3 sm:px-6">
+          <div className={styles.composer}>
+            {showBottom && <button type="button" className={styles.jump} onClick={() => { followBottom.current = true; scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' }); }}>Latest messages ↓</button>}
             <div className="max-w-3xl mx-auto">
-              <div className="mb-2 flex justify-end gap-1">
+              <div className="hidden">
                 <button
                   type="button"
                   onClick={() => setIsHistoryOpen(true)}

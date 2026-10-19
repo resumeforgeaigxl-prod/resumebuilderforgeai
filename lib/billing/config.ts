@@ -192,6 +192,8 @@ export const BILLING_CONFIG = {
 
   // 5. Estimated Token Costs for Real COGS Accounting (in INR per 1,000 tokens)
   modelRates: {
+    'gemini-3.8-flash': { inputCostPer1k: 0.008, outputCostPer1k: 0.032 },
+    'gemini-flash-latest': { inputCostPer1k: 0.008, outputCostPer1k: 0.032 },
     'gemini-1.5-flash': { inputCostPer1k: 0.006, outputCostPer1k: 0.024 },
     'gemini-2.0-flash': { inputCostPer1k: 0.008, outputCostPer1k: 0.032 },
     'gemini-1.5-pro': { inputCostPer1k: 0.10, outputCostPer1k: 0.40 },

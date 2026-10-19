@@ -144,6 +144,7 @@ export function OmniBlockRenderer({
           artifact={block as any}
           locale={locale}
           onTailorResume={onTailorResume}
+          onPrepareApplication={onPrepareApplication}
         />
       );
 

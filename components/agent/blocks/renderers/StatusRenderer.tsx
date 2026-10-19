@@ -224,7 +224,7 @@ export function ErrorRenderer({
             <Briefcase className="w-3 h-3 text-white" />
             <span>{block.actionLabel || 'Find Other Matches'}</span>
           </Button>
-        ) : onRetry ? (
+        ) : onRetry && block.retryable !== false ? (
           <Button
             size="sm"
             className="h-8 text-xs bg-[#1A1A1A] border border-[#2E2E2E] text-[#F5F5F5] hover:bg-[#222222] rounded-lg gap-1.5 font-medium cursor-pointer"

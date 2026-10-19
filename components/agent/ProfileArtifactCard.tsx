@@ -115,7 +115,7 @@ export function ProfileArtifactCard({ artifact, locale }: ProfileArtifactCardPro
         <Button
           onClick={handleOpenProfile}
           size="sm"
-          className="h-8 rounded-lg bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-[11px] font-medium px-3.5 transition-all flex items-center gap-1.5 cursor-pointer"
+          className="min-h-[44px] h-auto py-2.5 rounded-lg bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-xs font-medium px-4 transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
         >
           <span>Complete Profile</span>
           <ChevronRight className="w-3.5 h-3.5" />

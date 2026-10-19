@@ -13,6 +13,7 @@ export interface SearchJobMarketResult {
   query: string;
   jobs: any[];
   count: number;
+  source: 'supabase' | 'web_search';
 }
 
 export interface JobApplicationRecord {
@@ -78,7 +79,20 @@ export async function searchJobMarket(query: string): Promise<SearchJobMarketRes
     query,
     jobs: returnJobs || [],
     count: (returnJobs || []).length,
+    source: dbJobs?.length ? 'supabase' : 'web_search',
   };
+}
+
+export async function getJobDatabaseCounts() {
+  const db = createAdminClient();
+  const [stored, active] = await Promise.all([
+    db.from('jobs').select('id', { count: 'exact', head: true }),
+    db.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'ACTIVE'),
+  ]);
+  if (stored.error || active.error) throw new Error('Job counts unavailable');
+  return { success: true, tool: 'get_job_database_counts', source: 'supabase',
+    totalStored: stored.count, activeJobs: active.count,
+    candidateMatches: null, displayedResults: null };
 }
 
 /**

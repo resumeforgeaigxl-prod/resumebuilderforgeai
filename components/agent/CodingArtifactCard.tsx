@@ -176,7 +176,7 @@ export function CodingArtifactCard({ artifact, locale, onRunCode }: CodingArtifa
             <Button
               onClick={handleOpenChallenge}
               size="sm"
-              className="h-8 rounded-lg bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-xs font-medium px-4 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="min-h-[44px] h-auto py-2.5 rounded-lg bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-xs font-medium px-4 transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <ExternalLink className="w-3.5 h-3.5" />
               Practice in Full Editor
@@ -185,7 +185,7 @@ export function CodingArtifactCard({ artifact, locale, onRunCode }: CodingArtifa
               <Button
                 onClick={() => onRunCode(artifact.starterCode!, 'python')}
                 size="sm"
-                className="h-8 rounded-lg bg-[#1A1A1A] hover:bg-[#222222] text-[#F5F5F5] border border-[#2E2E2E] text-xs font-medium px-4 transition-all flex items-center gap-1.5 cursor-pointer"
+                className="min-h-[44px] h-auto py-2.5 rounded-lg bg-[#1A1A1A] hover:bg-[#222222] text-[#F5F5F5] border border-[#2E2E2E] text-xs font-medium px-4 transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <Play className="w-3 h-3 text-[#C4B5FD] fill-[#C4B5FD]" />
                 Run in Sandbox
@@ -325,7 +325,7 @@ export function CodingArtifactCard({ artifact, locale, onRunCode }: CodingArtifa
             <Button
               onClick={() => router.push(`/${locale}/codingforge`)}
               size="sm"
-              className="h-8 rounded-lg bg-[#1A1A1A] hover:bg-[#222222] text-[#F5F5F5] border border-[#2E2E2E] text-xs font-medium px-4 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="min-h-[44px] h-auto py-2.5 rounded-lg bg-[#1A1A1A] hover:bg-[#222222] text-[#F5F5F5] border border-[#2E2E2E] text-xs font-medium px-4 transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <ExternalLink className="w-3.5 h-3.5 text-[#7E7E7E]" />
               Practice Coding

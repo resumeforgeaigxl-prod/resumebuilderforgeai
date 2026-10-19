@@ -1,3 +1,4 @@
+import { classifyProviderError, OMNI_FAILURE_MESSAGE } from './provider-errors';
 import { AIRouterOptions, AIResponse } from './types';
 import { TASK_ROUTING_CHAINS } from './config';
 import { providers } from './providers';
@@ -73,31 +74,20 @@ export async function callAI(options: AIRouterOptions): Promise<AIResponse> {
 
             } catch (err: unknown) {
                 lastError = err instanceof Error ? err : new Error(String(err));
+                const failure = classifyProviderError(lastError);
                 const message = lastError.message;
                 const isQuotaError = message.includes('429') || message.includes('quota') || message.includes('Rate limit');
                 
                 keyPool.markFailure(key.id, isQuotaError);
+                console.error('[AIRouter] Provider failure', { provider: providerName, task: options.task, ...failure });
+                if (!failure.retryable) break;
                 
                 if (!isQuotaError && retry === maxRetriesPerProvider - 1) {
-                    console.error(`[AIRouter] ${providerName} failed after ${maxRetriesPerProvider} retries:`, lastError);
+                    console.error('[AIRouter] Provider failure', { provider: providerName, task: options.task, ...failure });
                 }
             }
         }
     }
 
-    // If all providers in chain fail, return fallback structured response if requested
-    if (options.responseFormat === 'json') {
-        return {
-            text: JSON.stringify({
-                error: "AI is busy, showing partial result",
-                is_fallback: true
-            }),
-            model: 'fallback',
-            provider: 'gemini', // Dummy
-            usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
-            latencyMs: 0
-        };
-    }
-
-    throw lastError || new Error(`AI generation failed for task: ${options.task}. All providers exhausted.`);
+    throw new Error(OMNI_FAILURE_MESSAGE, { cause: lastError });
 }

@@ -203,7 +203,7 @@ export function ResumeArtifactCard({ artifact, locale }: ResumeArtifactCardProps
             <Button
               onClick={handleDownload}
               size="sm"
-              className="h-8 rounded-lg bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-xs font-medium px-3.5 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="min-h-[44px] rounded-lg bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-xs font-medium px-3.5 transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <FileDown className="w-3.5 h-3.5" />
               {downloading ? 'Opening PDF...' : 'Download PDF'}
@@ -212,7 +212,7 @@ export function ResumeArtifactCard({ artifact, locale }: ResumeArtifactCardProps
           <Button
             onClick={handleEdit}
             size="sm"
-            className="h-8 rounded-lg bg-[#1A1A1A] hover:bg-[#222222] text-[#F5F5F5] border border-[#2E2E2E] text-xs font-medium px-3.5 transition-all flex items-center gap-1.5 cursor-pointer"
+            className="min-h-[44px] rounded-lg bg-[#1A1A1A] hover:bg-[#222222] text-[#F5F5F5] border border-[#2E2E2E] text-xs font-medium px-3.5 transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <ExternalLink className="w-3.5 h-3.5 text-[#7E7E7E]" />
             Open Resume Editor

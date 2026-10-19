@@ -8,7 +8,7 @@ import type { TextBlock, MarkdownBlock, HeadingBlock, ListBlock } from '../types
 export function TextRenderer({ block }: { block: TextBlock }) {
   if (!block.text) return null;
   return (
-    <div className="px-4 py-3 rounded-xl border border-[#242424] bg-[#101010] text-sm text-[#F5F5F5] leading-relaxed shadow-xs select-text font-normal max-w-2xl">
+    <div className="w-full min-w-0 text-[15px] text-[#F5F5F5] leading-[1.6] select-text [overflow-wrap:anywhere]">
       {block.text}
     </div>
   );
@@ -31,7 +31,7 @@ export function HeadingRenderer({ block }: { block: HeadingBlock }) {
 export function ListRenderer({ block }: { block: ListBlock }) {
   if (block.ordered) {
     return (
-      <ol className="list-decimal pl-5 my-2 space-y-1 text-xs text-[#BDBDBD]">
+      <ol className="list-decimal pl-5 my-2 space-y-1 text-[15px] text-[#BDBDBD]">
         {block.items.map((item, idx) => (
           <li key={idx} className="leading-relaxed">{item}</li>
         ))}
@@ -39,7 +39,7 @@ export function ListRenderer({ block }: { block: ListBlock }) {
     );
   }
   return (
-    <ul className="list-disc pl-5 my-2 space-y-1 text-xs text-[#BDBDBD]">
+    <ul className="list-disc pl-5 my-2 space-y-1 text-[15px] text-[#BDBDBD]">
       {block.items.map((item, idx) => (
         <li key={idx} className="leading-relaxed">{item}</li>
       ))}
@@ -50,16 +50,18 @@ export function ListRenderer({ block }: { block: ListBlock }) {
 export function MarkdownRenderer({ block }: { block: MarkdownBlock }) {
   if (!block.content) return null;
   return (
-    <div className="px-4 py-3 rounded-xl border border-[#242424] bg-[#101010] text-sm text-[#F5F5F5] leading-relaxed shadow-xs max-w-2xl space-y-2 select-text">
+    <div className="w-full min-w-0 text-[15px] text-[#F5F5F5] leading-[1.6] select-text [overflow-wrap:anywhere]">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
+          table: ({ children }) => <div className="max-w-full overflow-x-auto"><table className="text-[13px]">{children}</table></div>,
+          pre: ({ children }) => <pre className="max-w-full overflow-x-auto p-3 rounded-lg bg-[#101010]">{children}</pre>,
           h1: ({ children }) => <h1 className="text-base font-bold text-[#F5F5F5] mt-2 mb-1 tracking-tight">{children}</h1>,
           h2: ({ children }) => <h2 className="text-sm font-bold text-[#F5F5F5] mt-2 mb-1 tracking-tight">{children}</h2>,
           h3: ({ children }) => <h3 className="text-xs font-bold text-[#F5F5F5] mt-1.5 mb-0.5 tracking-tight">{children}</h3>,
-          p: ({ children }) => <p className="text-xs text-[#BDBDBD] leading-relaxed my-1">{children}</p>,
-          ul: ({ children }) => <ul className="list-disc pl-4 my-1 space-y-0.5 text-xs text-[#BDBDBD]">{children}</ul>,
-          ol: ({ children }) => <ol className="list-decimal pl-4 my-1 space-y-0.5 text-xs text-[#BDBDBD]">{children}</ol>,
+          p: ({ children }) => <p className="text-[15px] text-[#BDBDBD] leading-relaxed my-1">{children}</p>,
+          ul: ({ children }) => <ul className="list-disc pl-4 my-1 space-y-0.5 text-[15px] text-[#BDBDBD]">{children}</ul>,
+          ol: ({ children }) => <ol className="list-decimal pl-4 my-1 space-y-0.5 text-[15px] text-[#BDBDBD]">{children}</ol>,
           li: ({ children }) => <li className="pl-0.5 leading-relaxed">{children}</li>,
           strong: ({ children }) => <strong className="font-semibold text-[#F5F5F5]">{children}</strong>,
           code: ({ children }) => (

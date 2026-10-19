@@ -232,7 +232,7 @@ export function MentorForgeChatInput({
                 e.preventDefault();
                 setShowCommandPalette(false);
             }
-        } else if (e.key === "Enter" && !e.shiftKey) {
+        } else if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
             e.preventDefault();
             if (value.trim() && !isLoading) {
                 onSend();
@@ -253,7 +253,7 @@ export function MentorForgeChatInput({
         <div className="w-full">
             {/* Chat input container */}
             <motion.div
-                className="omni-composer relative flex items-end gap-2 rounded-2xl border border-[#2a2c33] bg-[#121214] px-3 py-2 transition-colors focus-within:border-[#3a3d46]"
+                className="omni-composer relative flex items-end gap-2 min-h-[52px] rounded-xl border border-[#242424] bg-[#101010] px-3 py-2 transition-colors focus-within:border-[#3a3d46]"
             >
                 {/* Command palette */}
                 <AnimatePresence>
@@ -318,7 +318,7 @@ export function MentorForgeChatInput({
                     className={cn(
                         "block min-w-0 flex-1 resize-none bg-transparent",
                         "border-none px-1 py-1.5 outline-none",
-                        "text-sm leading-6 text-[#F5F5F5]",
+                        "text-base leading-6 text-[#F5F5F5]",
                         "placeholder:text-[#8b909a]",
                         "min-h-[36px] max-h-[160px]",
                         "focus:ring-0 focus:outline-none"
@@ -331,7 +331,7 @@ export function MentorForgeChatInput({
                     disabled={isLoading || !value.trim()}
                     aria-label="Send"
                     className={cn(
-                        "mb-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors",
+                        "mb-0.5 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg transition-colors",
                         value.trim()
                             ? "bg-[#f4f5f7] text-[#0c0d10]"
                             : "text-[#5c616b]"

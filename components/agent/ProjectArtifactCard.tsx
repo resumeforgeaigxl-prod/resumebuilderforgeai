@@ -162,7 +162,7 @@ export function ProjectArtifactCard({
         <Button
           onClick={() => router.push(`/${locale}/projectforge`)}
           size="sm"
-          className="h-8 rounded-lg bg-[#1A1A1A] hover:bg-[#222222] text-[#F5F5F5] border border-[#2E2E2E] text-xs font-medium px-3 transition-all flex items-center gap-1.5 cursor-pointer"
+          className="min-h-[44px] h-auto py-2.5 rounded-lg bg-[#1A1A1A] hover:bg-[#222222] text-[#F5F5F5] border border-[#2E2E2E] text-xs font-medium px-3 transition-all flex items-center gap-1.5 cursor-pointer"
         >
           <FolderTree className="w-3.5 h-3.5 text-[#7E7E7E]" />
           Build Project in Studio

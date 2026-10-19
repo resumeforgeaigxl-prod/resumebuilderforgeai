@@ -83,24 +83,24 @@ export function InterviewRenderer({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center gap-2 pt-2 border-t border-[#242424]">
+      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#242424]">
         <Button
           size="sm"
-          className="h-8 text-xs bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg gap-1.5 font-medium cursor-pointer"
+          className="min-h-[44px] text-xs bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg gap-1.5 font-medium cursor-pointer"
           onClick={() => {
             if (onStartInterview) {
               onStartInterview(block.role);
             }
           }}
         >
-          <Mic className="w-3 h-3 text-white" />
+          <Mic className="w-3.5 h-3.5 text-white" />
           <span>Start Mock Interview</span>
         </Button>
 
         <Button
           size="sm"
           variant="outline"
-          className="h-8 text-xs rounded-lg gap-1.5 font-medium border-[#2E2E2E] bg-[#1A1A1A] text-[#F5F5F5] hover:bg-[#222222] cursor-pointer"
+          className="min-h-[44px] text-xs rounded-lg gap-1.5 font-medium border-[#2E2E2E] bg-[#1A1A1A] text-[#F5F5F5] hover:bg-[#222222] cursor-pointer"
           onClick={() => {
             if (onPracticeCoding) {
               onPracticeCoding(block.role);

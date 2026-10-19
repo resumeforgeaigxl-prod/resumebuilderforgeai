@@ -54,7 +54,7 @@ export function Sidebar({ locale }: SidebarProps) {
 
   return (
     <>
-      {!mobileOpen && (
+      {!mobileOpen && !pathname?.includes('/omni') && !pathname?.includes('/mentorforge') && (
         <button
           type="button"
           onClick={toggle}

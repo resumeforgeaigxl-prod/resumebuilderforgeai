@@ -148,10 +148,10 @@ export function ErrorArtifactCard({
       )}
 
       {/* Actions */}
-      <div className="flex items-center gap-2 pt-2 border-t border-[#242424]">
+      <div className="flex items-center gap-2 pt-2 border-t border-[#242424] flex-wrap">
         <Button
           size="sm"
-          className="h-8 text-xs bg-[#8B5CF6] text-white hover:bg-[#7C3AED] rounded-lg gap-1.5 font-medium cursor-pointer"
+          className="min-h-[44px] h-auto py-2.5 text-xs bg-[#8B5CF6] text-white hover:bg-[#7C3AED] rounded-lg gap-1.5 font-medium cursor-pointer"
           onClick={handleAction}
         >
           {isCredit ? (
@@ -183,7 +183,7 @@ export function ErrorArtifactCard({
           <Button
             size="sm"
             variant="outline"
-            className="h-8 text-xs rounded-lg gap-1.5 bg-[#1A1A1A] hover:bg-[#222222] text-[#F5F5F5] border border-[#2E2E2E] cursor-pointer"
+            className="min-h-[44px] h-auto py-2.5 text-xs rounded-lg gap-1.5 bg-[#1A1A1A] hover:bg-[#222222] text-[#F5F5F5] border border-[#2E2E2E] cursor-pointer"
             onClick={() => router.push(`/${locale}/account?tab=credits`)}
           >
             <span>View Credit Ledger</span>

@@ -14,6 +14,7 @@ import { listMockInterviews, triggerMockInterview, evaluateInterviewAnswer } fro
 import { listCodingSubmissions, listCodingProblems, runCodeSandbox, triggerCodingChallenge } from '@/lib/capabilities/coding';
 import {
   searchJobMarket,
+  getJobDatabaseCounts,
   getJobApplications,
   getCanonicalJobById,
   verifyJobFreshness,
@@ -327,9 +328,15 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
   },
 
   // ─── JOBFORGE TOOLS ──────────────────────────────────────────────────────
+  get_job_database_counts: {
+    name: 'get_job_database_counts',
+    description: 'Returns exact stored and ACTIVE job counts from Supabase. These are not candidate match counts or displayed result counts.',
+    parameters: { type: SchemaType.OBJECT, properties: {} },
+    execute: async () => getJobDatabaseCounts(),
+  },
   search_job_market: {
     name: 'search_job_market',
-    description: 'Performs a grounded search using Google Search to retrieve actual, live job openings matching the query.',
+    description: 'Searches canonical Supabase jobs, optionally discovering and ingesting web results first. Use returned source and count metadata; freshness and candidate match scores require their respective tools.',
     parameters: {
       type: SchemaType.OBJECT,
       properties: {

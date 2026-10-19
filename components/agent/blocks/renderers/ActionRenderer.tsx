@@ -103,7 +103,7 @@ export function ActionRenderer({ block, locale, onAction }: ActionRendererProps)
           key={idx}
           size="sm"
           variant={btn.variant === 'outline' ? 'outline' : btn.variant === 'ghost' ? 'ghost' : 'default'}
-          className={`h-8 text-xs rounded-lg gap-1.5 font-medium transition-all cursor-pointer ${
+          className={`min-h-[44px] px-3.5 py-2 text-xs rounded-lg gap-1.5 font-medium transition-all cursor-pointer ${
             btn.variant === 'primary'
               ? 'bg-[#8B5CF6] hover:bg-[#7C3AED] text-white'
               : !btn.variant
