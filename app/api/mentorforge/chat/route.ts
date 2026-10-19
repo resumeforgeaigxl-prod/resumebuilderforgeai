@@ -5,6 +5,12 @@ import { createClient } from '@/lib/supabase/server';
 import { buildUserContext, type UserContext } from '@/lib/ai/mentor-context';
 import { getSession } from '@/lib/auth/jwt';
 import { trackAIUsage, logAIChat, updateMentorMemory } from '@/lib/ai/governance-service';
+import {
+  resolveContextualJobIntent,
+  formatShortlistForPrompt,
+  extractConversationShortlist,
+  sanitizeSuggestedAction,
+} from '@/lib/ai-core/contextual-job-resolver';
 
 export async function POST(req: NextRequest) {
   try {
@@ -70,11 +76,54 @@ export async function POST(req: NextRequest) {
       console.warn('[MentorForge] Warning: pre-saving user message failed:', saveUserErr);
     }
 
-    // Clean history to prevent token bloat
-    const cleanedHistory = (history || []).slice(-10).map((h: { role: string; content?: string }) => ({
-      role: h.role === 'assistant' ? 'assistant' as const : 'user' as const,
-      content: h.content || ""
-    }));
+    // Reconstruct full history with structured artifacts (from client history or DB)
+    let fullHistoryForContext = Array.isArray(history) ? [...history] : [];
+    if (conversationId && (!fullHistoryForContext.length || !fullHistoryForContext.some((m: any) => m.artifacts?.length))) {
+      const { data: dbMsgs } = await supabase
+        .from('ai_messages')
+        .select('id, role, content, created_at')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      if (dbMsgs && dbMsgs.length > 0) {
+        const parsedDbMsgs = dbMsgs.reverse().map((m: any) => {
+          if (m.role === 'assistant' && typeof m.content === 'string' && m.content.trim().startsWith('{')) {
+            try {
+              const parsed = JSON.parse(m.content);
+              return {
+                role: 'assistant' as const,
+                content: parsed.reply || '',
+                artifacts: parsed.artifacts,
+                blocks: parsed.blocks,
+              };
+            } catch {
+              return { role: 'assistant' as const, content: m.content };
+            }
+          }
+          return { role: m.role as 'user' | 'assistant', content: m.content };
+        });
+        fullHistoryForContext = parsedDbMsgs;
+      }
+    }
+
+    // Resolve contextual job intent (ordinals, best match, relative apply, bulk apply)
+    const { intent, shortlist, systemDirective } = resolveContextualJobIntent(message, fullHistoryForContext);
+    const effectiveMessage = systemDirective ? `${message}\n\n${systemDirective}` : message;
+
+    // Clean history to prevent token bloat while preserving active job shortlist references for the LLM
+    const cleanedHistory = fullHistoryForContext.slice(-10).map((h: any) => {
+      let content = h.content || '';
+      if (h.role === 'assistant') {
+        const subShortlist = extractConversationShortlist([h]);
+        if (subShortlist.length > 0) {
+          content += formatShortlistForPrompt(subShortlist);
+        }
+      }
+      return {
+        role: h.role === 'assistant' ? ('assistant' as const) : ('user' as const),
+        content,
+      };
+    });
 
     // Create SSE stream
     const encoder = new TextEncoder();
@@ -99,7 +148,7 @@ export async function POST(req: NextRequest) {
         try {
           // Execute agent reasoning loop with real-time progress callback
           const result = await runAgenticLoop(
-            message,
+            effectiveMessage,
             cleanedHistory,
             userId,
             mode,
@@ -110,12 +159,13 @@ export async function POST(req: NextRequest) {
 
           // Retrieve updated context to return user readiness stats
           const userContext = await buildUserContext(userId).catch(() => ({} as UserContext));
+          const cleanSuggestedAction = sanitizeSuggestedAction(result.suggestedAction);
 
           // Send final result event immediately to client
           sendEvent('result', {
             conversationId,
             reply: result.reply,
-            suggestedAction: result.suggestedAction,
+            suggestedAction: cleanSuggestedAction,
             analysis: userContext.analysis,
             artifacts: result.artifacts,
             blocks: (result as any).blocks,
@@ -131,7 +181,7 @@ export async function POST(req: NextRequest) {
               reply: result.reply || '',
               blocks: (result as any).blocks || [],
               artifacts: result.artifacts || [],
-              suggestedAction: result.suggestedAction,
+              suggestedAction: cleanSuggestedAction,
               analysis: userContext.analysis,
             });
 

@@ -28,6 +28,7 @@ import {
   SENSITIVE_PROTECTED_FIELDS,
 } from '@/lib/capabilities/profile';
 import { ApplicationPreparationEngine } from '@/lib/application-engine';
+import { createClient } from '@/lib/supabase/server';
 
 export interface ToolDefinition {
   name: string;
@@ -958,11 +959,116 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
       },
       required: ['jobId'],
     },
-    execute: async ({ jobId, userOverride = false }, userId) => {
+    execute: async ({ jobId: inputJobId, userOverride = false }, userId) => {
       try {
+        const supabase = createClient();
+        let targetJobId = typeof inputJobId === 'string' ? inputJobId.trim() : '';
+
+        // 1. Resolve canonical Job ID (supports UUID and title-based resolution fallback)
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetJobId);
+        let jobRecord: any = null;
+
+        if (isUuid) {
+          const { data } = await supabase
+            .from('jobs')
+            .select('*')
+            .eq('id', targetJobId)
+            .maybeSingle();
+          if (data) {
+            jobRecord = data;
+          }
+        } else if (targetJobId) {
+          // If a title or partial text was passed instead of UUID, attempt canonical resolution
+          const { data: titleMatch } = await supabase
+            .from('jobs')
+            .select('*')
+            .ilike('title', `%${targetJobId}%`)
+            .eq('status', 'ACTIVE')
+            .limit(1)
+            .maybeSingle();
+          if (titleMatch) {
+            jobRecord = titleMatch;
+            targetJobId = titleMatch.id;
+          }
+        }
+
+        // 2. Authoritative check: If job not found
+        if (!jobRecord) {
+          return {
+            success: false,
+            tool: 'prepare_job_application_package',
+            status: 'BLOCKED',
+            errorType: 'JOB_NOT_FOUND',
+            title: 'Job Not Found in Active Listings',
+            message: 'This job could not be found in our current listings. It may have expired or been removed.',
+            actionLabel: 'Find Other Matches',
+            action: 'explore_jobs',
+            actionUrl: '/jobs?tab=recommended',
+          };
+        }
+
+        // 3. Status check: JOB_CLOSED
+        if (jobRecord.status === 'CLOSED') {
+          return {
+            success: false,
+            tool: 'prepare_job_application_package',
+            status: 'BLOCKED',
+            errorType: 'JOB_CLOSED',
+            title: 'Job Posting Closed',
+            jobTitle: jobRecord.title,
+            company: jobRecord.company,
+            message: `The opening for "${jobRecord.title}" at "${jobRecord.company}" is no longer accepting applications on the employer site.`,
+            actionLabel: 'Find Other Matches',
+            action: 'explore_jobs',
+            actionUrl: '/jobs?tab=recommended',
+          };
+        }
+
+        // 4. Destination verification: JOB_UNSUPPORTED
+        const destination = jobRecord.apply_url || jobRecord.destination_url || jobRecord.source_url;
+        if (!destination) {
+          return {
+            success: false,
+            tool: 'prepare_job_application_package',
+            status: 'BLOCKED',
+            errorType: 'JOB_UNSUPPORTED',
+            title: 'Application Destination Unavailable',
+            jobTitle: jobRecord.title,
+            company: jobRecord.company,
+            message: `The job opening for "${jobRecord.title}" at "${jobRecord.company}" does not have a verified application portal URL.`,
+            actionLabel: 'Find Other Matches',
+            action: 'explore_jobs',
+            actionUrl: '/jobs?tab=recommended',
+          };
+        }
+
+        // 5. Existing application check
+        const { data: existingApp } = await supabase
+          .from('job_applications')
+          .select('id, status, submitted_at, stage')
+          .eq('user_id', userId)
+          .eq('job_id', targetJobId)
+          .maybeSingle();
+
+        if (existingApp && ['SUBMITTED', 'OFFER', 'INTERVIEWING', 'ACCEPTED'].includes(existingApp.status)) {
+          return {
+            success: true,
+            tool: 'prepare_job_application_package',
+            status: 'ALREADY_APPLIED',
+            title: 'Application Already Submitted',
+            jobTitle: jobRecord.title,
+            company: jobRecord.company,
+            message: `You have already applied to ${jobRecord.company} for the ${jobRecord.title} role${existingApp.submitted_at ? ` on ${new Date(existingApp.submitted_at).toLocaleDateString()}` : ''}. Current status: ${existingApp.stage || existingApp.status}.`,
+            actionLabel: 'View Applications',
+            action: 'view_applications',
+            actionUrl: '/applications',
+          };
+        }
+
+        // 6. Call ApplicationPreparationEngine
         const pkg = await ApplicationPreparationEngine.preparePackage({
           userId,
-          jobId,
+          jobId: targetJobId,
           userOverride,
         });
 
@@ -972,13 +1078,13 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
             tool: 'prepare_job_application_package',
             status: 'BLOCKED',
             packageId: pkg.id,
-            jobId,
-            jobTitle: pkg.jobSnapshot?.title,
-            company: pkg.jobSnapshot?.company,
+            jobId: targetJobId,
+            jobTitle: pkg.jobSnapshot?.title || jobRecord.title,
+            company: pkg.jobSnapshot?.company || jobRecord.company,
             readinessScore: '0%',
             reason: pkg.blockedReason,
             evidence: pkg.blockedEvidence,
-            message: `Cannot prepare application for ${pkg.jobSnapshot?.company || 'Company'} - ${pkg.jobSnapshot?.title || 'Role'}: ${pkg.blockedEvidence || pkg.blockedReason}`,
+            message: `Cannot prepare application for ${pkg.jobSnapshot?.company || jobRecord.company} - ${pkg.jobSnapshot?.title || jobRecord.title}: ${pkg.blockedEvidence || pkg.blockedReason}`,
           };
         }
 
@@ -1018,6 +1124,33 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
         };
       } catch (err: any) {
         console.error('[prepare_job_application_package] Error:', err.message);
+        const errMsg = String(err.message || '');
+        if (errMsg.includes('JOB_NOT_FOUND') || errMsg.includes('does not exist')) {
+          return {
+            success: false,
+            tool: 'prepare_job_application_package',
+            status: 'BLOCKED',
+            errorType: 'JOB_NOT_FOUND',
+            title: 'Job Not Found in Active Listings',
+            message: 'This job could not be found in our current listings. It may have expired or been removed.',
+            actionLabel: 'Find Other Matches',
+            action: 'explore_jobs',
+            actionUrl: '/jobs?tab=recommended',
+          };
+        }
+        if (errMsg.includes('JOB_CLOSED')) {
+          return {
+            success: false,
+            tool: 'prepare_job_application_package',
+            status: 'BLOCKED',
+            errorType: 'JOB_CLOSED',
+            title: 'Job Posting Closed',
+            message: 'This vacancy is no longer accepting applications on the employer site.',
+            actionLabel: 'Find Other Matches',
+            action: 'explore_jobs',
+            actionUrl: '/jobs?tab=recommended',
+          };
+        }
         return { error: `Failed to prepare application package: ${err.message}` };
       }
     },

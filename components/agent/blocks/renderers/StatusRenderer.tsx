@@ -15,6 +15,7 @@ import {
   RotateCcw,
   ArrowRight,
   Check,
+  Briefcase,
 } from '@/components/icons';
 import { cn } from '@/lib/utils';
 
@@ -129,16 +130,69 @@ export function ErrorRenderer({
   const router = useRouter();
   const isCredit = block.errorType === 'CREDIT_EXHAUSTED';
   const isPolicy = block.errorType === 'POLICY_BLOCKED';
+  const isJobNotFound = block.errorType === 'JOB_NOT_FOUND';
+  const isJobClosed = block.errorType === 'JOB_CLOSED';
+  const isJobRelated =
+    isJobNotFound ||
+    isJobClosed ||
+    block.errorType === 'JOB_UNVERIFIED' ||
+    block.errorType === 'JOB_UNSUPPORTED' ||
+    (block.actionLabel && block.actionLabel.toLowerCase().includes('match'));
+
+  const handleAction = () => {
+    if (block.actionUrl) {
+      const url =
+        block.actionUrl.startsWith('/') && !block.actionUrl.startsWith(`/${locale}`)
+          ? `/${locale}${block.actionUrl}`
+          : block.actionUrl;
+      router.push(url);
+    } else if (isJobRelated) {
+      router.push(`/${locale}/jobs?tab=recommended`);
+    } else if (isCredit) {
+      router.push(`/${locale}/pricing`);
+    } else if (isPolicy) {
+      router.push(`/${locale}/account?tab=application-profile`);
+    } else if (onRetry) {
+      onRetry();
+    }
+  };
+
+  const badgeText = isCredit
+    ? 'AI CREDITS EXHAUSTED'
+    : isPolicy
+    ? 'POLICY PROTECTED'
+    : isJobNotFound
+    ? 'JOB NOT FOUND'
+    : isJobClosed
+    ? 'JOB CLOSED'
+    : block.errorType === 'JOB_UNVERIFIED'
+    ? 'VERIFICATION PENDING'
+    : block.errorType === 'JOB_UNSUPPORTED'
+    ? 'SUBMISSION UNSUPPORTED'
+    : 'ACTION UNAVAILABLE';
 
   return (
     <div className="my-3 w-full rounded-xl border border-amber-800/40 bg-[#0A0A0A] p-4 space-y-3 shadow-xs text-[#F5F5F5]">
       <div className="flex items-start gap-2.5">
         <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
-          {isCredit ? <Zap className="w-4 h-4 text-amber-400" /> : <ShieldAlert className="w-4 h-4 text-rose-400" />}
+          {isCredit ? (
+            <Zap className="w-4 h-4 text-amber-400" />
+          ) : isPolicy ? (
+            <ShieldAlert className="w-4 h-4 text-rose-400" />
+          ) : isJobRelated ? (
+            <Briefcase className="w-4 h-4 text-amber-400" />
+          ) : (
+            <AlertCircle className="w-4 h-4 text-amber-400" />
+          )}
         </div>
         <div>
-          <h4 className="text-xs font-bold text-[#F5F5F5]">{block.title}</h4>
-          <p className="text-xs text-[#BDBDBD] mt-0.5 leading-relaxed">{block.message}</p>
+          <div className="flex items-center gap-2">
+            <h4 className="text-xs font-bold text-[#F5F5F5]">{block.title}</h4>
+            <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#181818] border border-[#2E2E2E] text-[#9E9E9E]">
+              {badgeText}
+            </span>
+          </div>
+          <p className="text-xs text-[#BDBDBD] mt-1 leading-relaxed">{block.message}</p>
         </div>
       </div>
 
@@ -147,7 +201,7 @@ export function ErrorRenderer({
           <Button
             size="sm"
             className="h-8 text-xs bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg gap-1.5 font-medium cursor-pointer"
-            onClick={() => router.push(`/${locale}/pricing`)}
+            onClick={handleAction}
           >
             <Zap className="w-3 h-3 text-white" />
             <span>{block.actionLabel || 'Top Up Credits'}</span>
@@ -156,16 +210,25 @@ export function ErrorRenderer({
           <Button
             size="sm"
             className="h-8 text-xs bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg gap-1.5 font-medium cursor-pointer"
-            onClick={() => router.push(`/${locale}/account?tab=application-profile`)}
+            onClick={handleAction}
           >
             <span>{block.actionLabel || 'Review Profile'}</span>
             <ArrowRight className="w-3 h-3 text-white" />
+          </Button>
+        ) : isJobRelated || block.actionUrl ? (
+          <Button
+            size="sm"
+            className="h-8 text-xs bg-[#8B5CF6] hover:bg-[#7C3AED] text-white rounded-lg gap-1.5 font-medium cursor-pointer"
+            onClick={handleAction}
+          >
+            <Briefcase className="w-3 h-3 text-white" />
+            <span>{block.actionLabel || 'Find Other Matches'}</span>
           </Button>
         ) : onRetry ? (
           <Button
             size="sm"
             className="h-8 text-xs bg-[#1A1A1A] border border-[#2E2E2E] text-[#F5F5F5] hover:bg-[#222222] rounded-lg gap-1.5 font-medium cursor-pointer"
-            onClick={onRetry}
+            onClick={handleAction}
           >
             <RotateCcw className="w-3 h-3" />
             <span>{block.actionLabel || 'Try Again'}</span>

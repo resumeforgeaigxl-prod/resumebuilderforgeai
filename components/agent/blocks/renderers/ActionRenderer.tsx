@@ -34,7 +34,28 @@ export function ActionRenderer({ block, locale, onAction }: ActionRendererProps)
     pathname?.split('/').filter(Boolean)[0] ||
     'en-in';
 
-  const actions = block.actions || [];
+  const rawActions = block.actions || [];
+
+  // Filter out any action button with missing, null, or undefined labels or actions
+  const actions = rawActions.filter((btn) => {
+    if (!btn) return false;
+    const label = String(btn.label || '').trim();
+    const act = String(btn.action || btn.id || '').trim();
+    if (!label || !act) return false;
+    const lowerLabel = label.toLowerCase();
+    const lowerAct = act.toLowerCase();
+    if (
+      lowerLabel === 'null' ||
+      lowerLabel === 'undefined' ||
+      lowerLabel.includes('open null') ||
+      lowerLabel.includes('open undefined') ||
+      lowerAct === 'null' ||
+      lowerAct === 'undefined'
+    ) {
+      return false;
+    }
+    return true;
+  });
 
   if (actions.length === 0) return null;
 
@@ -47,14 +68,15 @@ export function ActionRenderer({ block, locale, onAction }: ActionRendererProps)
     // Default route mappings preserving active locale
     const act = (btn.action || btn.id).toLowerCase();
     if (act.includes('resume')) router.push(`/${activeLocale}/resumes`);
-    else if (act.includes('job')) {
+    else if (act.includes('job') || act === 'explore_jobs') {
       const tab = btn.payload?.tab || 'recommended';
       router.push(`/${activeLocale}/jobs?tab=${tab}`);
     }
+    else if (act.includes('application')) router.push(`/${activeLocale}/applications`);
     else if (act.includes('coding')) router.push(`/${activeLocale}/codingforge`);
     else if (act.includes('interview')) router.push(`/${activeLocale}/mock-interview`);
     else if (act.includes('profile')) router.push(`/${activeLocale}/account?tab=application-profile`);
-    else if (act.includes('credit') || act.includes('topup')) router.push(`/${activeLocale}/pricing`);
+    else if (act.includes('credit') || act.includes('topup') || act.includes('pricing')) router.push(`/${activeLocale}/pricing`);
     else if (act.includes('study') || act.includes('learn')) router.push(`/${activeLocale}/studyforge`);
   };
 

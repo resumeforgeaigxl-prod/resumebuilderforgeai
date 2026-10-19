@@ -97,6 +97,10 @@ export type ErrorArtifactType =
   | 'POLICY_BLOCKED'
   | 'TOOL_FAILED'
   | 'AUTHENTICATION_REQUIRED'
+  | 'JOB_NOT_FOUND'
+  | 'JOB_CLOSED'
+  | 'JOB_UNVERIFIED'
+  | 'JOB_UNSUPPORTED'
   | 'GENERAL';
 
 export interface ErrorArtifact {
@@ -106,7 +110,8 @@ export interface ErrorArtifact {
   message: string;
   actionLabel?: string;
   actionUrl?: string;
-  actionType?: 'topup' | 'pricing' | 'retry' | 'profile' | 'dismiss';
+  actionType?: 'topup' | 'pricing' | 'retry' | 'profile' | 'dismiss' | 'explore_jobs';
+  action?: string;
   retryable?: boolean;
   details?: string;
 }

@@ -10,7 +10,8 @@ import {
   ArrowRight,
   RotateCcw,
   Sparkles,
-  ExternalLink
+  ExternalLink,
+  Briefcase,
 } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import type { ErrorArtifact } from './types';
@@ -33,17 +34,30 @@ export function ErrorArtifactCard({
   const isCredit = artifact.errorType === 'CREDIT_EXHAUSTED';
   const isRateLimit = artifact.errorType === 'RATE_LIMIT';
   const isPolicy = artifact.errorType === 'POLICY_BLOCKED';
+  const isJobNotFound = artifact.errorType === 'JOB_NOT_FOUND';
+  const isJobClosed = artifact.errorType === 'JOB_CLOSED';
+  const isJobRelated =
+    isJobNotFound ||
+    isJobClosed ||
+    artifact.errorType === 'JOB_UNVERIFIED' ||
+    artifact.errorType === 'JOB_UNSUPPORTED' ||
+    artifact.actionType === 'explore_jobs' ||
+    (artifact.actionLabel && artifact.actionLabel.toLowerCase().includes('match'));
 
   const badgeColor = isCredit
     ? 'text-amber-400 bg-amber-950/40 border-amber-800/40'
     : isPolicy
     ? 'text-rose-400 bg-rose-950/40 border-rose-800/40'
+    : isJobRelated
+    ? 'text-amber-400 bg-amber-950/40 border-amber-800/40'
     : 'text-[#BDBDBD] bg-[#121212] border-[#242424]';
 
   const badgeIcon = isCredit ? (
     <Zap className="w-3 h-3 text-amber-400" />
   ) : isPolicy ? (
     <ShieldAlert className="w-3 h-3 text-rose-400" />
+  ) : isJobRelated ? (
+    <Briefcase className="w-3 h-3 text-amber-400" />
   ) : (
     <AlertCircle className="w-3 h-3 text-[#BDBDBD]" />
   );
@@ -54,11 +68,25 @@ export function ErrorArtifactCard({
     ? 'AI RATE LIMIT'
     : isPolicy
     ? 'POLICY PROTECTED'
+    : isJobNotFound
+    ? 'JOB NOT FOUND'
+    : isJobClosed
+    ? 'JOB CLOSED'
+    : artifact.errorType === 'JOB_UNVERIFIED'
+    ? 'VERIFICATION PENDING'
+    : artifact.errorType === 'JOB_UNSUPPORTED'
+    ? 'SUBMISSION UNSUPPORTED'
     : 'ACTION UNAVAILABLE';
 
   const handleAction = () => {
     if (artifact.actionUrl) {
-      router.push(artifact.actionUrl);
+      const url =
+        artifact.actionUrl.startsWith('/') && !artifact.actionUrl.startsWith(`/${locale}`)
+          ? `/${locale}${artifact.actionUrl}`
+          : artifact.actionUrl;
+      router.push(url);
+    } else if (isJobRelated) {
+      router.push(`/${locale}/jobs?tab=recommended`);
     } else if (isCredit) {
       if (onTopUp) {
         onTopUp();
@@ -82,6 +110,8 @@ export function ErrorArtifactCard({
               <Zap className="w-5 h-5 text-amber-400" />
             ) : isPolicy ? (
               <ShieldAlert className="w-5 h-5 text-rose-400" />
+            ) : isJobRelated ? (
+              <Briefcase className="w-5 h-5 text-amber-400" />
             ) : (
               <AlertCircle className="w-5 h-5 text-amber-400" />
             )}
@@ -133,6 +163,11 @@ export function ErrorArtifactCard({
             <>
               <span>{artifact.actionLabel || 'Open Profile Settings'}</span>
               <ArrowRight className="w-3 h-3" />
+            </>
+          ) : isJobRelated || artifact.actionUrl ? (
+            <>
+              <Briefcase className="w-3 h-3 text-white" />
+              <span>{artifact.actionLabel || 'Find Other Matches'}</span>
             </>
           ) : onRetry ? (
             <>

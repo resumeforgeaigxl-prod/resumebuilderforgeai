@@ -555,32 +555,63 @@ export function convertMessageToBlocks(msg: Partial<OmniMessage> & { content?: s
 
   // 3. Process suggested actions
   if (msg.suggestedAction) {
-    const actionClean = msg.suggestedAction.toLowerCase();
-    const isJobAction = actionClean.includes('job');
-    const actionLabel = actionClean.includes('coding')
-      ? 'Practice Coding'
-      : actionClean.includes('interview')
-      ? 'Prepare for Interview'
-      : actionClean.includes('study') || actionClean.includes('learn')
-      ? 'Start Learning Plan'
-      : actionClean.includes('resume')
-      ? 'Open Resume Editor'
-      : isJobAction
-      ? 'Explore Jobs'
-      : `Open ${msg.suggestedAction}`;
+    const rawAction = String(msg.suggestedAction).trim();
+    const actionClean = rawAction.toLowerCase();
 
-    blocks.push({
-      type: 'actions',
-      actions: [
-        {
-          id: isJobAction ? 'explore_jobs' : 'suggested_action',
-          label: actionLabel,
-          action: isJobAction ? 'explore_jobs' : msg.suggestedAction,
-          payload: isJobAction ? { tab: 'recommended' } : undefined,
-          variant: 'primary',
-        },
-      ],
-    });
+    // Ignore invalid, null, undefined or empty strings
+    if (
+      actionClean &&
+      actionClean !== 'null' &&
+      actionClean !== 'undefined' &&
+      actionClean !== 'none' &&
+      actionClean !== 'false' &&
+      actionClean !== '0'
+    ) {
+      let actionLabel = '';
+      let actionTarget = '';
+      let payload: Record<string, any> | undefined;
+
+      if (actionClean.includes('coding')) {
+        actionLabel = 'Practice Coding';
+        actionTarget = 'practice_coding';
+      } else if (actionClean.includes('interview')) {
+        actionLabel = 'Prepare for Interview';
+        actionTarget = 'prep_interview';
+      } else if (actionClean.includes('study') || actionClean.includes('learn')) {
+        actionLabel = 'Start Learning Plan';
+        actionTarget = 'start_plan';
+      } else if (actionClean.includes('resume')) {
+        actionLabel = 'Open Resume Editor';
+        actionTarget = 'open_resume';
+      } else if (actionClean.includes('job')) {
+        actionLabel = 'Explore Jobs';
+        actionTarget = 'explore_jobs';
+        payload = { tab: 'recommended' };
+      } else if (actionClean.includes('profile')) {
+        actionLabel = 'Review Profile';
+        actionTarget = 'view_profile';
+      } else if (actionClean.includes('pricing') || actionClean.includes('credit')) {
+        actionLabel = 'Top Up Credits';
+        actionTarget = 'top_up';
+      }
+
+      // ONLY push if we have a valid, verified destination label & target.
+      // NEVER fall back to `Open ${msg.suggestedAction}` which produces "Open null".
+      if (actionLabel && actionTarget) {
+        blocks.push({
+          type: 'actions',
+          actions: [
+            {
+              id: actionTarget,
+              label: actionLabel,
+              action: actionTarget,
+              payload,
+              variant: 'primary',
+            },
+          ],
+        });
+      }
+    }
   }
 
   return blocks.length > 0 ? blocks : [{ type: 'text', text: rawContent || '' }];

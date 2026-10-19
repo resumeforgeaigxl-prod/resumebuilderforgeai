@@ -27,8 +27,8 @@ const VALID_SKILLS = new Set([
 
 const ACTION_VERBS = new Set([
     'achieved', 'managed', 'developed', 'led', 'designed', 'created', 'improved', 'increased', 'decreased',
-    'resolved', 'spearheaded', 'built', 'implemented', 'optimized', 'automated', 'orchestrated', 'streamlined',
-    'pioneered', 'transformed', 'delivered', 'integrated', 'architected', 'maintained', 'mentored'
+    'resolved', 'spearheaded', 'built', 'implemented', 'optimized', 'optimize', 'automated', 'orchestrated', 'streamlined',
+    'pioneered', 'transformed', 'delivered', 'integrated', 'architected', 'maintained', 'mentored', 'building', 'scaled'
 ]);
 
 export function calculateATSScore(resume: ResumeData, jobDescription?: string, roleSkills?: string[]): ATSScoreResult | null {
@@ -48,20 +48,20 @@ export function calculateATSScore(resume: ResumeData, jobDescription?: string, r
         const knownTokens = words.filter(w =>
             VALID_SKILLS.has(w) ||
             ACTION_VERBS.has(w) ||
-            ['summary', 'experience', 'projects', 'education', 'skills', 'university', 'college', 'engineer', 'developer', 'manager', 'lead', 'achieved', 'managed'].includes(w)
+            ['university', 'college', 'engineer', 'developer', 'manager', 'lead', 'achieved', 'managed', 'degree', 'bachelor', 'master', 'science'].includes(w)
         );
 
         const semanticRatio = knownTokens.length / Math.max(words.length, 1);
 
         // If less than 5% of content is recognizable career context, it's likely gibberish
-        if (semanticRatio < 0.05 && words.length > 40) return false;
+        if (semanticRatio < 0.05 && words.length > 10) return false;
 
         return true;
     };
 
     const isValid = checkSemanticValidity();
 
-    if (!isValid && words.length > 8) {
+    if (!isValid) {
         return {
             score: 0,
             isValid: false,
@@ -87,9 +87,9 @@ export function calculateATSScore(resume: ResumeData, jobDescription?: string, r
                 score = Math.min(40, matchRatio * 40);
             }
         } else {
-            const baseKeywords = ['rest api', 'scalable', 'optimization', 'frontend', 'backend', 'database', 'testing', 'security', 'agile', 'git', 'ci/cd'];
+            const baseKeywords = ['rest api', 'scalable', 'optimization', 'frontend', 'backend', 'database', 'testing', 'security', 'agile', 'git', 'ci/cd', 'performance', 'docker', 'aws', 'cloud'];
             const matches = baseKeywords.filter(w => allText.includes(w)).length;
-            score = Math.min(25, matches * 2.5);
+            score = Math.min(25, matches * 4);
         }
 
         return score;
@@ -147,8 +147,8 @@ export function calculateATSScore(resume: ResumeData, jobDescription?: string, r
     let total = keywordWeight + skillsWeight + expWeight + completenessWeight;
 
     // Strictness caps
-    if (allText.length < 300) total = Math.min(total, 30);
-    else if (allText.length < 800) total = Math.min(total, 70);
+    if (allText.length < 250) total = Math.min(total, 30);
+    else if (allText.length < 500) total = Math.min(total, 60);
 
     total = Math.round(Math.min(100, Math.max(0, total)));
 

@@ -4,6 +4,7 @@ import { extractJson } from '@/lib/ai-provider';
 import { keyPool } from '@/lib/ai/key-pool';
 import { TASK_ROUTING_CHAINS, PROVIDER_CONFIGS } from '@/lib/ai/config';
 import { getConstitutionPrompt, ToolAuthorizer, AgentTracer } from '@/lib/agent-os';
+import { sanitizeSuggestedAction } from './contextual-job-resolver';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -177,6 +178,21 @@ CORE AUTONOMOUS RULES FOR JOB SEARCH & MARKET ACTIONS:
 CORE AUTONOMOUS RULES FOR APPLICATION PREPARATION ENGINE (LEVEL 12):
 1. When a user asks to prepare an application, get application ready, or apply to a job, ALWAYS call 'prepare_job_application_package' with jobId.
 2. Keep your reply to 1-2 sentences. The interactive UI will render the complete Application Package card with readiness score, documents, and missing question checklist.
+
+CORE AUTONOMOUS RULES FOR CONTEXTUAL JOB SELECTION & BULK COMMANDS:
+1. When a user asks to "apply to all jobs", "open browser and apply to all jobs", or mass-apply:
+   - NEVER substitute plain text without tool execution.
+   - NEVER claim the browser was opened or applications were submitted without tool execution.
+   - NEVER blindly submit applications without preparation.
+   - Explain concisely in 1 sentence that automated submissions require verified preparation and user approval per role.
+   - ALWAYS call 'rank_candidate_jobs' immediately to present an active, verified candidate shortlist for user selection.
+2. When a user refers to a previously displayed job using an ordinal or relative reference ("first one", "pick 1st", "second one", "apply to this", "choose best match"):
+   - ALWAYS resolve the reference to the exact canonical jobId from the active shortlist in conversation context.
+   - NEVER reconstruct or invent a job title as the jobId.
+   - If there is no previous job list in the conversation context, DO NOT GUESS OR INVENT A JOB. Immediately call 'rank_candidate_jobs' to present fresh eligible active matches.
+3. When calling 'prepare_job_application_package':
+   - ALWAYS provide a valid canonical UUID as 'jobId'.
+   - NEVER pass a job title string or hallucinated value as 'jobId'.
 
 CORE AUTONOMOUS RULES FOR STUDY & LEARNING ACTIONS:
 1. When a user asks to learn a technology, create a roadmap, build a curriculum, or study a topic (e.g. "Create a study roadmap for System Design", "I want to learn Kubernetes in 4 weeks"), ALWAYS call 'trigger_study_plan' with topic and durationWeeks.
@@ -360,15 +376,39 @@ You MUST output your final response as a JSON object matching this schema:
                   if (toolResult && (toolResult.tool || toolResult.resumeId || toolResult.packageId || toolResult.matches || toolResult.score !== undefined)) {
                     artifacts.push(toolResult);
                   } else if (toolResult && toolResult.error) {
-                    const isCredit = String(toolResult.error).toLowerCase().includes('credit') || String(toolResult.error).toLowerCase().includes('quota') || String(toolResult.error).toLowerCase().includes('limit');
-                    artifacts.push({
-                      tool: 'error_card',
-                      errorType: isCredit ? 'CREDIT_EXHAUSTED' : 'TOOL_FAILED',
-                      title: isCredit ? 'AI Credit Limit Reached' : 'Generation Unavailable',
-                      message: isCredit ? 'You have reached your allocated AI generation quota for this action. Please top up your credits to continue.' : toolResult.error,
-                      actionLabel: isCredit ? 'Top Up Credits' : 'Try Again',
-                      actionUrl: isCredit ? '/pricing' : undefined,
-                    });
+                    const errMsg = String(toolResult.error);
+                    const isCredit = errMsg.toLowerCase().includes('credit') || errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('limit');
+                    const isJobNotFound = errMsg.includes('JOB_NOT_FOUND') || errMsg.includes('does not exist');
+                    const isJobClosed = errMsg.includes('JOB_CLOSED');
+
+                    if (isJobNotFound) {
+                      artifacts.push({
+                        tool: 'error_card',
+                        errorType: 'JOB_NOT_FOUND',
+                        title: 'Job Not Found in Active Listings',
+                        message: 'This job could not be found in our current listings. It may have expired or been removed.',
+                        actionLabel: 'Find Other Matches',
+                        actionUrl: '/jobs?tab=recommended',
+                      });
+                    } else if (isJobClosed) {
+                      artifacts.push({
+                        tool: 'error_card',
+                        errorType: 'JOB_CLOSED',
+                        title: 'Job Posting Closed',
+                        message: 'This vacancy is no longer accepting applications on the employer site.',
+                        actionLabel: 'Find Other Matches',
+                        actionUrl: '/jobs?tab=recommended',
+                      });
+                    } else {
+                      artifacts.push({
+                        tool: 'error_card',
+                        errorType: isCredit ? 'CREDIT_EXHAUSTED' : 'TOOL_FAILED',
+                        title: isCredit ? 'AI Credit Limit Reached' : 'Generation Unavailable',
+                        message: isCredit ? 'You have reached your allocated AI generation quota for this action. Please top up your credits to continue.' : toolResult.error,
+                        actionLabel: isCredit ? 'Top Up Credits' : 'Try Again',
+                        actionUrl: isCredit ? '/pricing' : undefined,
+                      });
+                    }
                   }
                   onProgress?.({
                     type: 'tool_end',
@@ -380,15 +420,39 @@ You MUST output your final response as a JSON object matching this schema:
                 } catch (err: any) {
                   console.error(`[AgentLoop] Tool execution failed [${call.name}]:`, err.message);
                   toolResult = { error: `Failed to execute: ${err.message}` };
-                  const isCredit = String(err.message).toLowerCase().includes('credit') || String(err.message).toLowerCase().includes('quota') || String(err.message).toLowerCase().includes('limit');
-                  artifacts.push({
-                    tool: 'error_card',
-                    errorType: isCredit ? 'CREDIT_EXHAUSTED' : 'TOOL_FAILED',
-                    title: isCredit ? 'AI Credit Limit Reached' : 'Generation Unavailable',
-                    message: isCredit ? 'You have reached your allocated AI generation quota for this action. Please top up your credits to continue.' : err.message,
-                    actionLabel: isCredit ? 'Top Up Credits' : 'Try Again',
-                    actionUrl: isCredit ? '/pricing' : undefined,
-                  });
+                  const errMsg = String(err.message || '');
+                  const isCredit = errMsg.toLowerCase().includes('credit') || errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('limit');
+                  const isJobNotFound = errMsg.includes('JOB_NOT_FOUND') || errMsg.includes('does not exist');
+                  const isJobClosed = errMsg.includes('JOB_CLOSED');
+
+                  if (isJobNotFound) {
+                    artifacts.push({
+                      tool: 'error_card',
+                      errorType: 'JOB_NOT_FOUND',
+                      title: 'Job Not Found in Active Listings',
+                      message: 'This job could not be found in our current listings. It may have expired or been removed.',
+                      actionLabel: 'Find Other Matches',
+                      actionUrl: '/jobs?tab=recommended',
+                    });
+                  } else if (isJobClosed) {
+                    artifacts.push({
+                      tool: 'error_card',
+                      errorType: 'JOB_CLOSED',
+                      title: 'Job Posting Closed',
+                      message: 'This vacancy is no longer accepting applications on the employer site.',
+                      actionLabel: 'Find Other Matches',
+                      actionUrl: '/jobs?tab=recommended',
+                    });
+                  } else {
+                    artifacts.push({
+                      tool: 'error_card',
+                      errorType: isCredit ? 'CREDIT_EXHAUSTED' : 'TOOL_FAILED',
+                      title: isCredit ? 'AI Credit Limit Reached' : 'Generation Unavailable',
+                      message: isCredit ? 'You have reached your allocated AI generation quota for this action. Please top up your credits to continue.' : err.message,
+                      actionLabel: isCredit ? 'Top Up Credits' : 'Try Again',
+                      actionUrl: isCredit ? '/pricing' : undefined,
+                    });
+                  }
                   onProgress?.({
                     type: 'tool_end',
                     name: call.name,
@@ -422,7 +486,7 @@ You MUST output your final response as a JSON object matching this schema:
           const cleanReply = sanitizeAgentReply(parsed.reply || finalResponseText, artifacts);
           return {
             reply: cleanReply,
-            suggestedAction: parsed.suggestedAction || undefined,
+            suggestedAction: sanitizeSuggestedAction(parsed.suggestedAction),
             memoryExtraction: parsed.memoryExtraction || undefined,
             artifacts: artifacts.length > 0 ? artifacts : undefined,
             blocks: Array.isArray(parsed.blocks) ? parsed.blocks : undefined,
@@ -575,15 +639,39 @@ You MUST output your final response as a JSON object matching this schema:
                     if (toolResult && (toolResult.tool || toolResult.resumeId || toolResult.packageId || toolResult.matches || toolResult.score !== undefined)) {
                       artifacts.push(toolResult);
                     } else if (toolResult && toolResult.error) {
-                      const isCredit = String(toolResult.error).toLowerCase().includes('credit') || String(toolResult.error).toLowerCase().includes('quota') || String(toolResult.error).toLowerCase().includes('limit');
-                      artifacts.push({
-                        tool: 'error_card',
-                        errorType: isCredit ? 'CREDIT_EXHAUSTED' : 'TOOL_FAILED',
-                        title: isCredit ? 'AI Credit Limit Reached' : 'Generation Unavailable',
-                        message: isCredit ? 'You have reached your allocated AI generation quota for this action. Please top up your credits to continue.' : toolResult.error,
-                        actionLabel: isCredit ? 'Top Up Credits' : 'Try Again',
-                        actionUrl: isCredit ? '/pricing' : undefined,
-                      });
+                      const errMsg = String(toolResult.error);
+                      const isCredit = errMsg.toLowerCase().includes('credit') || errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('limit');
+                      const isJobNotFound = errMsg.includes('JOB_NOT_FOUND') || errMsg.includes('does not exist');
+                      const isJobClosed = errMsg.includes('JOB_CLOSED');
+
+                      if (isJobNotFound) {
+                        artifacts.push({
+                          tool: 'error_card',
+                          errorType: 'JOB_NOT_FOUND',
+                          title: 'Job Not Found in Active Listings',
+                          message: 'This job could not be found in our current listings. It may have expired or been removed.',
+                          actionLabel: 'Find Other Matches',
+                          actionUrl: '/jobs?tab=recommended',
+                        });
+                      } else if (isJobClosed) {
+                        artifacts.push({
+                          tool: 'error_card',
+                          errorType: 'JOB_CLOSED',
+                          title: 'Job Posting Closed',
+                          message: 'This vacancy is no longer accepting applications on the employer site.',
+                          actionLabel: 'Find Other Matches',
+                          actionUrl: '/jobs?tab=recommended',
+                        });
+                      } else {
+                        artifacts.push({
+                          tool: 'error_card',
+                          errorType: isCredit ? 'CREDIT_EXHAUSTED' : 'TOOL_FAILED',
+                          title: isCredit ? 'AI Credit Limit Reached' : 'Generation Unavailable',
+                          message: isCredit ? 'You have reached your allocated AI generation quota for this action. Please top up your credits to continue.' : toolResult.error,
+                          actionLabel: isCredit ? 'Top Up Credits' : 'Try Again',
+                          actionUrl: isCredit ? '/pricing' : undefined,
+                        });
+                      }
                     }
                     onProgress?.({
                       type: 'tool_end',
@@ -595,15 +683,39 @@ You MUST output your final response as a JSON object matching this schema:
                   } catch (err: any) {
                     console.error(`[AgentLoop] Tool execution failed [${call.function.name}]:`, err.message);
                     toolResult = { error: `Failed to execute: ${err.message}` };
-                    const isCredit = String(err.message).toLowerCase().includes('credit') || String(err.message).toLowerCase().includes('quota') || String(err.message).toLowerCase().includes('limit');
-                    artifacts.push({
-                      tool: 'error_card',
-                      errorType: isCredit ? 'CREDIT_EXHAUSTED' : 'TOOL_FAILED',
-                      title: isCredit ? 'AI Credit Limit Reached' : 'Generation Unavailable',
-                      message: isCredit ? 'You have reached your allocated AI generation quota for this action. Please top up your credits to continue.' : err.message,
-                      actionLabel: isCredit ? 'Top Up Credits' : 'Try Again',
-                      actionUrl: isCredit ? '/pricing' : undefined,
-                    });
+                    const errMsg = String(err.message || '');
+                    const isCredit = errMsg.toLowerCase().includes('credit') || errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('limit');
+                    const isJobNotFound = errMsg.includes('JOB_NOT_FOUND') || errMsg.includes('does not exist');
+                    const isJobClosed = errMsg.includes('JOB_CLOSED');
+
+                    if (isJobNotFound) {
+                      artifacts.push({
+                        tool: 'error_card',
+                        errorType: 'JOB_NOT_FOUND',
+                        title: 'Job Not Found in Active Listings',
+                        message: 'This job could not be found in our current listings. It may have expired or been removed.',
+                        actionLabel: 'Find Other Matches',
+                        actionUrl: '/jobs?tab=recommended',
+                      });
+                    } else if (isJobClosed) {
+                      artifacts.push({
+                        tool: 'error_card',
+                        errorType: 'JOB_CLOSED',
+                        title: 'Job Posting Closed',
+                        message: 'This vacancy is no longer accepting applications on the employer site.',
+                        actionLabel: 'Find Other Matches',
+                        actionUrl: '/jobs?tab=recommended',
+                      });
+                    } else {
+                      artifacts.push({
+                        tool: 'error_card',
+                        errorType: isCredit ? 'CREDIT_EXHAUSTED' : 'TOOL_FAILED',
+                        title: isCredit ? 'AI Credit Limit Reached' : 'Generation Unavailable',
+                        message: isCredit ? 'You have reached your allocated AI generation quota for this action. Please top up your credits to continue.' : err.message,
+                        actionLabel: isCredit ? 'Top Up Credits' : 'Try Again',
+                        actionUrl: isCredit ? '/pricing' : undefined,
+                      });
+                    }
                     onProgress?.({
                       type: 'tool_end',
                       name: call.function.name,
@@ -638,7 +750,7 @@ You MUST output your final response as a JSON object matching this schema:
           const cleanReply = sanitizeAgentReply(parsed.reply || finalReply, artifacts);
           return {
             reply: cleanReply,
-            suggestedAction: parsed.suggestedAction || undefined,
+            suggestedAction: sanitizeSuggestedAction(parsed.suggestedAction),
             memoryExtraction: parsed.memoryExtraction || undefined,
             artifacts: artifacts.length > 0 ? artifacts : undefined,
             blocks: Array.isArray(parsed.blocks) ? parsed.blocks : undefined,

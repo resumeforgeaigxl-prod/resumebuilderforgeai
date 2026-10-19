@@ -573,7 +573,17 @@ export default function MentorForgeClient({ locale }: { locale: string }) {
         sendMessage('Give me a coding challenge to practice.');
         break;
       case 'top_up':
+      case 'topup_credits':
         router.push(`/${activeLocale}/pricing`);
+        break;
+      case 'open_resume':
+        router.push(`/${activeLocale}/resumes`);
+        break;
+      case 'view_profile':
+        router.push(`/${activeLocale}/account?tab=application-profile`);
+        break;
+      case 'view_applications':
+        router.push(`/${activeLocale}/applications`);
         break;
       case 'retry': {
         const lastUser = [...messages].reverse().find(m => m.role === 'user');

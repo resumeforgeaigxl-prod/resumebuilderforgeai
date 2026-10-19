@@ -354,11 +354,22 @@ export interface ProjectBlock {
 
 export interface ErrorBlock {
   type: 'error';
-  errorType: 'CREDIT_EXHAUSTED' | 'RATE_LIMIT' | 'POLICY_BLOCKED' | 'TOOL_FAILED' | 'AUTHENTICATION_REQUIRED' | 'GENERAL';
+  errorType:
+    | 'CREDIT_EXHAUSTED'
+    | 'RATE_LIMIT'
+    | 'POLICY_BLOCKED'
+    | 'TOOL_FAILED'
+    | 'AUTHENTICATION_REQUIRED'
+    | 'JOB_NOT_FOUND'
+    | 'JOB_CLOSED'
+    | 'JOB_UNVERIFIED'
+    | 'JOB_UNSUPPORTED'
+    | 'GENERAL';
   title: string;
   message: string;
   actionLabel?: string;
   actionUrl?: string;
+  action?: string;
   retryable?: boolean;
   details?: string;
 }
