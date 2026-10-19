@@ -37,6 +37,12 @@ interface MockSessionState {
 }
 
 export class MockBrowserDriver implements BrowserDriver {
+  readonly capabilities = {
+    canReconnectSession: true,
+    supportsHumanTakeover: false, // Truthfully declared: mock simulation does not stream remote desktop
+    supportsSessionSnapshots: true,
+  };
+
   private sessions = new Map<string, MockSessionState>();
 
   async createSession(options?: BrowserSessionOptions): Promise<BrowserSession> {
@@ -60,6 +66,29 @@ export class MockBrowserDriver implements BrowserDriver {
     });
 
     return session;
+  }
+
+  async reconnectSession(sessionReference: string): Promise<BrowserSession | null> {
+    const state = this.sessions.get(sessionReference);
+    if (!state || !state.session.active) {
+      return null;
+    }
+    return state.session;
+  }
+
+  simulateCrash(sessionId: string): void {
+    const state = this.sessions.get(sessionId);
+    if (state) {
+      state.session.active = false;
+      this.sessions.delete(sessionId);
+    }
+  }
+
+  simulateDisconnect(sessionId: string): void {
+    const state = this.sessions.get(sessionId);
+    if (state) {
+      state.session.active = false;
+    }
   }
 
   async open(session: BrowserSession, url: string): Promise<PageState> {

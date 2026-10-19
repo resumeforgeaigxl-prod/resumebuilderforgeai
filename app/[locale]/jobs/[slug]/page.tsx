@@ -21,6 +21,7 @@ import { extractJobIdFromSlug, getCanonicalJobUrl, generateJobSlug } from '@/lib
 import { isJobIndexable, buildJobPostingJsonLd } from '@/lib/jobs/indexability';
 import { findReplacementJobs } from '@/lib/jobs/replacement';
 import { PublicJobActionBar } from '@/components/jobs/PublicJobActionBar';
+import { getSession } from '@/lib/auth/jwt';
 
 interface PageProps {
   params: {
@@ -130,6 +131,24 @@ export default async function PublicJobDetailPage({ params }: PageProps) {
     } catch {
       similarJobs = [];
     }
+  }
+
+  // 4. Level 15: Check if current authenticated user has an active application record
+  let existingApplication: any = null;
+  try {
+    const session = await getSession();
+    if (session?.userId) {
+      const supabase = await createClient();
+      const { data: appData } = await (supabase as any)
+        .from('job_applications')
+        .select('id, status, applied_at, last_activity_at')
+        .eq('user_id', session.userId)
+        .eq('job_id', job.id)
+        .maybeSingle();
+      existingApplication = appData;
+    }
+  } catch {
+    // Non-blocking
   }
 
   // Formatting helpers
@@ -314,6 +333,31 @@ export default async function PublicJobDetailPage({ params }: PageProps) {
               </span>
             </div>
           </div>
+
+          {/* Level 15 Existing Application Status Pill */}
+          {existingApplication && (
+            <div className="mt-4 p-4 rounded-xl border border-violet-200 bg-violet-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 className="w-5 h-5 text-violet-700 shrink-0" />
+                <div className="text-xs">
+                  <span className="font-semibold text-violet-950 block">
+                    {existingApplication.status === 'APPLIED' || existingApplication.status === 'Applied'
+                      ? 'You have already applied to this role'
+                      : `Application Status: ${existingApplication.status}`}
+                  </span>
+                  <span className="text-violet-700/80">
+                    Tracked in your applications pipeline with full audit history and evidence.
+                  </span>
+                </div>
+              </div>
+              <Link
+                href={`/${locale}/dashboard/applications`}
+                className="px-3.5 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-semibold text-xs whitespace-nowrap transition-colors self-start sm:self-auto shadow-xs"
+              >
+                View in Pipeline →
+              </Link>
+            </div>
+          )}
 
           {/* Action Bar (Apply with Omni, Manual Apply, Match Check) */}
           <div className="pt-4">

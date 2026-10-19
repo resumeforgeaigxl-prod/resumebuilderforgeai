@@ -9,14 +9,14 @@ export default async function Header({ lang = 'en', region = 'in' }: { lang?: st
     const locale = `${lang}-${region}`;
 
     return (
-        <nav className="fixed top-0 w-full z-50 bg-[#fafaf9]/90 backdrop-blur-md border-b border-[#e7e5e4]">
+        <nav className="fixed top-0 z-50 w-full border-b border-[#2a2c33] bg-[#0c0d10]">
             <div className="flex h-16 items-center justify-between px-6 max-w-7xl mx-auto select-none">
                 {/* Logo (matching the new landing page RF logo) */}
                 <div className="flex items-center gap-2">
                     <Link href={`/${locale}`} className="flex items-center gap-2.5 select-none">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#171717]">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[#2e3138]">
                             <span
-                                className="text-white"
+                                className="text-[#f4f5f7]"
                                 style={{
                                     fontFamily: "var(--font-geist-sans)",
                                     fontSize: "12px",
@@ -29,7 +29,7 @@ export default async function Header({ lang = 'en', region = 'in' }: { lang?: st
                             </span>
                         </div>
                         <span
-                            className="text-[#171717] font-semibold text-sm tracking-tight"
+                            className="text-sm font-semibold tracking-tight text-[#f4f5f7]"
                             style={{
                                 fontFamily: "var(--font-geist-sans)",
                             }}
@@ -43,25 +43,25 @@ export default async function Header({ lang = 'en', region = 'in' }: { lang?: st
                 <div className="hidden md:flex items-center gap-8">
                     <a 
                         href={`/${locale}#how-it-works`} 
-                        className="text-[#4D4D4D] transition-colors duration-200 hover:text-[#171717] font-mono text-[13px] uppercase font-semibold tracking-wider"
+                        className="font-mono text-[13px] font-semibold uppercase tracking-wider text-[#8b909a] transition-colors duration-200 hover:text-[#f4f5f7]"
                     >
                         {t('how_it_works')}
                     </a>
                     <a 
                         href={`/${locale}#features`} 
-                        className="text-[#4D4D4D] transition-colors duration-200 hover:text-[#171717] font-mono text-[13px] uppercase font-semibold tracking-wider"
+                        className="font-mono text-[13px] font-semibold uppercase tracking-wider text-[#8b909a] transition-colors duration-200 hover:text-[#f4f5f7]"
                     >
                         {t('features')}
                     </a>
                     <a 
                         href={`/${locale}/pricing`} 
-                        className="text-[#4D4D4D] transition-colors duration-200 hover:text-[#171717] font-mono text-[13px] uppercase font-semibold tracking-wider"
+                        className="font-mono text-[13px] font-semibold uppercase tracking-wider text-[#8b909a] transition-colors duration-200 hover:text-[#f4f5f7]"
                     >
                         {t('pricing')}
                     </a>
                     <Link 
                         href={`/${locale}/blogs`} 
-                        className="text-[#4D4D4D] transition-colors duration-200 hover:text-[#171717] font-mono text-[13px] uppercase font-semibold tracking-wider"
+                        className="font-mono text-[13px] font-semibold uppercase tracking-wider text-[#8b909a] transition-colors duration-200 hover:text-[#f4f5f7]"
                     >
                         Blogs
                     </Link>
@@ -83,12 +83,12 @@ export default async function Header({ lang = 'en', region = 'in' }: { lang?: st
                             )}
                             <Link 
                                 href={`/${locale}/dashboard`} 
-                                className="text-xs font-semibold font-mono text-[#4D4D4D] hover:text-[#171717] transition-colors uppercase tracking-wider"
+                                className="font-mono text-xs font-semibold uppercase tracking-wider text-[#b4b8c2] transition-colors hover:text-[#f4f5f7]"
                             >
                                 {t('dashboard')}
                             </Link>
                             <form action="/api/auth/signout" method="post">
-                                <button className="inline-flex items-center justify-center rounded-xl border border-[#EBEBEB] bg-white px-3.5 h-9 text-[#171717] transition-all duration-75 hover:bg-[#F2F2F2] active:scale-95 font-mono text-[11px] uppercase font-semibold tracking-wider gap-1.5 cursor-pointer">
+                                <button className="inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-full border border-[#3a3d46] px-3.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#f4f5f7] transition-colors hover:bg-[#16171b]">
                                     <LogOut className="w-3.5 h-3.5" />
                                     {t('logout')}
                                 </button>
@@ -98,13 +98,13 @@ export default async function Header({ lang = 'en', region = 'in' }: { lang?: st
                         <>
                             <Link 
                                 href={`/${locale}/login`} 
-                                className="inline-flex items-center justify-center rounded-xl border border-[#EBEBEB] bg-white px-3.5 h-9 text-[#171717] transition-all duration-75 hover:bg-[#F2F2F2] active:scale-95 font-mono text-[11px] uppercase font-semibold tracking-wider"
+                                className="inline-flex h-9 items-center justify-center rounded-full border border-[#3a3d46] px-3.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#f4f5f7] transition-colors hover:bg-[#16171b]"
                             >
                                 {t('login')}
                             </Link>
                             <Link 
                                 href={`/${locale}/signup`} 
-                                className="inline-flex items-center justify-center rounded-xl bg-[#7c3aed] border border-[#6d28d9] px-5 h-9 text-white transition-all duration-75 hover:bg-[#6d28d9] active:scale-95 font-mono text-[11px] uppercase font-semibold tracking-wider"
+                                className="inline-flex h-9 items-center justify-center rounded-full bg-[#f4f5f7] px-5 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#0c0d10] transition-colors hover:bg-white"
                             >
                                 {t('signup')}
                             </Link>

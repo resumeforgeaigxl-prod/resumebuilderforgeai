@@ -197,17 +197,24 @@ section.section span.stepDetail {
 
 @media (max-width: 800px) {
   section.section div.frame {
-    padding: 48px 24px 40px;
+    padding: 28px 16px 32px;
   }
 
   section.section div.top {
     grid-template-columns: 1fr;
-    gap: 28px;
+    gap: 16px;
     align-items: start;
   }
 
   section.section h2.headline {
-    max-width: 18ch;
+    max-width: 16ch;
+    font-size: 32px !important;
+    line-height: 1.08 !important;
+  }
+
+  section.section p.lead {
+    margin-top: 12px;
+    font-size: 15px;
   }
 
   section.section div.actions {
@@ -226,16 +233,24 @@ section.section span.stepDetail {
   }
 
   section.section div.content {
-    padding: 220px 20px 20px;
+    padding: 96px 14px 14px;
   }
 
   section.section ol.steps {
     grid-template-columns: 1fr;
-    gap: 10px;
-    margin-top: 32px;
+    gap: 8px;
+    margin-top: 20px;
   }
 
   section.section a.step {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 14px;
     min-height: 0;
+    padding: 12px 14px;
+  }
+
+  section.section span.stepIndex {
+    font-size: 22px;
   }
 }

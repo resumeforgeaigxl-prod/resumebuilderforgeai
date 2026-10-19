@@ -72,15 +72,6 @@ function OmniProductWindow({ locale }: { locale: string }) {
         </div>
       </div>
       </div>
-
-      <div className={styles.caption}>
-        <h2 className={styles.cardTitle}>Omni</h2>
-        <p className={styles.cardText}>Find jobs that match your profile and tailor the resume in the same conversation.</p>
-        <Link href={"/" + locale + "/omni"} className={styles.cardButton}>
-          Try Omni
-          <ArrowRight className="h-4 w-4" aria-hidden="true" />
-        </Link>
-      </div>
     </article>
   );
 }

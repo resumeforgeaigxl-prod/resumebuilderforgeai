@@ -33,46 +33,36 @@ export async function POST(req: Request) {
             // Non-blocking
         }
 
-        // 2. If user confirmed "Yes, I applied", record in public.job_applications
+        // 2. If user confirmed "Yes, I applied", record via Canonical ApplicationTrackerService (Level 15)
         if (mark_applied && job_id) {
             try {
-                const supabase = await createClient();
+                const { ApplicationTrackerService } = await import('@/lib/application-tracker');
                 const now = new Date().toISOString();
 
-                // Check for existing tracking record
-                const { data: existing } = await (supabase as any)
-                    .from('job_applications')
-                    .select('id')
-                    .eq('user_id', session.userId)
-                    .eq('job_id', job_id)
-                    .maybeSingle();
+                const app = await ApplicationTrackerService.createOrGetApplication({
+                    userId: session.userId,
+                    jobId: job_id,
+                    companyName: company || 'Company',
+                    roleTitle: job_title || 'Position',
+                    submissionMethod: 'MANUAL',
+                    jobSnapshot: {
+                        jobId: job_id,
+                        title: job_title || 'Position',
+                        companyName: company || 'Company',
+                        applyUrl: apply_url,
+                        capturedAt: now,
+                    },
+                });
 
-                if (existing) {
-                    await (supabase as any)
-                        .from('job_applications')
-                        .update({
-                            status,
-                            application_method: 'MANUAL',
-                            updated_at: now,
-                        })
-                        .eq('id', existing.id);
-                } else {
-                    await (supabase as any)
-                        .from('job_applications')
-                        .insert({
-                            user_id: session.userId,
-                            job_id,
-                            company: company || '',
-                            role_title: job_title || '',
-                            status,
-                            application_method: 'MANUAL',
-                            applied_date: now,
-                            created_at: now,
-                            updated_at: now,
-                        });
-                }
+                await ApplicationTrackerService.updateUserReportedStatus({
+                    userId: session.userId,
+                    applicationId: app.id,
+                    nextStatus: 'APPLIED',
+                    notes: 'Candidate marked applied manually from public job posting.',
+                    attestationText: `Applied directly on employer portal: ${apply_url || 'external job link'}`,
+                });
             } catch (dbErr: any) {
-                console.warn('[Track Apply] DB record creation skipped/failed:', dbErr.message);
+                console.warn('[Track Apply] Canonical tracker record skipped/failed:', dbErr.message);
             }
         }
 

@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useTranslation } from '@/lib/i18n/I18nProvider';
-import { X } from '@/components/icons';
 
 export default function CookieBanner() {
     const { locale, region } = useTranslation();
@@ -29,32 +28,31 @@ export default function CookieBanner() {
     if (!isVisible) return null;
 
     return (
-        <div className="fixed bottom-0 left-0 w-full bg-slate-900 border-t border-slate-700/50 p-4 md:p-6 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out">
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="flex-1">
-                    <p className="text-slate-300 text-sm md:text-base pr-8">
-                        We use cookies to improve your experience on ResumeForgeAI. By continuing you agree to our{' '}
-                        <Link href={`/${region}/${locale}/cookie-policy`} className="text-purple-400 hover:text-purple-300 underline underline-offset-2">
-                            cookie policy
-                        </Link>.
-                    </p>
-                </div>
-
-                <div className="flex items-center gap-3 w-full md:w-auto shrink-0 justify-end mt-2 md:mt-0">
+        <div className="fixed bottom-4 left-4 right-4 z-[60] md:left-8 md:right-auto md:max-w-xl">
+            <div className="rounded-2xl border border-[#2a2c33] bg-[#0c0d10] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.45)]">
+                <p className="text-[13px] leading-relaxed text-[#b4b8c2]">
+                    We use cookies to keep you signed in and remember your settings.{' '}
+                    <Link
+                        href={`/${locale}-${region}/cookie-policy`}
+                        className="text-[#d7e4f0] underline decoration-[#3a3d46] underline-offset-4 hover:decoration-[#d7e4f0]"
+                    >
+                        Cookie policy
+                    </Link>
+                </p>
+                <div className="mt-4 flex items-center justify-end gap-2">
                     <button
+                        type="button"
                         onClick={rejectNonEssential}
-                        className="px-4 py-2 border border-slate-600 hover:bg-slate-800 text-slate-300 text-sm rounded-lg transition-colors font-medium"
+                        className="h-9 cursor-pointer rounded-full border border-[#3a3d46] px-4 text-xs font-medium text-[#f4f5f7] transition-colors hover:bg-[#16171b]"
                     >
-                        Reject Non-Essential
+                        Essential only
                     </button>
                     <button
+                        type="button"
                         onClick={acceptAll}
-                        className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm rounded-lg transition-colors shadow-lg shadow-purple-500/20 font-medium"
+                        className="h-9 cursor-pointer rounded-full bg-[#f4f5f7] px-4 text-xs font-medium text-[#0c0d10] transition-colors hover:bg-white"
                     >
-                        Accept Cookies
-                    </button>
-                    <button onClick={rejectNonEssential} className="text-slate-500 hover:text-white p-1 rounded-full md:hidden absolute right-4 top-4">
-                        <X className="w-5 h-5" />
+                        Accept
                     </button>
                 </div>
             </div>

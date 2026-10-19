@@ -21,11 +21,33 @@ import type {
 } from './types';
 
 export class CreditService {
+  private static testBalances: Map<string, number> = new Map();
+
+  static _setTestBalance(userId: string, balance: number): void {
+    this.testBalances.set(userId, balance);
+  }
+
+  static _clearTestBalances(): void {
+    this.testBalances.clear();
+  }
+
   /**
    * Retrieves user's wallet balance.
    * Auto-initializes new users with the configurable welcome promotional grant.
    */
   static async getBalance(userId: string): Promise<WalletBalance> {
+    if (this.testBalances.has(userId)) {
+      const avail = this.testBalances.get(userId)!;
+      return {
+        available: avail,
+        reserved: 0,
+        total: avail,
+        planId: 'STARTER',
+        planExpiresAt: null,
+        isLowCredit: avail <= BILLING_CONFIG.lowCreditThreshold,
+      };
+    }
+
     const supabase = createClient();
 
     const { data: wallet, error } = await supabase

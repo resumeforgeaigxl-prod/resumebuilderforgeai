@@ -126,15 +126,21 @@
   justify-items: end;
   grid-column: 2;
   grid-row: 1;
+  container-type: inline-size;
 }
 
 .preview {
-  width: 100%;
+  width: min(100%, 460px);
+  height: calc(394px * min(1, 100cqi / 460px));
+  overflow: hidden;
 }
 
 .card {
   display: flex;
   flex-direction: column;
+  width: 460px;
+  transform-origin: top left;
+  transform: scale(min(1, 100cqi / 460px));
   padding: 16px 18px 18px;
   border-radius: 4px;
   background: #16171b;
@@ -145,7 +151,7 @@
 .well {
   position: relative;
   height: 360px;
-  margin-bottom: 22px;
+  margin-bottom: 0;
   overflow: hidden;
   border-radius: 4px;
   background-color: #0c0d10;
@@ -832,10 +838,6 @@
 
   .scene { justify-items: center; }
 
-  .preview {
-    width: min(100%, 460px);
-  }
-
   .headline {
     font-size: 44px !important;
     line-height: 1.02 !important;
@@ -843,8 +845,37 @@
 }
 
 @media (max-width: 640px) {
+  .layout {
+    padding: 20px 16px 28px;
+    row-gap: 20px;
+  }
+
+  .copy,
+  .scene {
+    max-width: none;
+    width: 100%;
+  }
+
   .headline {
-    font-size: 36px !important;
-    line-height: 1.05 !important;
+    font-size: 32px !important;
+    line-height: 1.08 !important;
+  }
+
+  .description {
+    margin-top: 12px;
+    font-size: 15px;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    margin-top: 18px;
+  }
+
+  .primary,
+  .secondary {
+    width: 100%;
+    border-radius: 999px;
   }
 }

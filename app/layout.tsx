@@ -72,7 +72,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#6c63ff",
+  themeColor: "#050505",
 };
 
 
@@ -95,7 +95,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#6c63ff" />
+        <meta name="theme-color" content="#050505" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-[var(--page-bg)] text-[var(--text-primary)] antialiased`}

@@ -63,7 +63,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
         manifest: '/manifest.json',
         appleWebApp: {
             capable: true,
-            statusBarStyle: 'default',
+            statusBarStyle: 'black',
             title: 'ResumeForgeAI',
         },
     };

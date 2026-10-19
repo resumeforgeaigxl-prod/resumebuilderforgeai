@@ -15,6 +15,12 @@ import type {
 } from '../types';
 
 export class PuppeteerBrowserDriver implements BrowserDriver {
+  readonly capabilities = {
+    canReconnectSession: false,
+    supportsHumanTakeover: false,
+    supportsSessionSnapshots: false,
+  };
+
   private browserInstances = new Map<string, any>();
   private pageInstances = new Map<string, any>();
 
@@ -29,6 +35,11 @@ export class PuppeteerBrowserDriver implements BrowserDriver {
     };
 
     return session;
+  }
+
+  async reconnectSession(_sessionReference: string): Promise<BrowserSession | null> {
+    // Puppeteer headless standalone does not support remote persistent reconnection across worker cycles
+    return null;
   }
 
   async open(session: BrowserSession, url: string): Promise<PageState> {

@@ -4,8 +4,8 @@
   "description": "Build resumes, prepare interviews, and get jobs with AI",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0b0f1a",
-  "theme_color": "#6c63ff",
+  "background_color": "#050505",
+  "theme_color": "#050505",
   "orientation": "portrait",
   "icons": [
     {

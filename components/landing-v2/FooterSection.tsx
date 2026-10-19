@@ -13,47 +13,12 @@ type FooterLink = {
   href: string;
 };
 
-const columns = (locale: string): { title: string; links: FooterLink[]; wide?: boolean }[] => [
-  {
-    title: "Product",
-    links: [
-      { label: "Resume Builder", href: `/${locale}/ai-resume-builder` },
-      { label: "Templates", href: `/${locale}/resumes` },
-      { label: "ATS Score", href: `/${locale}/ats-live` },
-      { label: "Pricing", href: `/${locale}/pricing` },
-      { label: "Omni", href: `/${locale}/omni` },
-    ],
-  },
-  {
-    title: "Forges",
-    wide: true,
-    links: [
-      { label: "ResumeForge", href: `/${locale}/ai-resume-builder` },
-      { label: "CodingForge", href: `/${locale}/codingforge` },
-      { label: "InterviewForge", href: `/${locale}/interview-prep` },
-      { label: "PrepForge", href: `/${locale}/prepforge` },
-      { label: "LearnForge", href: `/${locale}/learnforge` },
-      { label: "ProjectForge", href: `/${locale}/projectforge` },
-      { label: "CareerForge", href: `/${locale}/careerforge` },
-      { label: "JobForge", href: `/${locale}/jobs` },
-    ],
-  },
-  {
-    title: "Resources",
-    links: [
-      { label: "Documentation", href: `/${locale}/docs` },
-      { label: "Blog", href: `/${locale}/blogs` },
-      { label: "Project Services", href: `/${locale}/project-services` },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { label: "Careers", href: "https://careers.growxlabs.tech/" },
-      { label: "Support", href: "mailto:support@resumeforgeai.in" },
-      { label: "GrowXLabs", href: "https://growxlabs.tech" },
-    ],
-  },
+const links = (locale: string): FooterLink[] => [
+  { label: "Resumes", href: `/${locale}/resumes` },
+  { label: "Jobs", href: `/${locale}/jobs` },
+  { label: "Omni", href: `/${locale}/omni` },
+  { label: "Pricing", href: `/${locale}/pricing` },
+  { label: "Blog", href: `/${locale}/blogs` },
 ];
 
 const legal = (locale: string): FooterLink[] => [
@@ -77,8 +42,6 @@ function FooterAnchor({ link, className }: { link: FooterLink; className: string
 }
 
 export default function FooterSection({ locale = "en-in", promo = true }: FooterSectionProps) {
-  const footerColumns = columns(locale);
-
   return (
     <footer className={`${styles.footer} rf-dark`}>
       <div className={styles.frame}>
@@ -91,35 +54,15 @@ export default function FooterSection({ locale = "en-in", promo = true }: Footer
           </div>
         )}
 
-        <div className={styles.main}>
-          <div className={styles.brand}>
-            <Link href={`/${locale}`} className={styles.logo}>
-              <span className={styles.mark} aria-hidden="true">RF</span>
-              <span className={styles.wordmark}>ResumeForge AI</span>
-            </Link>
-            <p className={styles.tagline}>Build resumes that get interviews.</p>
-            <p className={styles.blurb}>
-              Resumes, job matches, and interview prep in one place.
-            </p>
-          </div>
-
-          <nav className={styles.columns} aria-label="Footer">
-            {footerColumns.map((column) => (
-              <div key={column.title}>
-                <h2 className={styles.heading}>{column.title}</h2>
-                <ul className={column.wide ? styles.wideList : styles.list}>
-                  {column.links.map((link) => (
-                    <li key={link.label}>
-                      <FooterAnchor link={link} className={styles.link} />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </nav>
-        </div>
+        <nav className={styles.links} aria-label="Footer">
+          {links(locale).map((link) => (
+            <FooterAnchor key={link.label} link={link} className={styles.link} />
+          ))}
+        </nav>
       </div>
+
       <p className={styles.giant}>RESUMEFORGEAI</p>
+
       <div className={styles.base}>
         <div className={styles.bottom}>
           <p className={styles.copy}>© 2026 ResumeForge AI</p>

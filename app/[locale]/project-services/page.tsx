@@ -3,15 +3,12 @@ import React from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/landing-v2/Navbar';
 import FooterSection from '@/components/landing-v2/FooterSection';
+import ProjectFeatureStage from '@/components/landing-v2/ProjectFeatureStage';
 import { 
   Code, Cpu, FileText, Server, Smartphone, BookOpen, Layers, CheckCircle2, 
-  HelpCircle, ChevronDown, Award, Users, ShieldCheck, HeartHandshake, Compass, Workflow
+  Award, Compass
 } from '@/components/icons';
 import { Accordion } from '@/components/ui/Accordion';
-import { Playfair_Display, Lora } from 'next/font/google';
-
-const playfair = Playfair_Display({ subsets: ['latin'], weight: ['400', '600', '700'] });
-const lora = Lora({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
 
 export default async function ProjectServicesLandingPage({ params }: { params: { locale: string } }) {
   const { locale } = params;
@@ -80,26 +77,17 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
     }
   }
 
-  const features = [
-    { title: 'Industry-Level Projects', desc: 'Get projects built with production-grade code, architecture, and documentation.', icon: <Code className="w-4.5 h-4.5" /> },
-    { title: 'Expert Developers', desc: 'Work with skilled software engineers and AI/ML professionals.', icon: <Users className="w-4.5 h-4.5" /> },
-    { title: 'Complete Documentation', desc: 'Receive high-quality thesis, system reports, design diagrams, and setup guides.', icon: <FileText className="w-4.5 h-4.5" /> },
-    { title: 'IEEE & Research Support', desc: 'IEEE base paper selection, research gap analyses, and implementation.', icon: <Award className="w-4.5 h-4.5" /> },
-    { title: 'Deployment Assistance', desc: 'Zero-configuration cloud setup on platforms like Vercel, Render, AWS, and GCP.', icon: <Server className="w-4.5 h-4.5" /> },
-    { title: 'Post Delivery Support', desc: 'We provide viva preparation guides, training sessions, and continuous help.', icon: <HeartHandshake className="w-4.5 h-4.5" /> },
-  ];
-
   const services = [
-    { title: 'Major Projects', desc: 'End-to-end B.Tech/M.Tech final year projects with detailed research, execution, and documentation.', icon: <Layers className="w-5 h-5 text-[#7c3aed]" /> },
-    { title: 'Minor Projects', desc: 'Focused mid-semester projects designed to master individual technology scopes.', icon: <Compass className="w-5 h-5 text-[#7c3aed]" /> },
-    { title: 'Mini Projects', desc: 'Simple, fast, and high-quality lab assignments and small projects.', icon: <Award className="w-5 h-5 text-[#7c3aed]" /> },
-    { title: 'AI & ML Projects', desc: 'State of the art models, datasets training, deep learning architectures, CV, and NLP solutions.', icon: <Cpu className="w-5 h-5 text-[#7c3aed]" /> },
-    { title: 'Full Stack Projects', desc: 'Modern web applications developed using MERN stack, Next.js, Django, or Spring Boot.', icon: <Code className="w-5 h-5 text-[#7c3aed]" /> },
-    { title: 'Mobile App Projects', desc: 'Fully responsive Android and iOS apps built with React Native or Flutter.', icon: <Smartphone className="w-5 h-5 text-[#7c3aed]" /> },
-    { title: 'IEEE Projects', desc: 'Implementation of the latest IEEE transaction papers with source code validation.', icon: <FileText className="w-5 h-5 text-[#7c3aed]" /> },
-    { title: 'Research Projects', desc: 'Custom project execution targeting international journals and paper submissions.', icon: <BookOpen className="w-5 h-5 text-[#7c3aed]" /> },
-    { title: 'Documentation Only', desc: 'Comprehensive technical project reports, design diagrams, PPTs, and synopses.', icon: <FileText className="w-5 h-5 text-[#7c3aed]" /> },
-    { title: 'Deployment Support', desc: 'Deployment of your existing source code to production servers with database sync.', icon: <Server className="w-5 h-5 text-[#7c3aed]" /> },
+    { title: 'Major Projects', desc: 'End-to-end B.Tech/M.Tech final year projects with detailed research, execution, and documentation.', icon: <Layers className="w-5 h-5 text-[#d7e4f0]" /> },
+    { title: 'Minor Projects', desc: 'Focused mid-semester projects designed to master individual technology scopes.', icon: <Compass className="w-5 h-5 text-[#d7e4f0]" /> },
+    { title: 'Mini Projects', desc: 'Simple, fast, and high-quality lab assignments and small projects.', icon: <Award className="w-5 h-5 text-[#d7e4f0]" /> },
+    { title: 'AI & ML Projects', desc: 'State of the art models, datasets training, deep learning architectures, CV, and NLP solutions.', icon: <Cpu className="w-5 h-5 text-[#d7e4f0]" /> },
+    { title: 'Full Stack Projects', desc: 'Modern web applications developed using MERN stack, Next.js, Django, or Spring Boot.', icon: <Code className="w-5 h-5 text-[#d7e4f0]" /> },
+    { title: 'Mobile App Projects', desc: 'Fully responsive Android and iOS apps built with React Native or Flutter.', icon: <Smartphone className="w-5 h-5 text-[#d7e4f0]" /> },
+    { title: 'IEEE Projects', desc: 'Implementation of the latest IEEE transaction papers with source code validation.', icon: <FileText className="w-5 h-5 text-[#d7e4f0]" /> },
+    { title: 'Research Projects', desc: 'Custom project execution targeting international journals and paper submissions.', icon: <BookOpen className="w-5 h-5 text-[#d7e4f0]" /> },
+    { title: 'Documentation Only', desc: 'Comprehensive technical project reports, design diagrams, PPTs, and synopses.', icon: <FileText className="w-5 h-5 text-[#d7e4f0]" /> },
+    { title: 'Deployment Support', desc: 'Deployment of your existing source code to production servers with database sync.', icon: <Server className="w-5 h-5 text-[#d7e4f0]" /> },
   ];
 
   const domains = [
@@ -129,7 +117,7 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
   ];
 
   return (
-    <div className="bg-[#fafaf9] min-h-screen text-[#171717] relative overflow-x-hidden">
+    <div className="bg-[#050505] min-h-screen text-[#f4f5f7] relative overflow-x-hidden">
       {/* Left Side Viewport Pixel Grid (scrolls with page) */}
       <div className="absolute left-0 top-0 bottom-0 w-[240px] pointer-events-none z-0 hidden xl:block overflow-hidden">
         <svg width="100%" height="100%">
@@ -142,7 +130,7 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
                   y={p.y} 
                   width="4" 
                   height="4" 
-                  fill="#7c3aed" 
+                  fill="#d7e4f0" 
                   fillOpacity={p.opacity} 
                 />
               ))}
@@ -173,7 +161,7 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
                   y={p.y} 
                   width="4" 
                   height="4" 
-                  fill="#7c3aed" 
+                  fill="#d7e4f0" 
                   fillOpacity={p.opacity} 
                 />
               ))}
@@ -195,138 +183,88 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
       <Navbar locale={locale} />
 
       {/* Main Content: Stacked A4 Sheets */}
-      <div className="max-w-[1200px] mx-auto px-4 md:px-0 pt-28 pb-12 space-y-16 relative z-10">
+      <div className="max-w-[1200px] mx-auto px-4 md:px-0 pt-8 pb-12 space-y-0 relative z-10">
         
         {/* A4 SHEET 1: Proposal Cover & Value Proposition */}
-        <article className={`${lora.className} relative overflow-hidden bg-white border border-[#E2E8F0] rounded-none p-8 md:p-16 shadow-[0_8px_30px_rgba(0,0,0,0.03)] min-h-[1130px] flex flex-col justify-between`}>
+        <article className="relative overflow-hidden bg-[#0c0d10] border border-[#2a2c33] rounded-none p-8 md:p-16 flex flex-col justify-between">
           <div>
-            {/* Header Block */}
             <header className="mb-12 text-center select-none">
-              <div className="border-t-2 border-b border-neutral-900 py-3 mb-8 flex justify-between items-center text-[10px] font-mono tracking-widest text-neutral-500 uppercase">
+              <div className="border-t border-b border-[#2a2c33] py-3 mb-8 flex justify-between items-center text-[10px] font-mono tracking-widest text-[#8b909a] uppercase">
                 <span>Academic Services</span>
-                <span className="font-bold text-neutral-900">ResumeForge AI</span>
+                <span className="font-semibold text-[#f4f5f7]">ResumeForge AI</span>
                 <span>Ref: RF-PRJ-2026</span>
               </div>
             </header>
 
-            {/* Hero Section */}
             <div className="text-center py-6">
-              <span className="font-mono text-[11px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-4">
-                # ACADEMIC EXCELLENCE
+              <span className="font-mono text-[11px] text-[#8b909a] font-semibold uppercase tracking-wider block mb-4">
+                Academic projects
               </span>
-              <h1 className={`${playfair.className} text-4xl md:text-5xl font-bold tracking-tight text-[#171717] leading-[1.15] max-w-[700px] mx-auto`}>
-                Build Your Final Year Project With Expert Guidance
+              <h1 className="text-4xl md:text-5xl font-normal tracking-[-0.03em] text-[#f4f5f7] leading-[1.1] max-w-[700px] mx-auto" style={{ fontFamily: "var(--font-display), Georgia, serif" }}>
+                Build your final year project with a clear brief.
               </h1>
-              <p className="text-stone-500 mt-6 text-sm md:text-base max-w-[580px] mx-auto leading-relaxed">
-                From idea to deployment, we help students build production-ready academic projects with documentation, reports, presentations, deployment, and ongoing support.
+              <p className="text-[#b4b8c2] mt-6 text-sm md:text-base max-w-[560px] mx-auto leading-relaxed">
+                From the idea to a live build. The work includes the code, the report, the slides, and help when the viva comes.
               </p>
-              <div className="flex justify-center gap-4 mt-8">
+              <div className="flex flex-wrap justify-center gap-3 mt-8">
                 <Link
                   href={`/${locale}/project-services/request`}
-                  className="inline-flex items-center justify-center rounded-xl bg-[#7c3aed] border border-[#6d28d9] px-6 h-11 text-white transition-all duration-75 hover:bg-[#6d28d9] active:scale-95 font-mono text-[12px] uppercase font-semibold shadow-sm"
+                  className="inline-flex items-center justify-center rounded-full bg-[#f4f5f7] px-6 h-11 text-[#0c0d10] font-mono text-[12px] uppercase font-semibold"
                 >
-                  Request Project
+                  Request project
                 </Link>
                 <a
                   href="#domains"
-                  className="inline-flex items-center justify-center rounded-xl border border-stone-200 bg-white px-6 h-11 text-[#171717] transition-all duration-75 hover:bg-[#F2F2F2] active:scale-95 font-mono text-[12px] uppercase font-semibold shadow-sm"
+                  className="inline-flex items-center justify-center rounded-full border border-[#3a3d46] px-6 h-11 text-[#f4f5f7] font-mono text-[12px] uppercase font-semibold"
                 >
-                  Explore Domains
+                  Explore domains
                 </a>
               </div>
             </div>
 
-            {/* Why Choose Us */}
             <div className="mt-16">
-
-              <div className="text-center mb-10">
-                <span className="font-mono text-[10px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-1">
-                  Why Choose Us
-                </span>
-                <h2 className={`${playfair.className} text-2xl font-bold tracking-tight text-neutral-800`}>Ecosystem Highlights</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                {features.map((feat) => (
-                  <div 
-                    key={feat.title} 
-                    className="group relative border border-stone-200/80 bg-[#fafafa]/50 p-6 rounded-xl hover:bg-white hover:border-stone-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:-translate-y-0.5 transition-all duration-300 text-left overflow-hidden select-none"
-                  >
-                    {/* Top border accent line on hover */}
-                    <div className="absolute top-0 left-6 right-6 h-[2px] bg-[#7c3aed]/60 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-                    
-                    {/* Premium Layered Icon Container */}
-                    <div className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-white border border-stone-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.02)] group-hover:border-[#7c3aed]/30 group-hover:shadow-[0_2px_8px_rgba(124,58,237,0.04)] transition-all duration-300 text-stone-600 group-hover:text-[#7c3aed] mb-5">
-                      <div className="absolute inset-0 bg-[#7c3aed]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
-                      <div className="relative group-hover:scale-105 transition-transform duration-300">
-                        {feat.icon}
-                      </div>
-                    </div>
-
-                    {/* Content Block */}
-                    <div className="space-y-2">
-                      <h3 className="font-sans font-semibold text-stone-900 text-sm tracking-tight">
-                        {feat.title}
-                      </h3>
-                      <p className="text-stone-500 text-xs leading-relaxed font-normal">
-                        {feat.desc}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <ProjectFeatureStage />
             </div>
           </div>
 
-          {/* Footer block */}
-          <footer className="border-t border-neutral-100 pt-6 mt-12 flex justify-between items-center text-[9px] font-mono tracking-wider text-neutral-400 select-none">
-            <span>CONFIDENTIAL • FOR ACADEMIC INTERNAL USE</span>
-            <span>PAGE 1 OF 3</span>
+          <footer className="border-t border-[#2a2c33] pt-6 mt-12 flex justify-between items-center text-[10px] font-mono tracking-wider text-[#8b909a] select-none">
+            <span>Academic services</span>
+            <span>01</span>
           </footer>
         </article>
 
         {/* A4 SHEET 2: Services Roster & Technical Domains */}
-        <article className={`${lora.className} bg-white border border-[#E2E8F0] rounded-none p-8 md:p-16 shadow-[0_8px_30px_rgba(0,0,0,0.03)] min-h-[1130px] flex flex-col justify-between`}>
+        <article className="bg-[#0c0d10] border border-t-0 border-[#2a2c33] rounded-none p-8 md:p-16 flex flex-col justify-between">
           <div>
-            {/* Header Block */}
             <header className="mb-12 text-center select-none">
-              <div className="border-t-2 border-b border-neutral-900 py-3 mb-8 flex justify-between items-center text-[10px] font-mono tracking-widest text-neutral-500 uppercase">
-                <span>Deliverables & Technology</span>
-                <span className="font-bold text-neutral-900">ResumeForge AI</span>
+              <div className="border-t border-b border-[#2a2c33] py-3 mb-8 flex justify-between items-center text-[10px] font-mono tracking-widest text-[#8b909a] uppercase">
+                <span>Deliverables</span>
+                <span className="font-semibold text-[#f4f5f7]">ResumeForge AI</span>
                 <span>Ref: RF-PRJ-2026</span>
               </div>
             </header>
 
-            {/* Services Grid */}
             <div className="text-left">
               <div className="text-center mb-10">
-                <span className="font-mono text-[10px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-1">
-                  Our Services
+                <span className="font-mono text-[10px] text-[#8b909a] font-semibold uppercase tracking-wider block mb-2">
+                  Services
                 </span>
-                <h2 className={`${playfair.className} text-2xl font-bold tracking-tight text-neutral-800`}>Structured Deliverables</h2>
+                <h2 className="text-3xl font-normal tracking-[-0.03em] text-[#f4f5f7]" style={{ fontFamily: "var(--font-display), Georgia, serif" }}>What we build.</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {services.map((svc) => (
-                  <div 
-                    key={svc.title} 
-                    className="group relative flex gap-5 p-6 border border-stone-200/80 bg-[#fafafa]/50 rounded-xl hover:bg-white hover:border-stone-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden select-none"
+                  <div
+                    key={svc.title}
+                    className="flex gap-4 p-6 border border-[#2a2c33] bg-[#16171b] rounded-2xl"
                   >
-                    {/* Top border accent line on hover */}
-                    <div className="absolute top-0 left-6 right-6 h-[2px] bg-[#7c3aed]/60 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-                    
-                    {/* Premium Layered Icon Container */}
-                    <div className="shrink-0 relative flex h-10 w-10 items-center justify-center rounded-lg bg-white border border-stone-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.02)] group-hover:border-[#7c3aed]/30 group-hover:shadow-[0_2px_8px_rgba(124,58,237,0.04)] transition-all duration-300 text-stone-600 group-hover:text-[#7c3aed]">
-                      <div className="absolute inset-0 bg-[#7c3aed]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
-                      <div className="relative group-hover:scale-105 transition-transform duration-300">
-                        {svc.icon}
-                      </div>
+                    <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-lg border border-[#2a2c33] bg-[#0c0d10]">
+                      {svc.icon}
                     </div>
-
-                    {/* Content Block */}
-                    <div className="space-y-1.5">
-                      <h3 className="font-sans font-semibold text-stone-900 text-sm tracking-tight">
+                    <div>
+                      <h3 className="font-sans font-medium text-[#f4f5f7] text-sm tracking-tight">
                         {svc.title}
                       </h3>
-                      <p className="text-stone-500 text-xs leading-relaxed font-normal">
+                      <p className="mt-1.5 text-[#8b909a] text-[13px] leading-relaxed">
                         {svc.desc}
                       </p>
                     </div>
@@ -335,78 +273,82 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
               </div>
             </div>
 
-            {/* Technical Domains */}
             <div id="domains" className="mt-16 text-left">
               <div className="text-center mb-10">
-                <span className="font-mono text-[10px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-1">
-                  Technical Domains
+                <span className="font-mono text-[10px] text-[#8b909a] font-semibold uppercase tracking-wider block mb-2">
+                  Domains
                 </span>
-                <h2 className={`${playfair.className} text-2xl font-bold tracking-tight text-neutral-800`}>Technologies We Support</h2>
+                <h2 className="text-3xl font-normal tracking-[-0.03em] text-[#f4f5f7]" style={{ fontFamily: "var(--font-display), Georgia, serif" }}>Where the work sits.</h2>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3.5">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {domains.map((dom) => (
-                  <div key={dom} className="border border-stone-200 bg-white px-4 py-2.5 rounded-lg flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#7c3aed]" />
-                    <span className="text-[11px] font-semibold text-stone-700">{dom}</span>
+                  <div key={dom} className="border border-[#2a2c33] bg-[#16171b] px-4 py-3 rounded-xl flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#d7e4f0] shrink-0" />
+                    <span className="text-[13px] text-[#f4f5f7]">{dom}</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Footer block */}
-          <footer className="border-t border-neutral-100 pt-6 mt-12 flex justify-between items-center text-[9px] font-mono tracking-wider text-neutral-400 select-none">
-            <span>CONFIDENTIAL • FOR ACADEMIC INTERNAL USE</span>
-            <span>PAGE 2 OF 3</span>
+          <footer className="border-t border-[#2a2c33] pt-6 mt-12 flex justify-between items-center text-[10px] font-mono tracking-wider text-[#8b909a] select-none">
+            <span>Deliverables</span>
+            <span>02</span>
           </footer>
         </article>
 
         {/* A4 SHEET 3: Development Timeline & FAQs */}
-        <article className={`${lora.className} bg-white border border-[#E2E8F0] rounded-none p-8 md:p-16 shadow-[0_8px_30px_rgba(0,0,0,0.03)] min-h-[1130px] flex flex-col justify-between`}>
+        <article className="bg-[#0c0d10] border border-t-0 border-[#2a2c33] rounded-none p-8 md:p-16 flex flex-col justify-between">
           <div>
-            {/* Header Block */}
             <header className="mb-12 text-center select-none">
-              <div className="border-t-2 border-b border-neutral-900 py-3 mb-8 flex justify-between items-center text-[10px] font-mono tracking-widest text-neutral-500 uppercase">
-                <span>Workflow & FAQ</span>
-                <span className="font-bold text-neutral-900">ResumeForge AI</span>
+              <div className="border-t border-b border-[#2a2c33] py-3 mb-8 flex justify-between items-center text-[10px] font-mono tracking-widest text-[#8b909a] uppercase">
+                <span>How it runs</span>
+                <span className="font-semibold text-[#f4f5f7]">ResumeForge AI</span>
                 <span>Ref: RF-PRJ-2026</span>
               </div>
             </header>
 
-            {/* Process Timeline */}
             <div className="text-left">
-              <div className="text-center mb-10">
-                <span className="font-mono text-[10px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-1">
-                  Our Process
+              <div className="mb-8">
+                <span className="font-mono text-[10px] text-[#8b909a] font-semibold uppercase tracking-wider block mb-2">
+                  Process
                 </span>
-                <h2 className={`${playfair.className} text-2xl font-bold tracking-tight text-neutral-800`}>Workflow Execution</h2>
+                <h2 className="text-4xl font-normal tracking-[-0.03em] text-[#f4f5f7]" style={{ fontFamily: "var(--font-display), Georgia, serif" }}>Seven steps, then the file.</h2>
               </div>
-              <div className="relative pl-6 border-l border-stone-200 space-y-8 max-w-[650px] mx-auto">
-                {timelineSteps.map((step) => (
-                  <div key={step.step} className="relative">
-                    <div className="absolute -left-[35px] top-0 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-[#7c3aed] text-white text-[9px] font-bold font-mono">
-                      {step.step}
-                    </div>
-                    <h3 className="font-sans font-bold text-xs text-[#171717]">{step.title}</h3>
-                    <p className="text-stone-500 text-xs mt-1 leading-relaxed">{step.desc}</p>
-                  </div>
-                ))}
+              <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)]">
+                <ol className="border-y border-[#2a2c33]">
+                  {timelineSteps.map((step) => (
+                    <li key={step.step} className="grid grid-cols-[56px_1fr] gap-4 border-b border-[#2a2c33] py-5 last:border-b-0">
+                      <span className="text-[32px] leading-none text-[#d7e4f0]" style={{ fontFamily: "var(--font-display), Georgia, serif" }}>
+                        {String(step.step).padStart(2, "0")}
+                      </span>
+                      <div>
+                        <h3 className="font-sans text-base font-medium text-[#f4f5f7]">{step.title}</h3>
+                        <p className="mt-1 text-[14px] leading-relaxed text-[#b4b8c2]">{step.desc}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+                <div className="grid gap-3">
+                  <img src="/project-brief.jpg" alt="" className="aspect-[4/3] w-full rounded-2xl border border-[#2a2c33] object-cover" />
+                  <img src="/project-build.jpg" alt="" className="aspect-[4/3] w-full rounded-2xl border border-[#2a2c33] object-cover" />
+                  <img src="/project-deliver.jpg" alt="" className="aspect-[3/4] w-full rounded-2xl border border-[#2a2c33] object-cover object-center" />
+                </div>
               </div>
             </div>
 
-            {/* FAQ Section */}
             <div className="mt-16 text-left">
               <div className="text-center mb-10">
-                <span className="font-mono text-[10px] text-[#7c3aed] font-semibold uppercase tracking-wider block mb-1">
-                  Have Questions?
+                <span className="font-mono text-[10px] text-[#8b909a] font-semibold uppercase tracking-wider block mb-2">
+                  Questions
                 </span>
-                <h2 className={`${playfair.className} text-2xl font-bold tracking-tight text-neutral-800`}>Frequently Asked Questions</h2>
+                <h2 className="text-3xl font-normal tracking-[-0.03em] text-[#f4f5f7]" style={{ fontFamily: "var(--font-display), Georgia, serif" }}>Before you send the brief.</h2>
               </div>
               
-              <div className="space-y-4 max-w-[650px] mx-auto">
+              <div className="space-y-3 max-w-[640px] mx-auto">
                 {faqs.map((faq, index) => (
-                  <Accordion key={index} title={faq.q}>
-                    <p className="text-stone-500 text-xs leading-relaxed">
+                  <Accordion key={index} title={faq.q} tone="dark">
+                    <p className="text-[#b4b8c2] text-[13px] leading-relaxed">
                       {faq.a}
                     </p>
                   </Accordion>
@@ -415,10 +357,9 @@ export default async function ProjectServicesLandingPage({ params }: { params: {
             </div>
           </div>
 
-          {/* Footer block */}
-          <footer className="border-t border-neutral-100 pt-6 mt-12 flex justify-between items-center text-[9px] font-mono tracking-wider text-neutral-400 select-none">
-            <span>CONFIDENTIAL • FOR ACADEMIC INTERNAL USE</span>
-            <span>PAGE 3 OF 3</span>
+          <footer className="border-t border-[#2a2c33] pt-6 mt-12 flex justify-between items-center text-[10px] font-mono tracking-wider text-[#8b909a] select-none">
+            <span>Process</span>
+            <span>03</span>
           </footer>
         </article>
 

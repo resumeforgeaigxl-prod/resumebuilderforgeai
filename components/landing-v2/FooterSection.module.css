@@ -8,8 +8,7 @@ footer.footer {
 footer.footer div.frame {
   max-width: 1120px;
   margin: 0 auto;
-  padding: 48px 32px 24px;
-  background: transparent;
+  padding: 36px 32px 8px;
 }
 
 footer.footer div.base {
@@ -23,7 +22,7 @@ footer.footer div.promo {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
   padding-bottom: 28px;
   border-bottom: 1px solid #2a2c33;
 }
@@ -45,7 +44,7 @@ footer.footer a.promoAction {
   flex: none;
   min-height: 40px;
   padding: 0 16px;
-  border-radius: 8px;
+  border-radius: 999px;
   background: #f4f5f7;
   color: #0c0d10;
   font-size: 14px;
@@ -58,93 +57,19 @@ footer.footer a.promoAction:hover {
   background: #e4e6ea;
 }
 
-footer.footer div.main {
-  display: grid;
-  grid-template-columns: minmax(200px, 240px) minmax(0, 1fr);
-  gap: 48px 56px;
-  align-items: start;
-}
-
-footer.footer a.logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  color: #f4f5f7;
-  text-decoration: none;
-}
-
-footer.footer span.mark {
-  display: inline-flex;
+footer.footer nav.links {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  border: 1px solid #3a3d46;
-  background: transparent;
-  color: #f4f5f7;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-footer.footer span.wordmark {
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
-
-footer.footer p.tagline {
-  margin: 14px 0 0;
-  color: #f4f5f7;
-  font-size: 14px;
-  line-height: 1.45;
-}
-
-footer.footer p.blurb {
-  max-width: 28ch;
-  margin: 8px 0 0;
-  color: #8b909a;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-footer.footer nav.columns {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.7fr) minmax(0, 1fr) minmax(0, 0.9fr);
-  gap: 28px 32px;
-}
-
-footer.footer h2.heading {
-  margin: 0 0 12px;
-  color: #8b909a;
-  font-family: var(--font-geist-mono), ui-monospace, monospace !important;
-  font-size: 11px !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.14em;
-  line-height: 1.2 !important;
-  text-transform: uppercase;
-}
-
-footer.footer ul.list,
-footer.footer ul.wideList,
-footer.footer ul.legal {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-footer.footer ul.wideList {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: 20px;
+  gap: 8px 28px;
 }
 
 footer.footer a.link,
 footer.footer a.legalLink {
   display: inline-flex;
   align-items: center;
-  min-height: 30px;
+  min-height: 32px;
   color: #b4b8c2;
   font-size: 14px;
   line-height: 1.3;
@@ -157,14 +82,26 @@ footer.footer p.credit a:hover {
   color: #f4f5f7;
 }
 
+footer.footer p.giant {
+  margin: 28px 0 16px;
+  padding: 0 16px;
+  box-sizing: border-box;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: min(168px, calc((100vw - 32px) / 9.2));
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  text-align: center;
+  white-space: nowrap;
+  color: #3a3d46;
+}
+
 footer.footer div.bottom {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 16px;
-  margin-top: 0;
   padding-top: 16px;
-  padding-bottom: 8px;
   border-top: 1px solid #2a2c33;
 }
 
@@ -190,6 +127,9 @@ footer.footer ul.legal {
   flex-wrap: wrap;
   justify-content: center;
   gap: 4px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 footer.footer a.legalLink {
@@ -198,20 +138,6 @@ footer.footer a.legalLink {
   font-size: 12px;
 }
 
-footer.footer p.giant {
-  margin: 56px 0 18px;
-  padding: 0 3vw;
-  font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(64px, 9.2vw, 168px);
-  font-weight: 400;
-  line-height: 0.9;
-  letter-spacing: -0.04em;
-  text-align: center;
-  white-space: nowrap;
-  color: #3a3d46;
-}
-
-footer.footer a.logo:focus-visible,
 footer.footer a.promoAction:focus-visible,
 footer.footer a.link:focus-visible,
 footer.footer a.legalLink:focus-visible,
@@ -221,13 +147,13 @@ footer.footer p.credit a:focus-visible {
   border-radius: 4px;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 700px) {
   footer.footer div.frame {
-    padding: 32px 24px 20px;
+    padding: 28px 20px 4px;
   }
 
   footer.footer div.base {
-    padding: 0 24px 16px;
+    padding: 0 20px 16px;
   }
 
   footer.footer div.promo {
@@ -235,32 +161,24 @@ footer.footer p.credit a:focus-visible {
     flex-direction: column;
   }
 
-  footer.footer div.main {
-    grid-template-columns: 1fr;
-    gap: 32px;
+  footer.footer nav.links {
+    gap: 4px 22px;
   }
 
-  footer.footer nav.columns {
-    grid-template-columns: 1fr;
-    gap: 28px;
-  }
-
-  footer.footer ul.wideList {
-    grid-template-columns: 1fr 1fr;
+  footer.footer p.giant {
+    margin: 22px 0 14px;
+    padding: 0 12px;
+    font-size: min(168px, calc((100vw - 24px) / 9.2));
   }
 
   footer.footer div.bottom {
     grid-template-columns: 1fr;
-    justify-items: start;
-    gap: 8px;
-  }
-
-  footer.footer ul.legal {
-    justify-content: flex-start;
+    justify-items: center;
+    gap: 6px;
+    text-align: center;
   }
 
   footer.footer p.credit {
-    justify-self: start;
+    justify-self: center;
   }
 }
-

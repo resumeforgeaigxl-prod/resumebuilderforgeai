@@ -1219,5 +1219,355 @@ export const toolsRegistry: Record<string, ToolDefinition> = {
       }
     },
   },
+
+  // ─── APPLICATION TRACKING & EVIDENCE (LEVEL 15) ───────────────────────────
+  get_user_applications: {
+    name: 'get_user_applications',
+    description: 'Retrieves all tracked job applications for the current candidate, including pipeline status counts (Saved, Preparing, Ready, Applied, Interview, Offer, Rejected), evidence status, and submission receipts.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        status: {
+          type: SchemaType.STRING,
+          description: 'Filter applications by status: ALL, ACTIVE, ARCHIVED, SAVED, PREPARING, READY, APPLIED, INTERVIEW, OFFER, REJECTED, WITHDRAWN',
+        },
+        search: {
+          type: SchemaType.STRING,
+          description: 'Optional keyword to search across company name or job title',
+        },
+      },
+    },
+    execute: async ({ status, search }, userId) => {
+      try {
+        const { ApplicationTrackerService } = await import('@/lib/application-tracker');
+        const filterStatus = status === 'ALL' ? undefined : (status as any);
+        const { applications, stats } = await ApplicationTrackerService.listUserApplications(userId, {
+          status: filterStatus,
+          search,
+        });
+
+        return {
+          success: true,
+          tool: 'get_user_applications',
+          stats,
+          totalCount: applications.length,
+          applications: applications.map((app) => ({
+            id: app.id,
+            jobId: app.jobId,
+            company: app.companyName,
+            title: app.roleTitle,
+            status: app.status,
+            submissionMethod: app.submissionMethod,
+            appliedAt: app.appliedAt,
+            hasEvidence: Boolean(app.submissionEvidenceId),
+            hasReceipt: Boolean(app.submissionReceipt),
+            confirmationCode: app.submissionReceipt?.confirmationCode,
+            lastActivityAt: app.lastActivityAt,
+          })),
+        };
+      } catch (err: any) {
+        console.error('[get_user_applications] Error:', err.message);
+        return { error: `Failed to retrieve applications: ${err.message}` };
+      }
+    },
+  },
+
+  get_application_detail: {
+    name: 'get_application_detail',
+    description: 'Retrieves the complete canonical detail of a specific job application, including immutable status events with source provenance (Browser vs User Reported), verified submission receipts, screenshots, and active browser runs.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        applicationId: {
+          type: SchemaType.STRING,
+          description: 'The canonical ID of the job application to inspect',
+        },
+      },
+      required: ['applicationId'],
+    },
+    execute: async ({ applicationId }, userId) => {
+      try {
+        if (!applicationId) return { error: 'applicationId is required' };
+        const { ApplicationTrackerService } = await import('@/lib/application-tracker');
+        const detail = await ApplicationTrackerService.getApplicationDetail(userId, applicationId);
+        if (!detail) {
+          return { error: `Application ${applicationId} not found or unauthorized` };
+        }
+
+        return {
+          success: true,
+          tool: 'get_application_detail',
+          application: {
+            id: detail.id,
+            jobId: detail.jobId,
+            company: detail.companyName,
+            title: detail.roleTitle,
+            status: detail.status,
+            submissionMethod: detail.submissionMethod,
+            appliedAt: detail.appliedAt,
+            receipt: detail.submissionReceipt,
+            timeline: detail.timeline.map((evt) => ({
+              status: evt.nextStatus,
+              source: evt.source,
+              notes: evt.notes,
+              timestamp: evt.occurredAt,
+            })),
+            evidenceCount: detail.evidence.length,
+            evidence: detail.evidence.map((evi) => ({
+              id: evi.id,
+              type: evi.type,
+              source: evi.source,
+              verificationStatus: evi.verificationStatus,
+              capturedAt: evi.capturedAt,
+              externalReference: evi.externalReference,
+            })),
+            activeRunStatus: detail.activeRunStatus,
+          },
+        };
+      } catch (err: any) {
+        console.error('[get_application_detail] Error:', err.message);
+        return { error: `Failed to get application detail: ${err.message}` };
+      }
+    },
+  },
+
+  update_application_status: {
+    name: 'update_application_status',
+    description: 'Records a candidate-reported status update (such as INTERVIEW, OFFER, REJECTED, WITHDRAWN, or manual APPLIED) with explicit user attestation and immutable provenance tracking.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        applicationId: {
+          type: SchemaType.STRING,
+          description: 'The canonical ID of the application to update',
+        },
+        nextStatus: {
+          type: SchemaType.STRING,
+          description: 'The updated status: APPLIED, IN_REVIEW, ASSESSMENT, INTERVIEW, OFFER, REJECTED, WITHDRAWN',
+        },
+        notes: {
+          type: SchemaType.STRING,
+          description: 'Optional details (e.g. "Scheduled interview for Friday with hiring manager")',
+        },
+        userAttested: {
+          type: SchemaType.BOOLEAN,
+          description: 'Must be true to confirm the user actually provided this update',
+        },
+      },
+      required: ['applicationId', 'nextStatus', 'userAttested'],
+    },
+    execute: async ({ applicationId, nextStatus, notes, userAttested }, userId) => {
+      try {
+        if (!userAttested) {
+          return { error: 'User attestation is required to update application status manually.' };
+        }
+        const { ApplicationTrackerService } = await import('@/lib/application-tracker');
+        const result = await ApplicationTrackerService.updateUserReportedStatus({
+          userId,
+          applicationId,
+          nextStatus: nextStatus as any,
+          notes,
+          attestationText: notes || `User self-reported status as ${nextStatus}`,
+        });
+
+        return {
+          success: true,
+          tool: 'update_application_status',
+          applicationId: result.application.id,
+          company: result.application.companyName,
+          title: result.application.roleTitle,
+          newStatus: result.application.status,
+          source: result.event.source,
+          message: `Application status updated to ${result.application.status} (source: User Reported).`,
+        };
+      } catch (err: any) {
+        console.error('[update_application_status] Error:', err.message);
+        return { error: `Failed to update status: ${err.message}` };
+      }
+    },
+  },
+
+  // ─── OMNI AUTOPILOT ENGINE (LEVEL 16) ─────────────────────────────────────
+  get_autopilot_status: {
+    name: 'get_autopilot_status',
+    description: 'Retrieves current Autopilot configuration, active operating mode (OFF, DISCOVER, PREPARE, REVIEW_AND_EXECUTE), limits, today’s activity metrics, and review queue count.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {},
+    },
+    execute: async (_, userId) => {
+      try {
+        const { AutopilotPolicyManager, AutopilotExecutionEngine } = await import('@/lib/autopilot');
+        const [policy, stats] = await Promise.all([
+          AutopilotPolicyManager.getPolicy(userId),
+          AutopilotExecutionEngine.getActivityStats(userId),
+        ]);
+
+        return {
+          success: true,
+          tool: 'get_autopilot_status',
+          policy: {
+            enabled: policy.enabled,
+            mode: policy.mode,
+            isPaused: policy.isPaused,
+            targetRoles: policy.targetRoles,
+            preferredLocations: policy.preferredLocations,
+            remotePreference: policy.remotePreference,
+            minMatchScore: policy.minMatchScore,
+            dailyPreparationLimit: policy.dailyPreparationLimit,
+            dailySubmissionLimit: policy.dailySubmissionLimit,
+            creditBudgetPerDay: policy.creditBudgetPerDay,
+            timezone: policy.timezone,
+            preferredExecutionHour: policy.preferredExecutionHour,
+            lastRunAt: policy.lastRunAt,
+          },
+          stats,
+          message: policy.enabled && !policy.isPaused
+            ? `Omni Autopilot is ACTIVE in ${policy.mode} mode. ${stats.pendingReviewCount} application(s) in review queue.`
+            : `Omni Autopilot is currently ${policy.isPaused ? 'PAUSED' : 'OFF'}.`,
+        };
+      } catch (err: any) {
+        console.error('[get_autopilot_status] Error:', err.message);
+        return { error: `Failed to fetch Autopilot status: ${err.message}` };
+      }
+    },
+  },
+
+  update_autopilot_policy: {
+    name: 'update_autopilot_policy',
+    description: 'Updates candidate Autopilot operating mode (OFF, DISCOVER, PREPARE, REVIEW_AND_EXECUTE), target roles, location preferences, match score threshold, daily preparation limits, or pause state.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {
+        mode: {
+          type: SchemaType.STRING,
+          description: 'The operating mode: OFF, DISCOVER, PREPARE, REVIEW_AND_EXECUTE',
+        },
+        enabled: {
+          type: SchemaType.BOOLEAN,
+          description: 'Set to true to activate Autopilot or false to deactivate',
+        },
+        targetRoles: {
+          type: SchemaType.ARRAY,
+          items: { type: SchemaType.STRING },
+          description: 'List of target job role titles (e.g. ["Backend Engineer", "Software Engineer"])',
+        },
+        preferredLocations: {
+          type: SchemaType.ARRAY,
+          items: { type: SchemaType.STRING },
+          description: 'List of preferred cities or regions (e.g. ["Bangalore", "Remote"])',
+        },
+        remotePreference: {
+          type: SchemaType.STRING,
+          description: 'Remote preference: REMOTE, HYBRID, ONSITE, ANY',
+        },
+        minMatchScore: {
+          type: SchemaType.NUMBER,
+          description: 'Minimum match percentage threshold between 50 and 95 (default 75)',
+        },
+        dailyPreparationLimit: {
+          type: SchemaType.NUMBER,
+          description: 'Maximum tailored applications prepared per day (e.g. 3 to 10)',
+        },
+        creditBudgetPerDay: {
+          type: SchemaType.NUMBER,
+          description: 'Maximum credits spent per day by Autopilot (default 40)',
+        },
+      },
+    },
+    execute: async (args, userId) => {
+      try {
+        const { AutopilotPolicyManager } = await import('@/lib/autopilot');
+        const updated = await AutopilotPolicyManager.updatePolicy(userId, args);
+
+        return {
+          success: true,
+          tool: 'update_autopilot_policy',
+          policy: {
+            enabled: updated.enabled,
+            mode: updated.mode,
+            targetRoles: updated.targetRoles,
+            preferredLocations: updated.preferredLocations,
+            remotePreference: updated.remotePreference,
+            minMatchScore: updated.minMatchScore,
+            dailyPreparationLimit: updated.dailyPreparationLimit,
+            creditBudgetPerDay: updated.creditBudgetPerDay,
+            policyVersion: updated.policyVersion,
+          },
+          message: `Autopilot settings saved. Mode: ${updated.mode}. Target roles: ${updated.targetRoles.join(', ') || 'Any'}. Threshold: ${updated.minMatchScore}%.`,
+        };
+      } catch (err: any) {
+        console.error('[update_autopilot_policy] Error:', err.message);
+        return { error: `Failed to update Autopilot policy: ${err.message}` };
+      }
+    },
+  },
+
+  run_autopilot_cycle: {
+    name: 'run_autopilot_cycle',
+    description: 'Triggers an immediate on-demand Autopilot cycle to discover active vacancies, evaluate eligibility and matches, and prepare tailored application packages according to candidate policy.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {},
+    },
+    execute: async (_, userId) => {
+      try {
+        const { AutopilotExecutionEngine } = await import('@/lib/autopilot');
+        const run = await AutopilotExecutionEngine.executeCycle(userId, { force: true });
+
+        return {
+          success: true,
+          tool: 'run_autopilot_cycle',
+          status: run.status,
+          runId: run.id,
+          jobsEvaluated: run.jobsEvaluated,
+          jobsEligible: run.jobsEligible,
+          applicationsPrepared: run.applicationsPrepared,
+          applicationsSubmitted: run.applicationsSubmitted,
+          creditsSpent: run.creditsSettled,
+          message: `Autopilot cycle finished with status "${run.status}".\n- Evaluated: ${run.jobsEvaluated}\n- Eligible: ${run.jobsEligible}\n- Prepared: ${run.applicationsPrepared}\n- Credits spent: ${run.creditsSettled}`,
+        };
+      } catch (err: any) {
+        console.error('[run_autopilot_cycle] Error:', err.message);
+        return { error: `Failed to execute Autopilot cycle: ${err.message}` };
+      }
+    },
+  },
+
+  get_autopilot_review_queue: {
+    name: 'get_autopilot_review_queue',
+    description: 'Retrieves all application packages currently in the candidate review queue awaiting approval, missing question answers, or review.',
+    parameters: {
+      type: SchemaType.OBJECT,
+      properties: {},
+    },
+    execute: async (_, userId) => {
+      try {
+        const { AutopilotReviewQueue } = await import('@/lib/autopilot');
+        const items = await AutopilotReviewQueue.getReviewQueue(userId);
+
+        return {
+          success: true,
+          tool: 'get_autopilot_review_queue',
+          count: items.length,
+          queue: items.map((i) => ({
+            applicationId: i.applicationId,
+            company: i.companyName,
+            title: i.roleTitle,
+            matchScore: i.matchScore,
+            status: i.status,
+            missingAnswersCount: i.missingAnswersCount,
+            resumeTitle: i.resumeTitle,
+            creditCost: i.creditCost,
+          })),
+        };
+      } catch (err: any) {
+        console.error('[get_autopilot_review_queue] Error:', err.message);
+        return { error: `Failed to fetch review queue: ${err.message}` };
+      }
+    },
+  },
 };
+
+
 

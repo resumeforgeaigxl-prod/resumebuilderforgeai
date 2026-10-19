@@ -21,16 +21,19 @@ export default function AuthLayout({ children, params }: {
                     {children}
                 </div>
             </div>
-            <aside
-                aria-label="About ResumeForge"
-                className="hidden min-w-0 items-center justify-center border-l border-[#242424] bg-[#151515] px-12 py-16 lg:flex xl:px-16"
-            >
-                <div className="w-full max-w-[540px] space-y-4">
-                    <h2 className="!font-sans !text-[32px] font-semibold leading-tight tracking-tight text-[#F5F5F5] xl:!text-[36px]">
-                        Your AI job agent.
-                    </h2>
-                    <p className="text-base leading-7 text-[#BDBDBD]">
-                        Find the right jobs, tailor your resume, prepare applications, and move faster with Omni.
+            <aside aria-label="About ResumeForge" className="relative hidden min-h-screen overflow-hidden lg:block">
+                <img
+                    src="/auth-still.jpg"
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/10 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-10 xl:p-14">
+                    <p
+                        className="max-w-[12ch] text-[40px] font-normal leading-[1.05] tracking-[-0.03em] text-[#f4f5f7]"
+                        style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+                    >
+                        A clear page. Then the right role.
                     </p>
                 </div>
             </aside>

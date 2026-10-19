@@ -256,7 +256,27 @@ export interface ApplicationBlock {
   jobId?: string;
   jobTitle: string;
   company: string;
-  status: 'READY' | 'NEEDS_USER' | 'BLOCKED' | 'DRAFT' | 'AWAITING_APPROVAL' | 'SUBMITTING' | 'SUBMITTED' | 'UNSUPPORTED' | string;
+  status:
+    | 'READY'
+    | 'NEEDS_USER'
+    | 'BLOCKED'
+    | 'DRAFT'
+    | 'STARTING'
+    | 'INSPECTING'
+    | 'FILLING'
+    | 'VALIDATING'
+    | 'AWAITING_APPROVAL'
+    | 'SUBMITTING'
+    | 'SUBMITTED'
+    | 'UNSUPPORTED'
+    | 'PAUSED_NEEDS_USER'
+    | 'RECOVERING'
+    | 'RETRY_SCHEDULED'
+    | 'SESSION_EXPIRED'
+    | 'FAILED'
+    | 'CANCELLED'
+    | 'SUBMISSION_UNKNOWN'
+    | string;
   readinessScore: string | number;
   resumeUsed?: string;
   tailoringStatus?: string;
@@ -269,6 +289,13 @@ export interface ApplicationBlock {
   applyUrl?: string;
   reason?: string;
   evidence?: string;
+  handoffReason?: string;
+  handoffMessage?: string;
+  requiredAction?: string;
+  takeoverUrl?: string;
+  canResume?: boolean;
+  recoveryCount?: number;
+  attemptCount?: number;
 }
 
 export interface InterviewBlock {

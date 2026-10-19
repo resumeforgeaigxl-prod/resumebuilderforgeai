@@ -87,7 +87,7 @@
   --rf-gradient-ship-start: #FF4D4D;
   --rf-gradient-ship-end: #F9CB28;
 
-  background-color: var(--rf-canvas);
+  background-color: #050505;
   color: var(--rf-ink);
 }
 

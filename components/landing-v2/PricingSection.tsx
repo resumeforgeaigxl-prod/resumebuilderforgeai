@@ -1,11 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Check } from "@/components/icons";
 import Link from "next/link";
-
-const ease = [0.16, 1, 0.3, 1] as const;
 
 interface TierDetails {
   name: string;
@@ -225,252 +222,149 @@ interface PricingSectionProps {
   locale?: string;
 }
 
+const offers: Record<string, { resume: string; resumeLines: string[]; forge: string; forgeLines: string[] }> = {
+  Free: {
+    resume: "Try the resume builder.",
+    resumeLines: ["Write a resume from your experience", "Run a basic ATS check", "Download the PDF"],
+    forge: "The resume builder, and a first look at the other tools.",
+    forgeLines: ["The same resume tools", "A short pass at jobs, interviews, and practice", "Our mark stays on the file"],
+  },
+  Daily: {
+    resume: "The resume builder, for one day.",
+    resumeLines: ["Build and tailor the resume", "A stronger ATS check", "A PDF without our mark"],
+    forge: "The resume plan, plus every forge, for 24 hours.",
+    forgeLines: ["Resume, ATS check, and PDF", "Jobs, interviews, coding practice, and learning", "It ends after one day"],
+  },
+  Weekly: {
+    resume: "The resume builder, for a week.",
+    resumeLines: ["Build and tailor the resume", "A stronger ATS check", "A PDF without our mark"],
+    forge: "The resume plan, plus every forge, for 7 days.",
+    forgeLines: ["Resume, ATS check, and PDF", "Jobs, interviews, coding practice, and learning", "It lasts the week"],
+  },
+  Monthly: {
+    resume: "The resume builder, for a month.",
+    resumeLines: ["Build and tailor the resume", "A stronger ATS check", "A PDF without our mark"],
+    forge: "The resume plan, plus every forge, for a month.",
+    forgeLines: ["Resume, ATS check, and PDF", "Jobs, interviews, coding practice, and learning", "A career roadmap for the month"],
+  },
+  Professional: {
+    resume: "The resume builder, with room to use it.",
+    resumeLines: ["Build and tailor the resume", "A stronger ATS check", "A PDF without our mark"],
+    forge: "Every forge, plus a person looking at the resume.",
+    forgeLines: ["Resume, ATS check, and PDF", "Jobs, interviews, coding practice, and learning", "A one-to-one resume review"],
+  },
+};
+
+function Feature({ children }: { children: string }) {
+  return (
+    <li className="flex items-start gap-2.5 text-[14px] leading-6 text-[#b4b8c2]">
+      <Check className="mt-1 h-3.5 w-3.5 shrink-0 text-[#d7e4f0]" strokeWidth={2.5} aria-hidden="true" />
+      <span>{children}</span>
+    </li>
+  );
+}
+
 export default function PricingSection({ locale = "en-in" }: PricingSectionProps) {
-  const [sliderValue, setSliderValue] = useState(3); // Default to Monthly (index 3)
-  const activeTier = pricingTiersData[sliderValue];
+  const [activeIndex, setActiveIndex] = useState(3);
+  const activeTier = pricingTiersData[activeIndex];
+  const offer = offers[activeTier.name];
 
   return (
-    <section id="pricing" className="w-full bg-[#fafaf9] relative overflow-hidden select-none">
-      <div className="max-w-[1200px] mx-auto border-x border-[#e7e5e4] bg-white">
-        
-        {/* Header Block */}
-        <div className="px-6 md:px-10 py-16 text-left">
-          <span className="font-mono text-[14px] text-rose-500 font-semibold uppercase leading-4 block mb-3 select-none">
-            #05 — Pricing
-          </span>
-          <h2
-            className="text-[#1c1917] font-bold leading-[1.15] text-2xl md:text-[clamp(28px,3vw,40px)] tracking-tight max-w-[640px]"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontStyle: "italic",
-            }}
-          >
-            Simple, transparent pricing
-          </h2>
-          <p className="text-sm md:text-base text-stone-500 mt-3 max-w-[560px] leading-relaxed">
-            Select your usage requirements and get started instantly. Save or upgrade anytime.
-          </p>
-        </div>
+    <section id="pricing" className="bg-[#050505] text-[#f4f5f7]">
+      <div className="mx-auto max-w-[1120px] px-5 py-14 sm:px-8 sm:py-20">
+        <p className="font-mono text-[11px] font-medium uppercase tracking-[0.16em] text-[#8b909a]">
+          Pricing
+        </p>
+        <h1
+          className="mt-4 max-w-[12ch] text-[clamp(36px,5vw,56px)] font-normal leading-[1.05] tracking-[-0.03em]"
+          style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+        >
+          Simple pricing.
+        </h1>
+        <p className="mt-4 max-w-[36rem] text-[15px] leading-relaxed text-[#b4b8c2] sm:text-base">
+          Choose how long you need it.
+        </p>
 
-        {/* Pricing Estimator Slider block */}
-        <div className="border-t border-[#e7e5e4] bg-[#fafaf9] px-6 py-12 md:py-16">
-          <div className="max-w-[720px] mx-auto bg-white border border-[#e7e5e4] rounded-2xl p-6 md:p-8 shadow-[0_2px_8px_rgba(0,0,0,0.02)] mb-12">
-            
-            <div className="flex items-center justify-between mb-6">
-              <span className="font-mono text-[11px] font-semibold text-stone-500 uppercase tracking-wider">
-                Usage Volume Estimator
-              </span>
-              <span className="bg-[#7c3aed]/10 text-[#7c3aed] text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                {activeTier.limit} / day
-              </span>
-            </div>
-
-            {/* Custom Range Slider */}
-            <div className="relative w-full py-4 select-none">
-              {/* Track background */}
-              <div className="relative w-full h-1.5 bg-stone-200 rounded-full">
-                {/* Active fill */}
-                <div
-                  className="absolute h-full bg-[#7c3aed] rounded-full animate-none"
-                  style={{ width: `${(sliderValue / 4) * 100}%` }}
-                />
-                
-                {/* Tick marks */}
-                <div className="absolute inset-0 flex justify-between px-1 pointer-events-none">
-                  {[0, 1, 2, 3, 4].map((tick) => (
-                    <div
-                      key={tick}
-                      className={`w-1.5 h-1.5 rounded-full -mt-0.5 transition-colors duration-200 ${
-                        tick <= sliderValue ? "bg-[#7c3aed]" : "bg-stone-300"
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Hidden native input overlay for drag-select */}
-              <input
-                type="range"
-                min="0"
-                max="4"
-                step="1"
-                value={sliderValue}
-                onChange={(e) => setSliderValue(parseInt(e.target.value))}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              />
-
-              {/* Custom Grab Thumb pill */}
-              <div
-                className="absolute top-1/2 -mt-3.5 w-11 h-7 bg-white border border-[#e7e5e4] shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-lg flex items-center justify-center pointer-events-none transition-all duration-75 select-none"
-                style={{
-                  left: `calc(${(sliderValue / 4) * 100}% - 22px)`,
-                }}
+        <div className="mt-8 flex flex-wrap gap-2" role="tablist" aria-label="Billing period">
+          {pricingTiersData.map((tier, index) => {
+            const selected = index === activeIndex;
+            return (
+              <button
+                key={tier.name}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                onClick={() => setActiveIndex(index)}
+                className={`h-9 cursor-pointer rounded-full px-4 text-[13px] font-medium transition-colors ${
+                  selected
+                    ? "bg-[#f4f5f7] text-[#0c0d10]"
+                    : "border border-[#3a3d46] text-[#f4f5f7] hover:bg-[#16171b]"
+                }`}
               >
-                <div className="flex gap-0.5">
-                  <div className="w-[1.5px] h-3 bg-stone-300" />
-                  <div className="w-[1.5px] h-3 bg-stone-300" />
-                </div>
-              </div>
-            </div>
-
-            {/* Slider Ticks/Labels */}
-            <div className="flex justify-between mt-3 px-1">
-              {pricingTiersData.map((tier, idx) => (
-                <button
-                  key={tier.name}
-                  onClick={() => setSliderValue(idx)}
-                  className="flex flex-col items-center group cursor-pointer animate-none bg-transparent border-0 p-0"
-                >
-                  <span
-                    className={`text-[11px] font-mono uppercase font-bold transition-colors ${
-                      sliderValue === idx ? "text-[#7c3aed]" : "text-stone-400 group-hover:text-stone-600"
-                    }`}
-                  >
-                    {tier.name === "Professional" ? (
-                      <>
-                        <span className="hidden sm:inline">Professional</span>
-                        <span className="inline sm:hidden">Pro</span>
-                      </>
-                    ) : tier.name}
-                  </span>
-                  <span className="text-[9.5px] text-stone-500 mt-0.5 hidden md:inline font-mono">
-                    {tier.limit.split(" ")[0]} cr
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Cards side-by-side comparison (AutoSend Split Layout) */}
-          <motion.div
-            className="border border-[#e7e5e4] bg-white rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#e7e5e4] max-w-[960px] mx-auto shadow-[0_4px_12px_rgba(0,0,0,0.02)]"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.6, ease, delay: 0.05 }}
-          >
-            
-            {/* CARD 1: Standard Access */}
-            <div className="flex flex-col bg-white h-full justify-between overflow-hidden">
-              <div className="p-6 md:p-8 flex-1 flex flex-col">
-                <span className="font-mono text-[9px] uppercase font-bold text-stone-400 tracking-widest mb-1.5 block text-left">
-                  ONLY RESUME BUILDER
-                </span>
-                
-                {/* Price block */}
-                <div className="flex items-center gap-4 my-4 justify-start">
-                  <span className="text-5xl md:text-6xl font-extrabold text-stone-900 leading-none tracking-tight">
-                    {activeTier.standardPrice}
-                  </span>
-                  <div className="flex flex-col text-left justify-center leading-none">
-                    <span className="text-[12px] font-bold text-stone-800 uppercase font-mono">
-                      {activeTier.name === "Monthly" ? "STARTER" : (activeTier.name === "Professional" ? "PRO" : activeTier.name.toUpperCase())}
-                    </span>
-                    <span className="text-[11px] font-semibold text-stone-500 mt-1 font-mono">
-                      {activeTier.limit} / day
-                    </span>
-                    <span className="text-[9.5px] text-stone-400 mt-1 font-mono">
-                      billed {activeTier.standardPeriod}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="my-4 h-[1px] bg-stone-100" />
-
-                {/* Features list */}
-                <ul className="space-y-3.5 flex-1 text-left mb-4">
-                  {activeTier.standardFeatures.map((feat) => (
-                    <li key={feat} className="flex items-start gap-2.5 text-stone-600 text-[13px]">
-                      <div className="w-4 h-4 rounded-full bg-[#7c3aed] flex items-center justify-center shrink-0 mt-0.5 animate-none">
-                        <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-                      </div>
-                      <span>{feat}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Full-width bottom CTA */}
-              <Link href={`/${locale}${activeTier.standardHref}`} className="block w-full">
-                <div className="w-full py-4 bg-[#292524] hover:bg-[#1c1917] text-white text-center font-mono text-[12px] uppercase font-bold tracking-widest flex items-center justify-center gap-1.5 border-t border-[#e7e5e4] cursor-pointer transition-all active:scale-[0.99]">
-                  <span>{activeTier.standardCTA}</span>
-                  <span className="text-[14px]">→</span>
-                </div>
-              </Link>
-            </div>
-
-            {/* CARD 2: All-Access Forges (Recommended) */}
-            <div className="flex flex-col bg-white h-full justify-between overflow-hidden relative">
-              <div className="p-6 md:p-8 flex-1 flex flex-col">
-                <div className="flex justify-between items-center mb-1.5">
-                  <span className="font-mono text-[9px] uppercase font-bold text-[#7c3aed] tracking-widest block text-left">
-                    RESUME BUILDER + ALL FORGES
-                  </span>
-                  <span className="bg-[#84cc16] text-white text-[8px] font-bold font-mono tracking-widest px-2.5 py-0.5 rounded uppercase select-none">
-                    RECOMMENDED
-                  </span>
-                </div>
-                
-                {/* Price block */}
-                <div className="flex items-center gap-4 my-4 justify-start">
-                  <span className="text-5xl md:text-6xl font-extrabold text-[#7c3aed] leading-none tracking-tight">
-                    {activeTier.allAccessPrice}
-                  </span>
-                  <div className="flex flex-col text-left justify-center leading-none">
-                    <span className="text-[12px] font-bold text-stone-800 uppercase font-mono">
-                      {activeTier.name === "Monthly" ? "STARTER" : (activeTier.name === "Professional" ? "PRO" : activeTier.name.toUpperCase())}
-                    </span>
-                    <span className="text-[11px] font-semibold text-stone-500 mt-1 font-mono">
-                      {activeTier.limit} / day · All Forges
-                    </span>
-                    <span className="text-[9.5px] text-stone-400 mt-1 font-mono">
-                      billed {activeTier.allAccessPeriod}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="my-4 h-[1px] bg-stone-100" />
-
-                {/* Split Features columns */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3.5 flex-1 text-left mb-4">
-                  {/* Left Column (Standard features, matching Left card) */}
-                  <ul className="space-y-3.5">
-                    {activeTier.allAccessFeaturesLeft.map((feat) => (
-                      <li key={feat} className="flex items-start gap-2.5 text-stone-700 text-[13px]">
-                        <div className="w-4 h-4 rounded-full bg-[#7c3aed] flex items-center justify-center shrink-0 mt-0.5 animate-none">
-                          <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-                        </div>
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* Right Column (All-Access extra Forges) */}
-                  <ul className="space-y-3.5 border-t sm:border-t-0 pt-3.5 sm:pt-0 border-stone-100">
-                    {activeTier.allAccessFeaturesRight.map((feat) => (
-                      <li key={feat} className="flex items-start gap-2.5 text-stone-700 text-[13px]">
-                        <div className="w-4 h-4 rounded-full bg-[#7c3aed] flex items-center justify-center shrink-0 mt-0.5 animate-none">
-                          <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-                        </div>
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Full-width bottom CTA */}
-              <Link href={`/${locale}${activeTier.allAccessHref}`} className="block w-full">
-                <div className="w-full py-4 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-center font-mono text-[12px] uppercase font-bold tracking-widest flex items-center justify-center gap-1.5 border-t border-[#e7e5e4] cursor-pointer transition-all active:scale-[0.99]">
-                  <span>{activeTier.allAccessCTA}</span>
-                  <span className="text-[14px]">→</span>
-                </div>
-              </Link>
-            </div>
-
-          </motion.div>
+                {tier.name}
+              </button>
+            );
+          })}
         </div>
 
+        <div className="mt-8 grid items-stretch gap-4 lg:grid-cols-2">
+          <article className="flex flex-col rounded-2xl border border-[#2a2c33] bg-[#0c0d10] p-5 sm:p-7">
+            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-[#8b909a]">Resume</p>
+            <div className="mt-5 flex items-end gap-3">
+              <p
+                className="text-[52px] leading-none tracking-[-0.04em] text-[#f4f5f7] sm:text-[60px]"
+                style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+              >
+                {activeTier.standardPrice}
+              </p>
+              <p className="pb-1 text-sm text-[#8b909a]">/ {activeTier.standardPeriod}</p>
+            </div>
+            <p className="mt-4 max-w-[28ch] text-[15px] leading-6 text-[#f4f5f7]">{offer.resume}</p>
+            <p className="mt-2 text-sm text-[#8b909a]">{activeTier.limit} a day</p>
+            <ul className="mt-6 flex flex-1 flex-col gap-3">
+              {offer.resumeLines.map((line) => (
+                <Feature key={line}>{line}</Feature>
+              ))}
+            </ul>
+            <Link
+              href={`/${locale}${activeTier.standardHref}`}
+              className="mt-8 inline-flex h-11 items-center justify-center rounded-full border border-[#3a3d46] text-sm font-medium text-[#f4f5f7] transition-colors hover:bg-[#16171b]"
+            >
+              {activeTier.standardCTA}
+            </Link>
+          </article>
+
+          <article className="flex flex-col rounded-2xl border border-[#d7e4f0]/40 bg-[#0c0d10] p-5 sm:p-7">
+            <div className="flex items-center justify-between gap-3">
+              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-[#d7e4f0]">Resume and forges</p>
+              <span className="rounded-full border border-[#2a2c33] px-2.5 py-1 text-[11px] text-[#b4b8c2]">
+                Recommended
+              </span>
+            </div>
+            <div className="mt-5 flex items-end gap-3">
+              <p
+                className="text-[52px] leading-none tracking-[-0.04em] text-[#d7e4f0] sm:text-[60px]"
+                style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+              >
+                {activeTier.allAccessPrice}
+              </p>
+              <p className="pb-1 text-sm text-[#8b909a]">/ {activeTier.allAccessPeriod}</p>
+            </div>
+            <p className="mt-4 max-w-[32ch] text-[15px] leading-6 text-[#f4f5f7]">{offer.forge}</p>
+            <p className="mt-2 text-sm text-[#8b909a]">{activeTier.limit} a day</p>
+            <ul className="mt-6 flex flex-1 flex-col gap-3">
+              {offer.forgeLines.map((line) => (
+                <Feature key={line}>{line}</Feature>
+              ))}
+            </ul>
+            <Link
+              href={`/${locale}${activeTier.allAccessHref}`}
+              className="mt-8 inline-flex h-11 items-center justify-center rounded-full bg-[#f4f5f7] text-sm font-medium text-[#0c0d10] transition-colors hover:bg-white"
+            >
+              {activeTier.allAccessCTA}
+            </Link>
+          </article>
+        </div>
       </div>
     </section>
   );

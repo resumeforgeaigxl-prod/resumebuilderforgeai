@@ -36,14 +36,12 @@ export async function generateMetadata({
 
 export default function PricingPage({ params }: PricingPageProps) {
   return (
-    <div className="landing-light">
+    <div className="bg-[#050505]">
       <Navbar locale={params.locale} />
-      <main className="pt-8 bg-[#fafaf9]">
-        <div className="max-w-[1200px] mx-auto border-x border-[#e7e5e4] bg-white">
-          <PricingSection locale={params.locale} />
-        </div>
+      <main>
+        <PricingSection locale={params.locale} />
       </main>
-      <FooterSection locale={params.locale} />
+      <FooterSection locale={params.locale} promo={false} />
     </div>
   );
 }

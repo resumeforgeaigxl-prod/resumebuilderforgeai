@@ -1,0 +1,86 @@
+.track { background: #080a0c; color: #f0f3f6; border-top: 1px solid #252a31; border-bottom: 1px solid #252a31; }
+.sticky { display: flex; align-items: center; }
+.frame { width: 100%; max-width: 1120px; margin: auto; padding: 64px 32px; }
+.header { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 36px; }
+.eyebrow { color: #91a3b1; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; margin: 0 0 14px; }
+.header h2 { margin: 0; font-family: var(--font-display), Georgia, serif; font-size: clamp(28px, 3vw, 38px); font-weight: 400; letter-spacing: -.035em; }
+.scrollHint { color: #77828c; font-size: 11px; white-space: nowrap; }
+.scrollHint span { margin-left: 12px; }
+.stage { display: grid; grid-template-columns: 1fr 1.2fr; gap: 64px; align-items: center; }
+.copy h3 { white-space: pre-line; font-family: var(--font-display), Georgia, serif; font-size: clamp(36px, 4.2vw, 54px); line-height: 1.08; letter-spacing: -.04em; font-weight: 400; margin: 0 0 22px; }
+.description { color: #9da7b0; font-size: 14px; line-height: 1.8; max-width: 37ch; margin: 0 0 26px; }
+.action { display: inline-flex; align-items: center; gap: 20px; border-bottom: 1px solid #607384; padding-bottom: 10px; color: #d8e8f3; font-size: 13px; }
+.action:hover { color: #fff; border-color: #fff; }
+.visual { min-width: 0; border: 1px solid #303740; border-radius: 16px; background: #141b22; overflow: hidden; }
+.windowBar { display: flex; justify-content: space-between; gap: 12px; padding: 15px 18px; border-bottom: 1px solid #303740; color: #8b9bab; font-size: 8px; letter-spacing: .1em; }
+.preview { height: 342px; padding: 24px; animation: reveal 350ms ease both; }
+.paper { background: #e3e8eb; color: #26313b; max-width: 350px; margin: 0 auto; padding: 22px 26px; box-shadow: 0 8px 32px #0004; border-radius: 3px; }
+.paperTop { display: flex; align-items: center; justify-content: space-between; font-size: 7px; letter-spacing: .14em; color: #62717d; margin-bottom: 14px; }
+.paper h4 { font-family: var(--font-display), Georgia, serif; font-size: 24px; line-height: 1.2; margin: 0 0 5px; }
+.paper p { margin: 0 0 10px; font-size: 9px; line-height: 1.6; color: #56616a; }
+.paper h5 { border-top: 1px solid #bec8cf; padding-top: 9px; margin: 10px 0 5px; font-size: 7px; letter-spacing: .13em; }
+.paper strong { font-size: 9px; }
+.tags { display: flex; gap: 5px; font-size: 7px; }
+.tags span { background: #cdd8df; padding: 3px 6px; border-radius: 3px; }
+.paperFoot { display: flex; align-items: center; gap: 7px; font-size: 8px; margin-top: 14px; color: #435e53; }
+.previewLabel { font-size: 8px; color: #9caebe; letter-spacing: .14em; margin: 0 0 12px; }
+.jobs h4, .chat h4 { font-family: var(--font-display), Georgia, serif; font-weight: 400; font-size: 26px; line-height: 1.2; margin: 0 0 22px; }
+.job { display: flex; align-items: center; gap: 12px; padding: 14px 12px; border: 1px solid #303b46; border-radius: 9px; background: #1a232c; margin-bottom: 9px; }
+.jobInitial { width: 30px; height: 30px; display: grid; place-items: center; background: #344653; color: #c7dbe8; border-radius: 7px; font-family: var(--font-display), Georgia, serif; }
+.job strong { font-size: 11px; font-weight: 500; }
+.job p { color: #8c9aa7; font-size: 9px; margin: 4px 0 0; }
+.match { margin-left: auto; color: #b7d7ca; font-size: 8px; white-space: nowrap; }
+.previewNote { font-size: 9px; color: #82909d; margin: 16px 0 0; }
+.chatQuestion, .chatAnswer { padding: 16px; font-size: 12px; line-height: 1.65; border-radius: 12px; margin: 0 0 14px; }
+.chatQuestion { background: #293b49; margin-left: 28px; color: #d8e6ef; border-bottom-right-radius: 3px; }
+.chatAnswer { background: #1b252e; margin-right: 28px; color: #b4c2cd; border: 1px solid #33404c; border-bottom-left-radius: 3px; }
+.chatPrompt { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 22px; font-size: 9px; color: #8c9eac; }
+.stepNav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 34px; }
+.stepNav button { display: flex; align-items: center; gap: 12px; text-align: left; padding: 17px 0 0; border: 0; border-top: 2px solid #2b323a; color: #737e89; background: transparent; cursor: pointer; font-size: 11px; transition: color 180ms ease, border-color 180ms ease; }
+.stepNav button > span:first-child { font-size: 10px; font-family: ui-monospace, monospace; }
+.stepNav button svg { margin-left: auto; }
+.stepNav button.selected { color: #d7e7f3; border-top-color: #b5cede; }
+.stepNav button:hover { color: #fff; }
+.stepNav button:focus-visible, .action:focus-visible { outline: 2px solid #b5cede; outline-offset: 5px; }
+@keyframes reveal { from { opacity: .25; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (min-width: 901px) and (min-height: 580px) and (prefers-reduced-motion: no-preference) {
+  .track { height: 280vh; }
+  .sticky { position: sticky; top: 0; height: 100vh; }
+  .frame { padding-top: 32px; padding-bottom: 32px; }
+}
+@media (max-width: 900px) {
+  .frame { padding: 48px 20px; }
+  .header { align-items: start; }
+  .scrollHint { display: none; }
+  .stage { grid-template-columns: 1fr; gap: 28px; }
+  .copy h3 { font-size: 40px; }
+  .description { max-width: 55ch; }
+  .stepNav { gap: 14px; }
+  .stepNav button { align-items: start; flex-wrap: wrap; gap: 6px; font-size: 10px; }
+  .stepNav button svg { display: none; }
+  .stepNav button > span:first-child { width: 100%; }
+}
+@media (max-width: 400px) {
+  .preview { padding: 18px 12px; }
+  .windowBar { font-size: 7px; padding: 14px 12px; }
+  .match { font-size: 7px; }
+}
+@media (prefers-reduced-motion: reduce) { .preview { animation: none; } .stepNav button { transition: none; } }
+@media (min-width: 901px) and (min-height: 580px) and (max-height: 720px) {
+  .frame { padding-top: 20px; padding-bottom: 20px; }
+  .header { margin-bottom: 22px; }
+  .header h2 { font-size: 30px; }
+  .stage { gap: 40px; }
+  .copy h3 { font-size: 42px; }
+  .preview { height: 320px; padding-top: 14px; padding-bottom: 14px; }
+  .stepNav { margin-top: 22px; }
+}
+.jobs h4 { font-size: 24px; margin-bottom: 16px; }
+.job { padding: 10px 12px; margin-bottom: 8px; line-height: 1.4; }
+.job p { line-height: 1.4; }
+.previewNote { margin-top: 12px; line-height: 1.4; }
+.paper { padding: 16px 22px; }
+.paperTop { margin-bottom: 8px; }
+.paper p { margin-bottom: 6px; }
+.paper h5 { margin-top: 6px; padding-top: 7px; }
+.paperFoot { margin-top: 10px; }

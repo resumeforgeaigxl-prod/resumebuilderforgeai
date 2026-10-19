@@ -62,6 +62,59 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, run });
     }
 
+    // ── 3. RECOVER RUN (LEVEL 14) ──
+    if (action === 'RECOVER') {
+      if (!runId) {
+        return NextResponse.json(
+          { success: false, error: 'Missing runId parameter for recovery.' },
+          { status: 400 }
+        );
+      }
+
+      const run = await BrowserApplicationAgentService.recoverRun({
+        userId: session.userId,
+        runId,
+      });
+
+      return NextResponse.json({ success: true, run });
+    }
+
+    // ── 4. CANCEL RUN (LEVEL 14) ──
+    if (action === 'CANCEL') {
+      if (!runId) {
+        return NextResponse.json(
+          { success: false, error: 'Missing runId parameter for cancellation.' },
+          { status: 400 }
+        );
+      }
+
+      const run = await BrowserApplicationAgentService.cancelRun({
+        userId: session.userId,
+        runId,
+        reason: body.reason || 'USER_CANCELLED',
+      });
+
+      return NextResponse.json({ success: true, run });
+    }
+
+    // ── 5. HEARTBEAT / LEASE EXTENSION (LEVEL 14) ──
+    if (action === 'HEARTBEAT') {
+      if (!runId) {
+        return NextResponse.json(
+          { success: false, error: 'Missing runId parameter for heartbeat.' },
+          { status: 400 }
+        );
+      }
+
+      const result = await BrowserApplicationAgentService.heartbeat({
+        runId,
+        workerId: body.workerId || 'client_session',
+        ttlSeconds: body.ttlSeconds || 300,
+      });
+
+      return NextResponse.json(result);
+    }
+
     // ── 3. START BROWSER APPLICATION RUN (APPROVAL MODE) ──
     if (!packageId) {
       return NextResponse.json(

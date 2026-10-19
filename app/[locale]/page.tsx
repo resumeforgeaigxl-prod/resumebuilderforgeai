@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 import LandingPage from "@/components/LandingPage";
 import { BASE_URL } from "@/lib/constants";
 import { getBlogPosts } from "@/lib/seo-service";
+import { createClient } from "@/lib/supabase/server";
 
 type LocaleHomeProps = {
   params: {
@@ -45,6 +46,12 @@ export async function generateMetadata({
 export default async function LocaleHome({ params }: LocaleHomeProps) {
   // Fetch posts server-side for the "What's New" section
   const posts = await getBlogPosts(params.locale.split('-')[0]);
+  const { data: jobs } = await createClient()
+    .from('jobs')
+    .select('id, title, company, location, remote_type, employment_type, skills, slug')
+    .eq('status', 'ACTIVE')
+    .order('last_seen_at', { ascending: false })
+    .limit(24);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -71,7 +78,7 @@ export default async function LocaleHome({ params }: LocaleHomeProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <LandingPage locale={params.locale} posts={posts} />
+      <LandingPage locale={params.locale} posts={posts} jobs={jobs || []} />
     </>
   );
 }

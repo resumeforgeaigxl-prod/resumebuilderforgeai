@@ -6,7 +6,7 @@ import { Download, X } from '@/components/icons';
 
 interface BeforeInstallPromptEvent extends Event {
     prompt: () => Promise<void>;
-    userChoice: Promise<{ outcome: 'accepted' | 'dismissed', platform: string }>;
+    userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
 }
 
 const DISMISS_KEY = 'pwa-banner-dismissed';
@@ -14,12 +14,14 @@ const DISMISS_KEY = 'pwa-banner-dismissed';
 export default function InstallBanner() {
     const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
     const [isVisible, setIsVisible] = useState(false);
+    const [cookieOpen, setCookieOpen] = useState(false);
+    const pathname = usePathname();
 
     useEffect(() => {
-        // If already dismissed or already installed, never show
         try {
+            setCookieOpen(!localStorage.getItem('cookie_consent'));
             if (localStorage.getItem(DISMISS_KEY)) return;
-        } catch { /* SSR / private browsing */ }
+        } catch { /* private browsing */ }
 
         if (window.matchMedia('(display-mode: standalone)').matches) return;
 
@@ -41,23 +43,20 @@ export default function InstallBanner() {
 
     const handleInstall = async () => {
         if (!deferredPrompt) return;
-        
+
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
-        
+
         if (outcome === 'accepted') {
-            console.log('User accepted the install prompt');
             try {
                 await fetch('/api/pwa/install', { method: 'POST' });
             } catch (err) {
                 console.error('Failed to track install', err);
             }
         }
-        
+
         dismiss();
     };
-
-    const pathname = usePathname();
 
     if (!isVisible) return null;
     if (
@@ -70,44 +69,46 @@ export default function InstallBanner() {
     }
 
     return (
-        <div className="fixed bottom-6 left-6 right-6 md:left-auto md:right-8 md:w-96 z-[100] animate-in slide-in-from-bottom-8 duration-500">
-            <div className="p-6 rounded-[12px] bg-white border border-[#EBEBEB] shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.06)] relative overflow-hidden group">
-                <button 
+        <div className={`fixed right-4 z-[60] w-[calc(100%-2rem)] max-w-sm md:bottom-4 md:right-8 ${cookieOpen ? 'bottom-44' : 'bottom-4'}`}>
+            <div className="relative rounded-2xl border border-[#2a2c33] bg-[#0c0d10] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.45)]">
+                <button
+                    type="button"
                     onClick={dismiss}
-                    className="absolute top-4 right-4 p-1 rounded-[4px] hover:bg-[#FAFAFA] text-[#8F8F8F] hover:text-[#171717] transition-all cursor-pointer"
+                    aria-label="Dismiss install prompt"
+                    className="absolute right-3 top-3 cursor-pointer p-1 text-[#8b909a] transition-colors hover:text-[#f4f5f7]"
                 >
-                    <X className="w-4 h-4" />
+                    <X className="h-4 w-4" />
                 </button>
 
-                <div className="flex gap-4 items-start relative z-10">
-                    <div className="w-10 h-10 rounded-[6px] bg-[#F2F2F2] border border-[#EBEBEB] flex items-center justify-center shrink-0 shadow-sm">
-                        <Download className="w-5 h-5 text-[#171717]" />
+                <div className="flex items-start gap-3 pr-6">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#2a2c33] bg-[#16171b]">
+                        <Download className="h-4 w-4 text-[#d7e4f0]" />
                     </div>
-                    <div className="space-y-3 flex-1">
-                        <div className="space-y-1">
-                            <h4 className="text-sm font-semibold tracking-[-0.28px] text-[#171717]">Level Up Your Access</h4>
-                            <p className="text-[#4D4D4D] text-xs leading-relaxed">
-                                Install <span className="font-semibold text-[#171717]">ResumeForgeAI</span> for a faster, seamless mobile experience.
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                            <button 
-                                onClick={handleInstall}
-                                className="px-4 py-2 rounded-[6px] bg-[#171717] hover:bg-[#333333] text-white text-xs font-medium transition-all active:scale-95 shadow-sm cursor-pointer"
-                            >
-                                Install Now
-                            </button>
-                            <button 
-                                onClick={dismiss}
-                                className="px-4 py-2 rounded-[6px] bg-white border border-[#EBEBEB] text-[#4D4D4D] hover:text-[#171717] hover:bg-[#FAFAFA] text-xs font-medium transition-all cursor-pointer"
-                            >
-                                Later
-                            </button>
-                        </div>
+                    <div>
+                        <h4 className="text-sm font-medium text-[#f4f5f7]">Install ResumeForge</h4>
+                        <p className="mt-1 text-xs leading-relaxed text-[#b4b8c2]">
+                            Add it to your home screen for a faster app.
+                        </p>
                     </div>
+                </div>
+
+                <div className="mt-4 flex items-center justify-end gap-2">
+                    <button
+                        type="button"
+                        onClick={dismiss}
+                        className="h-9 cursor-pointer rounded-full border border-[#3a3d46] px-4 text-xs font-medium text-[#f4f5f7] transition-colors hover:bg-[#16171b]"
+                    >
+                        Later
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleInstall}
+                        className="h-9 cursor-pointer rounded-full bg-[#f4f5f7] px-4 text-xs font-medium text-[#0c0d10] transition-colors hover:bg-white"
+                    >
+                        Install
+                    </button>
                 </div>
             </div>
         </div>
     );
 }
-

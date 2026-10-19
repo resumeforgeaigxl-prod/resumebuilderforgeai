@@ -13,7 +13,6 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState(0);
 
   const handleScroll = useCallback(() => {
     setScrolled(window.scrollY > 10);
@@ -54,38 +53,27 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
 
   const dropdownItems = [
     {
-      id: 0,
-      label: "Resume Builder",
-      desc: "ATS-optimized resume generation",
+      label: "Builder",
+      desc: "Write and tailor the resume.",
       href: `/${locale}/resumes`,
       icon: FileText,
-      color: "text-indigo-600 bg-indigo-50 border-indigo-100",
     },
     {
-      id: 1,
-      label: "Resume Templates",
-      desc: "Browse curated design systems",
+      label: "Layouts",
+      desc: "Choose how the page looks.",
       href: `/${locale}/resumes`,
       icon: Layout,
-      color: "text-blue-600 bg-blue-50 border-blue-100",
     },
     {
-      id: 2,
-      label: "ATS Scanner",
-      desc: "Calibrate and check score instantly",
+      label: "ATS check",
+      desc: "See how the resume reads to a screen.",
       href: `/${locale}/ats-live`,
       icon: Zap,
-      color: "text-pink-600 bg-pink-50 border-pink-100",
-    }
+    },
   ];
 
   return (
-    <motion.header
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      className="sticky top-0 z-50 w-full bg-[#0c0d10]"
-    >
+    <header className="sticky top-0 z-50 w-full bg-[#0c0d10]">
       <nav
         className={`mx-auto flex h-14 max-w-[1120px] items-center justify-between px-8 transition-all duration-300 ${
           scrolled
@@ -142,168 +130,42 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
             <AnimatePresence>
               {dropdownOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
+                  exit={{ opacity: 0, y: 8 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute top-14 left-1/2 -translate-x-1/2 w-[620px] bg-white border border-[#EBEBEB] rounded-2xl shadow-xl z-50 text-left overflow-hidden grid grid-cols-12"
+                  className="absolute left-1/2 top-14 z-50 grid w-[520px] -translate-x-1/2 grid-cols-[1fr_200px] overflow-hidden rounded-2xl border border-[#2a2c33] bg-[#0c0d10] text-left shadow-[0_16px_40px_rgba(0,0,0,0.45)]"
                 >
-                  {/* Left Column - Options Stack */}
-                  <div className="col-span-6 flex flex-col divide-y divide-[#EBEBEB] border-b border-[#EBEBEB]">
+                  <div className="p-2">
                     {dropdownItems.map((item) => {
                       const Icon = item.icon;
-                      const isSelected = activeTab === item.id;
                       return (
                         <Link
                           key={item.label}
                           href={item.href}
-                          onMouseEnter={() => setActiveTab(item.id)}
                           onClick={() => setDropdownOpen(false)}
-                          className={`flex items-start gap-4 p-5 transition-all duration-200 ${
-                            isSelected ? "bg-stone-50" : "bg-white hover:bg-stone-50/50"
-                          }`}
+                          className="flex items-start gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-[#16171b]"
                         >
-                          <div className={`p-2.5 rounded-lg border ${item.color} shrink-0`}>
-                            <Icon className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <span className="text-[12px] font-sans font-bold uppercase tracking-wider text-[#171717]">
-                              {item.label}
-                            </span>
-                            <span className="block text-[10px] font-sans text-stone-400 font-medium mt-1 leading-normal">
-                              {item.desc}
-                            </span>
-                          </div>
+                          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#2a2c33] bg-[#16171b]">
+                            <Icon className="h-4 w-4 text-[#d7e4f0]" />
+                          </span>
+                          <span>
+                            <span className="block text-sm font-medium text-[#f4f5f7]">{item.label}</span>
+                            <span className="mt-0.5 block text-[13px] leading-5 text-[#8b909a]">{item.desc}</span>
+                          </span>
                         </Link>
                       );
                     })}
                   </div>
-
-                  {/* Right Column - Premium Visual Preview Panel with Custom Background */}
-                  <div 
-                    className="col-span-6 border-l border-[#EBEBEB] p-5 flex flex-col justify-start select-none relative overflow-hidden h-full min-h-[220px] bg-cover bg-center"
-                    style={{ backgroundImage: "url('/resume_forge_pixel_bg.png')" }}
-                  >
-                    {/* Window Controls with Frosted Glass Header */}
-                    <div className="flex items-center gap-1.5 pb-3 mb-3 border-b border-stone-200/50 w-full shrink-0 bg-white/70 backdrop-blur-md -mx-5 -mt-5 px-5 py-3 rounded-tr-2xl">
-                      <div className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/80" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-green-400/80" />
-                      <span className="text-[9px] font-mono text-stone-500 ml-2 font-bold">resume_workspace.app</span>
-                    </div>
-
-                    <div className="flex-1 w-full flex flex-col justify-center">
-                      <AnimatePresence mode="wait">
-                        {activeTab === 0 && (
-                          <motion.div
-                            key="builder"
-                            initial={{ opacity: 0, scale: 0.96, y: 5 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.96, y: -5 }}
-                            transition={{ duration: 0.12 }}
-                            className="w-full flex flex-col justify-center"
-                          >
-                            <div className="bg-white border border-[#EBEBEB] rounded-xl p-3 shadow-sm w-full space-y-3">
-                              <div className="flex justify-between items-center bg-stone-50 border border-stone-100 p-2 rounded-lg">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                  <span className="text-[10px] font-sans font-bold text-[#171717]">Full Stack Engineer Resume</span>
-                                </div>
-                                <span className="text-[8px] font-mono text-stone-400 uppercase">92% Match</span>
-                              </div>
-                              
-                              <div className="space-y-2 p-1">
-                                <div className="flex justify-between text-[9px] font-sans text-stone-500 font-bold border-b border-stone-100 pb-1">
-                                  <span>WORK EXPERIENCE</span>
-                                  <span className="text-[8px] font-mono text-emerald-600 uppercase font-extrabold bg-emerald-50 border border-emerald-100 px-1.5 py-0.2 rounded">ATS Calibrated</span>
-                                </div>
-                                <div className="space-y-1">
-                                  <div className="flex justify-between text-[9px] font-sans text-[#171717] font-semibold">
-                                    <span>Senior Engineer — ResumeForge</span>
-                                    <span className="text-stone-400 font-normal">2024 - Pres.</span>
-                                  </div>
-                                  <p className="text-[8px] font-sans text-stone-400 leading-normal">
-                                    • Spearheaded AI parser reducing latency by 35% with Next.js structures.
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
-
-                        {activeTab === 1 && (
-                          <motion.div
-                            key="templates"
-                            initial={{ opacity: 0, scale: 0.96, y: 5 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.96, y: -5 }}
-                            transition={{ duration: 0.12 }}
-                            className="w-full flex flex-col justify-center"
-                          >
-                            <div className="space-y-2.5 text-left w-full">
-                              <span className="text-[9px] font-mono font-bold text-stone-600 uppercase tracking-wider block bg-white/40 backdrop-blur-sm py-0.5 px-1.5 rounded w-max border border-stone-200/20">Active Style Guides</span>
-                              <div className="grid grid-cols-2 gap-2">
-                                {[
-                                  { name: "Minimalist Grid", desc: "For Tech & Product Roles", active: true },
-                                  { name: "Serif Editorial", desc: "For Creative & Media", active: false },
-                                  { name: "Sleek Executive", desc: "For Finance & Leaders", active: false },
-                                  { name: "Developer Mono", desc: "For Backend Engineers", active: false }
-                                ].map((tpl) => (
-                                  <div 
-                                    key={tpl.name}
-                                    className={`p-2.5 rounded-lg border text-left transition-colors duration-150 shadow-sm ${
-                                      tpl.active 
-                                        ? "border-blue-500 bg-white text-[#171717]" 
-                                        : "border-stone-200 bg-white/95 text-stone-400"
-                                    }`}
-                                  >
-                                    <div className="text-[9px] font-sans font-bold">{tpl.name}</div>
-                                    <div className="text-[8px] font-sans text-stone-400 font-medium mt-0.5">{tpl.desc}</div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
-
-                        {activeTab === 2 && (
-                          <motion.div
-                            key="scanner"
-                            initial={{ opacity: 0, scale: 0.96, y: 5 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.96, y: -5 }}
-                            transition={{ duration: 0.12 }}
-                            className="w-full flex flex-col justify-center"
-                          >
-                            <div className="bg-white border border-[#EBEBEB] rounded-xl p-3 shadow-sm w-full space-y-3">
-                              <div className="flex justify-between items-center border-b border-stone-100 pb-2">
-                                <span className="text-[9px] font-mono font-bold text-stone-400 uppercase">ATS Compatibility Report</span>
-                                <span className="text-[8px] font-bold text-pink-600 bg-pink-50 border border-pink-100 px-2 py-0.5 rounded-full">Feasibility OK</span>
-                              </div>
-                              <div className="flex gap-4 items-center">
-                                <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
-                                  <svg width="48" height="48" viewBox="0 0 48 48" className="-rotate-90">
-                                    <circle cx="24" cy="24" r="20" fill="none" stroke="#F2F2F2" strokeWidth="3" />
-                                    <circle cx="24" cy="24" r="20" fill="none" stroke="#ec4899" strokeWidth="3" strokeDasharray="125" strokeDashoffset="18" />
-                                  </svg>
-                                  <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="text-[12px] font-mono font-black text-[#171717]">94%</span>
-                                  </div>
-                                </div>
-                                <div className="space-y-1">
-                                  <div className="text-[10px] font-sans font-black text-emerald-600 flex items-center gap-1">
-                                    ✓ Perfect Keyword Density
-                                  </div>
-                                  <p className="text-[8px] font-sans text-stone-400 leading-normal">
-                                    Your profile successfully matched 18 out of 20 critical target job description keywords.
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
+                  <div className="relative min-h-[220px]">
+                    <img src="/cta-night.jpg" alt="" className="absolute inset-0 h-full w-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/35 to-[#050505]/10" />
+                    <p
+                      className="absolute bottom-4 left-4 right-4 text-[22px] font-normal leading-[1.1] tracking-[-0.03em] text-[#f4f5f7]"
+                      style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+                    >
+                      Write it. Then send it.
+                    </p>
                   </div>
                 </motion.div>
               )}
@@ -395,6 +257,6 @@ export default function Navbar({ locale = "en-in" }: NavbarProps) {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.header>
+    </header>
   );
 }

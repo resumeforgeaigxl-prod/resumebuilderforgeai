@@ -1,6 +1,6 @@
 /**
- * ResumeForge — Browser Application Agent V1 (Level 13)
- * Provider-Neutral Browser Abstraction, ATS Adapters & Execution Types
+ * ResumeForge — Browser Application Agent V2 (Level 14)
+ * Provider-Neutral Browser Abstraction, Reliability, Recovery & Human Takeover Types
  */
 
 import type { ApplicationPackage, ApplicationField } from '@/lib/application-engine/types';
@@ -21,11 +21,15 @@ export type ApplicationRunStatus =
   | 'AWAITING_APPROVAL'
   | 'SUBMITTING'
   | 'SUBMITTED'
+  | 'PAUSED_NEEDS_USER'
+  | 'RECOVERING'
+  | 'RETRY_SCHEDULED'
+  | 'SESSION_EXPIRED'
   | 'NEEDS_USER'
   | 'UNSUPPORTED'
   | 'FAILED'
+  | 'CANCELLED'
   | 'SUBMISSION_UNKNOWN'
-  | 'SESSION_EXPIRED'
   | 'POLICY_BLOCKED';
 
 export type BrowserActivityStep =
@@ -40,7 +44,9 @@ export type BrowserActivityStep =
   | 'AWAITING_APPROVAL'
   | 'SUBMIT_CLICKED'
   | 'SUBMISSION_CONFIRMED'
-  | 'HANDOFF_TRIGGERED';
+  | 'HANDOFF_TRIGGERED'
+  | 'RECOVERING'
+  | 'CANCELLED';
 
 export type OmniPresenceState =
   | 'IDLE'
@@ -49,6 +55,33 @@ export type OmniPresenceState =
   | 'WORKING'
   | 'EDITING'
   | 'NEEDS_USER';
+
+export type CheckpointStep =
+  | 'APPLICATION_OPENED'
+  | 'ATS_DETECTED'
+  | 'FORM_INSPECTED'
+  | 'FIELDS_MAPPED'
+  | 'FIELDS_COMPLETED'
+  | 'RESUME_UPLOADED'
+  | 'FORM_VALIDATED'
+  | 'APPROVAL_REQUESTED';
+
+export interface BrowserCheckpoint {
+  id: string;
+  runId: string;
+  step: CheckpointStep;
+  sequence: number;
+  status: 'COMPLETED' | 'FAILED' | 'WAITING';
+  safeResultReference?: string;
+  metadata?: Record<string, any>;
+  createdAt: string;
+}
+
+export interface BrowserCapabilities {
+  canReconnectSession: boolean;
+  supportsHumanTakeover: boolean;
+  supportsSessionSnapshots: boolean;
+}
 
 export interface BrowserSessionOptions {
   headless?: boolean;
@@ -116,6 +149,7 @@ export interface UploadFilePayload {
 }
 
 export interface BrowserDriver {
+  readonly capabilities: BrowserCapabilities;
   createSession(options?: BrowserSessionOptions): Promise<BrowserSession>;
   open(session: BrowserSession, url: string): Promise<PageState>;
   getPageState(session: BrowserSession): Promise<PageState>;
@@ -127,6 +161,7 @@ export interface BrowserDriver {
   captureScreenshot(session: BrowserSession): Promise<string | null>;
   getCurrentUrl(session: BrowserSession): Promise<string>;
   closeSession(session: BrowserSession): Promise<void>;
+  reconnectSession?(sessionReference: string): Promise<BrowserSession | null>;
 }
 
 export type MappingConfidence = 'HIGH' | 'MEDIUM' | 'LOW';
@@ -231,6 +266,92 @@ export interface StepTraceEntry {
   metadata?: Record<string, any>;
 }
 
+export type AtsFormSchema = ApplicationFormSchema;
+
+export interface HandoffRequest {
+  runId: string;
+  reason:
+    | 'CAPTCHA_REQUIRED'
+    | 'MFA_REQUIRED'
+    | 'LOGIN_REQUIRED'
+    | 'IDENTITY_VERIFICATION'
+    | 'UNKNOWN_REQUIRED_FIELD'
+    | 'SENSITIVE_ANSWER_REQUIRED'
+    | 'LEGAL_DECLARATION'
+    | 'UNSUPPORTED_INTERACTION'
+    | 'LOW_CONFIDENCE'
+    | string;
+  message: string;
+  requiredAction: string;
+  canResume: boolean;
+  takeoverUrl?: string;
+  expiresAt?: string;
+  questionKey?: string;
+  options?: string[];
+  fieldKey?: string;
+  question?: string;
+  company?: string;
+  jobTitle?: string;
+  filledFieldsCount?: number;
+  resumeUploaded?: boolean;
+  resumeFileName?: string;
+  applyUrl?: string;
+  [key: string]: any;
+}
+
+export interface SubmissionGuardRecord {
+  id: string;
+  userId: string;
+  applicationId: string;
+  packageVersion: number;
+  browserRunId: string;
+  approvalId: string;
+  formVersion: string;
+  status: 'PENDING' | 'SUBMITTED' | 'FAILED' | 'UNKNOWN';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BrowserRunTelemetry {
+  browserSessionDurationMs: number;
+  provider: string;
+  sessionCount: number;
+  retryCount: number;
+  recoveryCount: number;
+  aiCallsCount: number;
+  estimatedBrowserCostUsd: number;
+  estimatedTotalCostUsd: number;
+}
+
+export type BrowserErrorCode =
+  | 'NAVIGATION_TIMEOUT'
+  | 'BROWSER_DISCONNECTED'
+  | 'BROWSER_PROVIDER_UNAVAILABLE'
+  | 'SESSION_EXPIRED'
+  | 'FORM_CHANGED'
+  | 'FIELD_MAPPING_FAILED'
+  | 'UPLOAD_FAILED'
+  | 'AUTH_REQUIRED'
+  | 'CAPTCHA_REQUIRED'
+  | 'MFA_REQUIRED'
+  | 'SENSITIVE_ANSWER_REQUIRED'
+  | 'UNKNOWN_REQUIRED_FIELD'
+  | 'APPROVAL_EXPIRED'
+  | 'JOB_CLOSED'
+  | 'PACKAGE_STALE'
+  | 'INSUFFICIENT_CREDITS'
+  | 'SUBMISSION_UNKNOWN'
+  | 'RECOVERY_EXHAUSTED'
+  | 'DUPLICATE_SUBMISSION_ATTEMPT_BLOCKED'
+  | 'CIRCUIT_BREAKER_TRIPPED';
+
+export type BrowserNextAction =
+  | 'RETRY_SAFE_STEP'
+  | 'RECOVER_SESSION'
+  | 'ASK_USER'
+  | 'MANUAL_FALLBACK'
+  | 'STOP';
+
 export interface ApplicationRunRecord {
   id: string;
   userId: string;
@@ -246,7 +367,7 @@ export interface ApplicationRunRecord {
   validationResult?: ValidationResult;
   requiresUserAction: boolean;
   handoffReason?: string | null;
-  handoffPayload?: Record<string, any> | null;
+  handoffPayload?: HandoffRequest | Record<string, any> | null;
   userApprovedAt?: string | null;
   submittedAt?: string | null;
   confirmationUrl?: string | null;
@@ -254,11 +375,25 @@ export interface ApplicationRunRecord {
   evidence: Record<string, any>;
   creditReservationId?: string | null;
   idempotencyKey?: string | null;
-  errorCode?: string | null;
+  errorCode?: BrowserErrorCode | string | null;
   errorMessage?: string | null;
   startedAt: string;
   updatedAt: string;
   expiresAt?: string | null;
+
+  // Level 14: Reliability & Recovery State
+  checkpointVersion: number;
+  attemptCount: number;
+  recoveryCount: number;
+  sessionReference?: string | null;
+  browserSessionExpiresAt?: string | null;
+  workerId?: string | null;
+  leaseExpiresAt?: string | null;
+  lastHeartbeatAt?: string | null;
+  formVersion?: string | null;
+  packageVersion?: number;
+  approvalId?: string | null;
+  telemetry?: BrowserRunTelemetry;
 }
 
 export interface StartBrowserRunOptions {
@@ -279,4 +414,21 @@ export interface AnswerHandoffOptions {
   userId: string;
   runId: string;
   answers: Record<string, any>;
+}
+
+export interface RecoverRunOptions {
+  userId: string;
+  runId: string;
+}
+
+export interface CancelRunOptions {
+  userId: string;
+  runId: string;
+  reason?: string;
+}
+
+export interface HeartbeatRunOptions {
+  runId: string;
+  workerId: string;
+  ttlSeconds?: number;
 }
