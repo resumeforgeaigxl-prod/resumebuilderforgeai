@@ -28,7 +28,7 @@
 
 @media (min-width: 801px) {
   .reviews {
-    height: calc(100vh + 280vh);
+    height: calc(100vh + 420vh);
   }
 
   .reelSticky {

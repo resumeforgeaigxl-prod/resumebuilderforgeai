@@ -59,6 +59,29 @@ const reviews: {
     quote: "The questions followed my resume, not a generic list. That got me interview ready.",
     color: "Oat",
   },
+  {
+    name: "Divya Sen",
+    photo: "/reviews/7.jpg",
+    topic: "Resume",
+    quote: "ATS score jumped from 61 to 94 after two bullet edits. Landed 3 screening calls in my first week.",
+    wide: true,
+    color: "Sage",
+  },
+  {
+    name: "Vikram Patel",
+    photo: "/reviews/8.jpg",
+    topic: "Jobs",
+    quote: "Filtered out postings that didn't match my stack. No more sending 50 blind applications a day.",
+    color: "Peach",
+  },
+  {
+    name: "Sneha Kulkarni",
+    photo: "/reviews/9.jpg",
+    topic: "Interview",
+    quote: "The mock coach drilled me on real project trade-offs from my experience section. Felt effortless in the round.",
+    wide: true,
+    color: "Frost",
+  },
 ];
 
 function cardPose(index: number, progress: number) {
