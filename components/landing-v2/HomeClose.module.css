@@ -47,6 +47,31 @@
   perspective-origin: 58% 46%;
 }
 
+/* Card Color Themes: 2 original + 4 more soft muted pastel tones */
+.colorFrost {
+  background: #d7e4f0 !important;
+}
+
+.colorChalk {
+  background: #f4f5f7 !important;
+}
+
+.colorSage {
+  background: #dde8dc !important;
+}
+
+.colorPeach {
+  background: #f9ebe2 !important;
+}
+
+.colorWisteria {
+  background: #ece5f5 !important;
+}
+
+.colorOat {
+  background: #fbf1d8 !important;
+}
+
 .wideCard,
 .squareCard {
   position: absolute;
@@ -59,20 +84,29 @@
   border-radius: 36px;
   color: #12161b;
   will-change: transform;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.35);
+  box-sizing: border-box;
 }
 
 .wideCard {
   width: min(680px, 78vw);
   min-height: 360px;
   padding: 36px;
-  background: #d7e4f0;
 }
 
 .squareCard {
   width: min(360px, 72vw);
   min-height: 360px;
   padding: 32px;
-  background: #f4f5f7;
+  flex-direction: column;
+}
+
+.mobileAuthorRow {
+  display: none;
+}
+
+.desktopAuthorMeta {
+  display: block;
 }
 
 .cardCopy {
@@ -331,24 +365,33 @@
 
   .reviewHeading {
     display: block;
-    padding: 48px 16px 0;
+    padding: 48px 20px 0;
   }
 
   .reviewIntro {
-    margin-top: 12px;
+    margin-top: 10px;
+    font-size: 14px;
+    color: #8b909a;
   }
 
   .stage {
     display: flex;
-    gap: 14px;
+    gap: 16px;
     min-height: 0;
     margin-top: 24px;
-    padding: 0 16px 48px;
+    padding: 0 20px 48px;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     perspective: none;
     scroll-snap-type: x mandatory;
+    scrollbar-width: none;
   }
 
+  .stage::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Consistent, perfectly-proportioned mobile cards (zero collision) */
   .wideCard,
   .squareCard {
     position: relative;
@@ -357,15 +400,93 @@
     flex: none;
     transform: none;
     scroll-snap-align: center;
+    width: min(324px, 84vw);
+    min-height: 240px;
+    padding: 24px 20px;
+    border-radius: 26px;
+    flex-direction: column;
+    gap: 14px;
+    box-sizing: border-box;
+    box-shadow: 0 10px 28px -10px rgba(0, 0, 0, 0.45);
   }
 
-  .wideCard {
-    width: min(520px, 86vw);
-    min-height: 280px;
+  /* Hide the desktop 200px wide portrait completely on mobile */
+  .portrait {
+    display: none !important;
   }
 
-  .squareCard {
-    width: min(300px, 78vw);
-    min-height: 280px;
+  .desktopAuthorMeta {
+    display: none !important;
+  }
+
+  /* Display the dedicated mobile author header row */
+  .mobileAuthorRow {
+    display: flex !important;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    margin-bottom: 2px;
+  }
+
+  .mobileAvatar {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center 18%;
+    border: 2px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    flex-shrink: 0;
+  }
+
+  .mobileAuthorMeta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .cardName {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #12161b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .cardTopicBadge {
+    display: inline-block;
+    align-self: flex-start;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: rgba(18, 22, 27, 0.08);
+    color: #38424d;
+    margin-top: 1px;
+  }
+
+  .cardCopy {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cardCopy blockquote,
+  .squareCard blockquote {
+    font-size: 19px !important;
+    line-height: 1.38 !important;
+    letter-spacing: -0.02em !important;
+    margin: 0 !important;
+    color: #12161b !important;
+    word-break: break-word;
   }
 }

@@ -4,19 +4,30 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "@/components/icons";
 import styles from "./HomeClose.module.css";
 
-const reviews: { name: string; photo: string; topic: string; quote: string; wide?: boolean }[] = [
+export type ReviewTheme = 'Frost' | 'Chalk' | 'Sage' | 'Peach' | 'Wisteria' | 'Oat';
+
+const reviews: {
+  name: string;
+  photo: string;
+  topic: string;
+  quote: string;
+  wide?: boolean;
+  color: ReviewTheme;
+}[] = [
   {
     name: "Ananya Iyer",
     photo: "/reviews/1.jpg",
     topic: "Resume",
     quote: "It stayed one page. I sent that file and left the spacing alone.",
     wide: true,
+    color: "Frost",
   },
   {
     name: "Arjun Mehta",
     photo: "/reviews/2.jpg",
     topic: "Jobs",
     quote: "The roles were already sorted against my resume, so I knew which ones to open.",
+    color: "Chalk",
   },
   {
     name: "Meera Krishnan",
@@ -24,25 +35,29 @@ const reviews: { name: string; photo: string; topic: string; quote: string; wide
     topic: "Interview",
     quote: "The practice questions were about my resume. That was the useful part.",
     wide: true,
+    color: "Sage",
   },
   {
-    name: "James Calder",
+    name: "Kabir Sharma",
     photo: "/reviews/4.jpg",
     topic: "Resume",
-    quote: "The PDF was the file I sent. I did not rebuild the layout.",
+    quote: "The PDF was the file I sent. I didn't have to rebuild the layout for each job.",
+    color: "Peach",
   },
   {
     name: "Rohan Deshmukh",
     photo: "/reviews/5.jpg",
     topic: "Jobs",
-    quote: "I could see the fit before I opened the posting.",
+    quote: "I could see the fit before I opened the posting. Saved me hours.",
     wide: true,
+    color: "Wisteria",
   },
   {
-    name: "Elena Marsh",
+    name: "Pooja Nair",
     photo: "/reviews/6.jpg",
     topic: "Interview",
-    quote: "The questions followed my resume, not a generic list.",
+    quote: "The questions followed my resume, not a generic list. That got me interview ready.",
+    color: "Oat",
   },
 ];
 
@@ -130,16 +145,30 @@ export function ReviewsSection() {
         <div className={styles.stage}>
           {reviews.map((review, index) => (
             <article
-              key={`${review.topic}-${index}`}
-              className={review.wide ? styles.wideCard : styles.squareCard}
+              key={`${review.name}-${index}`}
+              className={`${review.wide ? styles.wideCard : styles.squareCard} ${styles[`color${review.color}`]}`}
               style={motion ? cardPose(index, progress) : undefined}
             >
+              {/* Mobile-only author row (Avatar + Name + Topic Badge) */}
+              <div className={styles.mobileAuthorRow}>
+                <img className={styles.mobileAvatar} src={review.photo} alt={review.name} />
+                <div className={styles.mobileAuthorMeta}>
+                  <p className={styles.cardName}>{review.name}</p>
+                  <span className={styles.cardTopicBadge}>{review.topic}</span>
+                </div>
+              </div>
+
               <div className={styles.cardCopy}>
-                <p className={styles.cardName}>{review.name}</p>
-                <p className={styles.cardTopic}>{review.topic}</p>
+                {/* Desktop author meta */}
+                <div className={styles.desktopAuthorMeta}>
+                  <p className={styles.cardName}>{review.name}</p>
+                  <p className={styles.cardTopic}>{review.topic}</p>
+                </div>
                 <blockquote>“{review.quote}”</blockquote>
               </div>
-              <img className={styles.portrait} src={review.photo} alt="" />
+
+              {/* Desktop portrait */}
+              <img className={styles.portrait} src={review.photo} alt={review.name} />
             </article>
           ))}
         </div>
